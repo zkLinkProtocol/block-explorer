@@ -19,9 +19,14 @@
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
         <TokenPrice :address="item.l2Address" />
       </TableBodyColumn>
-      <TableBodyColumn class="text-center" :data-heading="t('tokensView.table.fromChain')">
-        <img class="icon" v-if="iconsList[item.networkKey]" :src="iconsList[item.networkKey]" :alt="item.networkKey" />
-        <div v-else>Native Token</div>
+      <TableBodyColumn :data-heading="t('tokensView.table.fromChain')">
+        <img
+          class="from-chain-icon"
+          v-if="iconsList[item.networkKey]"
+          :src="iconsList[item.networkKey]"
+          :alt="item.networkKey"
+        />
+        <div v-else class="from-chain-text">Native Token</div>
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
         <div class="token-address-container max-w-sm">
@@ -129,11 +134,13 @@ watch(width, () => {
   .tokens-not-found {
     @apply px-1.5 py-2 text-gray-700;
   }
-  .icon {
+  .from-chain-icon {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
-    overflow: hidden;
+    margin: 0 auto;
+  }
+  .from-chain-text {
+    text-align: center;
   }
 }
 .text-center {
