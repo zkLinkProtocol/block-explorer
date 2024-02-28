@@ -10,7 +10,8 @@ import { Contract, ethers, providers } from "ethers";
 import { ConfigService } from "@nestjs/config";
 
 let getterContract: Contract = null;
-
+const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000";
+const ERROR_GATEWAY = "error"
 export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
   matches: (): boolean => true,
   extract: async (
@@ -35,11 +36,11 @@ export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
     let gateway;
     try {
       gateway = await getterContract.getSecondaryChainOp(log.transactionHash)["gateway"];
-      if (gateway === utils.EEMPTY_ADDRESS) {
+      if (gateway === EMPTY_ADDRESS) {
         gateway = null;
       }
     } catch {
-      gateway = utils.ERROR_GATEWAY; //TODO Regularly maintain the transfers data table. When there are too many ERROR_GATEWAYs in the table, check the getSecondaryChainOp method.
+      gateway = ERROR_GATEWAY; //TODO Regularly maintain the transfers data table. When there are too many ERROR_GATEWAYs in the table, check the getSecondaryChainOp method.
     }
     return {
       from: parsedLog.args.l1Sender.toLowerCase(),
