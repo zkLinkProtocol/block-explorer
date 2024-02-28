@@ -35,7 +35,7 @@ export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
 
     let gateway;
     try {
-      gateway = await getterContract.getSecondaryChainOp(log.transactionHash)["gateway"];
+      gateway = (await getterContract.getSecondaryChainOp(log.transactionHash))["gateway"];
       if (gateway === EMPTY_ADDRESS) {
         gateway = null;
       }
