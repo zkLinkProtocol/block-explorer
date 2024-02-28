@@ -19,18 +19,18 @@ export const deleteOldBalancesScript = `
 `;
 
 export const selectBalancesByBlockScript = `
-  SELECT * FROM balances
-  USING
-  (
-    SELECT address, "tokenAddress", MAX("blockNumber") AS "blockNumber" 
-    FROM balances
-    WHERE address = $1 AND "blockNumber" <= $2
-    GROUP BY (address, "tokenAddress")
-  ) as latest_balances
-  WHERE 
-    balances.address = latest_balances.address AND
-    balances."tokenAddress" = latest_balances."tokenAddress" AND
-    balances."blockNumber" = latest_balances."blockNumber"
+  SELECT *
+  FROM balances
+         JOIN
+       (
+         SELECT address, "tokenAddress", MAX("blockNumber") AS "blockNumber"
+         FROM balances
+         WHERE address = $1 AND "blockNumber" <= $2
+         GROUP BY address, "tokenAddress"
+       ) AS latest_balances
+       ON balances.address = latest_balances.address
+         AND balances."tokenAddress" = latest_balances."tokenAddress"
+         AND balances."blockNumber" = latest_balances."blockNumber";
 `;
 
 export const deleteZeroBalancesScript = `
@@ -53,15 +53,16 @@ export class BalanceRepository extends BaseRepository<Balance> {
     super(Balance, unitOfWork);
   }
 
-  public async getAllAddresses(): Promise<string[]> {
+  public async getAllAddresses(): Promise<Buffer[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const addresses = await transactionManager.query(
+    const result = await transactionManager.query(
         `SELECT address FROM balances group by address;`
     );
+    const addresses = result.map((row: any) => row.address);
     return addresses;
   }
 
-  public async getAccountBalancesByBlock(address: string,block: number): Promise<Balance[]> {
+  public async getAccountBalancesByBlock(address: Buffer,block: number): Promise<Balance[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const balances = await transactionManager.query(selectBalancesByBlockScript,[address,block]
     );

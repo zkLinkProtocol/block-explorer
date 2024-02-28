@@ -28,11 +28,11 @@ export class BalanceService {
     await this.balanceRepository.addMany(changedBalances);
   }
 
-  public async getAllAddresses(): Promise<string[]> {
+  public async getAllAddresses(): Promise<Buffer[]> {
       return await this.balanceRepository.getAllAddresses();
   }
 
-  public async getAccountBalancesByBlock(address: string,block: number): Promise<Balance[]> {
+  public async getAccountBalancesByBlock(address: Buffer,block: number): Promise<Balance[]> {
     return await this.balanceRepository.getAccountBalancesByBlock(address,block);
   }
 

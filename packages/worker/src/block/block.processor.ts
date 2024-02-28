@@ -85,8 +85,10 @@ export class BlockProcessor {
       }
 
       for ( const address of addresses ) {
+        console.log(address);
         // calc points for every account
         let balances = await this.balanceService.getAccountBalancesByBlock(address,toBlock);
+        console.log(balances);
         let totalAmount = BigNumber.from(0);
         for ( const balance of balances ) {
            const tokenBalance: BigNumber = BigNumber.from(balance.balance);
@@ -99,27 +101,26 @@ export class BlockProcessor {
         const multiplier = 1;
         const unitPoint = 10;
         const point = totalAmount.mul(multiplier*unitPoint);
-        // todo:save point
-        console.log(`account ${address} point ${point} at ${fromBlock} - ${toBlock}`);
+        // todo:save account point
+        console.log(`account ${address.toString()} point ${point} at ${fromBlock} - ${toBlock}`);
 
-        // todo: save point history
+        // todo: save account point history
         console.log(`save point history`);
-
-        // save scan blocks
-        await this.blockScanRangeRepository.add(fromBlock,toBlock);
-
-        // set timer
-        const timeOutFromBlock = toBlock;
-        const timeOutToBlock =  timeOutFromBlock;
-        this.timer = setTimeout(
-            async function() {
-              await this.handlePointsPeriod(timeOutFromBlock, timeOutToBlock);
-              console.log("timer triggered");
-            }, this.pointsStatisticalPeriodSecs*1000,timeOutFromBlock,timeOutToBlock,
-        )
       }
 
-      return true;
+    // save scan blocks
+    await this.blockScanRangeRepository.add(fromBlock,toBlock);
+    // set timer
+    const timeOutFromBlock = toBlock;
+    const timeOutToBlock =  timeOutFromBlock;
+    this.timer = setTimeout(
+        async function() {
+          await this.handlePointsPeriod(timeOutFromBlock, timeOutToBlock);
+          console.log("timer triggered");
+        }, this.pointsStatisticalPeriodSecs*1000,timeOutFromBlock,timeOutToBlock,
+    )
+
+    return true;
   }
 
   public async processNextBlocksRange(): Promise<boolean> {
@@ -196,28 +197,35 @@ export class BlockProcessor {
       //points handler
       let blockData = blocksToProcess[0];
       const { block, blockDetails } = blockData;
+      //skip genesis block and 1st block
+      if ( block.number <= 1) {
+        stopDurationMeasuring({ status: "success" });
+        return true;
+      }
       const blockTs = block.timestamp;
       // get previous handled block timestamp
       const preBlockRange = await this.blockScanRangeRepository.getLastScanToBlock();
-      const preScanToBlockNumber = preBlockRange == null ? 0 : preBlockRange.to;
+      const preScanToBlockNumber = preBlockRange == null ? 1 : preBlockRange.to;
+      console.log(`Last scan to block number ${preScanToBlockNumber}`);
       const preBlock = await this.blockRepository.getLastBlock({
         where: { number: preScanToBlockNumber }
       });
-      console.log(`Last scan to block is ${preScanToBlockNumber}`);
-      const prePointsBlockTs = preBlock.timestamp.getTime();
+      const prePointsBlockTs = preBlock.timestamp.getTime()/1000;
       const ts_interval = blockTs - prePointsBlockTs;
-      console.log(`Timestamp interval ${ts_interval}`);
+      console.log(`Current block ${block.number} ,timestamp interval ${ts_interval},config period ${this.pointsStatisticalPeriodSecs}`);
       if ( ts_interval  > this.pointsStatisticalPeriodSecs ) {
         let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
         console.log(`Ts interval periods ${periods}`);
         //todo: handle periods?
         //for (let i = 0; i < periods; i++) {
-            let from_block = Math.min(preBlock.number+1,block.number - 1);
+            let from_block = preBlockRange == null ? 1 : Math.min(preBlock.number+1,block.number - 1);
             let to_block = block.number - 1;
             await this.handlePointsPeriod(from_block,to_block);
         //}
       } else if ( ts_interval == this.pointsStatisticalPeriodSecs ) {
-        await this.handlePointsPeriod(preBlock.number+1,block.number);
+        let from_block = preBlockRange == null ? 1 : preBlock.number+1;
+        let to_block = block.number;
+        await this.handlePointsPeriod(from_block,to_block);
       } else {
         console.log(`${preBlock.number} - ${block.number} block time interval does not reach the statistical period `);
       }
