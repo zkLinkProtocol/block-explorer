@@ -14,6 +14,7 @@ import {
   ethWithdrawalToL1Handler,
   ethWithdrawalWithMessageToL1Handler,
 } from "./extractHandlers";
+import { ConfigService } from "@nestjs/config";
 
 export enum TransferType {
   Deposit = "deposit",
@@ -36,17 +37,19 @@ const extractTransfersHandlers: Record<string, ExtractTransferHandler[]> = {
 @Injectable()
 export class TransferService {
   private readonly logger: Logger;
+  public readonly configService: ConfigService;
 
-  constructor() {
+  constructor(configService: ConfigService) {
     this.logger = new Logger(TransferService.name);
+    this.configService = configService;
   }
 
-  public getTransfers(
+  public async getTransfers(
     logs: types.Log[],
     blockDetails: types.BlockDetails,
     transactionDetails?: types.TransactionDetails,
     transactionReceipt?: types.TransactionReceipt
-  ): Transfer[] {
+  ): Promise<Transfer[]> {
     const transfers: Transfer[] = [];
     if (!logs) {
       return transfers;
@@ -62,9 +65,9 @@ export class TransferService {
       }
 
       try {
-        const transfer = handlerForLog.extract(log, blockDetails, transactionDetails);
+        const transfer = handlerForLog.extract(log, blockDetails, transactionDetails, this.configService);
         if (transfer) {
-          transfers.push(transfer);
+          transfers.push(await transfer);
         }
       } catch (error) {
         this.logger.error("Failed to parse transfer", {

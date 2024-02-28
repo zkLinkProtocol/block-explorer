@@ -5,6 +5,7 @@ import { abi as l2BridgeAbi } from "zksync-web3/abi/IL2Bridge.json";
 import * as erc721Abi from "./abis/erc721.json";
 import * as transferEventWithNoIndexesAbi from "./abis/transferEventWithNoIndexes.json";
 import * as l2StandardERC20Abi from "./abis/l2StandardERC20.json";
+import * as gettersFacetAbi from "./abis/GettersFacet.json";
 
 export const ZERO_HASH_64 = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const ethTokenAbi = [
@@ -65,5 +66,9 @@ export const CONTRACT_INTERFACES = {
   L2_BRIDGE: {
     interface: new utils.Interface(l2BridgeAbi),
     abi: l2BridgeAbi,
+  },
+  GETTERS_FACET: {
+    interface: new utils.Interface(gettersFacetAbi),
+    abi: gettersFacetAbi,
   },
 };
