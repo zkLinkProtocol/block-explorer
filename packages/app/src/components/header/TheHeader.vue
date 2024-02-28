@@ -161,7 +161,7 @@ const developerLinks = reactive([
   },
   {
     label: computed(() => t("header.nav.github")),
-    url: "https://github.com/zkLinkProtocol",
+    url: "https://docs.zklink.io/additional-resources/github",
   },
   {
     label: computed(() => t("header.nav.help")),
