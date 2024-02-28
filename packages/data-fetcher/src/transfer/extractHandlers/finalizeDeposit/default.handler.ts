@@ -39,7 +39,7 @@ export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
         gateway = null;
       }
     } catch {
-      gateway = utils.ERROR_GATEWAY; //Regularly maintain the transfers data table. When there are too many ERROR_GATEWAYs in the table, check the getSecondaryChainOp method.
+      gateway = utils.ERROR_GATEWAY; //TODO Regularly maintain the transfers data table. When there are too many ERROR_GATEWAYs in the table, check the getSecondaryChainOp method.
     }
     return {
       from: parsedLog.args.l1Sender.toLowerCase(),
