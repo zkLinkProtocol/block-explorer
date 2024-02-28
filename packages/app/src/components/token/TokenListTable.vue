@@ -137,6 +137,8 @@ watch(width, () => {
   .from-chain-icon {
     width: 30px;
     height: 30px;
+    border-radius: 50%;
+    overflow: hidden;
     margin: 0 auto;
   }
   .from-chain-text {

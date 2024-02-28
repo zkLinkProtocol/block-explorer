@@ -286,7 +286,10 @@
       "apiDocs": "API Documentation",
       "contractVerification": "Smart Contract Verification",
       "debugger": "zkEVM Debugger",
-      "bridge": "Bridge"
+      "bridge": "Bridge",
+      "developer": "Developer",
+      "github": "Github",
+      "help": "Help"
     }
   },
   "locale": {
