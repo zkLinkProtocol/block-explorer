@@ -17,7 +17,6 @@ export const ethWithdrawalWithMessageToL1Handler: ExtractTransferHandler = {
     transactionDetails?: types.TransactionDetails
   ): Transfer => {
     const parsedLog = parseLog(CONTRACT_INTERFACES.ETH_TOKEN, log);
-    new AbiCoder().decode(["address"], parsedLog.args._additionalData);
     const to = new AbiCoder().decode(["address"], parsedLog.args._additionalData)[0];
     return {
       from: parsedLog.args._l2Sender.toLowerCase(),
