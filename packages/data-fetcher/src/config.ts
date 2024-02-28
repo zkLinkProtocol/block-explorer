@@ -14,6 +14,8 @@ export default () => {
     USE_WEBSOCKETS_FOR_TRANSACTIONS,
     MAX_BLOCKS_BATCH_SIZE,
     BRIDGE_NETWORK_KEYS,
+    PRIMARY_CHAIN_MAIN_CONTRACT,
+    PRIMARY_CHAIN_RPC_URL,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -63,5 +65,7 @@ export default () => {
       getNetworkKeyByL2Erc20Bridge: (bridgeAddress: string): NetworkKey | undefined =>
         L22Key[bridgeAddress.toLowerCase()],
     },
+    primaryChainMainContract: PRIMARY_CHAIN_MAIN_CONTRACT,
+    primaryChainRpcUrl: PRIMARY_CHAIN_RPC_URL,
   };
 };
