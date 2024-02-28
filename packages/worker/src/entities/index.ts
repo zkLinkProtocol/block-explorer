@@ -13,3 +13,6 @@ export * from "./addressTransfer.entity";
 export * from "./balance.entity";
 export * from "./counter.entity";
 export * from "./counterState.entity";
+export * from "./blockScanRange.entity";
+export * from "./points.entity";
+export * from "./pointsHistory.entity";

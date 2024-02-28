@@ -1,6 +1,5 @@
 import { Entity, Column, Index, PrimaryColumn } from "typeorm";
 import { bigIntNumberTransformer } from "../transformers/bigIntNumber.transformer";
-import { BaseEntity } from "./base.entity";
 
 @Entity({ name: "blockScanRange" })
 export class BlockScanRange {

@@ -31,6 +31,7 @@ import {
   AddressTransferRepository,
   LogRepository,
   BalanceRepository,
+  BlockScanRangeRepository,
 } from "./repositories";
 import {
   Batch,
@@ -44,6 +45,10 @@ import {
   Transfer,
   AddressTransfer,
   Balance,
+  Point,
+  PointsHistory,
+  BlockScanRange,
+
 } from "./entities";
 import { typeOrmModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -80,6 +85,9 @@ import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
       AddressTransfer,
       Transfer,
       Balance,
+      Point,
+      PointsHistory,
+      BlockScanRange,
     ]),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),
@@ -121,6 +129,7 @@ import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
     AddressTransferRepository,
     BalanceRepository,
     LogRepository,
+    BlockScanRangeRepository,
     BlocksRevertService,
     BatchService,
     BlockProcessor,

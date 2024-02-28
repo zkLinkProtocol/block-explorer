@@ -1,10 +1,9 @@
 import { Entity, Column, Index, PrimaryColumn } from "typeorm";
-import { CountableEntity } from "./countable.entity";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { bigIntNumberTransformer } from "../transformers/bigIntNumber.transformer";
 
 @Entity({ name: "points" })
-export class Point extends CountableEntity {
+export class Point {
   @PrimaryColumn({ generated: true, type: "bigint" })
   public readonly id: number;
 

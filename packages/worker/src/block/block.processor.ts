@@ -10,7 +10,7 @@ import { BlockWatcher } from "./block.watcher";
 import { BlockData } from "../dataFetcher/types";
 import { BalanceService } from "../balance/balance.service";
 import { TokenService } from "../token/token.service";
-import {AddressRepository, BlockRepository, LogRepository, TransferRepository} from "../repositories";
+import { BlockRepository, LogRepository, TransferRepository,BlockScanRangeRepository } from "../repositories";
 import { Block } from "../entities";
 import { TransactionProcessor } from "../transaction";
 import { validateBlocksLinking } from "./block.utils";
@@ -25,7 +25,6 @@ import { BLOCKS_REVERT_DETECTED_EVENT } from "../constants";
 import { unixTimeToDateString } from "../utils/date";
 import {BigNumber} from "ethers";
 import {BlockScanRange} from "../entities/blockScanRange.entity";
-import {BlockScanRangeRepository} from "../repositories/blockScanRange.repository";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -67,7 +66,8 @@ export class BlockProcessor {
     this.pointsStatisticalPeriodSecs = configService.get<number>("blocks.pointsStatisticalPeriodSecs");
   }
 
-  public async handlePointsPeriod(fromBlock: number,toBlock: number): Promise<()> {
+  public async handlePointsPeriod(fromBlock: number,toBlock: number): Promise<boolean> {
+      console.log(`handlePointsPeriod ${fromBlock} - ${toBlock}`);
       // clear timer
       if (this.timer) {
         clearTimeout(this.timer);
@@ -75,30 +75,30 @@ export class BlockProcessor {
       // get all addresses
       const addresses = await this.balanceService.getAllAddresses();
       if (!addresses.length) {
-        return;
+        return false;
       }
 
       // get all tokens
       const tokens = await this.tokenService.getAllTokens();
       if (!tokens.length) {
-        return;
+        return false;
       }
 
       for ( const address of addresses ) {
         // calc points for every account
         let balances = await this.balanceService.getAccountBalancesByBlock(address,toBlock);
-        let totalAmount = 0;
+        let totalAmount = BigNumber.from(0);
         for ( const balance of balances ) {
-           const tokenBalance: BigNumber = new BigNumber(balance.balance);
+           const tokenBalance: BigNumber = BigNumber.from(balance.balance);
            const token = tokens.find(token => token.l2Address === balance.tokenAddress);
            const tokenPrice: number = token.usdPrice;
-           const tokenAmount = tokenBalance.times(tokenPrice);
-           totalAmount += tokenAmount;
+           const tokenAmount = tokenBalance.mul(tokenPrice);
+           totalAmount.add(tokenAmount);
         }
         //todo: get multiplier and unitPoint from config or database
         const multiplier = 1;
         const unitPoint = 10;
-        const point = totalAmount.times(multiplier*unitPoint);
+        const point = totalAmount.mul(multiplier*unitPoint);
         // todo:save point
         console.log(`account ${address} point ${point} at ${fromBlock} - ${toBlock}`);
 
@@ -118,6 +118,8 @@ export class BlockProcessor {
             }, this.pointsStatisticalPeriodSecs*1000,timeOutFromBlock,timeOutToBlock,
         )
       }
+
+      return true;
   }
 
   public async processNextBlocksRange(): Promise<boolean> {
@@ -196,14 +198,18 @@ export class BlockProcessor {
       const { block, blockDetails } = blockData;
       const blockTs = block.timestamp;
       // get previous handled block timestamp
-      const preBlockRange = await this.blockRepository.getLastScanToBlock({});
+      const preBlockRange = await this.blockScanRangeRepository.getLastScanToBlock();
+      const preScanToBlockNumber = preBlockRange == null ? 0 : preBlockRange.to;
       const preBlock = await this.blockRepository.getLastBlock({
-        where: { number: preBlockRange.to }
-      })
+        where: { number: preScanToBlockNumber }
+      });
+      console.log(`Last scan to block is ${preScanToBlockNumber}`);
       const prePointsBlockTs = preBlock.timestamp.getTime();
       const ts_interval = blockTs - prePointsBlockTs;
+      console.log(`Timestamp interval ${ts_interval}`);
       if ( ts_interval  > this.pointsStatisticalPeriodSecs ) {
         let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
+        console.log(`Ts interval periods ${periods}`);
         //todo: handle periods?
         //for (let i = 0; i < periods; i++) {
             let from_block = Math.min(preBlock.number+1,block.number - 1);
