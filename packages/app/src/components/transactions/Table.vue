@@ -216,6 +216,8 @@ import useToken, { type Token } from "@/composables/useToken";
 import { decodeDataWithABI } from "@/composables/useTransactionData";
 import useTransactions, { type TransactionListItem, type TransactionSearchParams } from "@/composables/useTransactions";
 
+import contractsMethodNames from "@/configs/contractsMethodNames.json";
+
 import type { Direction } from "@/components/transactions/TransactionDirectionTableCell.vue";
 import type { AbiFragment } from "@/composables/useAddress";
 import type { NetworkOrigin } from "@/types";
@@ -285,6 +287,10 @@ const getTransactionMethod = (transaction: TransactionListItem) => {
         props.contractAbi
       )?.name ?? sighash
     );
+  }
+  const methodIndex = sighash as keyof typeof contractsMethodNames;
+  if (contractsMethodNames[methodIndex]) {
+    return contractsMethodNames[methodIndex];
   }
   return sighash;
 };
