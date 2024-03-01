@@ -3,6 +3,7 @@ import { hexTransformer } from "../transformers/hex.transformer";
 import { bigIntNumberTransformer } from "../transformers/bigIntNumber.transformer";
 
 @Entity({ name: "points" })
+
 export class Point {
   @PrimaryColumn({ generated: true, type: "bigint" })
   public readonly id: number;
