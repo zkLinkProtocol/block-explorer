@@ -31,6 +31,10 @@ import {
   AddressTransferRepository,
   LogRepository,
   BalanceRepository,
+  BlockScanRangeRepository,
+  PointsRepository,
+  PointsHistoryRepository,
+  ReferralsRepository,
 } from "./repositories";
 import {
   Batch,
@@ -44,8 +48,12 @@ import {
   Transfer,
   AddressTransfer,
   Balance,
+  Point,
+  PointsHistory,
+  BlockScanRange,
+  Referral
 } from "./entities";
-import { typeOrmModuleOptions } from "./typeorm.config";
+import { typeOrmModuleOptions,typeOrmReferModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
 import { RetryDelayProvider } from "./retryDelay.provider";
 import { MetricsModule } from "./metrics";
@@ -80,7 +88,25 @@ import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
       AddressTransfer,
       Transfer,
       Balance,
+      Point,
+      PointsHistory,
+      BlockScanRange,
     ]),
+    TypeOrmModule.forRootAsync({
+      name: "refer",
+      imports: [ConfigModule],
+      useFactory: () => {
+        return {
+          ...typeOrmReferModuleOptions,
+          autoLoadEntities: true,
+          retryDelay: 3000, // to cover 3 minute DB failover window
+          retryAttempts: 70, // try to reconnect for 3.5 minutes,
+        };
+      },
+    }),
+    TypeOrmModule.forFeature([
+      Referral,
+    ],"refer"),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),
     MetricsModule,
@@ -121,6 +147,10 @@ import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
     AddressTransferRepository,
     BalanceRepository,
     LogRepository,
+    BlockScanRangeRepository,
+    PointsRepository,
+    PointsHistoryRepository,
+    ReferralsRepository,
     BlocksRevertService,
     BatchService,
     BlockProcessor,

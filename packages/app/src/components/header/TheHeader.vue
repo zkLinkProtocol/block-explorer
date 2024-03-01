@@ -3,10 +3,10 @@
     <div class="header-wrap">
       <div class="header-container">
         <div class="logo-container">
-          <router-link :to="{ name: 'home' }">
+          <a href="https://zklink.io/" target="_blank">
             <span class="sr-only">zkLink</span>
             <zk-sync-era />
-          </router-link>
+          </a>
         </div>
         <div class="burger-button-container">
           <PopoverButton class="burger-button">
@@ -17,16 +17,7 @@
         <PopoverGroup as="nav" class="navigation-container">
           <LinksPopover :label="t('header.nav.blockExplorer')" :items="blockExplorerLinks" />
           <LinksPopover :label="t('header.nav.tools')" :items="toolsLinks" />
-          <a
-            v-for="item in navigation"
-            :key="item.label"
-            :href="item.url"
-            target="_blank"
-            rel="noopener"
-            class="navigation-link"
-          >
-            {{ item.label }}
-          </a>
+          <LinksPopover :label="t('header.nav.developer')" :items="developerLinks" />
         </PopoverGroup>
         <div class="header-right-side">
           <NetworkSwitch />
@@ -88,18 +79,7 @@
                 </div>
                 <div class="mobile-navigation-divider"></div>
                 <div class="mobile-navigation">
-                  <a
-                    v-for="item in navigation"
-                    :key="item.label"
-                    :href="item.url"
-                    target="_blank"
-                    rel="noopener"
-                    class="mobile-navigation-link"
-                  >
-                    <span class="mobile-navigation-label">
-                      {{ item.label }}
-                    </span>
-                  </a>
+                  <LinksMobilePopover :items="developerLinks" />
                 </div>
               </nav>
             </div>
@@ -156,13 +136,6 @@ const { t, locale } = useI18n({ useScope: "global" });
 const route = useRoute();
 const { currentNetwork } = useContext();
 
-const navigation = reactive([
-  {
-    label: computed(() => t("header.nav.documentation")),
-    url: "https://zklink-team.gitbook.io/zklink-nova-testnet ",
-  },
-]);
-
 const blockExplorerLinks = reactive([
   {
     label: computed(() => t("blocksView.title")),
@@ -179,6 +152,20 @@ const blockExplorerLinks = reactive([
   {
     label: computed(() => t("tokensView.title")),
     to: { name: "tokens" },
+  },
+]);
+const developerLinks = reactive([
+  {
+    label: computed(() => t("header.nav.documentation")),
+    url: "https://docs.zklink.io/",
+  },
+  {
+    label: computed(() => t("header.nav.github")),
+    url: "https://docs.zklink.io/additional-resources/github",
+  },
+  {
+    label: computed(() => t("header.nav.help")),
+    url: " https://docs.zklink.io/additional-resources/help",
   },
 ]);
 

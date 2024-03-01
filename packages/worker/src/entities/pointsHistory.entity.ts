@@ -1,12 +1,11 @@
 import { Entity, Column, Index, PrimaryColumn } from "typeorm";
-import { CountableEntity } from "./countable.entity";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { bigIntNumberTransformer } from "../transformers/bigIntNumber.transformer";
 
 @Entity({ name: "pointsHistory" })
-export class Transfer extends CountableEntity {
+export class PointsHistory {
   @PrimaryColumn({ generated: true, type: "bigint" })
-  public override readonly number: number;
+  public readonly id: number;
 
   @Index()
   @Column({ type: "bytea", transformer: hexTransformer })
@@ -20,4 +19,7 @@ export class Transfer extends CountableEntity {
 
   @Column({ type: "bigint", transformer: bigIntNumberTransformer })
   public readonly refPoint: number;
+
+  @Column({ type: "bigint", transformer: bigIntNumberTransformer })
+  public readonly refNumber: number;
 }
