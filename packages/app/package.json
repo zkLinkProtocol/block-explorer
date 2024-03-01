@@ -14,6 +14,7 @@
     "build": "vue-tsc --noEmit && vite build",
     "build:sepolia": "VITE_APP_ENVIRONMENT=sepolia vue-tsc --noEmit && VITE_APP_ENVIRONMENT=sepolia vite build",
     "build:goerli": "VITE_APP_ENVIRONMENT=goerli vue-tsc --noEmit && VITE_APP_ENVIRONMENT=goerli vite build",
+    "build:nova":"VITE_APP_ENVIRONMENT=nova vue-tsc --noEmit && VITE_APP_ENVIRONMENT=nova vite build",
     "start": "vite preview --port 3010",
     "test": "TZ=UTC-3 vitest --environment jsdom",
     "test:ci": "TZ=UTC-3 vitest --environment jsdom --run --reporter=verbose --reporter=junit --outputFile.junit=./junit.xml",

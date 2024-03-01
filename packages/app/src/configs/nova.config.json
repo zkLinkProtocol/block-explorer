@@ -1,0 +1,22 @@
+{
+  "networks": [
+    {
+      "apiUrl": "https://explorer-api.zklink.io",
+      "verificationApiUrl": "https://explorer.zklink.io",
+      "bridgeUrl": "https://portal.zklink.io",
+      "hostnames": [],
+      "icon": "/images/icons/cion.png",
+      "l1ExplorerUrl": "https://lineascan.build/",
+      "l2ChainId": 810180,
+      "l2NetworkName": "zkLink Nova Mainnet",
+      "maintenance": false,
+      "name": "mainnet",
+      "published": true,
+      "rpcUrl": "https://rpc.zklink.io"
+    }
+  ],
+  "iconsList":{
+    "goerli": "/img/ethereum.svg",
+    "primary":"/img/linea.svg"
+  }
+}
