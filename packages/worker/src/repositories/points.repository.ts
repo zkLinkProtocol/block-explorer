@@ -14,21 +14,16 @@ export class PointsRepository {
     });
   }
 
-  public async update(address: string,refPoint: number): Promise<void> {
+  public async update(address: Buffer,refPoint: number): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.update<Point>(Point, {
-      address,
+      address: address.toString('hex'),
     },{ refPoint });
   }
 
-  public async getStakePointByAddress(address: string): Promise<number> {
+  public async getStakePointByAddress(address: Buffer): Promise<number> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const accountPoint = await transactionManager
-        .createQueryBuilder(Point, "point")
-        .select("point.stakePoint")
-        .where ({ address })
-        .getOne();
+    const accountPoint = await transactionManager.query(`SELECT "stakePoint" FROM points WHERE address = $1`,[address]);
     return accountPoint?.stakePoint || 0;
   }
-
 }

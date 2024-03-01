@@ -30,12 +30,6 @@ import {
 import { BLOCKS_REVERT_DETECTED_EVENT } from "../constants";
 import { unixTimeToDateString } from "../utils/date";
 import {BigNumber} from "ethers";
-import {BlockScanRange} from "../entities/blockScanRange.entity";
-import {InjectRepository} from "@nestjs/typeorm";
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 @Injectable()
 export class BlockProcessor {
@@ -133,6 +127,7 @@ export class BlockProcessor {
     console.log(referrals.length);
     let refPoints = new Map();
     for ( const referral of referrals) {
+      console.log(referral.referee);
       const referAddr = referral.address;
       let p = refPoints.get(referAddr);
       let referPoint = p === undefined ? 0: p;
@@ -232,6 +227,7 @@ export class BlockProcessor {
       const prePointsBlockTs = preBlock.timestamp.getTime() / 1000;
       const ts_interval = blockTs - prePointsBlockTs;
       console.log(`Current block ${block.number} ,timestamp interval ${ts_interval},config period ${this.pointsStatisticalPeriodSecs}`);
+      // if ts_interval == pointsStatisticalPeriodSecs,we can defer processing to the next block
       if (ts_interval > this.pointsStatisticalPeriodSecs) {
         let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
         console.log(`Ts interval periods ${periods}`);
@@ -240,10 +236,6 @@ export class BlockProcessor {
           let to_block = block.number - 1;
           await this.handlePointsPeriod(from_block, to_block);
         }
-      } else if (ts_interval == this.pointsStatisticalPeriodSecs) {
-        let from_block = preBlockRange == null ? 1 : preBlock.number + 1;
-        let to_block = block.number;
-        await this.handlePointsPeriod(from_block, to_block);
       } else {
         console.log(`${preBlock.number} - ${block.number} block time interval does not reach the statistical period `);
       }
