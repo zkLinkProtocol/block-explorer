@@ -17,6 +17,20 @@ export const deleteOldBalancesScript = `
     balances."tokenAddress" = latest_balances_to_leave."tokenAddress" AND
     balances."blockNumber" < latest_balances_to_leave."blockNumber"
 `;
+export const selectBalancesScript = `
+  SELECT *
+  FROM balances
+         JOIN
+       (
+         SELECT address, "tokenAddress", MAX("blockNumber") AS "blockNumber"
+         FROM balances
+         WHERE address = $1
+         GROUP BY address, "tokenAddress"
+       ) AS latest_balances
+       ON balances.address = latest_balances.address
+         AND balances."tokenAddress" = latest_balances."tokenAddress"
+         AND balances."blockNumber" = latest_balances."blockNumber";
+`;
 
 export const selectBalancesByBlockScript = `
   SELECT *
@@ -60,6 +74,13 @@ export class BalanceRepository extends BaseRepository<Balance> {
     );
     const addresses = result.map((row: any) => row.address);
     return addresses;
+  }
+
+  public async getAccountBalances(address: Buffer): Promise<Balance[]> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const balances = await transactionManager.query(selectBalancesScript,[address]
+    );
+    return balances;
   }
 
   public async getAccountBalancesByBlock(address: Buffer,block: number): Promise<Balance[]> {

@@ -32,6 +32,10 @@ export class BalanceService {
       return await this.balanceRepository.getAllAddresses();
   }
 
+  public async getAccountBalances(address: Buffer): Promise<Balance[]> {
+    return await this.balanceRepository.getAccountBalances(address);
+  }
+
   public async getAccountBalancesByBlock(address: Buffer,block: number): Promise<Balance[]> {
     return await this.balanceRepository.getAccountBalancesByBlock(address,block);
   }

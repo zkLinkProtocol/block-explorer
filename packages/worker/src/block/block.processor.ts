@@ -10,8 +10,14 @@ import { BlockWatcher } from "./block.watcher";
 import { BlockData } from "../dataFetcher/types";
 import { BalanceService } from "../balance/balance.service";
 import { TokenService } from "../token/token.service";
-import { BlockRepository, LogRepository, TransferRepository,BlockScanRangeRepository } from "../repositories";
-import { Block } from "../entities";
+import {
+  BlockRepository,
+  LogRepository,
+  TransferRepository,
+  BlockScanRangeRepository,
+  PointsRepository, PointsHistoryRepository,ReferralsRepository
+} from "../repositories";
+import { Block,Referral } from "../entities";
 import { TransactionProcessor } from "../transaction";
 import { validateBlocksLinking } from "./block.utils";
 import splitIntoChunks from "../utils/splitIntoChunks";
@@ -25,6 +31,7 @@ import { BLOCKS_REVERT_DETECTED_EVENT } from "../constants";
 import { unixTimeToDateString } from "../utils/date";
 import {BigNumber} from "ethers";
 import {BlockScanRange} from "../entities/blockScanRange.entity";
+import {InjectRepository} from "@nestjs/typeorm";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,8 +56,11 @@ export class BlockProcessor {
     private readonly blockWatcher: BlockWatcher,
     private readonly blockRepository: BlockRepository,
     private readonly logRepository: LogRepository,
+    private readonly pointsRepository: PointsRepository,
+    private readonly pointsHistoryRepository: PointsHistoryRepository,
     private readonly blockScanRangeRepository: BlockScanRangeRepository,
     private readonly transferRepository: TransferRepository,
+    private readonly referralRepository: ReferralsRepository,
     private readonly eventEmitter: EventEmitter2,
     @InjectMetric(BLOCKS_BATCH_PROCESSING_DURATION_METRIC_NAME)
     private readonly blocksBatchProcessingDurationMetric: Histogram<BlocksBatchProcessingMetricLabels>,
@@ -85,39 +95,69 @@ export class BlockProcessor {
       }
 
       for ( const address of addresses ) {
-        console.log(address);
         // calc points for every account
-        let balances = await this.balanceService.getAccountBalancesByBlock(address,toBlock);
-        console.log(balances);
+        let balances = await this.balanceService.getAccountBalances(address);
         let totalAmount = BigNumber.from(0);
+        //todo: add handler
         for ( const balance of balances ) {
            const tokenBalance: BigNumber = BigNumber.from(balance.balance);
            const token = tokens.find(token => token.l2Address === balance.tokenAddress);
-           const tokenPrice: number = token.usdPrice;
+           const tokenPrice: number = token == null ? 0 : token.usdPrice;
            const tokenAmount = tokenBalance.mul(tokenPrice);
            totalAmount.add(tokenAmount);
         }
         //todo: get multiplier and unitPoint from config or database
         const multiplier = 1;
         const unitPoint = 10;
-        const point = totalAmount.mul(multiplier*unitPoint);
-        // todo:save account point
-        console.log(`account ${address.toString()} point ${point} at ${fromBlock} - ${toBlock}`);
+        const stakePoint = totalAmount.mul(multiplier*unitPoint).toNumber();
+        let addrStr = address.toString('hex');
+        console.log(`account ${addrStr} point ${stakePoint} at ${fromBlock} - ${toBlock}`);
 
-        // todo: save account point history
-        console.log(`save point history`);
+        const refPoint = 0;
+        await this.pointsRepository.add(addrStr,stakePoint,refPoint);
+        await this.pointsHistoryRepository.add(addrStr,toBlock,stakePoint,refPoint);
       }
+
+    //calc referral point
+    //todo: add cache
+    let referrals = [];
+    let offset = BigInt(Number.MAX_SAFE_INTEGER);
+    while (true) {
+      let ret = await this.referralRepository.getReferralsByBlock(toBlock,offset);
+      if (ret.length == 0) {
+        break;
+      }
+      referrals.push(...ret);
+      offset = BigInt(ret[0].id);
+    }
+    console.log(referrals.length);
+    let refPoints = new Map();
+    for ( const referral of referrals) {
+      const referAddr = referral.address;
+      let p = refPoints.get(referAddr);
+      let referPoint = p === undefined ? 0: p;
+      const refereeStakePoint = await this.pointsRepository.getStakePointByAddress(referral.referee);
+      const newReferPoint = referPoint + refereeStakePoint*0.1;
+      refPoints.set(referAddr,newReferPoint);
+    }
+
+    // update referral points
+    // todo: process in batch
+    for (const [refer, point] of refPoints.entries()) {
+      await this.pointsRepository.update(refer,point);
+    }
 
     // save scan blocks
     await this.blockScanRangeRepository.add(fromBlock,toBlock);
     // set timer
     const timeOutFromBlock = toBlock;
     const timeOutToBlock =  timeOutFromBlock;
+    const fun = this.handlePointsPeriod;
     this.timer = setTimeout(
-        async function() {
-          await this.handlePointsPeriod(timeOutFromBlock, timeOutToBlock);
+        async function ()  {
+          await fun(timeOutFromBlock, timeOutToBlock);
           console.log("timer triggered");
-        }, this.pointsStatisticalPeriodSecs*1000,timeOutFromBlock,timeOutToBlock,
+        }, this.pointsStatisticalPeriodSecs*1000,fun,timeOutFromBlock,timeOutToBlock,
     )
 
     return true;
@@ -176,6 +216,39 @@ export class BlockProcessor {
       return false;
     }
 
+    //points handler
+    let blockData = blocksToProcess[0];
+    const { block, blockDetails } = blockData;
+    //skip genesis block and 1st block
+    if ( block.number > 1) {
+      const blockTs = block.timestamp;
+      // get previous handled block timestamp
+      const preBlockRange = await this.blockScanRangeRepository.getLastScanToBlock();
+      const preScanToBlockNumber = preBlockRange == null ? 1 : preBlockRange.to;
+      console.log(`Last scan to block number ${preScanToBlockNumber}`);
+      const preBlock = await this.blockRepository.getLastBlock({
+        where: {number: preScanToBlockNumber}
+      });
+      const prePointsBlockTs = preBlock.timestamp.getTime() / 1000;
+      const ts_interval = blockTs - prePointsBlockTs;
+      console.log(`Current block ${block.number} ,timestamp interval ${ts_interval},config period ${this.pointsStatisticalPeriodSecs}`);
+      if (ts_interval > this.pointsStatisticalPeriodSecs) {
+        let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
+        console.log(`Ts interval periods ${periods}`);
+        for (let i = 0; i < periods; i++) {
+          let from_block = preBlockRange == null ? 1 : Math.min(preBlock.number + 1, block.number - 1);
+          let to_block = block.number - 1;
+          await this.handlePointsPeriod(from_block, to_block);
+        }
+      } else if (ts_interval == this.pointsStatisticalPeriodSecs) {
+        let from_block = preBlockRange == null ? 1 : preBlock.number + 1;
+        let to_block = block.number;
+        await this.handlePointsPeriod(from_block, to_block);
+      } else {
+        console.log(`${preBlock.number} - ${block.number} block time interval does not reach the statistical period `);
+      }
+    }
+
     const stopDurationMeasuring = this.blocksBatchProcessingDurationMetric.startTimer();
     let dbTransactions: IDbTransaction[] = [];
 
@@ -194,46 +267,6 @@ export class BlockProcessor {
         await dbTransaction.commit();
       }
 
-      //points handler
-      let blockData = blocksToProcess[0];
-      const { block, blockDetails } = blockData;
-      //skip genesis block and 1st block
-      if ( block.number <= 1) {
-        stopDurationMeasuring({ status: "success" });
-        return true;
-      }
-      const blockTs = block.timestamp;
-      // get previous handled block timestamp
-      const preBlockRange = await this.blockScanRangeRepository.getLastScanToBlock();
-      const preScanToBlockNumber = preBlockRange == null ? 1 : preBlockRange.to;
-      console.log(`Last scan to block number ${preScanToBlockNumber}`);
-      const preBlock = await this.blockRepository.getLastBlock({
-        where: { number: preScanToBlockNumber }
-      });
-      const prePointsBlockTs = preBlock.timestamp.getTime()/1000;
-      const ts_interval = blockTs - prePointsBlockTs;
-      console.log(`Current block ${block.number} ,timestamp interval ${ts_interval},config period ${this.pointsStatisticalPeriodSecs}`);
-      if ( ts_interval  > this.pointsStatisticalPeriodSecs ) {
-        let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
-        console.log(`Ts interval periods ${periods}`);
-        //todo: handle periods?
-        //for (let i = 0; i < periods; i++) {
-            let from_block = preBlockRange == null ? 1 : Math.min(preBlock.number+1,block.number - 1);
-            let to_block = block.number - 1;
-            await this.handlePointsPeriod(from_block,to_block);
-        //}
-      } else if ( ts_interval == this.pointsStatisticalPeriodSecs ) {
-        let from_block = preBlockRange == null ? 1 : preBlock.number+1;
-        let to_block = block.number;
-        await this.handlePointsPeriod(from_block,to_block);
-      } else {
-        console.log(`${preBlock.number} - ${block.number} block time interval does not reach the statistical period `);
-      }
-      // let blockData = blocksToProcess[0];
-      // const { block, blockDetails } = blockData;
-      // if ( block.number > 20) {
-      //   await sleep(60 * 10 * 1000);
-      // }
       stopDurationMeasuring({ status: "success" });
     } catch (error) {
       await Promise.all(dbTransactions.map((dbTransaction) => dbTransaction.ensureRollbackIfNotCommitted()));

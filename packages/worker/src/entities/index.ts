@@ -16,3 +16,4 @@ export * from "./counterState.entity";
 export * from "./blockScanRange.entity";
 export * from "./points.entity";
 export * from "./pointsHistory.entity";
+export * from "./referral.entity";

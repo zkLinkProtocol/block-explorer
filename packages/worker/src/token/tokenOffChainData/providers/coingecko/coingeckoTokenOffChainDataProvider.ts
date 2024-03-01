@@ -82,6 +82,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
   }
 
   private getTokensMarketData(tokenIds: string[]) {
+    console.log(`getTokensMarketData ${tokenIds}`);
     return this.makeApiRequestRetryable<ITokenMarketDataProviderResponse[]>({
       path: "/coins/markets",
       query: {
