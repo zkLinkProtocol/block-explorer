@@ -16,4 +16,7 @@ export class Point {
 
   @Column({ type: "bigint", transformer: bigIntNumberTransformer })
   public readonly refPoint: number;
+
+  @Column({ type: "bigint", transformer: bigIntNumberTransformer })
+  public readonly refNumber: number;
 }

@@ -40,6 +40,8 @@ export class BlockProcessor {
   private readonly numberOfBlocksPerDbTransaction: number;
   private readonly pointsStatisticalPeriodSecs: number;
   private timer?: NodeJS.Timeout;
+  // restart will handle from genesis block
+  private lastHandlePointBlock: number;
 
   public constructor(
     private readonly unitOfWork: UnitOfWork,
@@ -52,7 +54,6 @@ export class BlockProcessor {
     private readonly logRepository: LogRepository,
     private readonly pointsRepository: PointsRepository,
     private readonly pointsHistoryRepository: PointsHistoryRepository,
-    private readonly blockScanRangeRepository: BlockScanRangeRepository,
     private readonly transferRepository: TransferRepository,
     private readonly referralRepository: ReferralsRepository,
     private readonly eventEmitter: EventEmitter2,
@@ -60,7 +61,7 @@ export class BlockProcessor {
     private readonly blocksBatchProcessingDurationMetric: Histogram<BlocksBatchProcessingMetricLabels>,
     @InjectMetric(BLOCK_PROCESSING_DURATION_METRIC_NAME)
     private readonly processingDurationMetric: Histogram<BlockProcessingMetricLabels>,
-    configService: ConfigService
+    configService: ConfigService,
   ) {
     this.logger = new Logger(BlockProcessor.name);
     this.fromBlock = configService.get<number>("blocks.fromBlock");
@@ -68,6 +69,7 @@ export class BlockProcessor {
     this.disableBlocksRevert = configService.get<boolean>("blocks.disableBlocksRevert");
     this.numberOfBlocksPerDbTransaction = configService.get<number>("blocks.numberOfBlocksPerDbTransaction");
     this.pointsStatisticalPeriodSecs = configService.get<number>("blocks.pointsStatisticalPeriodSecs");
+    this.lastHandlePointBlock = 0;
   }
 
   public async handlePointsPeriod(fromBlock: number,toBlock: number): Promise<boolean> {
@@ -108,8 +110,10 @@ export class BlockProcessor {
         console.log(`account ${addrStr} point ${stakePoint} at ${fromBlock} - ${toBlock}`);
 
         const refPoint = 0;
-        await this.pointsRepository.add(addrStr,stakePoint,refPoint);
-        await this.pointsHistoryRepository.add(addrStr,toBlock,stakePoint,refPoint);
+        const refNumber = 0;
+        await this.pointsRepository.add(addrStr,stakePoint,refPoint,refNumber);
+        await this.pointsHistoryRepository.add(addrStr,toBlock,stakePoint,refPoint,refNumber);
+        this.lastHandlePointBlock = toBlock;
       }
 
     //calc referral point
@@ -142,8 +146,6 @@ export class BlockProcessor {
       await this.pointsRepository.update(refer,point);
     }
 
-    // save scan blocks
-    await this.blockScanRangeRepository.add(fromBlock,toBlock);
     // set timer
     const timeOutFromBlock = toBlock;
     const timeOutToBlock =  timeOutFromBlock;
@@ -218,8 +220,7 @@ export class BlockProcessor {
     if ( block.number > 1) {
       const blockTs = block.timestamp;
       // get previous handled block timestamp
-      const preBlockRange = await this.blockScanRangeRepository.getLastScanToBlock();
-      const preScanToBlockNumber = preBlockRange == null ? 1 : preBlockRange.to;
+      const preScanToBlockNumber = this.lastHandlePointBlock == 0 ? 1 : this.lastHandlePointBlock;
       console.log(`Last scan to block number ${preScanToBlockNumber}`);
       const preBlock = await this.blockRepository.getLastBlock({
         where: {number: preScanToBlockNumber}
@@ -232,7 +233,7 @@ export class BlockProcessor {
         let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
         console.log(`Ts interval periods ${periods}`);
         for (let i = 0; i < periods; i++) {
-          let from_block = preBlockRange == null ? 1 : Math.min(preBlock.number + 1, block.number - 1);
+          let from_block = this.lastHandlePointBlock == 0 ? 1 : Math.min(preBlock.number + 1, block.number - 1);
           let to_block = block.number - 1;
           await this.handlePointsPeriod(from_block, to_block);
         }

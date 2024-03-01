@@ -7,10 +7,10 @@ import {Block, Point} from "../entities";
 export class PointsRepository {
   public constructor(private readonly unitOfWork: UnitOfWork) {}
 
-  public async add(address: string,stakePoint: number,refPoint: number): Promise<void> {
+  public async add(address: string,stakePoint: number,refPoint: number,refNumber: number): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.insert<Point>(Point, {
-      address,stakePoint,refPoint,
+      address,stakePoint,refPoint,refNumber
     });
   }
 

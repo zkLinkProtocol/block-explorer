@@ -23,6 +23,12 @@ interface ITokenMarketDataProviderResponse {
   market_cap?: number;
 }
 
+interface ITokenMarketChartProviderResponse {
+  prices: number[][];
+  market_caps: number[][];
+  total_volumes: number[][];
+}
+
 class ProviderResponseError extends Error {
   constructor(message: string, public readonly status: number, public readonly rateLimitResetDate?: Date) {
     super(message);
@@ -91,6 +97,20 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
         per_page: tokenIds.length.toString(),
         page: "1",
         locale: "en",
+      },
+    });
+  }
+
+  private getTokensMarketChart(tokenId: string,date: string) {
+    console.log(`getTokensMarketData ${tokenId}`);
+    const currentDate = new Date();
+    const getDate = new Date(date);
+    let days = Math.floor((currentDate.getTime() - getDate.getTime()) / 86400000);
+    return this.makeApiRequestRetryable<ITokenMarketChartProviderResponse[]>({
+      path: `/coins/${tokenId}/market_chart`,
+      query: {
+        vs_currency: "usd",
+        days: days.toString(),
       },
     });
   }
