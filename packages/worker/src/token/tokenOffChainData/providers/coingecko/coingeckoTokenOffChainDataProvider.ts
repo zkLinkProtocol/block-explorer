@@ -78,6 +78,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
               liquidity: tokenMarketData.market_cap,
               usdPrice: tokenMarketData.current_price,
               iconURL: tokenMarketData.image,
+              priceId: tokenMarketData.id,
             };
           })
         );
@@ -85,6 +86,14 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
       }
     }
     return tokensOffChainData;
+  }
+
+  public async getTokenPriceByBlock(tokenId:string,blockTs: number): Promise<number> {
+    let getDate = new Date(blockTs);
+    let marketChart = await this.getTokensMarketChart(tokenId,getDate);
+    getDate.setMinutes(0,0,0);
+    let prices = marketChart.prices.filter(price => price[0] >= getDate.getTime());
+    return prices.length > 0 ? prices[0][1] : 0;
   }
 
   private getTokensMarketData(tokenIds: string[]) {
@@ -101,12 +110,14 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     });
   }
 
-  private getTokensMarketChart(tokenId: string,date: string) {
-    console.log(`getTokensMarketData ${tokenId}`);
+  // start add by nick *get history price*
+  private getTokensMarketChart(tokenId: string,getDate: Date) {
+    console.log(`getTokensMarketChart ${tokenId}`);
     const currentDate = new Date();
-    const getDate = new Date(date);
-    let days = Math.floor((currentDate.getTime() - getDate.getTime()) / 86400000);
-    return this.makeApiRequestRetryable<ITokenMarketChartProviderResponse[]>({
+    let diffDays = Math.floor((currentDate.getTime() - getDate.getTime()) / 86400000);
+    let days = diffDays < 2 ? 2 : diffDays;
+
+    return this.makeApiRequestRetryable<ITokenMarketChartProviderResponse>({
       path: `/coins/${tokenId}/market_chart`,
       query: {
         vs_currency: "usd",
@@ -114,6 +125,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
       },
     });
   }
+  //end add by nick
 
   private async getTokensList() {
     const list = await this.makeApiRequestRetryable<ITokenListItemProviderResponse[]>({

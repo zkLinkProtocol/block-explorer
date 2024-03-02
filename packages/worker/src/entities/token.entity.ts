@@ -68,4 +68,7 @@ export class Token extends BaseEntity {
   @Index()
   @Column({ type: "timestamp", nullable: true })
   public readonly offChainDataUpdatedAt?: Date;
+
+  @Column({ nullable: true })
+  public readonly priceId?: string;
 }

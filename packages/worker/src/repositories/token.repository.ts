@@ -75,6 +75,7 @@ export class TokenRepository extends BaseRepository<Token> {
     usdPrice,
     updatedAt,
     iconURL,
+    priceId,
   }: {
     l1Address?: string;
     l2Address?: string;
@@ -82,6 +83,7 @@ export class TokenRepository extends BaseRepository<Token> {
     usdPrice?: number;
     updatedAt?: Date;
     iconURL?: string;
+    priceId?: string,
   }): Promise<void> {
     if (!l1Address && !l2Address) {
       throw new Error("l1Address or l2Address must be provided");
@@ -98,6 +100,9 @@ export class TokenRepository extends BaseRepository<Token> {
         offChainDataUpdatedAt: updatedAt,
         ...(iconURL && {
           iconURL,
+        }),
+        ...(priceId && {
+          priceId,
         }),
       }
     );

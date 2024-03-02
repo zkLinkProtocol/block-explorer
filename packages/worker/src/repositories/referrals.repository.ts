@@ -32,4 +32,21 @@ export class ReferralsRepository {
     );
     return referrals;
   }
+
+  public async getGroupMembersByAddress(address: string,block:number): Promise<string[]> {
+      const [ret] = await this.refer.query(
+          `SELECT groupId FROM referrals WHERE (address = $1 OR referee = $1) AND blockNumber <= $2`,[address,block]
+      );
+      const groupId = ret.groupId;
+      const members = await this.refer.query(
+          `SELECT DISTINCT(member) FROM (
+                            SELECT address AS member FROM referrals WHERE groupId = $1 AND blockNumber <= $2
+                            UNION
+                            SELECT referee AS member FROM referrals WHERE groupId = $1 AND blockNumber <= $2
+                        ) as members;
+    `,[groupId,block]
+      );
+      return members.map((row:any) => row.member);
+
+  }
 }

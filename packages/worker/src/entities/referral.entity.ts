@@ -13,6 +13,9 @@ export class Referral {
   @Column({ type: "bytea", transformer: hexTransformer })
   public readonly referee: string;
 
-  @Column({ type: "timestamp"})
-  public readonly effectTime: string;
+  @Column({ type: "bigint"})
+  public readonly blockNumber: number;
+
+  @Column({ type: "bigint"})
+  public readonly groupId: number;
 }

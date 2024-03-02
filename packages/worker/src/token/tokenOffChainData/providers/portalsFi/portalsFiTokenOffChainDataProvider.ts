@@ -61,6 +61,10 @@ export class PortalsFiTokenOffChainDataProvider implements TokenOffChainDataProv
     );
   }
 
+  public async getTokenPriceByBlock(tokenId:string,blockTs: number):Promise<number> {
+    return 0;
+  }
+
   private async getTokensOffChainDataPageRetryable({
     page,
     retryAttempt = 0,

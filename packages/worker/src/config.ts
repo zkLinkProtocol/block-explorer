@@ -31,6 +31,7 @@ export default () => {
     COINGECKO_API_KEY,
     BRIDGE_NETWORK_KEYS,
     POINTS_STATISTICAL_PERIOD_SECS,
+    POINTS_PHASE1_END_DATE,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -76,6 +77,7 @@ export default () => {
       disableBlocksRevert: DISABLE_BLOCKS_REVERT === "true",
       numberOfBlocksPerDbTransaction: parseInt(NUMBER_OF_BLOCKS_PER_DB_TRANSACTION, 10) || 50,
       pointsStatisticalPeriodSecs: parseInt(POINTS_STATISTICAL_PERIOD_SECS, 10) || 3600,
+      pointsPhase1EndDate: POINTS_PHASE1_END_DATE,
     },
     batches: {
       batchesProcessingPollingInterval: parseInt(BATCHES_PROCESSING_POLLING_INTERVAL, 10) || 60000,
