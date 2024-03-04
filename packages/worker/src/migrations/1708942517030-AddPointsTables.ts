@@ -12,10 +12,11 @@ export class AddPointsTables1708942517030 implements MigrationInterface {
       `CREATE TABLE "pointsHistory" ("id" BIGSERIAL NOT NULL, "address" bytea NOT NULL, "blockNumber" bigint NOT NULL, "stakePoint" bigint NOT NULL, "refPoint" bigint NOT NULL, "refNumber" bigint NOT NULL,CONSTRAINT "PK_3d3989db885fde70a502ffa3264" PRIMARY KEY ("id"))`
     );
     await queryRunner.query(`CREATE INDEX "IDX_b1b95df312364b2d2ce420b2c8" ON "pointsHistory" ("address") `);
+    await queryRunner.query(`ALTER TABLE "tokens" ADD COLUMN "priceId" character varying NULL`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "tokens" ALTER COLUMN "networkKey" DROP NOT NULL`);
+    await queryRunner.query(`ALTER TABLE "tokens" ALTER COLUMN "priceId" DROP NOT NULL`);
     await queryRunner.query(`DROP INDEX "public"."IDX_b1b95df312364b2d2ce420b2c8"`);
     await queryRunner.query(`DROP TABLE "pointsHistory"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_186821d745a802779bae61192c"`);

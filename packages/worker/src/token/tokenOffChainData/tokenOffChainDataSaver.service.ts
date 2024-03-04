@@ -50,6 +50,7 @@ export class TokenOffChainDataSaverService extends Worker {
               usdPrice: tokensToUpdate[i].usdPrice,
               updatedAt,
               iconURL: tokensToUpdate[i].iconURL,
+              priceId: tokensToUpdate[i].priceId,
             })
           );
           if (updateTokensTasks.length === UPDATE_TOKENS_BATCH_SIZE || i === tokensToUpdate.length - 1) {

@@ -28,21 +28,24 @@ export class ReferralsRepository {
 
   public async getReferralsByAddress(address: Buffer,block: number): Promise<Buffer[]> {
     const ret = await this.refer.query(
-        `SELECT DISTINCT(referree) AS referree FROM referrals WHERE address = $1 AND blockNumber <= $1`,[address,block]
+        `SELECT DISTINCT(referee) AS referee FROM referrals WHERE address = $1 AND "blockNumber" <= $2`,[address,block]
     );
     return ret.map((r:any) => r.referee);
   }
 
   public async getGroupMembersByAddress(address: Buffer,block:number): Promise<Buffer[]> {
       const [ret] = await this.refer.query(
-          `SELECT groupId FROM referrals WHERE (address = $1 OR referee = $1) AND blockNumber <= $2`,[address,block]
+          `SELECT "groupId" FROM referrals WHERE (address = $1 OR referee = $1) AND "blockNumber" <= $2`,[address,block]
       );
+      if (!ret) {
+        return [];
+      }
       const groupId = ret.groupId;
       const members = await this.refer.query(
           `SELECT DISTINCT(member) FROM (
-                            SELECT address AS member FROM referrals WHERE groupId = $1 AND blockNumber <= $2
+                            SELECT address AS member FROM referrals WHERE "groupId" = $1 AND "blockNumber" <= $2
                             UNION
-                            SELECT referee AS member FROM referrals WHERE groupId = $1 AND blockNumber <= $2
+                            SELECT referee AS member FROM referrals WHERE "groupId" = $1 AND "blockNumber" <= $2
                         ) as members;
     `,[groupId,block]
       );

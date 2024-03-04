@@ -154,7 +154,11 @@ export class BlockProcessor {
 
       let tokenPrices = new Map();
       for ( const token of tokens ) {
+        if (!token.priceId) {
+          return false;
+        }
         const tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(token.priceId, toBlock.timestamp.getTime());
+        console.log(`get token ${token.symbol} price is ${tokenPrice}`);
         tokenPrices.set(token.l2Address,tokenPrice);
       }
 
