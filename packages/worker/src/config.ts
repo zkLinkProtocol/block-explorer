@@ -31,7 +31,8 @@ export default () => {
     COINGECKO_API_KEY,
     BRIDGE_NETWORK_KEYS,
     POINTS_STATISTICAL_PERIOD_SECS,
-    POINTS_PHASE1_END_DATE,
+    POINTS_EARLY_DEPOSIT_END_TIME,
+    POINTS_PHASE1_END_TIME,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -76,8 +77,6 @@ export default () => {
       toBlock: parseInt(TO_BLOCK, 10) || null,
       disableBlocksRevert: DISABLE_BLOCKS_REVERT === "true",
       numberOfBlocksPerDbTransaction: parseInt(NUMBER_OF_BLOCKS_PER_DB_TRANSACTION, 10) || 50,
-      pointsStatisticalPeriodSecs: parseInt(POINTS_STATISTICAL_PERIOD_SECS, 10) || 3600,
-      pointsPhase1EndDate: POINTS_PHASE1_END_DATE,
     },
     batches: {
       batchesProcessingPollingInterval: parseInt(BATCHES_PROCESSING_POLLING_INTERVAL, 10) || 60000,
@@ -115,5 +114,10 @@ export default () => {
       getNetworkKeyByL2Erc20Bridge: (bridgeAddress: string): NetworkKey | undefined =>
         L22Key[bridgeAddress.toLowerCase()],
     },
+    points: {
+      pointsStatisticalPeriodSecs: parseInt(POINTS_STATISTICAL_PERIOD_SECS, 10) || 3600,
+      pointsPhase1EndTime: POINTS_PHASE1_END_TIME,
+      pointsEarlyDepositEndTime: POINTS_EARLY_DEPOSIT_END_TIME
+    }
   };
 };

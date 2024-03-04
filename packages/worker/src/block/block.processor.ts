@@ -41,7 +41,8 @@ export class BlockProcessor {
   private readonly disableBlocksRevert: boolean;
   private readonly numberOfBlocksPerDbTransaction: number;
   private readonly pointsStatisticalPeriodSecs: number;
-  private readonly pointsPhase1EndDate: string;
+  private readonly pointsPhase1EndTime: string;
+  private readonly pointsEarlyDepositEndTime: string;
   private timer?: NodeJS.Timeout;
   // restart will handle from genesis block
   private lastHandlePointBlock: number;
@@ -72,8 +73,9 @@ export class BlockProcessor {
     this.toBlock = configService.get<number>("blocks.toBlock");
     this.disableBlocksRevert = configService.get<boolean>("blocks.disableBlocksRevert");
     this.numberOfBlocksPerDbTransaction = configService.get<number>("blocks.numberOfBlocksPerDbTransaction");
-    this.pointsStatisticalPeriodSecs = configService.get<number>("blocks.pointsStatisticalPeriodSecs");
-    this.pointsPhase1EndDate = configService.get<string>("blocks.pointsPhase1EndDate");
+    this.pointsStatisticalPeriodSecs = configService.get<number>("points.pointsStatisticalPeriodSecs");
+    this.pointsPhase1EndTime = configService.get<string>("points.pointsPhase1EndTime");
+    this.pointsEarlyDepositEndTime = configService.get<string>("points.pointsPhase1EndTime");
     this.lastHandlePointBlock = 0;
   }
 
@@ -156,7 +158,8 @@ export class BlockProcessor {
         tokenPrices.set(token.l2Address,tokenPrice);
       }
 
-      let phase1EndDate = new Date(this.pointsPhase1EndDate);
+      let stakePointsCache = new Map();
+      let phase1EndDate = new Date(this.pointsPhase1EndTime);
       const earlyBirdMultiplier = toBlock.timestamp > phase1EndDate ? 1: 2;
       const ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", toBlock.timestamp.getTime());
       for ( const address of addresses ) {
@@ -164,14 +167,13 @@ export class BlockProcessor {
         for (const token of tokens) {
           let depositsOfToken = deposits.filter(deposit => deposit.tokenAddress == token.l2Address);
           let tokenPrice = tokenPrices.get(token.l2Address);
-          //todo: use config
-          const earlyDepositEndTime = new Date("2024-04-01 00:00:00");
-          const phase1DepositEndTime = new Date("2024-05-01 00:00:00");
+          const earlyDepositEndTime = new Date(this.pointsEarlyDepositEndTime);
+          const phase1EndTime = new Date(this.pointsPhase1EndTime);
           let eligibleDeposits = depositsOfToken.filter(d => {
             const depositEthAmount = Number(d.amount)*tokenPrice/ethPrice;
             const depositTime = new Date(d.timestamp);
             return (depositEthAmount >= 0.1 && depositTime <= earlyDepositEndTime) ||
-                (depositEthAmount >= 0.25 && depositTime > earlyDepositEndTime && depositTime < phase1DepositEndTime);
+                (depositEthAmount >= 0.25 && depositTime > earlyDepositEndTime && depositTime < phase1EndTime);
           });
           if (eligibleDeposits.length == 0) {
             // not eligible
@@ -209,9 +211,27 @@ export class BlockProcessor {
         //(1 + Group Booster + Growth Booster) * sum_all tokens in activity list
         // (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price/ ETH_Price )
         let stakePoint = (1 + groupBooster + growthBooster)*addressAmount*earlyBirdMultiplier;
-        let refPoint = 0;
+        stakePointsCache.set(address,stakePoint);
         let addrStr = address.toString('hex');
         console.log(`account ${addrStr} point ${stakePoint} at ${fromBlockNumber} - ${toBlockNumber}`);
+
+        //calc referral point
+        let refPoint = 0;
+        let referees = await this.referralRepository.getReferralsByAddress(address,toBlockNumber);
+        console.log(referees.length);
+        for ( const referee of referees ) {
+          console.log(referee);
+          // group leader
+          if (referee == address) {
+            continue;
+          }
+          let refereeStakePoint = stakePointsCache.get(referee);
+          if (!refereeStakePoint) {
+            refereeStakePoint = await this.pointsRepository.getStakePointByAddress(referee);
+          }
+          refPoint += refereeStakePoint*0.1;
+        }
+
         const refNumber = 0;
         await this.pointsRepository.add(addrStr,stakePoint,refPoint,refNumber);
         await this.pointsHistoryRepository.add(addrStr,toBlockNumber,stakePoint,refPoint,refNumber);
@@ -219,34 +239,28 @@ export class BlockProcessor {
       }
 
     //calc referral point
-    //todo: add cache
-    let referrals = [];
-    let offset = BigInt(Number.MAX_SAFE_INTEGER);
-    while (true) {
-      let ret = await this.referralRepository.getReferralsByBlock(toBlockNumber,offset);
-      if (ret.length == 0) {
-        break;
-      }
-      referrals.push(...ret);
-      offset = BigInt(ret[0].id);
-    }
-    console.log(referrals.length);
-    let refPoints = new Map();
-    for ( const referral of referrals) {
-      console.log(referral.referee);
-      const referAddr = referral.address;
-      let p = refPoints.get(referAddr);
-      let referPoint = p === undefined ? 0: p;
-      const refereeStakePoint = await this.pointsRepository.getStakePointByAddress(referral.referee);
-      const newReferPoint = referPoint + refereeStakePoint*0.1;
-      refPoints.set(referAddr,newReferPoint);
-    }
+    //let referrals = [];
+    // let offset = BigInt(Number.MAX_SAFE_INTEGER);
+    // while (true) {
+    //   let ret = await this.referralRepository.getReferralsByBlock(toBlockNumber,offset);
+    //   if (ret.length == 0) {
+    //     break;
+    //   }
+    //   referrals.push(...ret);
+    //   offset = BigInt(ret[0].id);
+    // }
+    // console.log(referrals.length);
+    // let refPoints = new Map();
+    // for ( const referral of referrals ) {
+    //   console.log(referral.referee);
+    //   const referAddr = referral.address;
+    //   let p = refPoints.get(referAddr);
+    //   let referPoint = p === undefined ? 0: p;
+    //   const refereeStakePoint = await this.pointsRepository.getStakePointByAddress(referral.referee);
+    //   const newReferPoint = referPoint + refereeStakePoint*0.1;
+    //   refPoints.set(referAddr,newReferPoint);
+    // }
 
-    // update referral points
-    // todo: process in batch
-    for (const [refer, point] of refPoints.entries()) {
-      await this.pointsRepository.update(refer,point);
-    }
 
     // set timer
     const timeOutFromBlock = toBlockNumber;

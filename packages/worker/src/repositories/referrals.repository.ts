@@ -13,17 +13,10 @@ export class ReferralsRepository {
       @InjectRepository(Referral, "refer")
       private readonly refer: Repository<Referral>) {}
 
-  public async add(address: string,referee: string,effectTime: string): Promise<void> {
+  public async add(address: string,referee: string,blockNumber: number): Promise<void> {
     await this.refer.insert({
-      address,referee,effectTime,
+      address,referee,blockNumber,
     });
-  }
-
-  public async getReferrals(): Promise<Referral[]> {
-    const referrals = await this.refer.query(
-        `SELECT * FROM referrals ORDER BY id DESC`,[]
-    );
-    return referrals;
   }
 
   public async getReferralsByBlock(block: number,offset: bigint): Promise<Referral[]> {
@@ -31,6 +24,13 @@ export class ReferralsRepository {
         `SELECT * FROM referrals WHERE blockNumber <= $1 AND id < $2 ORDER BY id DESC LIMIT 100`,[block,offset]
     );
     return referrals;
+  }
+
+  public async getReferralsByAddress(address: Buffer,block: number): Promise<Buffer[]> {
+    const ret = await this.refer.query(
+        `SELECT DISTINCT(referree) AS referree FROM referrals WHERE address = $1 AND blockNumber <= $1`,[address,block]
+    );
+    return ret.map((r:any) => r.referee);
   }
 
   public async getGroupMembersByAddress(address: Buffer,block:number): Promise<Buffer[]> {
