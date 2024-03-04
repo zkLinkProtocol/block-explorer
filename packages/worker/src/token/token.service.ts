@@ -42,42 +42,6 @@ export class TokenService {
     return await this.tokenRepository.getAllTokens();
   }
 
-  // todo: maybe use config file or database
-  public getTokenMultiplier(token: TokenEntity): number {
-      switch (token.symbol) {
-        case 'ETH1':
-        case 'wETH':
-        case 'wBTC':
-        case 'USDT':
-        case 'USDC':
-        case 'Dai':
-        case 'FDUSD':
-        case 'Frax':
-        case 'USDe':
-          return 2;
-        case 'ARB':
-        case 'MANTA':
-        case 'MNT':
-        case 'sDai':
-        case 'wUSDM':
-        case 'wstETH':
-        case 'rETH':
-        case 'wBETH':
-        case 'mETH':
-        case 'sfrxETH':
-        case 'Stone':
-        case 'swETH':
-        case 'cbETH':
-        case 'nETH':
-          return 1.5;
-        case 'weETH':
-        case 'pufETH':
-        case 'rsETH':
-        case 'ezETH':
-          return 1;
-      }
-  }
-
   private async getERC20Token(contractAddress: string): Promise<{
     symbol: string;
     decimals: number;

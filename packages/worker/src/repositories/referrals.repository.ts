@@ -33,7 +33,7 @@ export class ReferralsRepository {
     return referrals;
   }
 
-  public async getGroupMembersByAddress(address: string,block:number): Promise<string[]> {
+  public async getGroupMembersByAddress(address: Buffer,block:number): Promise<Buffer[]> {
       const [ret] = await this.refer.query(
           `SELECT groupId FROM referrals WHERE (address = $1 OR referee = $1) AND blockNumber <= $2`,[address,block]
       );

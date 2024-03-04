@@ -21,6 +21,14 @@ export class PointsRepository {
     },{ refPoint });
   }
 
+  public async updateDeposits(deposits: Map<Buffer,number>): Promise<void> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    for (const [address,depositPoint] of deposits) {
+      await transactionManager.query(
+          `UPDATE stakePoint = stakePoint + $2 WHERE address = $1`, [address, depositPoint]);
+    }
+  }
+
   public async getStakePointByAddress(address: Buffer): Promise<number> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const accountPoint = await transactionManager.query(`SELECT "stakePoint" FROM points WHERE address = $1`,[address]);

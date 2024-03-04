@@ -1,34 +1,35 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { EventEmitter2 } from "@nestjs/event-emitter";
-import { ConfigService } from "@nestjs/config";
-import { InjectMetric } from "@willsoto/nestjs-prometheus";
-import { Histogram } from "prom-client";
-import { MoreThanOrEqual, LessThanOrEqual, Between, FindOptionsWhere } from "typeorm";
-import { IDbTransaction, UnitOfWork } from "../unitOfWork";
-import { BlockchainService } from "../blockchain/blockchain.service";
-import { BlockWatcher } from "./block.watcher";
-import { BlockData } from "../dataFetcher/types";
-import { BalanceService } from "../balance/balance.service";
-import { TokenService } from "../token/token.service";
+import {Injectable, Logger} from "@nestjs/common";
+import {EventEmitter2} from "@nestjs/event-emitter";
+import {ConfigService} from "@nestjs/config";
+import {InjectMetric} from "@willsoto/nestjs-prometheus";
+import {Histogram} from "prom-client";
+import {Between, FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual} from "typeorm";
+import {IDbTransaction, UnitOfWork} from "../unitOfWork";
+import {BlockchainService} from "../blockchain/blockchain.service";
+import {BlockWatcher} from "./block.watcher";
+import {BlockData} from "../dataFetcher/types";
+import {BalanceService} from "../balance/balance.service";
+import {TokenService} from "../token/token.service";
 import {
   BlockRepository,
   LogRepository,
-  TransferRepository,
-  PointsRepository, PointsHistoryRepository,ReferralsRepository
+  PointsHistoryRepository,
+  PointsRepository,
+  ReferralsRepository,
+  TransferRepository
 } from "../repositories";
-import { Block,Referral } from "../entities";
-import { TransactionProcessor } from "../transaction";
-import { validateBlocksLinking } from "./block.utils";
+import {Block, Token as TokenEntity, TransferType} from "../entities";
+import {TransactionProcessor} from "../transaction";
+import {validateBlocksLinking} from "./block.utils";
 import splitIntoChunks from "../utils/splitIntoChunks";
 import {
-  BLOCKS_BATCH_PROCESSING_DURATION_METRIC_NAME,
   BLOCK_PROCESSING_DURATION_METRIC_NAME,
-  BlocksBatchProcessingMetricLabels,
   BlockProcessingMetricLabels,
+  BLOCKS_BATCH_PROCESSING_DURATION_METRIC_NAME,
+  BlocksBatchProcessingMetricLabels,
 } from "../metrics";
-import { BLOCKS_REVERT_DETECTED_EVENT } from "../constants";
-import { unixTimeToDateString } from "../utils/date";
-import {BigNumber} from "ethers";
+import {BLOCKS_REVERT_DETECTED_EVENT} from "../constants";
+import {unixTimeToDateString} from "../utils/date";
 import {TokenOffChainDataProvider} from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 
 
@@ -92,6 +93,42 @@ export class BlockProcessor {
     }
   }
 
+  // todo: maybe use config file or database
+  public getTokenMultiplier(tokenSymbol: string): number {
+    switch (tokenSymbol) {
+      case 'ETH1':
+      case 'wETH':
+      case 'wBTC':
+      case 'USDT':
+      case 'USDC':
+      case 'Dai':
+      case 'FDUSD':
+      case 'Frax':
+      case 'USDe':
+        return 2;
+      case 'ARB':
+      case 'MANTA':
+      case 'MNT':
+      case 'sDai':
+      case 'wUSDM':
+      case 'wstETH':
+      case 'rETH':
+      case 'wBETH':
+      case 'mETH':
+      case 'sfrxETH':
+      case 'Stone':
+      case 'swETH':
+      case 'cbETH':
+      case 'nETH':
+        return 1.5;
+      case 'weETH':
+      case 'pufETH':
+      case 'rsETH':
+      case 'ezETH':
+        return 1;
+    }
+  }
+
   public async handlePointsPeriod(fromBlockNumber: number,toBlockNumber: number): Promise<boolean> {
     const toBlock = await this.blockRepository.getLastBlock({
       where: {number: toBlockNumber}
@@ -150,7 +187,7 @@ export class BlockProcessor {
           let memberAmount = 0;
           for ( const token of tokens ) {
             let tokenPrice = tokenPrices.get(token.l2Address);
-            let tokenMultiplier = this.tokenService.getTokenMultiplier(token);
+            let tokenMultiplier = this.getTokenMultiplier(token.symbol);
             let balances = await this.balanceService.getAccountBalances(member);
             let balancesOfToken = balances.filter( balance => balance.tokenAddress == token.l2Address);
             for ( const balance of balancesOfToken ) {
@@ -293,7 +330,6 @@ export class BlockProcessor {
       const prePointsBlockTs = preBlock.timestamp.getTime() / 1000;
       const ts_interval = blockTs - prePointsBlockTs;
       console.log(`Current block ${block.number} ,timestamp interval ${ts_interval},config period ${this.pointsStatisticalPeriodSecs}`);
-      // if ts_interval == pointsStatisticalPeriodSecs,we can defer processing to the next block
       if (ts_interval > this.pointsStatisticalPeriodSecs) {
         let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
         console.log(`Ts interval periods ${periods}`);
@@ -378,6 +414,38 @@ export class BlockProcessor {
           blockNumber: blockNumber,
         });
         await this.transferRepository.addMany(blockData.blockTransfers);
+        // calc deposit points
+        let deposits = blockData.blockTransfers.filter(t => t.type == TransferType.Deposit);
+        let allTokens = await this.tokenService.getAllTokens()
+        type TokenInfo = { multiplier:number,price: number };
+        let tokenInfos = new Map();
+        let ethPrice = 0;
+        let depositPoints = new Map();
+        for (const deposit of deposits) {
+          let tokenInfo: TokenInfo = tokenInfos.get(deposit.tokenAddress);
+          if (!tokenInfo) {
+            let token = allTokens.find(t => t.l2Address == deposit.tokenAddress);
+            let tokenMultiplier = this.getTokenMultiplier(token.symbol);
+            let tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(token.priceId, block.timestamp);
+            tokenInfo =  {
+              multiplier: tokenMultiplier,
+              price: tokenPrice,
+            }
+            tokenInfos.set(deposit.tokenAddress,tokenInfo);
+          }
+          let depositAmount = Number(deposit.amount);
+          if (ethPrice == 0) {
+            ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", block.timestamp);
+          }
+          let depositPoint = 10 * tokenInfo.multiplier* depositAmount *tokenInfo.price/ethPrice;
+          let oldPoint = depositPoints.get(deposit.from);
+          let newPoint = oldPoint ? 0 : oldPoint;
+          newPoint += depositPoint;
+          depositPoints.set(deposit.from,newPoint);
+        }
+
+        // save to db
+        await this.pointsRepository.updateDeposits(depositPoints);
       }
 
       if (blockData.changedBalances.length) {
