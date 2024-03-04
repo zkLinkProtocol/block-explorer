@@ -85,6 +85,7 @@ export class TokenRepository extends BaseRepository<Token> {
     iconURL?: string;
     priceId?: string,
   }): Promise<void> {
+    console.log(`updateTokenOffChainData ${l1Address} ${l2Address} ${usdPrice} ${priceId}`);
     if (!l1Address && !l2Address) {
       throw new Error("l1Address or l2Address must be provided");
     }

@@ -5,7 +5,7 @@ import waitFor from "../../utils/waitFor";
 import { TokenRepository } from "../../repositories/token.repository";
 import { TokenOffChainDataProvider } from "./tokenOffChainDataProvider.abstract";
 
-const UPDATE_TOKENS_BATCH_SIZE = 100;
+const UPDATE_TOKENS_BATCH_SIZE = 10;
 
 @Injectable()
 export class TokenOffChainDataSaverService extends Worker {
