@@ -46,6 +46,7 @@ export class BlockProcessor {
   private timer?: NodeJS.Timeout;
   // restart will handle from genesis block
   private lastHandlePointBlock: number;
+  private addressEligibleCache: Map<string,boolean>
 
   public constructor(
     private readonly unitOfWork: UnitOfWork,
@@ -77,6 +78,7 @@ export class BlockProcessor {
     this.pointsPhase1EndTime = configService.get<string>("points.pointsPhase1EndTime");
     this.pointsEarlyDepositEndTime = configService.get<string>("points.pointsPhase1EndTime");
     this.lastHandlePointBlock = 0;
+    this.addressEligibleCache = new Map();
   }
 
   public getGroupBooster(groupTvl:number):number {
@@ -140,6 +142,7 @@ export class BlockProcessor {
         return "usd-coin";
     }
   }
+
   public async handlePointsPeriod(fromBlockNumber: number,toBlockNumber: number): Promise<boolean> {
     const toBlock = await this.blockRepository.getLastBlock({
       where: {number: toBlockNumber}
@@ -174,25 +177,7 @@ export class BlockProcessor {
       const earlyBirdMultiplier = toBlock.timestamp > phase1EndDate ? 1: 2;
       const ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", toBlock.timestamp.getTime());
       for ( const address of addresses ) {
-        let deposits = await this.transferRepository.getDeposits(address,toBlockNumber);
-        let eligible =  false;
-        for (const token of tokens) {
-          let depositsOfToken = deposits.filter(deposit => deposit.tokenAddress == token.l2Address);
-          let tokenPrice = tokenPrices.get(token.l2Address);
-          const earlyDepositEndTime = new Date(this.pointsEarlyDepositEndTime);
-          const phase1EndTime = new Date(this.pointsPhase1EndTime);
-          let eligibleDeposits = depositsOfToken.filter(d => {
-            const depositEthAmount = Number(d.amount)*tokenPrice/ethPrice;
-            const depositTime = new Date(d.timestamp);
-            return (depositEthAmount >= 0.1 && depositTime <= earlyDepositEndTime) ||
-                (depositEthAmount >= 0.25 && depositTime > earlyDepositEndTime && depositTime < phase1EndTime);
-          });
-          if (eligibleDeposits.length != 0) {
-            eligible = true;
-            break;
-          }
-        }
-
+        let eligible = this.addressEligibleCache.get(address.toString("hex"));
         // not have eligible to get point
         if (!eligible) {
           continue;
@@ -456,6 +441,7 @@ export class BlockProcessor {
           blockNumber: blockNumber,
         });
         await this.transferRepository.addMany(blockData.blockTransfers);
+
         // calc deposit points
         let deposits = blockData.blockTransfers.filter(t => t.type == TransferType.Deposit);
         let allTokens = await this.tokenService.getAllTokens()
@@ -464,9 +450,13 @@ export class BlockProcessor {
         let ethPrice = 0;
         let depositPoints = new Map();
         for (const deposit of deposits) {
+          if (ethPrice == 0) {
+            ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", block.timestamp);
+          }
           let tokenInfo: TokenInfo = tokenInfos.get(deposit.tokenAddress);
           if (!tokenInfo) {
             let token = allTokens.find(t => t.l2Address == deposit.tokenAddress);
+            console.log(`addBlock deposit token is ${token}`);
             let tokenMultiplier = this.getTokenMultiplier(token.symbol);
             let priceId = this.getCgIdByTokenSymbol(token.symbol);
             let tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, block.timestamp);
@@ -477,8 +467,20 @@ export class BlockProcessor {
             tokenInfos.set(deposit.tokenAddress,tokenInfo);
           }
           let depositAmount = Number(deposit.amount);
-          if (ethPrice == 0) {
-            ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", block.timestamp);
+          // check point eligible
+          let eligible = this.addressEligibleCache.get(deposit.from);
+          let newEligible = eligible;
+          if (!eligible) {
+            const earlyDepositEndTime = new Date(this.pointsEarlyDepositEndTime);
+            const phase1EndTime = new Date(this.pointsPhase1EndTime);
+            const depositEthAmount = depositAmount * tokenInfo.price / ethPrice;
+            const depositTime = new Date(deposit.timestamp);
+            newEligible = (depositEthAmount >= 0.1 && depositTime <= earlyDepositEndTime) ||
+                  (depositEthAmount >= 0.25 && depositTime > earlyDepositEndTime && depositTime < phase1EndTime);
+          }
+          if (!newEligible) { continue }
+          if (newEligible != eligible) {
+            this.addressEligibleCache.set(deposit.from,newEligible);
           }
           let depositPoint = 10 * tokenInfo.multiplier* depositAmount *tokenInfo.price/ethPrice;
           let oldPoint = depositPoints.get(deposit.from);
