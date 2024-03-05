@@ -14,10 +14,10 @@ export class PointsHistory {
   @Column({ type: "bigint", transformer: bigIntNumberTransformer })
   public readonly blockNumber: number;
 
-  @Column({ type: "bigint", transformer: bigIntNumberTransformer })
+  @Column("decimal", {scale:2} )
   public readonly stakePoint: number;
 
-  @Column({ type: "bigint", transformer: bigIntNumberTransformer })
+  @Column("decimal", {scale:2} )
   public readonly refPoint: number;
 
   @Column({ type: "bigint", transformer: bigIntNumberTransformer })

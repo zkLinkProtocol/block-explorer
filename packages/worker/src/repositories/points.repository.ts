@@ -9,9 +9,16 @@ export class PointsRepository {
 
   public async add(address: string,stakePoint: number,refPoint: number,refNumber: number): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    await transactionManager.insert<Point>(Point, {
+    await transactionManager.query(
+        `INSERT INTO points (address,"stakePoint","refPoint","refNumber") VALUES ($1,$2,$3,$4) 
+            ON CONFLICT (address) 
+            DO UPDATE
+            SET "stakePoint" = $2,
+            "refPoint" = $3,
+            "refNumber" = $4
+            `, [
       address,stakePoint,refPoint,refNumber
-    });
+    ]);
   }
 
   public async update(address: Buffer,refPoint: number): Promise<void> {

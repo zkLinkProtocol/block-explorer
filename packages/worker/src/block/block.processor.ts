@@ -99,7 +99,7 @@ export class BlockProcessor {
   public getTokenMultiplier(tokenSymbol: string): number {
     switch (tokenSymbol) {
       case 'ETH1':
-      case 'wETH':
+      case 'WETH':
       case 'wBTC':
       case 'USDT':
       case 'USDC':
@@ -123,10 +123,7 @@ export class BlockProcessor {
       case 'cbETH':
       case 'nETH':
         return 1.5;
-      case 'weETH':
-      case 'pufETH':
-      case 'rsETH':
-      case 'ezETH':
+      default:
         return 1;
     }
   }
@@ -178,6 +175,7 @@ export class BlockProcessor {
       const ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", toBlock.timestamp.getTime());
       for ( const address of addresses ) {
         let deposits = await this.transferRepository.getDeposits(address,toBlockNumber);
+        let eligible =  false;
         for (const token of tokens) {
           let depositsOfToken = deposits.filter(deposit => deposit.tokenAddress == token.l2Address);
           let tokenPrice = tokenPrices.get(token.l2Address);
@@ -189,15 +187,24 @@ export class BlockProcessor {
             return (depositEthAmount >= 0.1 && depositTime <= earlyDepositEndTime) ||
                 (depositEthAmount >= 0.25 && depositTime > earlyDepositEndTime && depositTime < phase1EndTime);
           });
-          if (eligibleDeposits.length == 0) {
-            // not eligible
-            continue;
+          if (eligibleDeposits.length != 0) {
+            eligible = true;
+            break;
           }
+        }
+
+        // not have eligible to get point
+        if (!eligible) {
+          continue;
         }
 
         let addressAmount = 0;
         // calc group TVL
         let members = await this.referralRepository.getGroupMembersByAddress(address,toBlockNumber);
+        // should not empty,use for test
+        if (!members.length) {
+          members = [address];
+        }
         let groupTvl = 0;
         for (const member of members) {
           let memberAmount = 0;
@@ -205,9 +212,14 @@ export class BlockProcessor {
             let tokenPrice = tokenPrices.get(token.l2Address);
             let tokenMultiplier = this.getTokenMultiplier(token.symbol);
             let balances = await this.balanceService.getAccountBalances(member);
-            let balancesOfToken = balances.filter( balance => balance.tokenAddress == token.l2Address);
+            let balancesOfToken = balances.filter( balance => {
+              let tokenAddress = `0x${Buffer.from(balance.tokenAddress).toString("hex")}`;
+              return tokenAddress == token.l2Address;
+            });
             for ( const balance of balancesOfToken ) {
-              const tokenBalance = Number(balance.balance);
+              const decimals = Math.pow(10,Number(token.decimals));
+              const tokenBalance = Number(balance.balance)/decimals;
+              console.log(`${member.toString("hex")} balance of ${token.symbol} is ${tokenBalance},price is ${tokenPrice}`);
               const tokenAmount = tokenBalance*tokenPrice;
               if (member == address) {
                 addressAmount += tokenAmount*tokenMultiplier;
@@ -225,6 +237,7 @@ export class BlockProcessor {
         //(1 + Group Booster + Growth Booster) * sum_all tokens in activity list
         // (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price/ ETH_Price )
         let stakePoint = (1 + groupBooster + growthBooster)*addressAmount*earlyBirdMultiplier;
+        stakePoint = Number(stakePoint.toFixed(2));
         stakePointsCache.set(address,stakePoint);
         let addrStr = address.toString('hex');
         console.log(`account ${addrStr} point ${stakePoint} at ${fromBlockNumber} - ${toBlockNumber}`);
@@ -246,6 +259,7 @@ export class BlockProcessor {
           refPoint += refereeStakePoint*0.1;
         }
 
+        refPoint = Number(refPoint.toFixed(2));
         const refNumber = 0;
         await this.pointsRepository.add(addrStr,stakePoint,refPoint,refNumber);
         await this.pointsHistoryRepository.add(addrStr,toBlockNumber,stakePoint,refPoint,refNumber);
