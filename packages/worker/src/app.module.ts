@@ -49,7 +49,6 @@ import {
   Balance,
   Point,
   PointsHistory,
-  BlockScanRange,
   Referral
 } from "./entities";
 import { typeOrmModuleOptions,typeOrmReferModuleOptions } from "./typeorm.config";
@@ -89,7 +88,6 @@ import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
       Balance,
       Point,
       PointsHistory,
-      BlockScanRange,
     ]),
     TypeOrmModule.forRootAsync({
       name: "refer",

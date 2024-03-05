@@ -92,7 +92,9 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     let getDate = new Date(blockTs);
     let marketChart = await this.getTokensMarketChart(tokenId,getDate);
     getDate.setMinutes(0,0,0);
-    let prices = marketChart.prices.filter(price => price[0] >= getDate.getTime());
+    let nextHourDate = new Date(getDate);
+    nextHourDate.setHours(getDate.getHours() + 1);
+    let prices = marketChart.prices.filter(price => price[0][0] >= getDate.getTime() && price[0][0] < nextHourDate.getTime());
     return prices.length > 0 ? prices[0][1] : 0;
   }
 
@@ -112,9 +114,8 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
 
   // start add by nick *get history price*
   private getTokensMarketChart(tokenId: string,getDate: Date) {
-    console.log(`getTokensMarketChart ${tokenId}`);
     const currentDate = new Date();
-    let diffDays = Math.floor((currentDate.getTime() - getDate.getTime()) / 86400000);
+    let diffDays = Math.ceil((currentDate.getTime() - getDate.getTime()) / 86400000);
     let days = diffDays < 2 ? 2 : diffDays;
 
     return this.makeApiRequestRetryable<ITokenMarketChartProviderResponse>({

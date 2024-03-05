@@ -5,7 +5,6 @@ import { Block as BlockDto } from "../dataFetcher/types";
 import { unixTimeToDate } from "../utils/date";
 import { Block } from "../entities";
 import { UnitOfWork } from "../unitOfWork";
-import {BlockScanRange} from "../entities/blockScanRange.entity";
 
 @Injectable()
 export class BlockRepository {

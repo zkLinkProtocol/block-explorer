@@ -31,8 +31,18 @@ export class PointsRepository {
   public async updateDeposits(deposits: Map<Buffer,number>): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     for (const [address,depositPoint] of deposits) {
-      await transactionManager.query(
-          `UPDATE stakePoint = stakePoint + $2 WHERE address = $1`, [address, depositPoint]);
+      let [ret] = await transactionManager.query(
+          `SELECT "stakePoint"
+           FROM points
+           WHERE address = $1`, [address]);
+      if (!ret) {
+        await transactionManager.query(
+            `INSERT INTO points (address, "stakePoint", "refPoint", "refNumber")
+             VALUES ($1, $2, 0, 0)`, [address, depositPoint]);
+      } else {
+        await transactionManager.query(
+            `UPDATE points SET "stakePoint" = "stakePoint" + $2 WHERE address = $1`, [address, depositPoint]);
+      }
     }
   }
 

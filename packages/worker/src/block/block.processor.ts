@@ -81,6 +81,10 @@ export class BlockProcessor {
     this.addressEligibleCache = new Map();
   }
 
+  // public getEarlyBirdMultiplier(ts: Date): number {
+  //
+  // }
+
   public getGroupBooster(groupTvl:number):number {
     if (groupTvl > 20) {
       return 0.1;
@@ -441,11 +445,27 @@ export class BlockProcessor {
           blockNumber: blockNumber,
         });
         await this.transferRepository.addMany(blockData.blockTransfers);
+      }
 
-        // calc deposit points
-        let deposits = blockData.blockTransfers.filter(t => t.type == TransferType.Deposit);
+      if (blockData.changedBalances.length) {
+        this.logger.debug({ message: "Updating balances and tokens", blockNumber });
+        const erc20TokensForChangedBalances = this.balanceService.getERC20TokensForChangedBalances(
+          blockData.changedBalances
+        );
+
+        await Promise.all([
+          this.balanceService.saveChangedBalances(blockData.changedBalances),
+          this.tokenService.saveERC20Tokens(erc20TokensForChangedBalances),
+        ]);
+      }
+
+      // calc deposit points
+      for (const transaction of blockData.transactions) {
+        let deposits = transaction.transfers.filter(t => t.type == TransferType.Deposit);
+        if (!deposits.length) { continue };
+        console.log(`addBlock at ${block.number} deposits number is ${deposits.length}`);
         let allTokens = await this.tokenService.getAllTokens()
-        type TokenInfo = { multiplier:number,price: number };
+        type TokenInfo = { multiplier: number, price: number, decimals: number };
         let tokenInfos = new Map();
         let ethPrice = 0;
         let depositPoints = new Map();
@@ -460,13 +480,16 @@ export class BlockProcessor {
             let tokenMultiplier = this.getTokenMultiplier(token.symbol);
             let priceId = this.getCgIdByTokenSymbol(token.symbol);
             let tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, block.timestamp);
-            tokenInfo =  {
+            tokenInfo = {
               multiplier: tokenMultiplier,
               price: tokenPrice,
+              decimals: token.decimals
             }
-            tokenInfos.set(deposit.tokenAddress,tokenInfo);
+            tokenInfos.set(deposit.tokenAddress, tokenInfo);
           }
-          let depositAmount = Number(deposit.amount);
+
+          let decimals = Math.pow(10, tokenInfo.decimals);
+          let depositAmount = Number(deposit.amount) / decimals;
           // check point eligible
           let eligible = this.addressEligibleCache.get(deposit.from);
           let newEligible = eligible;
@@ -475,34 +498,25 @@ export class BlockProcessor {
             const phase1EndTime = new Date(this.pointsPhase1EndTime);
             const depositEthAmount = depositAmount * tokenInfo.price / ethPrice;
             const depositTime = new Date(deposit.timestamp);
+            console.log(`addBlock check eligible ${depositEthAmount} ${depositTime}`);
             newEligible = (depositEthAmount >= 0.1 && depositTime <= earlyDepositEndTime) ||
-                  (depositEthAmount >= 0.25 && depositTime > earlyDepositEndTime && depositTime < phase1EndTime);
+                (depositEthAmount >= 0.25 && depositTime > earlyDepositEndTime && depositTime < phase1EndTime);
           }
-          if (!newEligible) { continue }
+          if (!newEligible) {
+            continue
+          }
           if (newEligible != eligible) {
-            this.addressEligibleCache.set(deposit.from,newEligible);
+            this.addressEligibleCache.set(deposit.from, newEligible);
           }
-          let depositPoint = 10 * tokenInfo.multiplier* depositAmount *tokenInfo.price/ethPrice;
+          let depositPoint = 10 * tokenInfo.multiplier * depositAmount * tokenInfo.price / ethPrice;
           let oldPoint = depositPoints.get(deposit.from);
           let newPoint = oldPoint ? 0 : oldPoint;
           newPoint += depositPoint;
-          depositPoints.set(deposit.from,newPoint);
+          depositPoints.set(deposit.from, newPoint);
         }
 
         // save to db
         await this.pointsRepository.updateDeposits(depositPoints);
-      }
-
-      if (blockData.changedBalances.length) {
-        this.logger.debug({ message: "Updating balances and tokens", blockNumber });
-        const erc20TokensForChangedBalances = this.balanceService.getERC20TokensForChangedBalances(
-          blockData.changedBalances
-        );
-
-        await Promise.all([
-          this.balanceService.saveChangedBalances(blockData.changedBalances),
-          this.tokenService.saveERC20Tokens(erc20TokensForChangedBalances),
-        ]);
       }
     } catch (error) {
       blockProcessingStatus = "error";
