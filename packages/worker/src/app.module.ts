@@ -34,6 +34,7 @@ import {
   PointsRepository,
   PointsHistoryRepository,
   ReferralsRepository,
+  TvlRepository,
 } from "./repositories";
 import {
   Batch,
@@ -147,6 +148,7 @@ import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
     PointsRepository,
     PointsHistoryRepository,
     ReferralsRepository,
+    TvlRepository,
     BlocksRevertService,
     BatchService,
     BlockProcessor,

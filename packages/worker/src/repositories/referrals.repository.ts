@@ -52,4 +52,24 @@ export class ReferralsRepository {
       return members.map((row:any) => row.member);
 
   }
+
+    public async getAllGroups(): Promise<number[]> {
+        const ret = await this.refer.query(
+            `SELECT "groupId" FROM referrals GROUP BY "groupId"`,
+        );
+        return ret.map((r:any) => r.groupId);
+    }
+
+    public async getGroupMembers(groupId: number): Promise<Buffer[]> {
+        const members = await this.refer.query(
+            `SELECT DISTINCT(member) FROM (
+                            SELECT address AS member FROM referrals WHERE "groupId" = $1
+                            UNION
+                            SELECT referee AS member FROM referrals WHERE "groupId" = $1
+                        ) as members;
+    `,[groupId]
+        );
+        return members.map((row:any) => row.member);
+
+    }
 }

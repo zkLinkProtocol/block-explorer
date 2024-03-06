@@ -5,7 +5,11 @@ import { AxiosError } from "axios";
 import { setTimeout } from "timers/promises";
 import { catchError, firstValueFrom } from "rxjs";
 import { utils } from "zksync-web3";
-import { TokenOffChainDataProvider, ITokenOffChainData } from "../../tokenOffChainDataProvider.abstract";
+import {
+  TokenOffChainDataProvider,
+  ITokenOffChainData,
+  ITokenCurrentPrice
+} from "../../tokenOffChainDataProvider.abstract";
 
 const API_NUMBER_OF_TOKENS_PER_REQUEST = 250;
 const API_INITIAL_RETRY_TIMEOUT = 5000;
@@ -88,6 +92,28 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     return tokensOffChainData;
   }
 
+  public async getTokensCurrentPrice(tokens: string[]): Promise<ITokenCurrentPrice[]> {
+    const tokensCurrentPrice: ITokenCurrentPrice[] = [];
+    let tokenIdsPerRequest = [];
+    for (let i = 0; i < tokens.length; i++) {
+      tokenIdsPerRequest.push(tokens[i]);
+      if (tokenIdsPerRequest.length === API_NUMBER_OF_TOKENS_PER_REQUEST || i === tokens.length - 1) {
+        const tokensMarkedData = await this.getTokensMarketData(tokenIdsPerRequest);
+        tokensCurrentPrice.push(
+            ...tokensMarkedData.map((tokenMarketData) => {
+              const token = tokens.find((t) => t === tokenMarketData.id);
+              return {
+                priceId: tokenMarketData.id,
+                usdPrice: tokenMarketData.current_price,
+              };
+            })
+        );
+        tokenIdsPerRequest = [];
+      }
+    }
+    return tokensCurrentPrice;
+  }
+
   public async getTokenPriceByBlock(tokenId:string,blockTs: number): Promise<number> {
     let getDate = new Date(blockTs);
     let marketChart = await this.getTokensMarketChart(tokenId,getDate);
@@ -99,7 +125,6 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
   }
 
   private getTokensMarketData(tokenIds: string[]) {
-    console.log(`getTokensMarketData ${tokenIds}`);
     return this.makeApiRequestRetryable<ITokenMarketDataProviderResponse[]>({
       path: "/coins/markets",
       query: {

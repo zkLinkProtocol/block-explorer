@@ -3,7 +3,11 @@ import { HttpService } from "@nestjs/axios";
 import { AxiosError } from "axios";
 import { setTimeout } from "timers/promises";
 import { catchError, firstValueFrom } from "rxjs";
-import { TokenOffChainDataProvider, ITokenOffChainData } from "../../tokenOffChainDataProvider.abstract";
+import {
+  TokenOffChainDataProvider,
+  ITokenOffChainData,
+  ITokenCurrentPrice
+} from "../../tokenOffChainDataProvider.abstract";
 
 const TOKENS_INFO_API_URL = "https://api.portals.fi/v2/tokens";
 const API_INITIAL_RETRY_TIMEOUT = 5000;
@@ -63,6 +67,10 @@ export class PortalsFiTokenOffChainDataProvider implements TokenOffChainDataProv
 
   public async getTokenPriceByBlock(tokenId:string,blockTs: number):Promise<number> {
     return 0;
+  }
+
+  public async getTokensCurrentPrice(tokens: string[]): Promise<ITokenCurrentPrice[]> {
+    return [];
   }
 
   private async getTokensOffChainDataPageRetryable({

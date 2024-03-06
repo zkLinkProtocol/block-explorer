@@ -33,6 +33,7 @@ export default () => {
     POINTS_STATISTICAL_PERIOD_SECS,
     POINTS_EARLY_DEPOSIT_END_TIME,
     POINTS_PHASE1_END_TIME,
+    POINTS_STATISTICS_TVL_INTERVAL,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -117,7 +118,8 @@ export default () => {
     points: {
       pointsStatisticalPeriodSecs: parseInt(POINTS_STATISTICAL_PERIOD_SECS, 10) || 3600,
       pointsPhase1EndTime: POINTS_PHASE1_END_TIME,
-      pointsEarlyDepositEndTime: POINTS_EARLY_DEPOSIT_END_TIME
+      pointsEarlyDepositEndTime: POINTS_EARLY_DEPOSIT_END_TIME,
+      pointsStatistsTvlInterval: POINTS_STATISTICS_TVL_INTERVAL,
     }
   };
 };

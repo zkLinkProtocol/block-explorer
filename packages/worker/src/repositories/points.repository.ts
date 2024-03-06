@@ -52,4 +52,11 @@ export class PointsRepository {
     const accountPoint = await transactionManager.query(`SELECT "stakePoint" FROM points WHERE address = $1`,[address]);
     return accountPoint?.stakePoint || 0;
   }
+
+    public async getPointByAddress(address: Buffer): Promise<Point> {
+        const transactionManager = this.unitOfWork.getTransactionManager();
+        const accountPoint = await transactionManager.query(`SELECT * FROM points WHERE address = $1`,[address]);
+        return accountPoint || null;
+    }
+
 }
