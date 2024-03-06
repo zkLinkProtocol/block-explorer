@@ -474,6 +474,8 @@ export class BlockProcessor {
         let ethPrice = 0;
         let depositPoints = new Map();
         for (const deposit of deposits) {
+          // update referrals blockNumber
+          await this.referralRepository.updateReferralsBlock(deposit.from,block.number);
           let depositPoint = 0;
           let depositEthAmount = 0;
           if (this.checkTokenIsEth(deposit.tokenAddress)) {

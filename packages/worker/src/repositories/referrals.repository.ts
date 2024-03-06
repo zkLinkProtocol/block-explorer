@@ -26,6 +26,12 @@ export class ReferralsRepository {
     return referrals;
   }
 
+    public async updateReferralsBlock(referee: string,block: number): Promise<void> {
+        await this.refer.query(
+            `UPDATE referrals SET blockNumber = $2 WHERE referee = $1 AND blockNumber IS NULL`,[referee,block]
+        );
+    }
+
   public async getReferralsByAddress(address: Buffer,block: number): Promise<Buffer[]> {
     const ret = await this.refer.query(
         `SELECT DISTINCT(referee) AS referee FROM referrals WHERE address = $1 AND "blockNumber" <= $2`,[address,block]
@@ -60,7 +66,7 @@ export class ReferralsRepository {
         return ret.map((r:any) => r.groupId);
     }
 
-    public async getGroupMembers(groupId: number): Promise<Buffer[]> {
+    public async getGroupMembers(groupId: string): Promise<Buffer[]> {
         const members = await this.refer.query(
             `SELECT DISTINCT(member) FROM (
                             SELECT address AS member FROM referrals WHERE "groupId" = $1

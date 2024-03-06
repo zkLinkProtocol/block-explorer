@@ -16,6 +16,6 @@ export class Referral {
   @Column({ type: "bigint"})
   public readonly blockNumber: number;
 
-  @Column({ type: "bigint"})
-  public readonly groupId: number;
+  @Column({ type: "varchar"})
+  public readonly groupId: string;
 }

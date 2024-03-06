@@ -87,7 +87,7 @@ export class StatisticsTvlService extends Worker {
                     let referralTvl = 0;
                     let referees = await this.referrerRepository.getReferralsByAddress(address, Number.MAX_SAFE_INTEGER);
                     for (const r of referees) {
-                        referralTvl += addressTvls.get(r)
+                        referralTvl += addressTvls.get(r);
                     }
                     referralTvls.set(address, referralTvl);
                 }
