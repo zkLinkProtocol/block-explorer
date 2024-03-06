@@ -15,8 +15,13 @@
       "rpcUrl": "https://rpc.zklink.io"
     }
   ],
-  "iconsList":{
+  "iconsList": {
     "goerli": "/img/ethereum.svg",
-    "primary":"/img/linea.svg"
+    "primary": "/img/linea.svg",
+    "ethereum": "/img/ethereum.svg",
+    "zksync": "/img/zksync.svg",
+    "arbitrum": "/img/arbitrum-arb-logo.svg",
+    "mantle": "/img/mantle.svg",
+    "manta": "/img/manta.jpg"
   }
 }
