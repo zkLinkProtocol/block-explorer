@@ -94,7 +94,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     getDate.setMinutes(0,0,0);
     let nextHourDate = new Date(getDate);
     nextHourDate.setHours(getDate.getHours() + 1);
-    let prices = marketChart.prices.filter(price => price[0][0] >= getDate.getTime() && price[0][0] < nextHourDate.getTime());
+    let prices = marketChart.prices.filter(price => price[0] >= getDate.getTime() && price[0] < nextHourDate.getTime());
     return prices.length > 0 ? prices[0][1] : 0;
   }
 

@@ -31,6 +31,7 @@ import {
 import {BLOCKS_REVERT_DETECTED_EVENT} from "../constants";
 import {unixTimeToDateString} from "../utils/date";
 import {TokenOffChainDataProvider} from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
+import { utils } from "zksync-web3";
 
 
 @Injectable()
@@ -81,8 +82,12 @@ export class BlockProcessor {
     this.addressEligibleCache = new Map();
   }
 
-  // public getEarlyBirdMultiplier(ts: Date): number {
-  //
+  public checkTokenIsEth(tokenAddress: string): boolean {
+    //todo: WETH or other ?
+    return utils.isETH(tokenAddress);
+  }
+
+  //public getEarlyBirdMultiplier(ts: Date): number {
   // }
 
   public getGroupBooster(groupTvl:number):number {
@@ -252,7 +257,6 @@ export class BlockProcessor {
         const refNumber = 0;
         await this.pointsRepository.add(addrStr,stakePoint,refPoint,refNumber);
         await this.pointsHistoryRepository.add(addrStr,toBlockNumber,stakePoint,refPoint,refNumber);
-        this.lastHandlePointBlock = toBlock.number;
       }
 
     //calc referral point
@@ -278,7 +282,7 @@ export class BlockProcessor {
     //   refPoints.set(referAddr,newReferPoint);
     // }
 
-
+    this.lastHandlePointBlock = toBlock.number;
     // set timer
     const timeOutFromBlock = toBlockNumber;
     const timeOutToBlock =  timeOutFromBlock;
@@ -470,33 +474,42 @@ export class BlockProcessor {
         let ethPrice = 0;
         let depositPoints = new Map();
         for (const deposit of deposits) {
-          if (ethPrice == 0) {
-            ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", block.timestamp);
-          }
-          let tokenInfo: TokenInfo = tokenInfos.get(deposit.tokenAddress);
-          if (!tokenInfo) {
-            let token = allTokens.find(t => t.l2Address == deposit.tokenAddress);
-            console.log(`addBlock deposit token is ${token}`);
-            let tokenMultiplier = this.getTokenMultiplier(token.symbol);
-            let priceId = this.getCgIdByTokenSymbol(token.symbol);
-            let tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, block.timestamp);
-            tokenInfo = {
-              multiplier: tokenMultiplier,
-              price: tokenPrice,
-              decimals: token.decimals
+          let depositPoint = 0;
+          let depositEthAmount = 0;
+          if (this.checkTokenIsEth(deposit.tokenAddress)) {
+            depositEthAmount = Number(deposit.amount) / Math.pow(10,18);
+            const tokenMultiplier = this.getTokenMultiplier("ETH");
+            depositPoint = 10 * tokenMultiplier * depositEthAmount;
+          } else {
+            if (ethPrice == 0) {
+              ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", block.timestamp * 1000);
             }
-            tokenInfos.set(deposit.tokenAddress, tokenInfo);
-          }
+            let tokenInfo: TokenInfo = tokenInfos.get(deposit.tokenAddress);
+            if (!tokenInfo) {
+              let token = allTokens.find(t => t.l2Address == deposit.tokenAddress);
+              console.log(`addBlock deposit token is ${token}`);
+              let tokenMultiplier = this.getTokenMultiplier(token.symbol);
+              let priceId = this.getCgIdByTokenSymbol(token.symbol);
+              let tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, block.timestamp * 1000);
+              tokenInfo = {
+                multiplier: tokenMultiplier,
+                price: tokenPrice,
+                decimals: token.decimals
+              }
+              tokenInfos.set(deposit.tokenAddress, tokenInfo);
+            }
 
-          let decimals = Math.pow(10, tokenInfo.decimals);
-          let depositAmount = Number(deposit.amount) / decimals;
+            let decimals = Math.pow(10, tokenInfo.decimals);
+            let depositAmount = Number(deposit.amount) / decimals;
+            depositEthAmount = depositAmount * tokenInfo.price / ethPrice;
+            depositPoint = 10 * tokenInfo.multiplier * depositEthAmount;
+          }
           // check point eligible
           let eligible = this.addressEligibleCache.get(deposit.from);
           let newEligible = eligible;
           if (!eligible) {
             const earlyDepositEndTime = new Date(this.pointsEarlyDepositEndTime);
             const phase1EndTime = new Date(this.pointsPhase1EndTime);
-            const depositEthAmount = depositAmount * tokenInfo.price / ethPrice;
             const depositTime = new Date(deposit.timestamp);
             console.log(`addBlock check eligible ${depositEthAmount} ${depositTime}`);
             newEligible = (depositEthAmount >= 0.1 && depositTime <= earlyDepositEndTime) ||
@@ -508,11 +521,11 @@ export class BlockProcessor {
           if (newEligible != eligible) {
             this.addressEligibleCache.set(deposit.from, newEligible);
           }
-          let depositPoint = 10 * tokenInfo.multiplier * depositAmount * tokenInfo.price / ethPrice;
-          let oldPoint = depositPoints.get(deposit.from);
-          let newPoint = oldPoint ? 0 : oldPoint;
+          let addrBuf = Buffer.from(deposit.from.startsWith("0x") ? deposit.from.substring(2) : deposit.from, "hex");
+          let oldPoint = depositPoints.get(addrBuf);
+          let newPoint = oldPoint || 0;
           newPoint += depositPoint;
-          depositPoints.set(deposit.from, newPoint);
+          depositPoints.set(addrBuf, newPoint);
         }
 
         // save to db

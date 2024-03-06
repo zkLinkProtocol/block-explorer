@@ -28,20 +28,21 @@ export class PointsRepository {
     },{ refPoint });
   }
 
-  public async updateDeposits(deposits: Map<Buffer,number>): Promise<void> {
+  public async updateDeposits(deposits: Map<string,number>): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     for (const [address,depositPoint] of deposits) {
-      let [ret] = await transactionManager.query(
+        let addrBuf = Buffer.from(address.startsWith("0x") ? address.substring(2) : address, "hex");
+        let [ret] = await transactionManager.query(
           `SELECT "stakePoint"
            FROM points
-           WHERE address = $1`, [address]);
+           WHERE address = $1`, [addrBuf]);
       if (!ret) {
         await transactionManager.query(
             `INSERT INTO points (address, "stakePoint", "refPoint", "refNumber")
-             VALUES ($1, $2, 0, 0)`, [address, depositPoint]);
+             VALUES ($1, $2, 0, 0)`, [addrBuf, depositPoint]);
       } else {
         await transactionManager.query(
-            `UPDATE points SET "stakePoint" = "stakePoint" + $2 WHERE address = $1`, [address, depositPoint]);
+            `UPDATE points SET "stakePoint" = "stakePoint" + $2 WHERE address = $1`, [addrBuf, depositPoint]);
       }
     }
   }
