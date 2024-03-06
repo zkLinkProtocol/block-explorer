@@ -23,5 +23,14 @@
     "arbitrum": "/img/arbitrum-arb-logo.svg",
     "mantle": "/img/mantle.svg",
     "manta": "/img/manta.jpg"
+  },
+  "chainNameList": {
+    "goerli": "Goerli Mainnet",
+    "primary": "Linea Mainnet",
+    "ethereum": "Ethereum",
+    "zksync": "zkSync Mainnet",
+    "arbitrum": "Arbitrum Mainnet",
+    "mantle": "Mantle Mainnet",
+    "manta": "Manta Mainnet"
   }
 }

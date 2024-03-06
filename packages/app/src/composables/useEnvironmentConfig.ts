@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 
-import type { EnvironmentConfig, NetworkConfig,IconsList, RuntimeConfig } from "@/configs";
+import type { EnvironmentConfig, NetworkConfig, IconsList, RuntimeConfig } from "@/configs";
 
 const config = ref<EnvironmentConfig | null>(null);
 
@@ -34,6 +34,7 @@ export default () => {
         ? config.value.networks.filter((e) => e.published === true)
         : []
     ),
-    iconsList:config.value?.iconsList as IconsList
+    iconsList: config.value?.iconsList as IconsList,
+    chainNameList: config.value?.chainNameList as IconsList,
   };
 };
