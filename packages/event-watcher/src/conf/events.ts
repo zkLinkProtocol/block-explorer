@@ -1,7 +1,7 @@
 import { Address, BlockNumber, ChainId, EventName } from '../types';
-import eventsGoerli from '../../events.goerli.json';
-import eventsMainnet from '../../events.mainnet.json';
-import eventsMainnet2 from '../../events.mainnet2.json';
+import { EVENTS_GOERLI } from '../../events.goerli';
+import { EVENTS_MAINNET } from '../../events.mainnet';
+import { EVENTS_MAINNET2 } from '../../events.mainnet2';
 export interface EventProfile {
   name: EventName;
   topic: string;
@@ -16,11 +16,11 @@ export interface EventProfile {
 
 export const Events: Record<EventName, EventProfile> = (() => {
   if (process.env.APP_ENV === 'mainnet') {
-    return eventsMainnet;
+    return EVENTS_MAINNET;
   } else if (process.env.APP_ENV === 'mainnet2') {
-    return eventsMainnet2;
+    return EVENTS_MAINNET2;
   } else if (process.env.APP_ENV === 'goerli') {
-    return eventsGoerli;
+    return EVENTS_GOERLI;
   } else {
     throw new Error('Invalid APP_ENV');
   }

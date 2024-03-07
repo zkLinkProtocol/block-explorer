@@ -1,3 +1,4 @@
+export const EVENTS_GOERLI = 
 {
   "SyncBatchRoot": {
     "name": "SyncBatchRoot",

@@ -12,7 +12,7 @@
     "start:server:devnet": "cross-env APP_ENV=devnet node -r @swc-node/register src/server.ts",
     "start:watcher:mainnet": "cross-env APP_ENV=mainnet node -r @swc-node/register src/watcher.ts",
     "start:server:mainnet": "cross-env APP_ENV=mainnet node -r @swc-node/register src/server.ts",
-
+    "prebuild": "rimraf dist",
     "build": "nest build",
     "dev": "nest start",
     "dev:watch": "nest start --watch",
