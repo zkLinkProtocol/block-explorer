@@ -8,6 +8,9 @@ import { AccountTVLDto } from "../api/dtos/tvl/accountTVL.dto";
 import { Token } from "src/token/token.entity";
 import { Point } from "./entities/points.entity";
 import { AddressTvl } from "./entities/addressTvl.entity";
+import { AccountsRankResponseDto } from "src/api/dtos/tvl/accountsRank.dto";
+import { AccountRankDto } from "src/api/dtos/tvl/accountRank.dto";
+import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
 
 @Injectable()
 export class TVLService {
@@ -86,5 +89,25 @@ export class TVLService {
       [totalPoints]
     );
     return [points, Number(rank.count) + 1];
+  }
+
+  public async getAccountsRank(): Promise<AccountRankDto[]> {
+    const ranks: Point[] = await this.addressTVLRepository.query(
+      `select * from "points" order by "refPoint" + "stakePoint" desc limit $1`,
+      [50]
+    );
+
+    let result: AccountRankDto[] = [];
+    for (let i = 0; i < ranks.length; i++) {
+      const rank = ranks[i];
+      result.push({
+        novaPoint: rank.stakePoint,
+        referPoint: rank.refPoint,
+        rank: i + 1,
+        inviteBy: "",
+        address: normalizeAddressTransformer.from(rank.address),
+      });
+    }
+    return result;
   }
 }

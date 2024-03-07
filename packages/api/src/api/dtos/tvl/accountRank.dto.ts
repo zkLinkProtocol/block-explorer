@@ -29,6 +29,13 @@ export class AccountRankDto {
     example: "0x433",
   })
   public readonly inviteBy: string;
+
+  @ApiProperty({
+    type: String,
+    description: "account address",
+    example: "0x433",
+  })
+  public readonly address: string;
 }
 
 export class AccountRankResponseDto extends ResponseBaseDto {

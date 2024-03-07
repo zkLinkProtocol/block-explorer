@@ -11,6 +11,7 @@ import { Point } from "./entities/points.entity";
 import { AccountPointsResponseDto } from "src/api/dtos/tvl/accountPoints.dto";
 import { TotalTVLResponseDto } from "src/api/dtos/tvl/totalTVL.dto";
 import { AccountRankResponseDto } from "src/api/dtos/tvl/accountRank.dto";
+import { AccountsRankResponseDto } from "src/api/dtos/tvl/accountsRank.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -71,8 +72,20 @@ export class TVLController {
         novaPoint: points ? points.stakePoint : 0,
         referPoint: points ? points.refPoint : 0,
         rank,
-        inviteBy: "0xe5ca6e311a5e7de0346e801d0b460b6a1f91a98d",
+        inviteBy: "",
+        address,
       },
+    };
+  }
+
+  @ApiOperation({ summary: "Get accounts rank" })
+  @Get("/getAccountsRank")
+  public async getAccountsRank(): Promise<AccountsRankResponseDto> {
+    const result = await this.tvlService.getAccountsRank();
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result,
     };
   }
 }
