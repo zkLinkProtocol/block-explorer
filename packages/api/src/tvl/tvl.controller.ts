@@ -10,7 +10,7 @@ import { swagger } from "src/config/featureFlags";
 
 const entityName = "addressTokenTvl";
 
-@ApiTags("TanLiYuan")
+@ApiTags("Points")
 @Controller(entityName)
 @ApiExcludeController(!swagger.bffEnabled)
 export class TVLController {
