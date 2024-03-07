@@ -56,14 +56,14 @@ export class ReferralsRepository {
 
     public async getAllGroups(): Promise<string[]> {
         const ret = await this.refer.query(
-            `SELECT "groupId" FROM invites GROUP BY "groupId"`,
+            `SELECT DISTINCT("groupId") FROM invites`,
         );
         return ret.map((r:any) => r.groupId);
     }
 
     public async getGroupMembers(groupId: string): Promise<Buffer[]> {
         const members = await this.refer.query(
-            `SELECT DISTINCT(address) FROM invites WHERE "groupId" = $1`,[groupId]
+            `SELECT address FROM invites WHERE "groupId" = $1`,[groupId]
         );
         return members.map((row:any) => row.address);
 
