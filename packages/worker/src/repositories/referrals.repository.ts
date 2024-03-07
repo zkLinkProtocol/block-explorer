@@ -13,69 +13,59 @@ export class ReferralsRepository {
       @InjectRepository(Referral, "refer")
       private readonly refer: Repository<Referral>) {}
 
-  public async add(address: string,referee: string,blockNumber: number): Promise<void> {
+  public async add(referrer: string,address: string,blockNumber: number): Promise<void> {
     await this.refer.insert({
-      address,referee,blockNumber,
+        referrer,address,blockNumber,
     });
   }
 
   public async getReferralsByBlock(block: number,offset: bigint): Promise<Referral[]> {
     const referrals = await this.refer.query(
-        `SELECT * FROM referrals WHERE blockNumber <= $1 AND id < $2 ORDER BY id DESC LIMIT 100`,[block,offset]
+        `SELECT * FROM referrers WHERE "blockNumber" <= $1 AND id < $2 ORDER BY id DESC LIMIT 100`,[block,offset]
     );
     return referrals;
   }
 
     public async updateReferralsBlock(referee: string,block: number): Promise<void> {
         await this.refer.query(
-            `UPDATE referrals SET blockNumber = $2 WHERE referee = $1 AND blockNumber IS NULL`,[referee,block]
+            `UPDATE referrers SET "blockNumber" = $2 WHERE address = $1 AND "blockNumber" IS NULL`,[referee,block]
         );
     }
 
-  public async getReferralsByAddress(address: Buffer,block: number): Promise<Buffer[]> {
+  public async getReferralsByAddress(referer: Buffer,block: number): Promise<Buffer[]> {
     const ret = await this.refer.query(
-        `SELECT DISTINCT(referee) AS referee FROM referrals WHERE address = $1 AND "blockNumber" <= $2`,[address,block]
+        `SELECT DISTINCT(address) AS referee FROM referrers WHERE referrer = $1 AND "blockNumber" <= $2`,[referer,block]
     );
     return ret.map((r:any) => r.referee);
   }
 
   public async getGroupMembersByAddress(address: Buffer,block:number): Promise<Buffer[]> {
       const [ret] = await this.refer.query(
-          `SELECT "groupId" FROM referrals WHERE (address = $1 OR referee = $1) AND "blockNumber" <= $2`,[address,block]
+          `SELECT "groupId" FROM invites WHERE address = $1 AND "blockNumber" <= $2`,[address,block]
       );
       if (!ret) {
         return [];
       }
       const groupId = ret.groupId;
       const members = await this.refer.query(
-          `SELECT DISTINCT(member) FROM (
-                            SELECT address AS member FROM referrals WHERE "groupId" = $1 AND "blockNumber" <= $2
-                            UNION
-                            SELECT referee AS member FROM referrals WHERE "groupId" = $1 AND "blockNumber" <= $2
-                        ) as members;
-    `,[groupId,block]
+          `SELECT DISTINCT(address) FROM invites WHERE "groupId" = $1 AND "blockNumber" <= $2`,[groupId,block]
       );
-      return members.map((row:any) => row.member);
+      return members.map((row:any) => row.address);
 
   }
 
-    public async getAllGroups(): Promise<number[]> {
+    public async getAllGroups(): Promise<string[]> {
         const ret = await this.refer.query(
-            `SELECT "groupId" FROM referrals GROUP BY "groupId"`,
+            `SELECT "groupId" FROM invites GROUP BY "groupId"`,
         );
         return ret.map((r:any) => r.groupId);
     }
 
     public async getGroupMembers(groupId: string): Promise<Buffer[]> {
         const members = await this.refer.query(
-            `SELECT DISTINCT(member) FROM (
-                            SELECT address AS member FROM referrals WHERE "groupId" = $1
-                            UNION
-                            SELECT referee AS member FROM referrals WHERE "groupId" = $1
-                        ) as members;
-    `,[groupId]
+            `SELECT DISTINCT(address) FROM invites WHERE "groupId" = $1`,[groupId]
         );
-        return members.map((row:any) => row.member);
+        return members.map((row:any) => row.address);
 
     }
 }

@@ -62,6 +62,7 @@ export class StatisticsTvlService extends Worker {
                     let addressTvl = {
                         address: address,
                         tvl: addressTotalBalance,
+                        referralTvl: 0,
                     };
                     addressTvls.set(address,addressTokenBalances);
                     addressTvls.set(address,addressTvl);
@@ -71,25 +72,34 @@ export class StatisticsTvlService extends Worker {
                 let groupTvls = new Map();
                 let groupIds = await this.referrerRepository.getAllGroups();
                 for (const groupId of groupIds) {
-                   let groupTvl = 0;
+                   let tvl = 0;
                    let members = await this.referrerRepository.getGroupMembers(groupId);
                    for (const member of members) {
-                       groupTvl += addressTvls.get(member)
+                       tvl += addressTvls.get(member).tvl
                    }
                    let ethPrice = tokenPrices.find(t => t.priceId === "ethereum");
-                   groupTvl /= ethPrice.usdPrice;
+                   tvl /= ethPrice.usdPrice;
+                   let groupTvl = {
+                       groupId: groupId,
+                       tvl: tvl,
+                   }
                    groupTvls.set(groupId,groupTvl);
                 }
 
                 // calc referrals tvl
-                let referralTvls = new Map();
                 for (const address of addresses) {
                     let referralTvl = 0;
                     let referees = await this.referrerRepository.getReferralsByAddress(address, Number.MAX_SAFE_INTEGER);
                     for (const r of referees) {
                         referralTvl += addressTvls.get(r);
                     }
-                    referralTvls.set(address, referralTvl);
+                    let addressTvl = addressTvls.get(address);
+                    let newAddressTvl = {
+                        address: addressTvl.address,
+                        tvl: addressTvl.tvl,
+                        referralTvl: referralTvl,
+                    };
+                    addressTvls.set(address, newAddressTvl);
                 }
 
                 const updatedAt = new Date();

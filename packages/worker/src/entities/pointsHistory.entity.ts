@@ -11,6 +11,7 @@ export class PointsHistory {
   @Column({ type: "bytea", transformer: hexTransformer })
   public readonly address: string;
 
+  @Index()
   @Column({ type: "bigint", transformer: bigIntNumberTransformer })
   public readonly blockNumber: number;
 

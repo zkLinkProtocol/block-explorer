@@ -16,3 +16,6 @@ export * from "./counterState.entity";
 export * from "./points.entity";
 export * from "./pointsHistory.entity";
 export * from "./referral.entity";
+export * from "./addressTokenTvl.entity";
+export * from "./addressTvl.entity";
+export * from "./groupTvl.entity";

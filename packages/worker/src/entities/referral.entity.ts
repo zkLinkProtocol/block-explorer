@@ -1,21 +1,16 @@
 import { Entity, Column, Index, PrimaryColumn } from "typeorm";
 import { hexTransformer } from "../transformers/hex.transformer";
+import {BaseEntity} from "./base.entity";
 
-@Entity({ name: "referrals" })
-export class Referral {
-  @PrimaryColumn({ generated: true, type: "bigint" })
-  public readonly id: number;
+@Entity({ name: "referrers" })
+export class Referral extends BaseEntity{
+  @PrimaryColumn({ type: "bytea", transformer: hexTransformer })
+  public readonly address: string;
 
   @Index()
   @Column({ type: "bytea", transformer: hexTransformer })
-  public readonly address: string;
-
-  @Column({ type: "bytea", transformer: hexTransformer })
-  public readonly referee: string;
+  public readonly referrer: string;
 
   @Column({ type: "bigint"})
-  public readonly blockNumber: number;
-
-  @Column({ type: "varchar"})
-  public readonly groupId: string;
+  public readonly blockNumber?: number;
 }
