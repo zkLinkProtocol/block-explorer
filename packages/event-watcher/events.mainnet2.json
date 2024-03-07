@@ -5,31 +5,31 @@
     "chains": {
       "1": [
         {
-          "contractAddress": "0x5fD9F73286b7E8683Bab45019C94553b93e015Cf",
+          "contractAddress": "0xAeF0836696cb498eB4B1ee5fcB5ab80381b75289",
           "contractDeploymentBlock": 17711562
         }
       ],
       "324": [
         {
-          "contractAddress": "0xaFe8C7Cf33eD0fee179DFF20ae174C660883273A",
+          "contractAddress": "0xB48Ab42965366C768a65c0dcBA10EF740AECc866",
           "contractDeploymentBlock": 17711562
         }
       ],
       "42161": [
         {
-          "contractAddress": "0xFF73a1a1d27951A005eb23276dc99CB7F8d5420A",
+          "contractAddress": "0x363d8aFCE6c7493252229a1cf3152114070e8Aee",
           "contractDeploymentBlock": 17711562
         }
       ],
       "5000": [
         {
-          "contractAddress": "0xD784d7128B46B60Ca7d8BdC17dCEC94917455657",
+          "contractAddress": "0x363d8aFCE6c7493252229a1cf3152114070e8Aee",
           "contractDeploymentBlock": 17711562
         }
       ],
       "169": [
         {
-          "contractAddress": "0xD784d7128B46B60Ca7d8BdC17dCEC94917455657",
+          "contractAddress": "0x363d8aFCE6c7493252229a1cf3152114070e8Aee",
           "contractDeploymentBlock": 17711562
         }
       ]

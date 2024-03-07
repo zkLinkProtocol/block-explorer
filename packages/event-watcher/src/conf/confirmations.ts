@@ -2,16 +2,15 @@ import { ChainId } from 'src/types';
 
 export const BLOCK_CONFIRMATIONS: Record<ChainId, number> = {
   // ~~~ Mainnet ~~~
+  //1,324,42161,5000,169
   1: 64, // Ethereum
   10: 30, // Optimism
-  56: 20, // Bsc
-  137: 300, // Polygon
-  204: 60, // opBNB
   324: 60, // zkSync Era
   8453: 30, // Base
   42161: 20, // Arbitrum One
-  43114: 30, // Avalanche C-Chain
   59144: 5, // Linea
+  5000: 30, // Mantle
+  169: 30, // Manta
 
   // ~~~ Testnet ~~~
   5: 64, // Goerli
