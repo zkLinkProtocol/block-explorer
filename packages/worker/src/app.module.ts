@@ -59,6 +59,7 @@ import { MetricsModule } from "./metrics";
 import { DbMetricsService } from "./dbMetrics.service";
 import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
+import {StatisticsTvlService} from "./points/statistics.service";
 
 @Module({
   imports: [
@@ -134,6 +135,7 @@ import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
       inject: [ConfigService, HttpService],
     },
     TokenOffChainDataSaverService,
+    StatisticsTvlService,
     BatchRepository,
     BlockRepository,
     TransactionRepository,

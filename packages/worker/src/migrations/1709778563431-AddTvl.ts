@@ -13,7 +13,7 @@ export class Migrations1709778563431 implements MigrationInterface {
     );
     await queryRunner.query(`CREATE INDEX "IDX_3087fd5f663582167074da3b10" ON "addressTokenTvls" ("address") `);
     await queryRunner.query(
-      `CREATE TABLE "groupTvls" ("createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "groupId" integer NOT NULL, "tvl" numeric NOT NULL, CONSTRAINT "PK_76c0c12beb707760665b3f51d14" PRIMARY KEY ("groupId"))`
+      `CREATE TABLE "groupTvls" ("createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "groupId" varchar NOT NULL, "tvl" numeric NOT NULL, CONSTRAINT "PK_76c0c12beb707760665b3f51d14" PRIMARY KEY ("groupId"))`
     );
     await queryRunner.query(`CREATE INDEX "IDX_76c0c12beb707760665b3f51d1" ON "groupTvls" ("groupId") `);
 
