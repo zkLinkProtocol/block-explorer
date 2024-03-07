@@ -52,4 +52,4 @@ const typeOrmReferCliDataSource = new DataSource({
   entities: ["src/**/*.entity.{ts,js}"],
   migrations: [],
 });
-export default {typeOrmCliDataSource,typeOrmReferCliDataSource};
+export default typeOrmCliDataSource;
