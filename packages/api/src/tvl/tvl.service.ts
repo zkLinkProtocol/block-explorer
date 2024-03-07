@@ -1,3 +1,4 @@
+import { map } from "rxjs/operators";
 import { IsNotEmpty } from "class-validator";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -11,6 +12,7 @@ import { AddressTvl } from "./entities/addressTvl.entity";
 import { AccountsRankResponseDto } from "src/api/dtos/tvl/accountsRank.dto";
 import { AccountRankDto } from "src/api/dtos/tvl/accountRank.dto";
 import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
+import { TokenTVLDto } from "src/api/dtos/tvl/tokenTVL.dto";
 
 @Injectable()
 export class TVLService {
@@ -108,6 +110,42 @@ export class TVLService {
         address: normalizeAddressTransformer.from(rank.address),
       });
     }
+    return result;
+  }
+
+  public async getTotalTokensTVL(): Promise<TokenTVLDto[]> {
+    interface TokenTvl {
+      amount: number;
+      tvl: number;
+      tokenAddress: string;
+    }
+
+    const totalTokens: TokenTvl[] = await this.addressTokenRepository.query(
+      `SELECT sum("balance") as amount, sum("tvl") as tvl, "tokenAddress" FROM "addressTokenTvls" group by "tokenAddress"`
+    );
+
+    const tokenAddresses = totalTokens.map((token) => normalizeAddressTransformer.from(token.tokenAddress));
+    let tokens = await this.tokenRepository.find({
+      where: {
+        l2Address: In(tokenAddresses),
+      },
+    });
+
+    var tokensMap = new Map(tokens.map((token) => [token.l2Address, token]));
+
+    let result: TokenTVLDto[] = [];
+    for (let token of totalTokens) {
+      const hexAddress = normalizeAddressTransformer.from(token.tokenAddress);
+      result.push({
+        symbol: tokensMap.get(hexAddress)!.symbol,
+        tokenAddress: hexAddress,
+        amount: token.amount,
+        tvl: token.amount,
+        type: "",
+        yieldType: "",
+      });
+    }
+
     return result;
   }
 }

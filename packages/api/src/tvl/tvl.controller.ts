@@ -12,6 +12,7 @@ import { AccountPointsResponseDto } from "src/api/dtos/tvl/accountPoints.dto";
 import { TotalTVLResponseDto } from "src/api/dtos/tvl/totalTVL.dto";
 import { AccountRankResponseDto } from "src/api/dtos/tvl/accountRank.dto";
 import { AccountsRankResponseDto } from "src/api/dtos/tvl/accountsRank.dto";
+import { TokenTVLResponseDto } from "src/api/dtos/tvl/tokenTVL.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -82,6 +83,17 @@ export class TVLController {
   @Get("/getAccountsRank")
   public async getAccountsRank(): Promise<AccountsRankResponseDto> {
     const result = await this.tvlService.getAccountsRank();
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result,
+    };
+  }
+
+  @ApiOperation({ summary: "total token tvl" })
+  @Get("/getTotalTvlByToken")
+  public async getTotalTvlByToken(): Promise<TokenTVLResponseDto> {
+    const result = await this.tvlService.getTotalTokensTVL();
     return {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,
