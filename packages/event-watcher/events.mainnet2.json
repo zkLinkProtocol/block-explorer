@@ -6,31 +6,31 @@
       "1": [
         {
           "contractAddress": "0xAeF0836696cb498eB4B1ee5fcB5ab80381b75289",
-          "contractDeploymentBlock": 17711562
+          "contractDeploymentBlock": 19367482
         }
       ],
       "324": [
         {
           "contractAddress": "0xB48Ab42965366C768a65c0dcBA10EF740AECc866",
-          "contractDeploymentBlock": 17711562
+          "contractDeploymentBlock": 28178475
         }
       ],
       "42161": [
         {
           "contractAddress": "0x363d8aFCE6c7493252229a1cf3152114070e8Aee",
-          "contractDeploymentBlock": 17711562
+          "contractDeploymentBlock": 187267735 
         }
       ],
       "5000": [
         {
           "contractAddress": "0x363d8aFCE6c7493252229a1cf3152114070e8Aee",
-          "contractDeploymentBlock": 17711562
+          "contractDeploymentBlock": 59363092
         }
       ],
       "169": [
         {
           "contractAddress": "0x363d8aFCE6c7493252229a1cf3152114070e8Aee",
-          "contractDeploymentBlock": 17711562
+          "contractDeploymentBlock": 1540072
         }
       ]
     }
