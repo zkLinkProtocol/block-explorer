@@ -139,19 +139,6 @@ export class BlockProcessor {
     }
   }
 
-  // todo: should get from config or database
-  public getCgIdByTokenSymbol(tokenSymbol:string): string {
-    switch (tokenSymbol) {
-      case "WETH":
-        return "ethereum";
-      case "USDC":
-        return "usd-coin";
-      default:
-        //todo: use usdc for test
-        return "usd-coin";
-    }
-  }
-
   public async handlePointsPeriod(fromBlockNumber: number,toBlockNumber: number): Promise<boolean> {
     const toBlock = await this.blockRepository.getLastBlock({
       where: {number: toBlockNumber}
@@ -175,9 +162,8 @@ export class BlockProcessor {
 
       let tokenPrices = new Map();
       for ( const token of tokens ) {
-        let priceId = this.getCgIdByTokenSymbol(token.symbol);
+        let priceId = this.tokenService.getCgIdByTokenSymbol(token.symbol);
         const tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, toBlock.timestamp.getTime());
-        console.log(`get token ${token.symbol} price is ${tokenPrice}`);
         tokenPrices.set(token.l2Address,tokenPrice);
       }
 
@@ -491,7 +477,7 @@ export class BlockProcessor {
               let token = allTokens.find(t => t.l2Address == deposit.tokenAddress);
               console.log(`addBlock deposit token is ${token}`);
               let tokenMultiplier = this.getTokenMultiplier(token.symbol);
-              let priceId = this.getCgIdByTokenSymbol(token.symbol);
+              let priceId = this.tokenService.getCgIdByTokenSymbol(token.symbol);
               let tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, block.timestamp * 1000);
               tokenInfo = {
                 multiplier: tokenMultiplier,

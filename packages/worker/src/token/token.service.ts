@@ -38,6 +38,19 @@ export class TokenService {
     this.logger = new Logger(TokenService.name);
   }
 
+  // todo: should get from config or database
+  public getCgIdByTokenSymbol(tokenSymbol:string): string {
+    switch (tokenSymbol) {
+      case "WETH":
+        return "ethereum";
+      case "USDC":
+        return "usd-coin";
+      default:
+        //todo: use usdc for test
+        return "usd-coin";
+    }
+  }
+
   public async getAllTokens(): Promise<TokenEntity[]> {
     return await this.tokenRepository.getAllTokens();
   }

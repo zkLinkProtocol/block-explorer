@@ -10,8 +10,8 @@ export class TvlRepository {
 
   public async getLastUpdatedAt(): Promise<Date> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const [updatedAt] = await transactionManager.query(`SELECT MAX("updatedAt") AS updatedAt FROM "groupTvls"`);
-    if (!updatedAt) {
+    const updatedAt = await transactionManager.query(`SELECT MAX("updatedAt") AS updatedAt FROM "groupTvls"`);
+    if (!updatedAt || !updatedAt.updatedAt) {
       return new Date(0);
     } else {
       return updatedAt.map((r: any) => r.updatedAt);

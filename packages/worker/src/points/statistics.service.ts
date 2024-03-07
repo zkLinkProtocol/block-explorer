@@ -4,6 +4,7 @@ import { Worker } from "../common/worker";
 import waitFor from "../utils/waitFor";
 import { TokenRepository,BalanceRepository,ReferralsRepository,TvlRepository } from "../repositories";
 import {TokenOffChainDataProvider} from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
+import {TokenService} from "../token/token.service";
 
 
 @Injectable()
@@ -12,6 +13,7 @@ export class StatisticsTvlService extends Worker {
     private readonly logger: Logger;
 
     public constructor(
+        private readonly tokenService: TokenService,
         private readonly balanceRepository: BalanceRepository,
         private readonly tokenRepository: TokenRepository,
         private readonly referrerRepository: ReferralsRepository,
@@ -47,9 +49,17 @@ export class StatisticsTvlService extends Worker {
                     let addressTokenBalances = [];
                     let addressTotalBalance = 0;
                     for (const token of tokens) {
-                        let balancesOfToken = balances.find(b => b.tokenAddress == token.l2Address);
-                        let tokenPrice = tokenPrices.find(p => p.priceId == token.priceId);
-                        let usdBalance = Number(balancesOfToken.balance) * tokenPrice.usdPrice;
+                        let balancesOfToken = balances.find(b => {
+                            let tokenAddress = `0x${Buffer.from(b.tokenAddress).toString("hex")}`;
+                            return tokenAddress == token.l2Address;
+                        });
+                        if (!balancesOfToken) {
+                            continue;
+                        }
+                        let tokenPriceId = this.tokenService.getCgIdByTokenSymbol(token.symbol);
+                        let tokenPrice = tokenPrices.find(p => p.priceId == tokenPriceId);
+                        let tokenDecimals = Math.pow(10,token.decimals);
+                        let usdBalance = Number(balancesOfToken.balance)/tokenDecimals * tokenPrice.usdPrice;
                         let addressTokenTvl =  {
                             address: address,
                             tokenAddress:token.l2Address,
@@ -75,7 +85,7 @@ export class StatisticsTvlService extends Worker {
                    let tvl = 0;
                    let members = await this.referrerRepository.getGroupMembers(groupId);
                    for (const member of members) {
-                       tvl += addressTvls.get(member).tvl
+                       tvl += addressTvls.get(member)?.tvl
                    }
                    let ethPrice = tokenPrices.find(t => t.priceId === "ethereum");
                    tvl /= ethPrice.usdPrice;
