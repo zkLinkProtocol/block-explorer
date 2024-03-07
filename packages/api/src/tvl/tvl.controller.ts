@@ -114,4 +114,17 @@ export class TVLController {
       result,
     };
   }
+
+  @ApiOperation({ summary: "group tvl" })
+  @Get("/getGroupTvl")
+  public async getGroupTvl(
+    @Query("address", new ParseAddressPipe()) address: string
+  ): Promise<ReferralTotalTVLResponseDto> {
+    const result = await this.tvlService.getReferralTvl(address);
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result: 23,
+    };
+  }
 }
