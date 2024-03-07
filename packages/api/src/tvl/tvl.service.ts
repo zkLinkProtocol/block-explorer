@@ -70,4 +70,21 @@ export class TVLService {
     const totalTVL = await this.addressTVLRepository.sum("tvl");
     return totalTVL;
   }
+
+  public async getAccountRank(address: string): Promise<[Point | null, number]> {
+    const points = await this.pointRepository.findOne({
+      where: { address },
+    });
+
+    let totalPoints = 0;
+    if (points) {
+      totalPoints = points.refPoint + points.stakePoint;
+    }
+
+    const [rank] = await this.addressTVLRepository.query(
+      `select count(1) from "points" where "refPoint" + "stakePoint" > $1`,
+      [totalPoints]
+    );
+    return [points, Number(rank.count) + 1];
+  }
 }

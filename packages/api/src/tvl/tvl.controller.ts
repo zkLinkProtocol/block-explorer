@@ -10,6 +10,7 @@ import { swagger } from "src/config/featureFlags";
 import { Point } from "./entities/points.entity";
 import { AccountPointsResponseDto } from "src/api/dtos/tvl/accountPoints.dto";
 import { TotalTVLResponseDto } from "src/api/dtos/tvl/totalTVL.dto";
+import { AccountRankResponseDto } from "src/api/dtos/tvl/accountRank.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -54,6 +55,24 @@ export class TVLController {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,
       result: totalTvl,
+    };
+  }
+
+  @ApiOperation({ summary: "Get account rank" })
+  @Get("/getAccountRank")
+  public async getAccountRank(
+    @Query("address", new ParseAddressPipe()) address: string
+  ): Promise<AccountRankResponseDto> {
+    const [points, rank] = await this.tvlService.getAccountRank(address);
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result: {
+        novaPoint: points ? points.stakePoint : 0,
+        referPoint: points ? points.refPoint : 0,
+        rank,
+        inviteBy: "0xe5ca6e311a5e7de0346e801d0b460b6a1f91a98d",
+      },
     };
   }
 }
