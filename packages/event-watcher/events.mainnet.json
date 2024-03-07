@@ -1,0 +1,15 @@
+{
+  "SyncBatchRoot": {
+    "name": "SyncBatchRoot",
+    "topic": "",
+    "chains": {
+      "1": [
+        {
+          "contractAddress": "0x629d74d459f072914f0b2aab9f7232fa36c1baed",
+          "contractDeploymentBlock": 17711562
+        }
+      ]
+      
+    }
+  }
+}
