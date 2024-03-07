@@ -20,13 +20,14 @@
         <TokenPrice :address="item.l2Address" />
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.fromChain')">
-        <img
-          class="from-chain-icon"
-          v-if="iconsList[item.networkKey]"
-          :src="iconsList[item.networkKey]"
-          :alt="item.networkKey"
-        />
-        <div v-else class="from-chain-text">Native Token</div>
+        <div v-if="iconsList[item.networkKey]">
+          <Tooltip class="batches-tooltip">
+            <img class="from-chain-icon" :src="iconsList[item.networkKey]" :alt="item.networkKey" />
+            <template #content>{{ chainNameList[item.networkKey] }}</template>
+          </Tooltip>
+        </div>
+
+        <div v-else class="from-chain-text">{{ NOVA_NATIVE_TOKEN }}</div>
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
         <div class="token-address-container max-w-sm">
@@ -89,8 +90,10 @@ import TokenPrice from "@/components/common/table/fields/TokenPrice.vue";
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
 // import { iconList } from "@/configs/hyperchain.config.json"
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
+import Tooltip from "@/components/common/Tooltip.vue";
+import { NOVA_NATIVE_TOKEN } from "@/utils/constants";
 
-const { iconsList } = useEnvironmentConfig();
+const { iconsList, chainNameList } = useEnvironmentConfig();
 
 import type { Token } from "@/composables/useToken";
 
