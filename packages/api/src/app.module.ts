@@ -24,6 +24,7 @@ import { metricProviders } from "./metrics";
 import { DbMetricsService } from "./dbMetrics.service";
 import { disableExternalAPI } from "./config/featureFlags";
 import config from "./config";
+import { TVLModule } from "./tvl/tvl.module";
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import config from "./config";
     LogModule,
     StatsModule,
     HealthModule,
+    TVLModule,
   ],
   providers: [Logger, ...metricProviders, DbMetricsService],
 })
