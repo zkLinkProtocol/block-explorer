@@ -18,13 +18,14 @@ export class TvlRepository {
     }
   }
 
-  public async upsertTokenTvls(tvl:AddressTokenTvl): Promise<void> {
+  public async upsertTokenTvls(tvls:AddressTokenTvl[]): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    await transactionManager.query(`INSERT INTO "addressTokenTvls" 
-    (address,"tokenAddress",balance,tvl) VALUES ($1,$2,$3,$4) ON CONFLICT(address,"tokenAddress") 
-    DO UPDATE SET balance = $3,tvl = $4`, [
-      tvl.address,tvl.tokenAddress,tvl.balance,tvl.tvl
-    ]);
+    for (const tvl of tvls) {
+      await transactionManager.query(`INSERT INTO "addressTokenTvls" (address, "tokenAddress", balance, tvl)
+                                      VALUES ($1, $2, $3, $4) ON CONFLICT(address,"tokenAddress") DO UPDATE SET balance = $3,tvl = $4`, [
+        tvl.address, tvl.tokenAddress, tvl.balance, tvl.tvl
+      ]);
+    }
   }
 
   public async upsertAddressTvls(tvl: AddressTvl ): Promise<void> {
