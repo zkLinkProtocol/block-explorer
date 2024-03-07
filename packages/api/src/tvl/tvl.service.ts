@@ -6,6 +6,7 @@ import { Pagination } from "nestjs-typeorm-paginate";
 import { AddressTokenTvl } from "./entities/addressTokenTvl.entity";
 import { AccountTVLDto } from "../api/dtos/tvl/accountTVL.dto";
 import { Token } from "src/token/token.entity";
+import { Point } from "./entities/points.entity";
 
 @Injectable()
 export class TVLService {
@@ -13,7 +14,9 @@ export class TVLService {
     @InjectRepository(AddressTokenTvl)
     private readonly addressTokenRepository: Repository<AddressTokenTvl>,
     @InjectRepository(Token)
-    private readonly tokenRepository: Repository<Token>
+    private readonly tokenRepository: Repository<Token>,
+    @InjectRepository(Point)
+    private readonly pointRepository: Repository<Point>
   ) {}
 
   public async getAccountTokensTVL(address: string): Promise<AccountTVLDto[]> {
@@ -48,5 +51,15 @@ export class TVLService {
     });
 
     return result;
+  }
+
+  public async getAccountPoints(address: string) {
+    const point: Point | null = await this.pointRepository.findOne({
+      where: {
+        address,
+      },
+    });
+
+    return point;
   }
 }
