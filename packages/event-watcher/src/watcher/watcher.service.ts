@@ -72,7 +72,7 @@ export class WatcherService implements OnModuleInit {
             this.getLookupProcessKey(event.name, chainId, contractAddress),
             processedBlockNumber || contractDeploymentBlock,
           );
-          await this.lookupLogs(
+          this.lookupLogs(
             event.name,
             chainId,
             contractAddress.toLowerCase(),
