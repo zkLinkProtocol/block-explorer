@@ -9,6 +9,7 @@ import { AccountTVLResponseDto } from "../api/dtos/tvl/accountTVL.dto";
 import { swagger } from "src/config/featureFlags";
 import { Point } from "./entities/points.entity";
 import { AccountPointsResponseDto } from "src/api/dtos/tvl/accountPoints.dto";
+import { TotalTVLResponseDto } from "src/api/dtos/tvl/totalTVL.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -42,6 +43,17 @@ export class TVLController {
         novaPoint: point ? point.stakePoint : 0,
         referPoint: point ? point.refPoint : 0,
       },
+    };
+  }
+
+  @ApiOperation({ summary: "Get total tvl" })
+  @Get("/getTotalTvl")
+  public async getTotalTVL(): Promise<TotalTVLResponseDto> {
+    const totalTvl = await this.tvlService.getTotalTVL();
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result: totalTvl,
     };
   }
 }

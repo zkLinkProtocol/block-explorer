@@ -7,6 +7,7 @@ import { AddressTokenTvl } from "./entities/addressTokenTvl.entity";
 import { AccountTVLDto } from "../api/dtos/tvl/accountTVL.dto";
 import { Token } from "src/token/token.entity";
 import { Point } from "./entities/points.entity";
+import { AddressTvl } from "./entities/addressTvl.entity";
 
 @Injectable()
 export class TVLService {
@@ -16,7 +17,9 @@ export class TVLService {
     @InjectRepository(Token)
     private readonly tokenRepository: Repository<Token>,
     @InjectRepository(Point)
-    private readonly pointRepository: Repository<Point>
+    private readonly pointRepository: Repository<Point>,
+    @InjectRepository(AddressTvl)
+    private readonly addressTVLRepository: Repository<AddressTvl>
   ) {}
 
   public async getAccountTokensTVL(address: string): Promise<AccountTVLDto[]> {
@@ -61,5 +64,10 @@ export class TVLService {
     });
 
     return point;
+  }
+
+  public async getTotalTVL() {
+    const totalTVL = await this.addressTVLRepository.sum("tvl");
+    return totalTVL;
   }
 }
