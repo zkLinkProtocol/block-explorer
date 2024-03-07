@@ -148,4 +148,9 @@ export class TVLService {
 
     return result;
   }
+
+  public async getReferralTvl(address: string) {
+    const tvl = await this.addressTVLRepository.sum("referralTvl", { address });
+    return tvl;
+  }
 }

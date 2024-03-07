@@ -13,6 +13,7 @@ import { TotalTVLResponseDto } from "src/api/dtos/tvl/totalTVL.dto";
 import { AccountRankResponseDto } from "src/api/dtos/tvl/accountRank.dto";
 import { AccountsRankResponseDto } from "src/api/dtos/tvl/accountsRank.dto";
 import { TokenTVLResponseDto } from "src/api/dtos/tvl/tokenTVL.dto";
+import { ReferralTotalTVLResponseDto } from "src/api/dtos/tvl/referralTotalTVL.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -94,6 +95,19 @@ export class TVLController {
   @Get("/getTotalTvlByToken")
   public async getTotalTvlByToken(): Promise<TokenTVLResponseDto> {
     const result = await this.tvlService.getTotalTokensTVL();
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result,
+    };
+  }
+
+  @ApiOperation({ summary: "referral tvl" })
+  @Get("/getReferralTvl")
+  public async getReferralTvl(
+    @Query("address", new ParseAddressPipe()) address: string
+  ): Promise<ReferralTotalTVLResponseDto> {
+    const result = await this.tvlService.getReferralTvl(address);
     return {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,
