@@ -53,8 +53,20 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     const supportedTokens = tokensList.filter(
       (token) =>
         token.id === "ethereum" ||
-        token.platforms.zksync ||
-        bridgedTokensToInclude.find((bridgetTokenAddress) => bridgetTokenAddress === token.platforms.ethereum)
+        token.platforms.zklinkNova || // unless the nova token is list on coingecko, this will not take effect here
+        bridgedTokensToInclude.find(
+          (bridgetTokenAddress) =>
+            bridgetTokenAddress === token.platforms.ethereum ||
+            bridgetTokenAddress === token.platforms.zksync ||
+            bridgetTokenAddress === token.platforms.arbitrum ||
+            bridgetTokenAddress === token.platforms.optimism ||
+            bridgetTokenAddress === token.platforms.mantaPacific ||
+            bridgetTokenAddress === token.platforms.mantle ||
+            bridgetTokenAddress === token.platforms.linea ||
+            bridgetTokenAddress === token.platforms.scroll ||
+            bridgetTokenAddress === token.platforms.polygonZkevm ||
+            bridgetTokenAddress === token.platforms.starknet
+        )
     );
 
     const tokensOffChainData: ITokenOffChainData[] = [];
@@ -105,13 +117,36 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
       return [];
     }
     return list
-      .filter((item) => item.id === "ethereum" || item.platforms.zksync || item.platforms.ethereum)
+      .filter(
+        (item) =>
+          item.id === "ethereum" ||
+          item.platforms.zksync ||
+          item.platforms.ethereum ||
+          item.platforms["zklink-nova"] ||
+          item.platforms["arbitrum-one"] ||
+          item.platforms.optimism ||
+          item.platforms["manta-pacific"] ||
+          item.platforms.mantle ||
+          item.platforms.linea ||
+          item.platforms.scroll ||
+          item.platforms["polygon-zkevm"] ||
+          item.platforms.starknet
+      )
       .map((item) => ({
         ...item,
         platforms: {
           // use substring(0, 42) to fix some instances when after address there is some additional text
+          zklinkNova: item.platforms["zklink-nova"]?.substring(0, 42), // unless the nova token is list on coingecko, this will not take effect here
           zksync: item.platforms.zksync?.substring(0, 42),
           ethereum: item.platforms.ethereum?.substring(0, 42),
+          arbitrum: item.platforms["arbitrum-one"]?.substring(0, 42),
+          optimism: item.platforms.optimism?.substring(0, 42), // not support yet
+          mantaPacific: item.platforms["manta-pacific"]?.substring(0, 42),
+          mantle: item.platforms.mantle?.substring(0, 42),
+          linea: item.platforms.linea?.substring(0, 42),
+          scroll: item.platforms.scroll?.substring(0, 42), // not support yet
+          polygonZkevm: item.platforms["polygon-zkevm"]?.substring(0, 42), // not support yet
+          starknet: item.platforms.starknet?.substring(0, 66), // not support yet
         },
       }));
   }
