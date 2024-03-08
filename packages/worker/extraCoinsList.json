@@ -23,5 +23,13 @@
       "extra": "0xC6572019548dfeBA782bA5a2093C836626C7789A",
       "zklink-nova": "0x047756F7714DD8E8625aBFD1617940577dE03C9c",
     }
+  },
+  {
+    "id": "mantle-staked-ether",
+    "symbol": "meth",
+    "name": "mETH",
+    "platforms": {
+      "mantle": "0xcDA86A272531e8640cD7F1a92c01839911B90bb0"
+    }
   }
 ]
