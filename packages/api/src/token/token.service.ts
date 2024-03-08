@@ -47,9 +47,11 @@ export class TokenService {
 
   public async findOne(address: string, fields?: FindOptionsSelect<DbToken>): Promise<DbToken> {
     const token = await this.tokenRepository.findOne({
-      where: {
+      where: [{
         l2Address: address,
-      },
+      },{
+        l1Address: address,
+      }],
       select: fields,
     });
     if (!token && address.toLowerCase() === ETH_TOKEN.l2Address.toLowerCase()) {

@@ -10,6 +10,7 @@ import {
   ITokenOffChainData,
   ITokenCurrentPrice
 } from "../../tokenOffChainDataProvider.abstract";
+import {Token} from "../../../token.service";
 
 const API_NUMBER_OF_TOKENS_PER_REQUEST = 250;
 const API_INITIAL_RETRY_TIMEOUT = 5000;
@@ -53,39 +54,26 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     this.apiUrl = this.isProPlan ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3";
   }
 
-  public async getTokensOffChainData({
-    bridgedTokensToInclude,
-  }: {
-    bridgedTokensToInclude: string[];
-  }): Promise<ITokenOffChainData[]> {
-    const tokensList = await this.getTokensList();
-    // Include ETH, all zksync L2 tokens and bridged tokens
-    const supportedTokens = tokensList.filter(
-      (token) =>
-        token.id === "ethereum" ||
-        token.platforms.zksync ||
-        bridgedTokensToInclude.find((bridgetTokenAddress) => bridgetTokenAddress === token.platforms.ethereum)
-    );
-
+  public async getTokensOffChainData(supportedTokens: Token[]): Promise<ITokenOffChainData[]> {
     const tokensOffChainData: ITokenOffChainData[] = [];
     let tokenIdsPerRequest = [];
     for (let i = 0; i < supportedTokens.length; i++) {
-      tokenIdsPerRequest.push(supportedTokens[i].id);
+      tokenIdsPerRequest.push(supportedTokens[i].cgPriceId);
       if (tokenIdsPerRequest.length === API_NUMBER_OF_TOKENS_PER_REQUEST || i === supportedTokens.length - 1) {
         const tokensMarkedData = await this.getTokensMarketData(tokenIdsPerRequest);
-        tokensOffChainData.push(
-          ...tokensMarkedData.map((tokenMarketData) => {
-            const token = supportedTokens.find((t) => t.id === tokenMarketData.id);
-            return {
-              l1Address: token.id === "ethereum" ? utils.ETH_ADDRESS : token.platforms.ethereum,
-              l2Address: token.platforms.zksync,
+        for (const tokenMarketData of tokensMarkedData) {
+          const token = supportedTokens.find((t) => t.cgPriceId === tokenMarketData.id);
+          for (const t of token.address) {
+            tokensOffChainData.push({
+              l1Address: t.l1Address,
+              l2Address: t.l2Address,
               liquidity: tokenMarketData.market_cap,
               usdPrice: tokenMarketData.current_price,
               iconURL: tokenMarketData.image,
               priceId: tokenMarketData.id,
-            };
-          })
-        );
+            });
+          }
+        }
         tokenIdsPerRequest = [];
       }
     }
