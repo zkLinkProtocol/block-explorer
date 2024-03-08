@@ -16,11 +16,11 @@ import tokens from "../../tokens";
 
 export interface TokenL1Address {
   chain: string,
-  address: string,
+  l1Address: string,
+  l2Address: string,
 }
 export interface Token {
-  l2Address: string;
-  l1Address: TokenL1Address[];
+  address: TokenL1Address[];
   symbol: string;
   decimals: number;
   cgPriceId: string;
@@ -28,7 +28,6 @@ export interface Token {
   yieldType: string[];
   multiplier: number;
 }
-
 @Injectable()
 export class TokenService {
   private readonly logger: Logger;
@@ -42,6 +41,7 @@ export class TokenService {
     private readonly getTokenInfoDurationMetric: Histogram,
   ) {
     this.logger = new Logger(TokenService.name);
+    this.supportTokens = [];
     tokens.forEach(token => {
       this.supportTokens.push(token);
     });

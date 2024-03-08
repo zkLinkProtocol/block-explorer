@@ -11,7 +11,7 @@ export default [
         "l1Address": "0x3119fd5290e3b946a0398dc6571de0ff378da5fd",
         "l2Address": "0x3Af585b8d06F7c31E389d7A611F505A9EFEBEc73"
       }
-    ],
+  ],
     "symbol": "USDT",
     "decimals": 6,
     "cgPriceId": "tether",
