@@ -25,7 +25,15 @@
       "zklink-nova": "0x047756F7714DD8E8625aBFD1617940577dE03C9c",
     }
   },
-    {
+  {
+    "id": "mantle-staked-ether",
+    "symbol": "meth",
+    "name": "mETH",
+    "platforms": {
+      "mantle": "0xcDA86A272531e8640cD7F1a92c01839911B90bb0"
+    }
+  },
+  {
     "id": "wrapped-steth",
     "symbol": "wsteth",
     "name": "wstETH",
