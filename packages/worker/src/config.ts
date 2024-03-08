@@ -35,6 +35,9 @@ export default async () => {
     COINGECKO_API_KEY,
     BRIDGE_NETWORK_KEYS,
     COINGECKO_PLATFORM_IDS,
+    UPDATE_TOTAL_LOCKED_VALUE_INTERVAL,
+    UPDATE_TOTAL_LOCKED_VALUE_DELAY,
+    ENABLE_TOTAL_LOCKED_VALUE_UPDATER,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -104,6 +107,9 @@ export default async () => {
         platformIds: COINGECKO_PLATFORM_IDS.split(","),
         extraCoinsList: await getExtraCoinsList(),
       },
+      updateTotalLockedValueInterval: parseInt(UPDATE_TOTAL_LOCKED_VALUE_INTERVAL, 10) || 30000,
+      updateTotalLockedValueDelay: parseInt(UPDATE_TOTAL_LOCKED_VALUE_DELAY, 10) || 500,
+      enableTotalLockedValueUpdater: ENABLE_TOTAL_LOCKED_VALUE_UPDATER === "true",
     },
     metrics: {
       collectDbConnectionPoolMetricsInterval: parseInt(COLLECT_DB_CONNECTION_POOL_METRICS_INTERVAL, 10) || 10000,

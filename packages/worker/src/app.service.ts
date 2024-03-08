@@ -9,6 +9,7 @@ import { BatchService } from "./batch";
 import { CounterService } from "./counter";
 import { BalancesCleanerService } from "./balance";
 import { TokenOffChainDataSaverService } from "./token/tokenOffChainData/tokenOffChainDataSaver.service";
+import { ValuesService } from "./values/values.service";
 import runMigrations from "./utils/runMigrations";
 
 @Injectable()
@@ -22,6 +23,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     private readonly blocksRevertService: BlocksRevertService,
     private readonly balancesCleanerService: BalancesCleanerService,
     private readonly tokenOffChainDataSaverService: TokenOffChainDataSaverService,
+    private readonly valuesService: ValuesService,
     private readonly dataSource: DataSource,
     private readonly configService: ConfigService
   ) {
@@ -55,6 +57,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     const disableCountersProcessing = this.configService.get<boolean>("counters.disableCountersProcessing");
     const disableOldBalancesCleaner = this.configService.get<boolean>("balances.disableOldBalancesCleaner");
     const enableTokenOffChainDataSaver = this.configService.get<boolean>("tokens.enableTokenOffChainDataSaver");
+    const enableTotalLockedValueUpdater = this.configService.get<boolean>("tokens.enableTotalLockedValueUpdater");
     const tasks = [this.blockService.start()];
     if (!disableBatchesProcessing) {
       tasks.push(this.batchService.start());
@@ -68,6 +71,9 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     if (enableTokenOffChainDataSaver) {
       tasks.push(this.tokenOffChainDataSaverService.start());
     }
+    if (enableTotalLockedValueUpdater) {
+      tasks.push(this.valuesService.start());
+    }
     return Promise.all(tasks);
   }
 
@@ -78,6 +84,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       this.counterService.stop(),
       this.balancesCleanerService.stop(),
       this.tokenOffChainDataSaverService.stop(),
+      this.valuesService.stop(),
     ]);
   }
 }
