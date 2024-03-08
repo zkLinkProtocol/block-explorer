@@ -8,12 +8,14 @@ import { TVLService } from "./tvl.service";
 import { AccountTVLResponseDto } from "../api/dtos/tvl/accountTVL.dto";
 import { swagger } from "src/config/featureFlags";
 import { Point } from "./entities/points.entity";
-import { AccountPointsResponseDto } from "src/api/dtos/tvl/accountPoints.dto";
+import { AccountPointResponseDto, AccountPointsResponseDto } from "src/api/dtos/tvl/accountPoints.dto";
 import { TotalTVLResponseDto } from "src/api/dtos/tvl/totalTVL.dto";
 import { AccountRankResponseDto } from "src/api/dtos/tvl/accountRank.dto";
 import { AccountsRankResponseDto } from "src/api/dtos/tvl/accountsRank.dto";
 import { TokenTVLResponseDto } from "src/api/dtos/tvl/tokenTVL.dto";
 import { ReferralTotalTVLResponseDto } from "src/api/dtos/tvl/referralTotalTVL.dto";
+import { PagingOptionsDto } from "src/common/dtos";
+import { AccountReferTVLResponseDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -38,7 +40,7 @@ export class TVLController {
   @Get("/getAccountPoint")
   public async getAccountPoint(
     @Query("address", new ParseAddressPipe()) address: string
-  ): Promise<AccountPointsResponseDto> {
+  ): Promise<AccountPointResponseDto> {
     const point = await this.tvlService.getAccountPoints(address);
     return {
       status: ResponseStatus.OK,
@@ -46,6 +48,7 @@ export class TVLController {
       result: {
         novaPoint: point ? point.stakePoint : 0,
         referPoint: point ? point.refPoint : 0,
+        address,
       },
     };
   }
@@ -119,6 +122,34 @@ export class TVLController {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,
       result: 23,
+    };
+  }
+
+  @ApiOperation({ summary: "getAccount Refferals point" })
+  @Get("/getAccountRefferals")
+  public async getAccountRefferals(
+    @Query("address", new ParseAddressPipe()) address: string,
+    @Query() pagingOptions: PagingOptionsDto
+  ): Promise<AccountPointsResponseDto> {
+    const result = await this.tvlService.getAccountRefferals(address, pagingOptions);
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result,
+    };
+  }
+
+  @ApiOperation({ summary: "getAccount Refferals tvl" })
+  @Get("/getAccountRefferalsTVL")
+  public async getAccountRefferalsTVL(
+    @Query("address", new ParseAddressPipe()) address: string,
+    @Query() pagingOptions: PagingOptionsDto
+  ): Promise<AccountReferTVLResponseDto> {
+    const result = await this.tvlService.getAccountRefferalsTVL(address, pagingOptions);
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result,
     };
   }
 }

@@ -14,6 +14,9 @@ import { AccountRankDto } from "src/api/dtos/tvl/accountRank.dto";
 import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
 import { TokenTVLDto } from "src/api/dtos/tvl/tokenTVL.dto";
 import { Referral } from "./entities/referral.entity";
+import { PagingOptionsDto } from "src/common/dtos";
+import { AccountPointsDto } from "src/api/dtos/tvl/accountPoints.dto";
+import { AccountReferTVLDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
 
 @Injectable()
 export class TVLService {
@@ -183,5 +186,78 @@ export class TVLService {
   public async getReferralTvl(address: string) {
     const tvl = await this.addressTVLRepository.sum("referralTvl", { address });
     return tvl;
+  }
+
+  public async getAccountRefferals(address: string, page: PagingOptionsDto): Promise<AccountPointsDto[]> {
+    let invitees = await this.referralRepository.find({
+      where: {
+        referrer: address,
+      },
+      skip: (page.page - 1) * page.limit,
+      take: page.limit,
+      order: {
+        createdAt: "desc",
+      },
+    });
+
+    if (invitees.length === 0) {
+      return [];
+    }
+
+    const addresses = invitees.map((invitee) => invitee.address);
+    let points = await this.pointRepository.find({
+      where: {
+        address: In(addresses),
+      },
+    });
+
+    const pointsMap = new Map(points.map((point) => [point.address, point]));
+
+    let result: AccountPointsDto[] = invitees.map((invitee) => {
+      const point = pointsMap.get(invitee.address);
+      let account: AccountPointsDto = {
+        novaPoint: point ? point.stakePoint : 0,
+        referPoint: point ? point.refPoint : 0,
+        address: invitee.address,
+      };
+      return account;
+    });
+    return result;
+  }
+
+  public async getAccountRefferalsTVL(address: string, page: PagingOptionsDto): Promise<AccountReferTVLDto[]> {
+    let invitees = await this.referralRepository.find({
+      where: {
+        referrer: address,
+      },
+      skip: (page.page - 1) * page.limit,
+      take: page.limit,
+      order: {
+        createdAt: "desc",
+      },
+    });
+
+    if (invitees.length === 0) {
+      return [];
+    }
+
+    const addresses = invitees.map((invitee) => invitee.address);
+    let addressTvl = await this.addressTVLRepository.find({
+      where: {
+        address: In(addresses),
+      },
+    });
+
+    const addressTvlMap = new Map(addressTvl.map((address) => [address.address, address]));
+
+    let result: AccountReferTVLDto[] = invitees.map((invitee) => {
+      const tvl = addressTvlMap.get(invitee.address);
+      let account: AccountReferTVLDto = {
+        address: invitee.address,
+        tvl: tvl ? tvl.tvl : 0,
+      };
+      return account;
+    });
+    return result;
   }
 }

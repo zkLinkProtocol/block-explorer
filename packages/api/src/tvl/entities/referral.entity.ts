@@ -1,5 +1,6 @@
+import { BaseEntity } from "src/common/entities/base.entity";
 import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
-import { Entity, Column, Index, PrimaryColumn, BaseEntity } from "typeorm";
+import { Entity, Column, Index, PrimaryColumn } from "typeorm";
 
 @Entity({ name: "referrers" })
 export class Referral extends BaseEntity {
