@@ -104,6 +104,8 @@ export class StatisticsTvlService extends Worker {
                     for (const r of referees) {
                         referralTvl += addressTvls.get(r);
                     }
+                    let ethPrice = tokenPrices.find(t => t.priceId === "ethereum");
+                    referralTvl /= ethPrice.usdPrice;
                     let addressTvl = addressTvls.get(address);
                     let newAddressTvl = {
                         address: addressTvl.address,
