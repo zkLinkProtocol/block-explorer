@@ -29,6 +29,7 @@ export type ExcuteBatchItem = {
 export type EnvironmentConfig = {
   networks: NetworkConfig[];
   iconsList: IconsList;
+  chainNameList: IconsList;
   excuteBatchList: ExcuteBatchItem[];
 };
 

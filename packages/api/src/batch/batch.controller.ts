@@ -19,6 +19,7 @@ import { BatchDto } from "./batch.dto";
 import { BatchService } from "./batch.service";
 import { BatchAmountDto } from "./batchAmount.dto";
 import { BatchDetailsDto } from "./batchDetails.dto";
+import { BatchRootDto } from "./batchRoot.dto";
 
 const entityName = "batches";
 
@@ -90,5 +91,20 @@ export class BatchController {
       throw new NotFoundException();
     }
     return result[0] ?? null;
+  }
+  @Get("batchroot/:batchNumber")
+  @ApiParam({
+    name: "batchNumber",
+    type: "integer",
+    example: "1",
+    description: "Batch number",
+  })
+  @ApiOkResponse({ description: "BatchRoot info was returned successfully", type: BatchRootDto })
+  @ApiBadRequestResponse({ description: "Batch number is invalid" })
+  @ApiNotFoundResponse({ description: "Can't find batchRoot info for the specified batch number" })
+  public async getBatchRoot(
+    @Param("batchNumber", new ParseLimitedIntPipe({ min: 1 })) batchNumber: number
+  ): Promise<BatchRootDto[]> {
+    return this.batchService.findOneBatchRoot(batchNumber);
   }
 }
