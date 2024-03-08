@@ -13,4 +13,7 @@ export class Referral extends BaseEntity{
 
   @Column({ type: "bigint"})
   public readonly blockNumber?: number;
+
+  @Column({ type: "boolean",default:false})
+  public readonly active: boolean;
 }

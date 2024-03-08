@@ -32,7 +32,7 @@ import {BLOCKS_REVERT_DETECTED_EVENT} from "../constants";
 import {unixTimeToDateString} from "../utils/date";
 import {TokenOffChainDataProvider} from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 import { utils } from "zksync-web3";
-
+import tokens from "../../tokens";
 
 @Injectable()
 export class BlockProcessor {
@@ -42,12 +42,14 @@ export class BlockProcessor {
   private readonly disableBlocksRevert: boolean;
   private readonly numberOfBlocksPerDbTransaction: number;
   private readonly pointsStatisticalPeriodSecs: number;
+  private readonly pointsPhase1StartTime: string;
   private readonly pointsPhase1EndTime: string;
   private readonly pointsEarlyDepositEndTime: string;
   private timer?: NodeJS.Timeout;
   // restart will handle from genesis block
   private lastHandlePointBlock: number;
-  private addressEligibleCache: Map<string,boolean>
+  private addressEligibleCache: Map<string,boolean>;
+  private supportTokens=[];
 
   public constructor(
     private readonly unitOfWork: UnitOfWork,
@@ -76,10 +78,14 @@ export class BlockProcessor {
     this.disableBlocksRevert = configService.get<boolean>("blocks.disableBlocksRevert");
     this.numberOfBlocksPerDbTransaction = configService.get<number>("blocks.numberOfBlocksPerDbTransaction");
     this.pointsStatisticalPeriodSecs = configService.get<number>("points.pointsStatisticalPeriodSecs");
+    this.pointsPhase1StartTime = configService.get<string>("points.pointsPhase1StartTime");
     this.pointsPhase1EndTime = configService.get<string>("points.pointsPhase1EndTime");
     this.pointsEarlyDepositEndTime = configService.get<string>("points.pointsPhase1EndTime");
     this.lastHandlePointBlock = 0;
     this.addressEligibleCache = new Map();
+    tokens.forEach(token => {
+      this.supportTokens.push(token);
+    });
   }
 
   public checkTokenIsEth(tokenAddress: string): boolean {
@@ -87,8 +93,22 @@ export class BlockProcessor {
     return utils.isETH(tokenAddress);
   }
 
-  //public getEarlyBirdMultiplier(ts: Date): number {
-  // }
+  public getEarlyBirdMultiplier(blockTs: Date): number {
+    // 1st week: 2,second week:1.5,third,forth week:1.2,
+    const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const startDate = new Date(this.pointsPhase1StartTime);
+    const diffInMilliseconds = blockTs.getTime() - startDate.getTime();
+    const diffInWeeks = Math.floor(diffInMilliseconds / millisecondsPerWeek);
+    if (diffInWeeks < 1 ) {
+      return 2;
+    } else if (diffInWeeks < 2) {
+      return 1.5;
+    } else if (diffInWeeks < 4) {
+      return 1.2;
+    } else {
+      return 1;
+    }
+  }
 
   public getGroupBooster(groupTvl:number):number {
     if (groupTvl > 20) {
@@ -103,39 +123,6 @@ export class BlockProcessor {
       return 0.5;
     } else {
       return 0;
-    }
-  }
-
-  // todo: maybe use config file or database
-  public getTokenMultiplier(tokenSymbol: string): number {
-    switch (tokenSymbol) {
-      case 'ETH1':
-      case 'WETH':
-      case 'wBTC':
-      case 'USDT':
-      case 'USDC':
-      case 'Dai':
-      case 'FDUSD':
-      case 'Frax':
-      case 'USDe':
-        return 2;
-      case 'ARB':
-      case 'MANTA':
-      case 'MNT':
-      case 'sDai':
-      case 'wUSDM':
-      case 'wstETH':
-      case 'rETH':
-      case 'wBETH':
-      case 'mETH':
-      case 'sfrxETH':
-      case 'Stone':
-      case 'swETH':
-      case 'cbETH':
-      case 'nETH':
-        return 1.5;
-      default:
-        return 1;
     }
   }
 
@@ -155,7 +142,7 @@ export class BlockProcessor {
       }
 
       // get all tokens
-      const tokens = await this.tokenService.getAllTokens();
+      const tokens = this.tokenService.getAllSupportTokens();
       if (!tokens.length) {
         return false;
       }
@@ -163,13 +150,16 @@ export class BlockProcessor {
       let tokenPrices = new Map();
       for ( const token of tokens ) {
         let priceId = this.tokenService.getCgIdByTokenSymbol(token.symbol);
+        if (!priceId) {
+          continue;
+        }
         const tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, toBlock.timestamp.getTime());
         tokenPrices.set(token.l2Address,tokenPrice);
       }
 
       let stakePointsCache = new Map();
       let phase1EndDate = new Date(this.pointsPhase1EndTime);
-      const earlyBirdMultiplier = toBlock.timestamp > phase1EndDate ? 1: 2;
+      const earlyBirdMultiplier = this.getEarlyBirdMultiplier(toBlock.timestamp);
       const ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", toBlock.timestamp.getTime());
       for ( const address of addresses ) {
         let eligible = this.addressEligibleCache.get(address.toString("hex"));
@@ -190,7 +180,7 @@ export class BlockProcessor {
           let memberAmount = 0;
           for ( const token of tokens ) {
             let tokenPrice = tokenPrices.get(token.l2Address);
-            let tokenMultiplier = this.getTokenMultiplier(token.symbol);
+            let tokenMultiplier = this.tokenService.getTokenMultiplier(token.symbol);
             let balances = await this.balanceService.getAccountBalances(member);
             let balancesOfToken = balances.filter( balance => {
               let tokenAddress = `0x${Buffer.from(balance.tokenAddress).toString("hex")}`;
@@ -454,11 +444,12 @@ export class BlockProcessor {
         let deposits = transaction.transfers.filter(t => t.type == TransferType.Deposit);
         if (!deposits.length) { continue };
         console.log(`addBlock at ${block.number} deposits number is ${deposits.length}`);
-        let allTokens = await this.tokenService.getAllTokens()
+        let allTokens = await this.tokenService.getAllTokens();
         type TokenInfo = { multiplier: number, price: number, decimals: number };
         let tokenInfos = new Map();
         let ethPrice = 0;
         let depositPoints = new Map();
+        let accountActives = [];
         for (const deposit of deposits) {
           // update referrals blockNumber
           await this.referralRepository.updateReferralsBlock(deposit.from,block.number);
@@ -466,7 +457,7 @@ export class BlockProcessor {
           let depositEthAmount = 0;
           if (this.checkTokenIsEth(deposit.tokenAddress)) {
             depositEthAmount = Number(deposit.amount) / Math.pow(10,18);
-            const tokenMultiplier = this.getTokenMultiplier("ETH");
+            const tokenMultiplier = this.tokenService.getTokenMultiplier("ETH");
             depositPoint = 10 * tokenMultiplier * depositEthAmount;
           } else {
             if (ethPrice == 0) {
@@ -476,7 +467,7 @@ export class BlockProcessor {
             if (!tokenInfo) {
               let token = allTokens.find(t => t.l2Address == deposit.tokenAddress);
               console.log(`addBlock deposit token is ${token}`);
-              let tokenMultiplier = this.getTokenMultiplier(token.symbol);
+              let tokenMultiplier = this.tokenService.getTokenMultiplier(token.symbol);
               let priceId = this.tokenService.getCgIdByTokenSymbol(token.symbol);
               let tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, block.timestamp * 1000);
               tokenInfo = {
@@ -508,6 +499,7 @@ export class BlockProcessor {
           }
           if (newEligible != eligible) {
             this.addressEligibleCache.set(deposit.from, newEligible);
+            accountActives.push(deposit.from);
           }
           let addrBuf = Buffer.from(deposit.from.startsWith("0x") ? deposit.from.substring(2) : deposit.from, "hex");
           let oldPoint = depositPoints.get(addrBuf);
@@ -518,6 +510,7 @@ export class BlockProcessor {
 
         // save to db
         await this.pointsRepository.updateDeposits(depositPoints);
+        await this.referralRepository.updateActives(accountActives);
       }
     } catch (error) {
       blockProcessingStatus = "error";

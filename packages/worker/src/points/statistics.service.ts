@@ -38,7 +38,7 @@ export class StatisticsTvlService extends Worker {
                     : this.statisticsTvlInterval - timeSinceLastUpdate;
 
             if (!nextUpdateTimeout) {
-                const tokens = await this.tokenRepository.getAllTokens();
+                const tokens = await this.tokenService.getAllSupportTokens();
                 const tokenIds = tokens.map(t => this.tokenService.getCgIdByTokenSymbol(t.symbol));
                 let tokenPrices = await this.tokenOffChainDataProvider.getTokensCurrentPrice(tokenIds);
                 const addresses = await this.balanceRepository.getAllAddresses();
@@ -104,6 +104,8 @@ export class StatisticsTvlService extends Worker {
                     for (const r of referees) {
                         referralTvl += addressTvls.get(r);
                     }
+                    let ethPrice = tokenPrices.find(t => t.priceId === "ethereum");
+                    referralTvl /= ethPrice.usdPrice;
                     let addressTvl = addressTvls.get(address);
                     let newAddressTvl = {
                         address: addressTvl.address,

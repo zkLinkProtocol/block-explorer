@@ -31,6 +31,7 @@ export default () => {
     COINGECKO_API_KEY,
     BRIDGE_NETWORK_KEYS,
     POINTS_STATISTICAL_PERIOD_SECS,
+    POINTS_PHASE1_START_TIME,
     POINTS_EARLY_DEPOSIT_END_TIME,
     POINTS_PHASE1_END_TIME,
     POINTS_STATISTICS_TVL_INTERVAL,
@@ -117,6 +118,7 @@ export default () => {
     },
     points: {
       pointsStatisticalPeriodSecs: parseInt(POINTS_STATISTICAL_PERIOD_SECS, 10) || 3600,
+      pointsPhase1StartTime: POINTS_PHASE1_START_TIME,
       pointsPhase1EndTime: POINTS_PHASE1_END_TIME,
       pointsEarlyDepositEndTime: POINTS_EARLY_DEPOSIT_END_TIME,
       pointsStatistsTvlInterval: POINTS_STATISTICS_TVL_INTERVAL,
