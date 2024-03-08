@@ -23,5 +23,31 @@
     "arbitrum": "/img/arbitrum-arb-logo.svg",
     "mantle": "/img/mantle.svg",
     "manta": "/img/manta.jpg"
-  }
+  },
+  "excuteBatchList": [
+    {
+      "key": "zksync",
+      "limitNumber": 50,
+      "chainId": 324,
+      "blockExplorersUrl": "https://explorer.zksync.io"
+    },
+    {
+      "key": "arbitrum",
+      "limitNumber": 50,
+      "chainId": 42161,
+      "blockExplorersUrl": "https://arbiscan.io"
+    },
+    {
+      "key": "mantle",
+      "limitNumber": 50,
+      "chainId": 5000,
+      "blockExplorersUrl": "https://explorer.mantle.xyz"
+    },
+    {
+      "key": "manta",
+      "limitNumber": 50,
+      "chainId": 169,
+      "blockExplorersUrl": "https://pacific-explorer.manta.network"
+    }
+  ]
 }

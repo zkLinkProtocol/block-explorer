@@ -16,3 +16,4 @@ export const PROXY_CONTRACT_IMPLEMENTATION_ABI = [
     type: "function",
   },
 ];
+export const ETH_BLOCKEXPLORER_URL = "https://etherscan.io";

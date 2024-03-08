@@ -6,17 +6,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watchEffect } from "vue";
+import useBatchRoot from "@/composables/useBatchRoot";
 import { useI18n } from "vue-i18n";
+const { getById, mainBatch, batchRoot } = useBatchRoot();
 
-import { useWindowSize } from "@vueuse/core";
+import { controlledComputed, useWindowSize } from "@vueuse/core";
 
 import InfoTableSection from "@/components/batches/InfoTableSection.vue";
 import CopyContent from "@/components/common/table/fields/CopyContent.vue";
 import TimeField from "@/components/common/table/fields/TimeField.vue";
+import ExcuteTxHashChain from "../common/table/fields/ExcuteTxHashChain.vue";
 
 import useContext from "@/composables/useContext";
-
+import { ETH_BLOCKEXPLORER_URL } from "@/utils/constants";
 import type { BatchDetails } from "@/composables/useBatch";
 import type { Component, PropType } from "vue";
 
@@ -40,11 +43,15 @@ const props = defineProps({
     default: true,
   },
 });
-
+watchEffect(() => {
+  if (props.batch?.executeTxHash) {
+    getById(parseInt(props.batchNumber).toString());
+  }
+});
 const tableInfoItems = computed(() => {
   type InfoTableItem = {
     label: string;
-    tooltip: string;
+    tooltip?: string;
     value: string | number | null | Record<string, unknown>;
     component?: Component;
     url?: string;
@@ -87,23 +94,61 @@ const tableInfoItems = computed(() => {
     ["executeTxHash", "executedAt", "notYetExecuted"],
   ] as [keyof BatchDetails, keyof BatchDetails, string][]) {
     if (props.batch[key]) {
-      tableItems.push(
-        {
-          label: t(`batches.${key}`),
-          tooltip: t(`batches.${key}Tooltip`),
-          value: { value: props.batch[key] },
-          component: CopyContent,
-          url: currentNetwork.value.l1ExplorerUrl
-            ? `${currentNetwork.value.l1ExplorerUrl}/tx/${props.batch[key]}`
-            : undefined,
-        },
-        {
-          label: t(`batches.${timeKey}`),
-          tooltip: t(`batches.${timeKey}Tooltip`),
-          value: { value: props.batch[timeKey] },
-          component: TimeField,
+      if (key === "executeTxHash") {
+        tableItems.push(
+          {
+            label: t(`batches.${key}`),
+            tooltip: t(`batches.${key}Tooltip`),
+            value: {
+              value: props.batch[key],
+              batchRoot: batchRoot.value,
+              url: currentNetwork.value.l1ExplorerUrl
+                ? `${currentNetwork.value.l1ExplorerUrl}/tx/${props.batch[key]}`
+                : undefined,
+            },
+            component: ExcuteTxHashChain,
+          },
+          {
+            label: t(`batches.${timeKey}`),
+            tooltip: t(`batches.${timeKey}Tooltip`),
+            value: { value: props.batch[timeKey] },
+            component: TimeField,
+          }
+        );
+        if (mainBatch.value.executedAt) {
+          tableItems.push(
+            {
+              label: t(`batches.finalizeTxHash`),
+              value: { value: mainBatch.value?.transactionHash, isShowIocn: true },
+              component: CopyContent,
+              url: `${ETH_BLOCKEXPLORER_URL}/tx/${mainBatch.value?.transactionHash}`,
+            },
+            {
+              label: t(`batches.finalizeAt`),
+              value: { value: mainBatch.value?.executedAt },
+              component: TimeField,
+            }
+          );
         }
-      );
+      } else {
+        tableItems.push(
+          {
+            label: t(`batches.${key}`),
+            tooltip: t(`batches.${key}Tooltip`),
+            value: { value: props.batch[key], id: props.batchNumber },
+            component: CopyContent,
+            url: currentNetwork.value.l1ExplorerUrl
+              ? `${currentNetwork.value.l1ExplorerUrl}/tx/${props.batch[key]}`
+              : undefined,
+          },
+          {
+            label: t(`batches.${timeKey}`),
+            tooltip: t(`batches.${timeKey}Tooltip`),
+            value: { value: props.batch[timeKey] },
+            component: TimeField,
+          }
+        );
+      }
     }
   }
 
