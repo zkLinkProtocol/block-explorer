@@ -36,6 +36,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
   private readonly apiKey: string;
   private readonly apiUrl: string;
   private readonly platformIds: Array<string>;
+  private readonly extraCoinsList: ITokenListItemProviderResponse[];
   constructor(configService: ConfigService, private readonly httpService: HttpService) {
     this.logger = new Logger(CoingeckoTokenOffChainDataProvider.name);
     this.isProPlan = configService.get<boolean>("tokens.coingecko.isProPlan");
@@ -47,6 +48,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     } else {
       this.platformIds = _platformIds;
     }
+    this.extraCoinsList = configService.get<ITokenListItemProviderResponse[]>("tokens.coingecko.extraCoinsList");
   }
 
   public async getTokensOffChainData({
@@ -60,18 +62,8 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
       (token) =>
         token.id === "ethereum" ||
         token.platforms.zklinkNova || // unless the nova token is list on coingecko, this will not take effect here
-        bridgedTokensToInclude.find(
-          (bridgetTokenAddress) =>
-            bridgetTokenAddress === token.platforms.ethereum ||
-            bridgetTokenAddress === token.platforms.zksync ||
-            bridgetTokenAddress === token.platforms.arbitrum ||
-            bridgetTokenAddress === token.platforms.optimism ||
-            bridgetTokenAddress === token.platforms.mantaPacific ||
-            bridgetTokenAddress === token.platforms.mantle ||
-            bridgetTokenAddress === token.platforms.linea ||
-            bridgetTokenAddress === token.platforms.scroll ||
-            bridgetTokenAddress === token.platforms.polygonZkevm ||
-            bridgetTokenAddress === token.platforms.starknet
+        bridgedTokensToInclude.find((bridgetTokenAddress) =>
+          this.isPlatformIncluded(token.platforms, bridgetTokenAddress)
         )
     );
 
@@ -81,18 +73,29 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
       tokenIdsPerRequest.push(supportedTokens[i].id);
       if (tokenIdsPerRequest.length === API_NUMBER_OF_TOKENS_PER_REQUEST || i === supportedTokens.length - 1) {
         const tokensMarkedData = await this.getTokensMarketData(tokenIdsPerRequest);
-
         for (let tokenMarketData of tokensMarkedData) {
           const token = supportedTokens.find((t) => t.id === tokenMarketData.id);
+          if (!token) {
+            continue;
+          }
           for (const platform of this.platformIds) {
             if (token.platforms[platform]) {
-              tokensOffChainData.push({
-                l1Address: token.platforms[platform],
-                l2Address: token.platforms.zklinkNova, // unless the nova token is list on coingecko, this will not take effect here
-                liquidity: tokenMarketData.market_cap,
-                usdPrice: tokenMarketData.current_price,
-                iconURL: tokenMarketData.image,
-              });
+              if (platform === "zklink-nova") {
+                tokensOffChainData.push({
+                  l1Address: null,
+                  l2Address: token.platforms["zklink-nova"], // unless the nova token is list on coingecko, this will not take effect here
+                  liquidity: tokenMarketData.market_cap,
+                  usdPrice: tokenMarketData.current_price,
+                  iconURL: tokenMarketData.image,
+                });
+              } else {
+                tokensOffChainData.push({
+                  l1Address: token.platforms[platform],
+                  l2Address: null,
+                  usdPrice: tokenMarketData.current_price,
+                  iconURL: tokenMarketData.image,
+                });
+              }
             }
           }
           if (token.id === "ethereum") {
@@ -134,39 +137,19 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     if (!list) {
       return [];
     }
+
     return list
-      .filter(
-        (item) =>
-          item.id === "ethereum" ||
-          item.platforms.zksync ||
-          item.platforms.ethereum ||
-          item.platforms["zklink-nova"] ||
-          item.platforms["arbitrum-one"] ||
-          item.platforms.optimism ||
-          item.platforms["manta-pacific"] ||
-          item.platforms.mantle ||
-          item.platforms.linea ||
-          item.platforms.scroll ||
-          item.platforms["polygon-zkevm"] ||
-          item.platforms.starknet
-      )
-      .map((item) => ({
-        ...item,
-        platforms: {
-          // use substring(0, 42) to fix some instances when after address there is some additional text
-          zklinkNova: item.platforms["zklink-nova"]?.substring(0, 42), // unless the nova token is list on coingecko, this will not take effect here
-          zksync: item.platforms.zksync?.substring(0, 42),
-          ethereum: item.platforms.ethereum?.substring(0, 42),
-          arbitrum: item.platforms["arbitrum-one"]?.substring(0, 42),
-          optimism: item.platforms.optimism?.substring(0, 42), // not support yet
-          mantaPacific: item.platforms["manta-pacific"]?.substring(0, 42),
-          mantle: item.platforms.mantle?.substring(0, 42),
-          linea: item.platforms.linea?.substring(0, 42),
-          scroll: item.platforms.scroll?.substring(0, 42), // not support yet
-          polygonZkevm: item.platforms["polygon-zkevm"]?.substring(0, 42), // not support yet
-          starknet: item.platforms.starknet?.substring(0, 66), // not support yet
-        },
-      }));
+      .filter((item) => item.id === "ethereum" || this.isPlatformSupported(item.platforms))
+      .map((item) => {
+        const extraCoin = this.extraCoinsList.find((extraCoin) => extraCoin.id === item.id);
+        if (extraCoin) {
+          item.platforms = { ...item.platforms, ...extraCoin.platforms };
+        }
+        return {
+          ...item,
+          platforms: this.rewritePlatformIds(item.platforms),
+        };
+      });
   }
 
   private async makeApiRequestRetryable<T>({
@@ -209,6 +192,26 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
         retryTimeout: retryTimeout * 2,
       });
     }
+  }
+  private isPlatformSupported(platforms: Record<string, string>) {
+    return Object.keys(platforms).some((platform) => this.platformIds.includes(platform));
+  }
+
+  private isPlatformIncluded(platforms: Record<string, string>, bridgetTokenAddress: string) {
+    return Object.values(platforms).includes(bridgetTokenAddress);
+  }
+
+  private rewritePlatformIds(platforms: Record<string, string>) {
+    return Object.fromEntries(
+      Object.entries(platforms)
+        .filter(([key, value]) => this.platformIds.includes(key))
+        .map(([key, value]) => {
+          if (key === "starknet") {
+            return [key, value.substring(0, 66)];
+          }
+          return [key, value.substring(0, 42)];
+        })
+    );
   }
 
   private async makeApiRequest<T>(path: string, query?: Record<string, string>): Promise<T> {

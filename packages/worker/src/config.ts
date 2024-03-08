@@ -1,5 +1,9 @@
 export type NetworkKey = string;
-export default () => {
+import * as fs from "fs";
+import * as JSONStream from "JSONStream";
+import * as path from "path";
+const extraCoinsListPath = "./extraCoinsList.json";
+export default async () => {
   const {
     PORT,
     BLOCKCHAIN_RPC_URL,
@@ -98,6 +102,7 @@ export default () => {
         isProPlan: COINGECKO_IS_PRO_PLAN === "true",
         apiKey: COINGECKO_API_KEY,
         platformIds: COINGECKO_PLATFORM_IDS.split(","),
+        extraCoinsList: await getExtraCoinsList(),
       },
     },
     metrics: {
@@ -115,3 +120,26 @@ export default () => {
     },
   };
 };
+async function getExtraCoinsList() {
+  const readStream = fs.createReadStream(path.join(__dirname, extraCoinsListPath));
+  const jsonStream = JSONStream.parse("*");
+
+  readStream.pipe(jsonStream);
+  const res = [];
+  await new Promise((resolve, reject) => {
+    jsonStream.on("data", (item: any) => {
+      res.push(item);
+    });
+
+    jsonStream.on("end", resolve);
+    jsonStream.on("error", reject);
+  });
+  return (res as ITokenListItemProviderResponse[]).map((item) => ({
+    ...item,
+    platforms: Object.fromEntries(Object.entries(item.platforms).map(([key, value]) => [key, value.toLowerCase()])),
+  }));
+}
+interface ITokenListItemProviderResponse {
+  id: string;
+  platforms: Record<string, string>;
+}
