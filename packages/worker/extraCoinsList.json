@@ -12,7 +12,8 @@
     "symbol": "WBTC",
     "name": "Wrapped Bitcoin",
     "platforms": {
-      "linea": "0x3aAB2285ddcDdaD8edf438C1bAB47e1a9D05a9b4"
+      "linea": "0x3aAB2285ddcDdaD8edf438C1bAB47e1a9D05a9b4",
+      "mantle": "0xCAbAE6f6Ea1ecaB08Ad02fE02ce9A44F09aebfA2"
     }
   },
   {
@@ -30,6 +31,14 @@
     "name": "mETH",
     "platforms": {
       "mantle": "0xcDA86A272531e8640cD7F1a92c01839911B90bb0"
+    }
+  },
+  {
+    "id": "wrapped-steth",
+    "symbol": "wsteth",
+    "name": "wstETH",
+    "platforms": {
+      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
     }
   }
 ]
