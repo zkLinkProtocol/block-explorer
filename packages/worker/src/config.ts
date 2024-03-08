@@ -30,6 +30,7 @@ export default () => {
     COINGECKO_IS_PRO_PLAN,
     COINGECKO_API_KEY,
     BRIDGE_NETWORK_KEYS,
+    COINGECKO_PLATFORM_IDS,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -96,6 +97,7 @@ export default () => {
       coingecko: {
         isProPlan: COINGECKO_IS_PRO_PLAN === "true",
         apiKey: COINGECKO_API_KEY,
+        platformIds: COINGECKO_PLATFORM_IDS.split(","),
       },
     },
     metrics: {
