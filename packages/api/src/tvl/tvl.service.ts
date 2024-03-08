@@ -13,6 +13,7 @@ import { AccountsRankResponseDto } from "src/api/dtos/tvl/accountsRank.dto";
 import { AccountRankDto } from "src/api/dtos/tvl/accountRank.dto";
 import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
 import { TokenTVLDto } from "src/api/dtos/tvl/tokenTVL.dto";
+import { Referral } from "./entities/referral.entity";
 
 @Injectable()
 export class TVLService {
@@ -24,7 +25,9 @@ export class TVLService {
     @InjectRepository(Point)
     private readonly pointRepository: Repository<Point>,
     @InjectRepository(AddressTvl)
-    private readonly addressTVLRepository: Repository<AddressTvl>
+    private readonly addressTVLRepository: Repository<AddressTvl>,
+    @InjectRepository(Referral, "refer")
+    private readonly referralRepository: Repository<Referral>
   ) {}
 
   public async getAccountTokensTVL(address: string): Promise<AccountTVLDto[]> {
@@ -76,7 +79,7 @@ export class TVLService {
     return totalTVL;
   }
 
-  public async getAccountRank(address: string): Promise<[Point | null, number]> {
+  public async getAccountRank(address: string): Promise<AccountRankDto> {
     const points = await this.pointRepository.findOne({
       where: { address },
     });
@@ -90,7 +93,20 @@ export class TVLService {
       `select count(1) from "points" where "refPoint" + "stakePoint" > $1`,
       [totalPoints]
     );
-    return [points, Number(rank.count) + 1];
+
+    const refereral = await this.referralRepository.findOne({
+      where: {
+        address,
+      },
+    });
+
+    return {
+      novaPoint: points ? points.stakePoint : 0,
+      referPoint: points ? points.refPoint : 0,
+      rank: Number(rank.count) + 1,
+      inviteBy: refereral ? refereral.referrer : null,
+      address,
+    };
   }
 
   public async getAccountsRank(): Promise<AccountRankDto[]> {
@@ -99,15 +115,30 @@ export class TVLService {
       [50]
     );
 
+    if (ranks.length === 0) {
+      return [];
+    }
+
+    const addresses = ranks.map((r) => normalizeAddressTransformer.from(r.address));
+    const refererals = await this.referralRepository.find({
+      where: {
+        address: In(addresses),
+      },
+    });
+
+    const referMap = new Map(refererals.map((refer) => [refer.address, refer.referrer]));
+
     let result: AccountRankDto[] = [];
     for (let i = 0; i < ranks.length; i++) {
       const rank = ranks[i];
+      const address = normalizeAddressTransformer.from(rank.address);
+      const referer = referMap.get(address);
       result.push({
         novaPoint: rank.stakePoint,
         referPoint: rank.refPoint,
         rank: i + 1,
-        inviteBy: "",
-        address: normalizeAddressTransformer.from(rank.address),
+        inviteBy: referer,
+        address,
       });
     }
     return result;

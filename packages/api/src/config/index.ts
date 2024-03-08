@@ -1,5 +1,7 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import * as featureFlags from "./featureFlags";
+import { DataSourceOptions } from "typeorm";
+import { typeOrmReferModuleOptions } from "./refer-typeorm.config";
 
 export default () => {
   const {
@@ -72,6 +74,7 @@ export default () => {
       collectDbConnectionPoolMetricsInterval: parseInt(COLLECT_DB_CONNECTION_POOL_METRICS_INTERVAL, 10) || 10000,
     },
     typeORM: getTypeOrmModuleOptions(),
+    referORM: typeOrmReferModuleOptions,
     contractVerificationApiUrl: CONTRACT_VERIFICATION_API_URL || "http://127.0.0.1:3070",
     featureFlags,
   };

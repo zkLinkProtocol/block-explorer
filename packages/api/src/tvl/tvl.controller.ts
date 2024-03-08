@@ -66,17 +66,11 @@ export class TVLController {
   public async getAccountRank(
     @Query("address", new ParseAddressPipe()) address: string
   ): Promise<AccountRankResponseDto> {
-    const [points, rank] = await this.tvlService.getAccountRank(address);
+    const result = await this.tvlService.getAccountRank(address);
     return {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,
-      result: {
-        novaPoint: points ? points.stakePoint : 0,
-        referPoint: points ? points.refPoint : 0,
-        rank,
-        inviteBy: "",
-        address,
-      },
+      result,
     };
   }
 
