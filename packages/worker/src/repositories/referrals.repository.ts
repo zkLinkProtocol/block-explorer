@@ -32,6 +32,16 @@ export class ReferralsRepository {
         );
     }
 
+    public async updateActives(addresses: Buffer[]): Promise<void> {
+      for (const address of addresses) {
+          await this.refer.query(
+              `UPDATE invites
+               SET "active" = true
+               WHERE address = $1`, [address]
+          );
+      }
+    }
+
   public async getReferralsByAddress(referer: Buffer,block: number): Promise<Buffer[]> {
     const ret = await this.refer.query(
         `SELECT DISTINCT(address) AS referee FROM referrers WHERE referrer = $1 AND "blockNumber" <= $2`,[referer,block]

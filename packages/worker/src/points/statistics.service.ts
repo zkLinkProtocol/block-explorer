@@ -38,7 +38,7 @@ export class StatisticsTvlService extends Worker {
                     : this.statisticsTvlInterval - timeSinceLastUpdate;
 
             if (!nextUpdateTimeout) {
-                const tokens = await this.tokenRepository.getAllTokens();
+                const tokens = await this.tokenService.getAllSupportTokens();
                 const tokenIds = tokens.map(t => this.tokenService.getCgIdByTokenSymbol(t.symbol));
                 let tokenPrices = await this.tokenOffChainDataProvider.getTokensCurrentPrice(tokenIds);
                 const addresses = await this.balanceRepository.getAllAddresses();

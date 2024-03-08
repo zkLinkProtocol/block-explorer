@@ -12,47 +12,65 @@ import parseLog from "../utils/parseLog";
 import { stringTransformer } from "../transformers/string.transformer";
 import { CONTRACT_INTERFACES } from "../constants";
 import { Token as TokenEntity } from "../entities";
+import tokens from "../../tokens";
 
+export interface TokenL1Address {
+  chain: string,
+  address: string,
+}
 export interface Token {
   l2Address: string;
-  l1Address: string;
+  l1Address: TokenL1Address[];
   symbol: string;
   decimals: number;
-  name: string;
-  blockNumber: number;
-  transactionHash: string;
-  logIndex: number;
+  cgPriceId: string;
+  type: string;
+  yieldType: string[];
+  multiplier: number;
 }
 
 @Injectable()
 export class TokenService {
   private readonly logger: Logger;
+  private supportTokens: Token[];
 
   constructor(
     private readonly blockchainService: BlockchainService,
     private readonly addressRepository: AddressRepository,
     private readonly tokenRepository: TokenRepository,
     @InjectMetric(GET_TOKEN_INFO_DURATION_METRIC_NAME)
-    private readonly getTokenInfoDurationMetric: Histogram
+    private readonly getTokenInfoDurationMetric: Histogram,
   ) {
     this.logger = new Logger(TokenService.name);
+    tokens.forEach(token => {
+      this.supportTokens.push(token);
+    });
   }
 
-  // todo: should get from config or database
   public getCgIdByTokenSymbol(tokenSymbol:string): string {
-    switch (tokenSymbol) {
-      case "WETH":
-        return "ethereum";
-      case "USDC":
-        return "usd-coin";
-      default:
-        //todo: use usdc for test
-        return "usd-coin";
+    let token = this.supportTokens.find(t => t.symbol == tokenSymbol);
+    if (!token) {
+      return "";
+    } else {
+      return token.cgPriceId
+    }
+  }
+
+  public getTokenMultiplier(tokenSymbol: string): number {
+    let token = this.supportTokens.find(t => t.symbol == tokenSymbol);
+    if (!token) {
+      return 0;
+    } else {
+      return token.multiplier;
     }
   }
 
   public async getAllTokens(): Promise<TokenEntity[]> {
     return await this.tokenRepository.getAllTokens();
+  }
+
+  public getAllSupportTokens(): Token[] {
+    return this.supportTokens;
   }
 
   private async getERC20Token(contractAddress: string): Promise<{
