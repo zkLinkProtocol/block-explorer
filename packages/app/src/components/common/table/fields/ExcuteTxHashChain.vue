@@ -11,12 +11,12 @@
       <a v-if="item?.url && item?.limitNumber! > parseInt(item.number)" :href="item?.url" target="_blank">
         <Tooltip class="batches-tooltip">
           <img class="from-chain-icon" :src="item?.logoUrl" alt="" />
-          <template #content>Linea</template>
+          <template #content>{{ chainNameList[item?.key!] }}</template>
         </Tooltip>
       </a>
       <Tooltip v-else class="batches-tooltip">
         <img class="from-chain-icon opacity-60" :src="item?.logoUrl" alt="" />
-        <template #content>Linea</template>
+        <template #content>{{ chainNameList[item?.key!] }} </template>
       </Tooltip>
     </template>
   </div>
@@ -28,7 +28,7 @@ export type BatchRootItem = Api.Response.BatchRootItem;
 import { computed } from "vue";
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 
-const { excuteBatchList, iconsList } = useEnvironmentConfig();
+const { excuteBatchList, iconsList, chainNameList } = useEnvironmentConfig();
 
 const props = defineProps({
   value: {
