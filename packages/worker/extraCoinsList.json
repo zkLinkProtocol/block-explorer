@@ -1,0 +1,44 @@
+[
+  {
+    "id": "wrapped-usdm",
+    "symbol": "wusdm",
+    "name": "Wrapped USDM",
+    "platforms": {
+      "manta-pacific": "0xbdAd407F77f44F7Da6684B416b1951ECa461FB07"
+    }
+  },
+  {
+    "id": "wrapped-bitcoin",
+    "symbol": "WBTC",
+    "name": "Wrapped Bitcoin",
+    "platforms": {
+      "linea": "0x3aAB2285ddcDdaD8edf438C1bAB47e1a9D05a9b4",
+      "mantle": "0xCAbAE6f6Ea1ecaB08Ad02fE02ce9A44F09aebfA2"
+    }
+  },
+  {
+    "id": "weth",
+    "symbol": "weth",
+    "name": "WETH",
+    "platforms": {
+      "extra": "0xC6572019548dfeBA782bA5a2093C836626C7789A",
+      "zklink-nova": "0x047756F7714DD8E8625aBFD1617940577dE03C9c",
+    }
+  },
+  {
+    "id": "mantle-staked-ether",
+    "symbol": "meth",
+    "name": "mETH",
+    "platforms": {
+      "mantle": "0xcDA86A272531e8640cD7F1a92c01839911B90bb0"
+    }
+  },
+  {
+    "id": "wrapped-steth",
+    "symbol": "wsteth",
+    "name": "wstETH",
+    "platforms": {
+      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
+    }
+  }
+]

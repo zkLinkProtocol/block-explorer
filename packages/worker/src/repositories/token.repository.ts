@@ -4,6 +4,7 @@ import { IsNull, Not, FindOptionsSelect } from "typeorm";
 import { Token } from "../entities";
 import { BaseRepository } from "./base.repository";
 import { UnitOfWork } from "../unitOfWork";
+import { BigNumber } from "ethers";
 
 @Injectable()
 export class TokenRepository extends BaseRepository<Token> {
@@ -93,6 +94,28 @@ export class TokenRepository extends BaseRepository<Token> {
         ...(iconURL && {
           iconURL,
         }),
+      }
+    );
+  }
+
+  public async updateTokenTotalSupply({
+    l2Address,
+    totalSupply,
+  }: {
+    l2Address?: string;
+    totalSupply: BigNumber
+  }): Promise<void> {
+    if (!l2Address) {
+      throw new Error("l2Address must be provided");
+    }
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update(
+      this.entityTarget,
+      {
+        l2Address
+      },
+      {
+        totalSupply
       }
     );
   }

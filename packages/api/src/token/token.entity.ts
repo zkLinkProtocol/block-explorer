@@ -1,6 +1,8 @@
 import { Entity, Column, PrimaryColumn, Index } from "typeorm";
 import { BaseEntity } from "../common/entities/base.entity";
 import { normalizeAddressTransformer } from "../common/transformers/normalizeAddress.transformer";
+import { BigNumber } from "ethers";
+import { bigNumberTransformer } from "../common/transformers/bigNumber.transformer";
 
 export enum TokenType {
   ETH = "ETH",
@@ -63,4 +65,7 @@ export class Token extends BaseEntity {
   @Index()
   @Column({ type: "timestamp", nullable: true, select: false })
   public readonly offChainDataUpdatedAt?: Date;
+
+  @Column({ type: "varchar", length: 256, transformer: bigNumberTransformer, default: "", nullable: true })
+  public readonly totalSupply?: BigNumber;
 }
