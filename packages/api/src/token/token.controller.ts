@@ -59,6 +59,18 @@ export class TokenController {
     );
   }
 
+  @Get("/tvl")
+  @ApiParam({
+    name: "iall",
+    example: true,
+    description: "Boolean value as string",
+  })
+  @ApiListPageOkResponse(TokenDto, { description: "Successfully returned all tokens" })
+  @ApiBadRequestResponse({ description: "Paging query params are not valid or out of range" })
+  public async getAllTokens(@Query("isall") isall: boolean): Promise<TokenDto[]> {
+    return await this.tokenService.calculateTvl(isall===false);
+  }
+
   @Get(":address")
   @ApiParam({
     name: "address",

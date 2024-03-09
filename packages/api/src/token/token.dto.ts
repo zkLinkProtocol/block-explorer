@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { BigNumber } from "ethers";
 
 export class TokenDto {
   @ApiProperty({ type: String, description: "L2 token address", example: "0xd754Ff5e8a6f257E162F72578A4bB0493c0681d8" })
@@ -58,4 +59,23 @@ export class TokenDto {
     required: false,
   })
   public readonly iconURL?: string;
+
+  @ApiProperty({
+    type: BigNumber,
+    description: "Token total supply",
+    example: "1000000000000000000",
+    examples: ["1000000000000000000", null],
+    required: false,
+  })
+  public readonly totalSupply?: BigNumber;
+
+  //add new filed: tvl
+  @ApiProperty({
+    type: String,
+    description: "Token TVL",
+    example: "1000000000000000000",
+    examples: ["1000000000000000000", null],
+    required: false,
+  })
+  public readonly tvl?: string;
 }
