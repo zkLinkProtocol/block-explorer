@@ -38,7 +38,18 @@ export class StatisticsTvlService extends Worker {
                     : this.statisticsTvlInterval - timeSinceLastUpdate;
 
             if (!nextUpdateTimeout) {
-                const tokens = await this.tokenService.getAllSupportTokens();
+                let tokens = [];
+                let supportTokens = await this.tokenService.getAllSupportTokens();
+                for (const t of supportTokens) {
+                    for (const addr of t.address) {
+                        tokens.push({
+                            symbol: t.symbol,
+                            chain: addr.chain,
+                            l2Address: addr.l2Address,
+                            priceId: t.cgPriceId,
+                            });
+                    }
+                }
                 const tokenIds = tokens.map(t => this.tokenService.getCgIdByTokenSymbol(t.symbol));
                 let tokenPrices = await this.tokenOffChainDataProvider.getTokensCurrentPrice(tokenIds);
                 const addresses = await this.balanceRepository.getAllAddresses();
@@ -49,17 +60,19 @@ export class StatisticsTvlService extends Worker {
                     let addressTokenBalances = [];
                     let addressTotalBalance = 0;
                     for (const token of tokens) {
-                        let balancesOfToken = balances.find(b => {
+                        let balancesOfToken = balances.filter(b => {
                             let tokenAddress = `0x${Buffer.from(b.tokenAddress).toString("hex")}`;
-                            return tokenAddress == token.l2Address;
+                            return token.l2Address == tokenAddress;
                         });
-                        if (!balancesOfToken) {
+                        if (!balancesOfToken || balancesOfToken.length == 0) {
                             continue;
                         }
-                        let tokenPriceId = this.tokenService.getCgIdByTokenSymbol(token.symbol);
-                        let tokenPrice = tokenPrices.find(p => p.priceId == tokenPriceId);
+                        let tokenPrice = tokenPrices.find(p => p.priceId == token.priceId);
                         let tokenDecimals = Math.pow(10,token.decimals);
-                        let balance = Number(balancesOfToken.balance)/tokenDecimals;
+                        let balance = 0;
+                        for (const balanceOfToken of balancesOfToken) {
+                            balance += Number(balanceOfToken.balance)/tokenDecimals;
+                        }
                         let usdBalance = balance * tokenPrice.usdPrice;
                         let addressTokenTvl =  {
                             address: address,
@@ -100,7 +113,7 @@ export class StatisticsTvlService extends Worker {
                 // calc referrals tvl
                 for (const address of addresses) {
                     let referralTvl = 0;
-                    let referees = await this.referrerRepository.getReferralsByAddress(address, Number.MAX_SAFE_INTEGER);
+                    let referees = await this.referrerRepository.getReferralsByAddress(address, 2147483647);
                     for (const r of referees) {
                         referralTvl += addressTvls.get(r);
                     }

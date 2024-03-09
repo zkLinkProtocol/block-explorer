@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+pimport { Injectable } from "@nestjs/common";
 import { FindOptionsWhere, FindOptionsSelect, FindOptionsRelations } from "typeorm";
 import { UnitOfWork } from "../unitOfWork";
 import {PointsHistory} from "../entities";
@@ -12,5 +12,16 @@ export class PointsHistoryRepository {
     await transactionManager.insert<PointsHistory>(PointsHistory, {
       address,blockNumber,stakePoint,refPoint,refNumber
     });
+  }
+
+  public async getLastHandlePointBlock(): Promise<number> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    let ret = await transactionManager.query(
+        `SELECT MAX("blockNumber") AS blockNumber FROM "pointsHistory"`);
+    if (!ret) {
+      return 0;
+    } else {
+      return ret.map((r: any) => r.blockNumber);
+    }
   }
 }

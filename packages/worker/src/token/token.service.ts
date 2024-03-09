@@ -73,6 +73,15 @@ export class TokenService {
     return this.supportTokens;
   }
 
+  public isSupportSupport(tokenAddress: string): boolean {
+    for (const token of this.supportTokens) {
+      if (token.address.find(t => t.l2Address == tokenAddress)) {
+          return true;
+      }
+    }
+    return false;
+  }
+
   private async getERC20Token(contractAddress: string): Promise<{
     symbol: string;
     decimals: number;
