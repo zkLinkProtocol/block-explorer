@@ -2,7 +2,7 @@ export type Hash = `0x${string}` | string;
 
 export type Address = Hash;
 
-export type NetworkOrigin = "L1" | "L2";
+export type NetworkOrigin = "L1" | "L2" | "origin" | "nova";
 
 export enum ContractVerificationCodeFormatEnum {
   soliditySingleFile = "solidity-single-file",
