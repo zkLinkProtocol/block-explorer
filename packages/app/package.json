@@ -8,7 +8,7 @@
   "license": "MIT",
   "repository": "https://github.com/matter-labs/block-explorer",
   "scripts": {
-    "dev": "vite",
+    "dev": "VITE_APP_ENVIRONMENT=nova vite",
     "dev:sepolia": "VITE_APP_ENVIRONMENT=sepolia vite",
     "dev:goerli": "VITE_APP_ENVIRONMENT=goerli vite",
     "build": "vue-tsc --noEmit && vite build",
