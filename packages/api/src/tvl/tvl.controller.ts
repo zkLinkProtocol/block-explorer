@@ -16,6 +16,8 @@ import { TokenTVLResponseDto } from "src/api/dtos/tvl/tokenTVL.dto";
 import { ReferralTotalTVLResponseDto } from "src/api/dtos/tvl/referralTotalTVL.dto";
 import { PagingOptionsDto } from "src/common/dtos";
 import { AccountReferTVLResponseDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
+import {ConfigService} from "@nestjs/config";
+import {DepositThresholdDto} from "../api/dtos/stats/depositThreshold.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -23,7 +25,31 @@ const entityName = "addressTokenTvl";
 @Controller(entityName)
 @ApiExcludeController(!swagger.bffEnabled)
 export class TVLController {
-  constructor(private readonly tvlService: TVLService) {}
+  private readonly pointsPhase1StartTime: string;
+  private readonly  pointsEarlyDepositEndTime: string;
+  private readonly  pointsPhase1EndTime: string;
+  constructor(
+      private readonly tvlService: TVLService,
+      configService: ConfigService
+  ) {
+    this.pointsPhase1StartTime = configService.get<string>("pointsPhase1StartTime");
+    this.pointsPhase1EndTime = configService.get<string>("pointsPhase1EndTime");
+    this.pointsEarlyDepositEndTime = configService.get<string>("pointsEarlyDepositEndTime");
+  }
+
+  @Get("/getDepositEthThreshold")
+  public async getDepositEthThreshold(): Promise<DepositThresholdDto> {
+    let nowDate = new Date();
+    let threshold = 0;
+    if (nowDate >= new Date(this.pointsPhase1StartTime) && nowDate <= new Date(this.pointsPhase1EndTime)) {
+      if (nowDate <= new Date(this.pointsEarlyDepositEndTime)) {
+        threshold = 0.1;
+      } else {
+        threshold = 0.25;
+      }
+    }
+    return { ethAmount: threshold}
+  }
 
   @ApiOperation({ summary: "Get account TVL" })
   @Get("/getAccounTvl")
@@ -35,6 +61,7 @@ export class TVLController {
       result: tokenAccounts,
     };
   }
+
 
   @ApiOperation({ summary: "Get account point" })
   @Get("/getAccountPoint")
