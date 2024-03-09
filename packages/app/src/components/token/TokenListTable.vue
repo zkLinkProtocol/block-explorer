@@ -31,7 +31,7 @@
             <template #content>{{ chainNameList[item.networkKey] }}</template>
           </Tooltip>
         </div>
-
+        <div v-else-if="ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="from-chain-text">{{ NOVA_MERGED_TOKEN }}</div>
         <div v-else class="from-chain-text">{{ NOVA_NATIVE_TOKEN }}</div>
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
@@ -45,7 +45,7 @@
         </div>
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
-        <div v-if="item.l1Address" class="token-address-container max-w-sm">
+        <div v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="ORIGIN" />-->
           <div v-if="!item.networkKey">
             {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
@@ -110,7 +110,7 @@ import TransactionNetworkSquareBlock from "@/components/transactions/Transaction
 // import { iconList } from "@/configs/hyperchain.config.json"
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 
-import { NOVA_NATIVE_TOKEN } from "@/utils/constants";
+import { NOVA_NATIVE_TOKEN, ETH_TOKEN_L1_ADDRESS, NOVA_MERGED_TOKEN } from "@/utils/constants";
 
 const { iconsList, chainNameList } = useEnvironmentConfig();
 
@@ -134,6 +134,7 @@ const { width } = useElementSize(table);
 watch(width, () => {
   width.value <= 500 ? (subtraction.value = 10) : (subtraction.value = 5);
 });
+
 </script>
 
 <style scoped lang="scss">
