@@ -92,10 +92,6 @@ export class TokenService {
     return await paginate<Token>(queryBuilder, paginationOptions);
   }
 
-  private async findAllTokens(): Promise<Token[]> {
-    return this.tokenRepository.find();
-  }
-
   public async calculateTvl(onlyTotal = true): Promise<TokenTvl[]> {
     const tvl = cache.get("tvl");
     if (tvl) {
@@ -104,7 +100,6 @@ export class TokenService {
       }
       return tvl as TokenTvl[];
     }
-    console.log("Calculating TVL");
     const tokens = await this.tokenRepository.find();
     let totalTvl = BigNumber.from(0);
     const ntvl = tokens.map((token) => {

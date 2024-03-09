@@ -69,7 +69,6 @@ export class TokenDto {
   })
   public readonly totalSupply?: BigNumber;
 
-  //add new filed: tvl
   @ApiProperty({
     type: String,
     description: "Token TVL",

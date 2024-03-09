@@ -19,6 +19,7 @@ import { ParseLimitedIntPipe } from "../common/pipes/parseLimitedInt.pipe";
 import { ParseAddressPipe, ADDRESS_REGEX_PATTERN } from "../common/pipes/parseAddress.pipe";
 import { swagger } from "../config/featureFlags";
 import { constants } from "../config/docs";
+import { BigNumber } from "ethers";
 
 const entityName = "tokens";
 
@@ -46,7 +47,7 @@ export class TokenController {
     if (key === "") {
       key = undefined;
     }
-    return await this.tokenService.findAll(
+    const res = await this.tokenService.findAll(
       {
         minLiquidity,
         networkKey: key,
@@ -57,6 +58,18 @@ export class TokenController {
         route: entityName,
       }
     );
+    return {
+      ...res,
+      items: res.items.map((token) => {
+        return {
+          ...token,
+          tvl: token.totalSupply
+            .mul(Math.floor((token.usdPrice ?? 0) * 10 ** 6))
+            .div(10 ** 6)
+            .div(BigNumber.from(10).pow(token.decimals)).toString(),
+        };
+      }),
+    };
   }
 
   @Get("/tvl")
@@ -68,7 +81,7 @@ export class TokenController {
   @ApiListPageOkResponse(TokenDto, { description: "Successfully returned all tokens" })
   @ApiBadRequestResponse({ description: "Paging query params are not valid or out of range" })
   public async getAllTokens(@Query("isall") isall: boolean): Promise<TokenDto[]> {
-    return await this.tokenService.calculateTvl(isall===false);
+    return await this.tokenService.calculateTvl(isall === false);
   }
 
   @Get(":address")
