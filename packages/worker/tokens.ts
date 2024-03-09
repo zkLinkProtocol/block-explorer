@@ -3,7 +3,7 @@ export default [
     "address":[
       {
         "chain": "Ethereum",
-        "l1Address": "0x80e41d1801E5b7F9a9f4e55Fd37bF2F3e797aC64",
+        "l1Address": "0x2593f2930feb95ef7461cabe3f1ca8f3dd3d0da8",
         "l2Address": "0x8f12a1a00520071D9C91dccd34C7E426B61Bd12a"
       },
       {
@@ -12,7 +12,7 @@ export default [
         "l2Address": "0x3Af585b8d06F7c31E389d7A611F505A9EFEBEc73"
       }
     ],
-    "symbol": "USDT",
+    "symbol": "USDC",
     "decimals": 6,
     "cgPriceId": "tether",
     "type": "Stablecoin",
