@@ -320,6 +320,11 @@ export class BlockProcessor {
     //points handler
     if (this.lastHandlePointBlock == -1) {
       this.lastHandlePointBlock = await this.pointsHistoryRepository.getLastHandlePointBlock();
+      let eligibleAddresses = await this.referralRepository.getAddressEligible();
+      console.log(eligibleAddresses);
+      for (const addr of eligibleAddresses) {
+        this.addressEligibleCache.set(addr.toString("hex"), true);
+      }
     }
     let blockData = blocksToProcess[0];
     const { block, blockDetails } = blockData;
@@ -437,15 +442,6 @@ export class BlockProcessor {
           this.balanceService.saveChangedBalances(blockData.changedBalances),
           this.tokenService.saveERC20Tokens(erc20TokensForChangedBalances),
         ]);
-      }
-
-
-      // restore eligible addresses
-      if (this.lastHandlePointBlock == -1) {
-        let eligibleAddresses = await this.referralRepository.getAddressEligible();
-        for (const addr of eligibleAddresses) {
-          this.addressEligibleCache.set(addr.toString("hex"), true);
-        }
       }
 
       // calc deposit points
