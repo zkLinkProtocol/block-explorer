@@ -10,7 +10,7 @@ export const bigNumberTransformer: ValueTransformer = {
   },
   from(str: string | null): BigNumber | null {
     if (!str) {
-      return null;
+      return BigNumber.from(0);
     }
     return BigNumber.from(str);
   },
