@@ -5,7 +5,7 @@ import { Pagination } from "nestjs-typeorm-paginate";
 import { IPaginationOptions } from "../common/types";
 import { paginate } from "../common/utils";
 import { Token, ETH_TOKEN } from "./token.entity";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { LRUCache } from "lru-cache";
 
 // const options: LRU. = { max: 500 };
@@ -92,6 +92,28 @@ export class TokenService {
     return await paginate<Token>(queryBuilder, paginationOptions);
   }
 
+  public async getUserHighestDepositTvl(address: string): Promise<BigNumber> {
+    address=address.substring(2);
+    const sql = `
+    SELECT tokens."usdPrice", transfers.amount,
+     transfers."tokenType", tokens.decimals
+    FROM public.transfers
+    LEFT JOIN tokens on transfers."tokenAddress" = tokens."l2Address"
+    WHERE transfers.type='deposit' and transfers."from" = '\\x${address}'
+  `;
+    const res = await this.tokenRepository.query(sql);
+    const a = res.map((item) =>
+      BigNumber.from(item.amount)
+        .mul(((item.usdPrice ?? 0) * 1000) | 0)
+        .div(1000)
+        .div(BigNumber.from(10).pow(item.decimals))
+    ).sort((a, b) => (a.gt(b) ? -1 : 1));
+    if (a.length === 0) {
+      return BigNumber.from(0);
+    }
+    return a[0];
+  }
+
   public async calculateTvl(onlyTotal = true): Promise<TokenTvl[]> {
     const tvl = cache.get("tvl");
     if (tvl) {
@@ -104,8 +126,8 @@ export class TokenService {
     let totalTvl = BigNumber.from(0);
     const ntvl = tokens.map((token) => {
       const tvl = token.totalSupply
-        .mul(Math.floor((token.usdPrice ?? 0) * 10 ** 6))
-        .div(10 ** 6)
+        .mul(Math.floor((token.usdPrice ?? 0) * 10 ** 3))
+        .div(10 ** 3)
         .div(BigNumber.from(10).pow(token.decimals));
       totalTvl = totalTvl.add(tvl);
       return {
