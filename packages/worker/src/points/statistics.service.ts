@@ -50,7 +50,7 @@ export class StatisticsTvlService extends Worker {
                             });
                     }
                 }
-                const tokenIds = tokens.map(t => this.tokenService.getCgIdByTokenSymbol(t.symbol));
+                const tokenIds = tokens.map(t => t.priceId);
                 let tokenPrices = await this.tokenOffChainDataProvider.getTokensCurrentPrice(tokenIds);
                 const addresses = await this.balanceRepository.getAllAddresses();
                 let addressTokenTvls = new Map();

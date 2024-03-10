@@ -13,8 +13,8 @@ export class PointsRepository {
         `INSERT INTO points (address,"stakePoint","refPoint","refNumber") VALUES ($1,$2,$3,$4) 
             ON CONFLICT (address) 
             DO UPDATE
-            SET "stakePoint" = $2,
-            "refPoint" = $3,
+            SET "stakePoint" = points."stakePoint" + $2,
+            "refPoint" = points."refPoint" + $3,
             "refNumber" = $4
             `, [
       address,stakePoint,refPoint,refNumber

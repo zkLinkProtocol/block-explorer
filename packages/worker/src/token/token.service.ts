@@ -73,7 +73,7 @@ export class TokenService {
     return this.supportTokens;
   }
 
-  public isSupportSupport(tokenAddress: string): boolean {
+  public isSupportToken(tokenAddress: string): boolean {
     for (const token of this.supportTokens) {
       if (token.address.find(t => t.l2Address == tokenAddress)) {
           return true;
