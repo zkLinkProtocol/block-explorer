@@ -186,14 +186,17 @@ export class TVLService {
     let result: TokenTVLDto[] = [];
     for (let token of totalTokens) {
       const hexAddress = normalizeAddressTransformer.from(token.tokenAddress);
-      result.push({
-        symbol: tokensMap.get(hexAddress)!.symbol,
-        tokenAddress: hexAddress,
-        amount: token.amount,
-        tvl: token.amount,
-        type: "",
-        yieldType: "",
-      });
+       const isEth = isETH(hexAddress);
+       const cur_token = tokensMap.get(hexAddress);
+       const symbol = isEth ? "Eth" : cur_token ? cur_token.symbol : "";
+       result.push({
+         symbol,
+         tokenAddress: hexAddress,
+         amount: token.amount,
+         tvl: token.amount,
+         type: "",
+         yieldType: "",
+       });
     }
 
     return result;
