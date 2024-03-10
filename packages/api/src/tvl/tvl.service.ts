@@ -192,7 +192,7 @@ export class TVLService {
          symbol,
          tokenAddress: hexAddress,
          amount: token.amount,
-         tvl: token.amount,
+         tvl: token.tvl,
          type: "",
          yieldType: "",
        });
