@@ -19,7 +19,15 @@ export class ReferralsRepository {
     });
   }
 
-    public async updateReferralsBlock(referee: string,block: number): Promise<void> {
+  public async getAddressEligible(): Promise<Buffer[]> {
+      let ret = await this.refer.query(`SELECT address FROM invites WHERE active = true`);
+      if (!ret || ret.length == 0) {
+          return [];
+      } else {
+          return ret.map((r:any) => r.address);
+      }
+  }
+    public async updateReferralsBlock(referee: Buffer,block: number): Promise<void> {
         await this.refer.query(
             `UPDATE invites SET "blockNumber" = $2 WHERE address = $1 AND "blockNumber" IS NULL`,[referee,block]
         );
@@ -29,7 +37,7 @@ export class ReferralsRepository {
       for (const address of addresses) {
           await this.refer.query(
               `UPDATE invites
-               SET "active" = true
+               SET active = true
                WHERE address = $1`, [address]
           );
       }

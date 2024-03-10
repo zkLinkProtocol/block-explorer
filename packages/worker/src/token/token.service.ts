@@ -65,6 +65,10 @@ export class TokenService {
     }
   }
 
+  // public async saveETH(): Promise<void> {
+  //   return await this.tokenRepository.saveETH();
+  // }
+
   public async getAllTokens(): Promise<TokenEntity[]> {
     return await this.tokenRepository.getAllTokens();
   }

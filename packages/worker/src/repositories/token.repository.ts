@@ -4,6 +4,8 @@ import { IsNull, Not, FindOptionsSelect } from "typeorm";
 import { Token } from "../entities";
 import { BaseRepository } from "./base.repository";
 import { UnitOfWork } from "../unitOfWork";
+import {ETH_TOKEN_L2_ADDRESS} from "../../../app/src/utils/constants";
+import {ETH_ADDRESS} from "zksync-web3/build/src/utils";
 
 @Injectable()
 export class TokenRepository extends BaseRepository<Token> {
@@ -34,6 +36,19 @@ export class TokenRepository extends BaseRepository<Token> {
       `);
     await queryBuilder.execute();
   }
+
+  // public async saveETH(): Promise<void> {
+  //   const transactionManager = this.unitOfWork.getTransactionManager();
+  //   let symbol = "ETH";
+  //   let tokenName = "Ethereum";
+  //   let l1Address = Buffer.from(ETH_ADDRESS.substring(2),"hex");
+  //   let l2Address = Buffer.from(ETH_TOKEN_L2_ADDRESS.substring(2),"hex");
+  //   let transactionHash = Buffer.from("0000000000000000000000000000000000000000000000000000000000000000","hex");
+  //   await transactionManager.query(
+  //       `INSERT INTO tokens ("createdAt","updatedAt","number",symbol,"name",decimals,"blockNumber","l2Address",
+  //                   "L1Address","transactionHash","logIndex") VALUES (now(),now(),0,$1,$2,18,0,$3,$4, $5,0) ON CONFLICT("l2Address") DO NOTHING`,
+  //       [symbol,tokenName,l2Address,l1Address,transactionHash]);
+  // }
 
   public async getOffChainDataLastUpdatedAt(): Promise<Date> {
     const transactionManager = this.unitOfWork.getTransactionManager();

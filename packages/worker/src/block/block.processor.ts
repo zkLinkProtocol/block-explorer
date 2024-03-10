@@ -319,6 +319,11 @@ export class BlockProcessor {
 
     //points handler
     if (this.lastHandlePointBlock == -1) {
+      // restore eligible addresses
+      let eligibleAddresses = await this.referralRepository.getAddressEligible();
+      for (const addr of eligibleAddresses) {
+        this.addressEligibleCache.set(addr.toString("hex"),true);
+      }
       this.lastHandlePointBlock = await this.pointsHistoryRepository.getLastHandlePointBlock();
     }
     let blockData = blocksToProcess[0];
@@ -452,7 +457,8 @@ export class BlockProcessor {
         let accountActives = [];
         for (const deposit of deposits) {
           // update referrals blockNumber
-          await this.referralRepository.updateReferralsBlock(deposit.from,block.number);
+          let addrBuf = Buffer.from(deposit.from.startsWith("0x") ? deposit.from.substring(2) : deposit.from, "hex");
+          await this.referralRepository.updateReferralsBlock(addrBuf,block.number);
           let depositPoint = 0;
           let depositEthAmount = 0;
           if (this.checkTokenIsEth(deposit.tokenAddress)) {
@@ -503,13 +509,12 @@ export class BlockProcessor {
           }
           if (newEligible != eligible) {
             this.addressEligibleCache.set(deposit.from, newEligible);
-            accountActives.push(deposit.from);
+            accountActives.push(addrBuf);
           }
-          let addrBuf = Buffer.from(deposit.from.startsWith("0x") ? deposit.from.substring(2) : deposit.from, "hex");
-          let oldPoint = depositPoints.get(addrBuf);
+          let oldPoint = depositPoints.get(deposit.from);
           let newPoint = oldPoint || 0;
           newPoint += depositPoint;
-          depositPoints.set(addrBuf, newPoint);
+          depositPoints.set(deposit.from, newPoint);
         }
 
         // save to db
