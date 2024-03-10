@@ -37,7 +37,7 @@ export class ReferralsRepository {
 
   public async getReferralsByAddress(referer: Buffer,block: number): Promise<Buffer[]> {
     const ret = await this.refer.query(
-        `SELECT DISTINCT(r.address) AS referee FROM referrers r,invites v ON r.address = v.address WHERE r.referrer = $1 AND v."blockNumber" <= $2`,[referer,block]
+        `SELECT DISTINCT(r.address) AS referee FROM referrers r,invites v WHERE r.referrer = $1 AND r.address = v.address AND v."blockNumber" <= $2`,[referer,block]
     );
     return ret.map((r:any) => r.referee);
   }
