@@ -68,14 +68,14 @@ export class TVLService {
     var tokensMap = new Map(tokens.map((token) => [token.l2Address, token]));
 
     let result = tokenBalance.map((token) => {
-      const isEth = isETH(token.tokenAddress);
       const cur_token = tokensMap.get(token.tokenAddress);
-      const symbol = isEth ? "Eth" : cur_token ? cur_token.symbol : "";
+      const symbol = cur_token ? cur_token.symbol : "";
       let tvl: AccountTVLDto = {
         tvl: token.tvl,
         amount: token.balance,
         tokenAddress: token.tokenAddress,
         symbol,
+        iconURL: cur_token ? cur_token.iconURL : "",
       };
       return tvl;
     });
@@ -186,9 +186,8 @@ export class TVLService {
     let result: TokenTVLDto[] = [];
     for (let token of totalTokens) {
       const hexAddress = normalizeAddressTransformer.from(token.tokenAddress);
-       const isEth = isETH(hexAddress);
        const cur_token = tokensMap.get(hexAddress);
-       const symbol = isEth ? "Eth" : cur_token ? cur_token.symbol : "";
+       const symbol = cur_token ? cur_token.symbol : "";
        result.push({
          symbol,
          tokenAddress: hexAddress,
