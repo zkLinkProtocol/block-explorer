@@ -19,6 +19,7 @@ import { ParseLimitedIntPipe } from "../common/pipes/parseLimitedInt.pipe";
 import { ParseAddressPipe, ADDRESS_REGEX_PATTERN } from "../common/pipes/parseAddress.pipe";
 import { swagger } from "../config/featureFlags";
 import { constants } from "../config/docs";
+import {SupportTokenDto} from "./support-token.dto";
 
 const entityName = "tokens";
 
@@ -38,6 +39,7 @@ export class TokenController {
     example: 100000,
     required: false,
   })
+
   public async getTokens(
     @Query() pagingOptions: PagingOptionsDto,
     @Query("minLiquidity", new ParseLimitedIntPipe({ min: 0, isOptional: true })) minLiquidity?: number,
@@ -57,6 +59,11 @@ export class TokenController {
         route: entityName,
       }
     );
+  }
+
+  @Get("/getSupportTokens")
+  public getSupportTokens(): SupportTokenDto[] {
+    return this.tokenService.getAllSupportTokens();
   }
 
   @Get(":address")

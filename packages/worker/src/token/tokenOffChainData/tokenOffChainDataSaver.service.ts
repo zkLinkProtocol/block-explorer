@@ -4,6 +4,7 @@ import { Worker } from "../../common/worker";
 import waitFor from "../../utils/waitFor";
 import { TokenRepository } from "../../repositories/token.repository";
 import { TokenOffChainDataProvider } from "./tokenOffChainDataProvider.abstract";
+import {TokenService} from "../token.service";
 
 const UPDATE_TOKENS_BATCH_SIZE = 10;
 
@@ -14,6 +15,7 @@ export class TokenOffChainDataSaverService extends Worker {
 
   public constructor(
     private readonly tokenRepository: TokenRepository,
+    private readonly tokenService: TokenService,
     private readonly tokenOffChainDataProvider: TokenOffChainDataProvider,
     configService: ConfigService
   ) {
@@ -34,10 +36,10 @@ export class TokenOffChainDataSaverService extends Worker {
           : this.updateTokenOffChainDataInterval - timeSinceLastUpdate;
 
       if (!nextUpdateTimeout) {
-        const bridgedTokens = await this.tokenRepository.getBridgedTokens();
-        const tokensToUpdate = await this.tokenOffChainDataProvider.getTokensOffChainData({
-          bridgedTokensToInclude: bridgedTokens.map((t) => t.l1Address),
-        });
+        // const bridgedTokens = await this.tokenRepository.getBridgedTokens();
+        const tokensToUpdate = await this.tokenOffChainDataProvider.getTokensOffChainData(
+          this.tokenService.getAllSupportTokens(),
+        );
         const updatedAt = new Date();
 
         let updateTokensTasks = [];
