@@ -184,7 +184,7 @@ export class BlockProcessor {
                 const tokenBalance = Number(balance.balance) / decimals;
                 console.log(`${member.toString("hex")} balance of ${token.symbol} is ${tokenBalance},price is ${tokenPrice}`);
                 const tokenAmount = tokenBalance * tokenPrice;
-                if (member == address) {
+                if (member.compare(address)) {
                   addressAmount += tokenAmount * tokenMultiplier;
                 }
                 memberAmount += tokenAmount;
@@ -197,11 +197,13 @@ export class BlockProcessor {
           let groupBooster = this.getGroupBooster(groupTvl);
           //todo: growthBooster low priority
           let growthBooster = 0;
+          let oldPoint = await this.pointsRepository.getPointByAddress(address);
           //(1 + Group Booster + Growth Booster) * sum_all tokens in activity list
           // (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price/ ETH_Price )
-          stakePoint = (1 + groupBooster + growthBooster) * addressAmount * earlyBirdMultiplier;
-          stakePoint = Number(stakePoint.toFixed(2));
-          stakePointsCache.set(address, stakePoint);
+          let newStakePoint = (1 + groupBooster + growthBooster) * addressAmount * earlyBirdMultiplier;
+          newStakePoint = Number(stakePoint.toFixed(2));
+          stakePoint = oldPoint.stakePoint + newStakePoint;
+          stakePointsCache.set(addrStr, stakePoint);
           console.log(`account ${addrStr} point ${stakePoint} at ${fromBlockNumber} - ${toBlockNumber}`);
 
           //calc referral point
@@ -209,18 +211,14 @@ export class BlockProcessor {
           console.log(referees.length);
           for (const referee of referees) {
             console.log(referee);
-            // group leader
-            if (referee == address) {
-              continue;
-            }
-            let refereeStakePoint = stakePointsCache.get(referee);
+            let refereeStakePoint = stakePointsCache.get(referee.toString("hex"));
             if (!refereeStakePoint) {
               refereeStakePoint = await this.pointsRepository.getStakePointByAddress(referee);
             }
             refPoint += refereeStakePoint * 0.1;
           }
 
-          refPoint = Number(refPoint.toFixed(2));
+          refPoint = oldPoint.refPoint + Number(refPoint.toFixed(2));
         }
         const refNumber = 0;
         await this.pointsRepository.add(address, stakePoint, refPoint, refNumber);

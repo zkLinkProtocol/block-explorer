@@ -6,7 +6,6 @@ import { TokenRepository,BalanceRepository,ReferralsRepository,TvlRepository } f
 import {TokenOffChainDataProvider} from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 import {TokenService} from "../token/token.service";
 
-
 @Injectable()
 export class StatisticsTvlService extends Worker {
     private readonly statisticsTvlInterval: number;
@@ -47,6 +46,7 @@ export class StatisticsTvlService extends Worker {
                             chain: addr.chain,
                             l2Address: addr.l2Address,
                             priceId: t.cgPriceId,
+                            decimals: t.decimals,
                             });
                     }
                 }
@@ -89,7 +89,7 @@ export class StatisticsTvlService extends Worker {
                         referralTvl: 0,
                     };
                     addressTokenTvls.set(address,addressTokenBalances);
-                    addressTvls.set(address,addressTvl);
+                    addressTvls.set(address.toString("hex"),addressTvl);
                 }
 
                 // calc group tvl
@@ -99,7 +99,7 @@ export class StatisticsTvlService extends Worker {
                    let tvl = 0;
                    let members = await this.referrerRepository.getGroupMembers(groupId);
                    for (const member of members) {
-                       tvl += addressTvls.get(member)?.tvl||0;
+                       tvl += addressTvls.get(member.toString("hex"))?.tvl||0;
                    }
                    let ethPrice = tokenPrices.find(t => t.priceId === "ethereum");
                    tvl /= ethPrice.usdPrice;
@@ -115,17 +115,17 @@ export class StatisticsTvlService extends Worker {
                     let referralTvl = 0;
                     let referees = await this.referrerRepository.getReferralsByAddress(address, 2147483647);
                     for (const r of referees) {
-                        referralTvl += addressTvls.get(r);
+                        referralTvl += addressTvls.get(r.toString("hex"))?.tvl||0;
                     }
                     let ethPrice = tokenPrices.find(t => t.priceId === "ethereum");
                     referralTvl /= ethPrice.usdPrice;
-                    let addressTvl = addressTvls.get(address);
+                    let addressTvl = addressTvls.get(address.toString("hex"));
                     let newAddressTvl = {
                         address: addressTvl.address,
                         tvl: addressTvl.tvl,
                         referralTvl: referralTvl,
                     };
-                    addressTvls.set(address, newAddressTvl);
+                    addressTvls.set(address.toString("hex"), newAddressTvl);
                 }
 
                 const updatedAt = new Date();
