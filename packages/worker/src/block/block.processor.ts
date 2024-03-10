@@ -200,7 +200,7 @@ export class BlockProcessor {
           let oldPoint = await this.pointsRepository.getPointByAddress(address);
           //(1 + Group Booster + Growth Booster) * sum_all tokens in activity list
           // (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price/ ETH_Price )
-          let newStakePoint = (1 + groupBooster + growthBooster) * addressAmount * earlyBirdMultiplier;
+          let newStakePoint = (1 + groupBooster + growthBooster) * addressAmount * earlyBirdMultiplier/ethPrice;
           newStakePoint = Number(newStakePoint.toFixed(2));
           let oldStakePoint = oldPoint?.stakePoint || 0;
           stakePoint = oldStakePoint + newStakePoint;
