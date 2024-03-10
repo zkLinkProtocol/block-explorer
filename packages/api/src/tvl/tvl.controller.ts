@@ -26,12 +26,9 @@ const entityName = "addressTokenTvl";
 @ApiExcludeController(!swagger.bffEnabled)
 export class TVLController {
   private readonly pointsPhase1StartTime: string;
-  private readonly  pointsEarlyDepositEndTime: string;
-  private readonly  pointsPhase1EndTime: string;
-  constructor(
-      private readonly tvlService: TVLService,
-      configService: ConfigService
-  ) {
+  private readonly pointsEarlyDepositEndTime: string;
+  private readonly pointsPhase1EndTime: string;
+  constructor(private readonly tvlService: TVLService, configService: ConfigService) {
     this.pointsPhase1StartTime = configService.get<string>("pointsPhase1StartTime");
     this.pointsPhase1EndTime = configService.get<string>("pointsPhase1EndTime");
     this.pointsEarlyDepositEndTime = configService.get<string>("pointsEarlyDepositEndTime");
@@ -48,7 +45,7 @@ export class TVLController {
         threshold = 0.25;
       }
     }
-    return { ethAmount: threshold}
+    return { ethAmount: threshold };
   }
 
   @ApiOperation({ summary: "Get account TVL" })
@@ -61,7 +58,6 @@ export class TVLController {
       result: tokenAccounts,
     };
   }
-
 
   @ApiOperation({ summary: "Get account point" })
   @Get("/getAccountPoint")
@@ -141,14 +137,12 @@ export class TVLController {
 
   @ApiOperation({ summary: "group tvl" })
   @Get("/getGroupTvl")
-  public async getGroupTvl(
-    @Query("address", new ParseAddressPipe()) address: string
-  ): Promise<ReferralTotalTVLResponseDto> {
-    const result = await this.tvlService.getReferralTvl(address);
+  public async getGroupTvl(@Query("address", new ParseAddressPipe()) address: string): Promise<TotalTVLResponseDto> {
+    const result = await this.tvlService.getGroupTVL(address);
     return {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,
-      result: 23,
+      result,
     };
   }
 

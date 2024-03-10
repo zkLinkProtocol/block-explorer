@@ -1,3 +1,4 @@
+import { GroupTvl } from "./../../../worker/src/entities/groupTvl.entity";
 import { map } from "rxjs/operators";
 import { IsNotEmpty } from "class-validator";
 import { Injectable } from "@nestjs/common";
@@ -17,6 +18,7 @@ import { Referral } from "./entities/referral.entity";
 import { PagingOptionsDto } from "src/common/dtos";
 import { AccountPointsDto } from "src/api/dtos/tvl/accountPoints.dto";
 import { AccountReferTVLDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
+import { Invite } from "./entities/invite.entity";
 
 @Injectable()
 export class TVLService {
@@ -30,7 +32,11 @@ export class TVLService {
     @InjectRepository(AddressTvl)
     private readonly addressTVLRepository: Repository<AddressTvl>,
     @InjectRepository(Referral, "refer")
-    private readonly referralRepository: Repository<Referral>
+    private readonly referralRepository: Repository<Referral>,
+    @InjectRepository(Invite, "refer")
+    private readonly inviteRepository: Repository<Invite>,
+    @InjectRepository(GroupTvl)
+    private readonly groupTVLRepository: Repository<GroupTvl>
   ) {}
 
   public async getAccountTokensTVL(address: string): Promise<AccountTVLDto[]> {
@@ -186,6 +192,29 @@ export class TVLService {
   public async getReferralTvl(address: string) {
     const tvl = await this.addressTVLRepository.sum("referralTvl", { address });
     return tvl;
+  }
+
+  public async getGroupTVL(address: string) {
+    let account = await this.inviteRepository.findOne({
+      where: {
+        address,
+      },
+    });
+
+    if (!account) {
+      return 0;
+    }
+
+    let groupTVL = await this.groupTVLRepository.findOne({
+      where: {
+        groupId: account.groupId,
+      },
+    });
+    if (!groupTVL) {
+      return 0;
+    }
+
+    return groupTVL.tvl;
   }
 
   public async getAccountRefferals(address: string, page: PagingOptionsDto): Promise<AccountPointsDto[]> {

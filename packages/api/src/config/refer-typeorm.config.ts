@@ -1,6 +1,7 @@
 import { DataSource, DataSourceOptions } from "typeorm";
 import { config } from "dotenv";
 import { Referral } from "src/tvl/entities/referral.entity";
+import { Invite } from "src/tvl/entities/invite.entity";
 
 config();
 export const typeOrmReferModuleOptions: DataSourceOptions = {
@@ -18,7 +19,7 @@ export const typeOrmReferModuleOptions: DataSourceOptions = {
   migrationsRun: false,
   synchronize: false,
   logging: false,
-  entities: [Referral],
+  entities: [Referral, Invite],
   subscribers: [],
   migrations: [],
 };
