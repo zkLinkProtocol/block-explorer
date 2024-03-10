@@ -16,11 +16,6 @@ export class Migrations1709778563431 implements MigrationInterface {
       `CREATE TABLE "groupTvls" ("createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "groupId" varchar NOT NULL, "tvl" numeric NOT NULL, CONSTRAINT "PK_76c0c12beb707760665b3f51d14" PRIMARY KEY ("groupId"))`
     );
     await queryRunner.query(`CREATE INDEX "IDX_76c0c12beb707760665b3f51d1" ON "groupTvls" ("groupId") `);
-
-    await queryRunner.query(`ALTER TABLE "points" ALTER COLUMN "stakePoint" TYPE numeric`);
-    await queryRunner.query(`ALTER TABLE "points" ALTER COLUMN "refPoint" TYPE numeric`);
-    await queryRunner.query(`ALTER TABLE "pointsHistory" ALTER COLUMN "stakePoint" TYPE numeric`);
-    await queryRunner.query(`ALTER TABLE "pointsHistory" ALTER COLUMN "refPoint" TYPE numeric`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

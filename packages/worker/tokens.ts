@@ -1,5 +1,20 @@
 export default [
   {
+    "address": [
+      {
+        "chain": "Ethereum",
+        "l1Address": "0x0000000000000000000000000000000000000000",
+        "l2Address": "0x000000000000000000000000000000000000800a"
+      }
+    ],
+    "symbol": "ETH",
+    "decimals": 18,
+    "cgPriceId": "ethereum",
+    "type": "NATIVE",
+    "yieldType": ["NOVA Points"],
+    "multiplier": 2
+  },
+  {
     "address":[
       {
         "chain": "Ethereum",
@@ -14,10 +29,10 @@ export default [
     ],
     "symbol": "USDC",
     "decimals": 6,
-    "cgPriceId": "tether",
+    "cgPriceId": "usd-coin",
     "type": "Stablecoin",
     "yieldType": ["NOVA Points"],
-    "multiplier": 1.2
+    "multiplier": 1
   },
   {
     "address":[
@@ -38,5 +53,25 @@ export default [
     "type": "LSD",
     "yieldType": ["NOVA Points"],
     "multiplier": 2
+  },
+  {
+    "address":[
+      {
+        "chain": "Ethereum",
+        "l1Address": "0xece6cd0024ff59bceba34e2639466409026484f5",
+        "l2Address": "0x285923c58af7a0e8EFfD02e18901Fa37318ccC56"
+      },
+      {
+        "chain": "Linea",
+        "l1Address": "0x36504cf172bfd4e84e52f2a857467a84f89b8475",
+        "l2Address": "0xAC71eC1796e0D98B541A96f95c03b7F3149dC6Aa"
+      }
+    ],
+    "symbol": "USDT",
+    "decimals": 6,
+    "cgPriceId": "tether",
+    "type": "Stablecoin",
+    "yieldType": ["NOVA Points"],
+    "multiplier": 1.5
   }
 ]

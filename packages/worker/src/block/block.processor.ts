@@ -9,7 +9,7 @@ import {BlockchainService} from "../blockchain/blockchain.service";
 import {BlockWatcher} from "./block.watcher";
 import {BlockData} from "../dataFetcher/types";
 import {BalanceService} from "../balance/balance.service";
-import {TokenService} from "../token/token.service";
+import {TokenL1Address, TokenService} from "../token/token.service";
 import {
   BlockRepository,
   LogRepository,
@@ -131,6 +131,7 @@ export class BlockProcessor {
       where: {number: toBlockNumber}
     });
       console.log(`handlePointsPeriod ${fromBlockNumber} - ${toBlockNumber}`);
+      this.lastHandlePointBlock = toBlock.number;
       // clear timer
       if (this.timer) {
         clearTimeout(this.timer);
@@ -142,10 +143,7 @@ export class BlockProcessor {
       }
 
       // get all support tokens
-      const tokens = this.tokenService.getAllSupportTokens();
-      if (!tokens.length) {
-        return false;
-      }
+      let tokens = this.tokenService.getAllSupportTokens();
 
       let tokenPrices = new Map();
       for ( const token of tokens ) {
@@ -160,8 +158,8 @@ export class BlockProcessor {
       for ( const address of addresses ) {
         let stakePoint = 0;
         let refPoint = 0;
-        let addrStr = address.toString('hex');
-        let eligible = this.addressEligibleCache.get(address.toString("hex"));
+        let addrStr = `0x${address.toString('hex')}`;
+        let eligible = this.addressEligibleCache.get(addrStr);
         if (eligible) {
           let addressAmount = 0;
           // calc group TVL
@@ -252,7 +250,6 @@ export class BlockProcessor {
     //   refPoints.set(referAddr,newReferPoint);
     // }
 
-    this.lastHandlePointBlock = toBlock.number;
     // set timer
     const timeOutFromBlock = toBlockNumber;
     const timeOutToBlock =  timeOutFromBlock;
@@ -329,25 +326,31 @@ export class BlockProcessor {
     //skip genesis block and 1st block
     if ( block.number > 1) {
       const blockTs = block.timestamp;
-      // get previous handled block timestamp
-      const preScanToBlockNumber = this.lastHandlePointBlock == 0 ? 1 : this.lastHandlePointBlock;
-      console.log(`Last scan to block number ${preScanToBlockNumber}`);
-      const preBlock = await this.blockRepository.getLastBlock({
-        where: {number: preScanToBlockNumber}
-      });
-      const prePointsBlockTs = preBlock.timestamp.getTime() / 1000;
-      const ts_interval = blockTs - prePointsBlockTs;
-      console.log(`Current block ${block.number} ,timestamp interval ${ts_interval},config period ${this.pointsStatisticalPeriodSecs}`);
-      if (ts_interval > this.pointsStatisticalPeriodSecs) {
-        let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
-        console.log(`Ts interval periods ${periods}`);
-        let fromBlockNumber = this.lastHandlePointBlock == 0 ? 1 : Math.min(preBlock.number + 1, block.number - 1);
-        let toBlockNumber = block.number - 1;
-        for (let i = 0; i < periods; i++) {
-          await this.handlePointsPeriod(fromBlockNumber, toBlockNumber);
-        }
+      const pointsPhase1StartTime = new Date(this.pointsPhase1StartTime).getTime()/1000;
+      console.log(`check ${blockTs} ${pointsPhase1StartTime}`);
+      if (blockTs < pointsPhase1StartTime) {
+        this.lastHandlePointBlock = block.number;
       } else {
-        console.log(`${preBlock.number} - ${block.number} block time interval does not reach the statistical period `);
+        // get previous handled block timestamp
+        const preScanToBlockNumber = this.lastHandlePointBlock == 0 ? 1 : this.lastHandlePointBlock;
+        console.log(`Last scan to block number ${preScanToBlockNumber}`);
+        const preBlock = await this.blockRepository.getLastBlock({
+          where: {number: preScanToBlockNumber}
+        });
+        const prePointsBlockTs = preBlock.timestamp.getTime() / 1000;
+        const ts_interval = blockTs - prePointsBlockTs;
+        console.log(`Current block ${block.number} ,timestamp interval ${ts_interval},config period ${this.pointsStatisticalPeriodSecs}`);
+        if (ts_interval > this.pointsStatisticalPeriodSecs) {
+          let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
+          console.log(`Ts interval periods ${periods}`);
+          let fromBlockNumber = this.lastHandlePointBlock == 0 ? 1 : Math.min(preBlock.number + 1, block.number - 1);
+          let toBlockNumber = block.number - 1;
+          for (let i = 0; i < periods; i++) {
+            await this.handlePointsPeriod(fromBlockNumber, toBlockNumber);
+          }
+        } else {
+          console.log(`${preBlock.number} - ${block.number} block time interval does not reach the statistical period `);
+        }
       }
     }
 
@@ -452,15 +455,15 @@ export class BlockProcessor {
           await this.referralRepository.updateReferralsBlock(deposit.from,block.number);
           let depositPoint = 0;
           let depositEthAmount = 0;
-          //not support tokens
-          if (!this.tokenService.isSupportSupport(deposit.tokenAddress)) {
-            continue;
-          }
           if (this.checkTokenIsEth(deposit.tokenAddress)) {
             depositEthAmount = Number(deposit.amount) / Math.pow(10,18);
             const tokenMultiplier = this.tokenService.getTokenMultiplier("ETH");
             depositPoint = 10 * tokenMultiplier * depositEthAmount;
           } else {
+            //not support tokens
+            if (!this.tokenService.isSupportToken(deposit.tokenAddress)) {
+              continue;
+            }
             if (ethPrice == 0) {
               ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", block.timestamp * 1000);
             }

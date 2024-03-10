@@ -19,16 +19,9 @@ export class ReferralsRepository {
     });
   }
 
-  public async getReferralsByBlock(block: number,offset: bigint): Promise<Referral[]> {
-    const referrals = await this.refer.query(
-        `SELECT * FROM referrers WHERE "blockNumber" <= $1 AND id < $2 ORDER BY id DESC LIMIT 100`,[block,offset]
-    );
-    return referrals;
-  }
-
     public async updateReferralsBlock(referee: string,block: number): Promise<void> {
         await this.refer.query(
-            `UPDATE referrers SET "blockNumber" = $2 WHERE address = $1 AND "blockNumber" IS NULL`,[referee,block]
+            `UPDATE invites SET "blockNumber" = $2 WHERE address = $1 AND "blockNumber" IS NULL`,[referee,block]
         );
     }
 
@@ -44,7 +37,7 @@ export class ReferralsRepository {
 
   public async getReferralsByAddress(referer: Buffer,block: number): Promise<Buffer[]> {
     const ret = await this.refer.query(
-        `SELECT DISTINCT(address) AS referee FROM referrers WHERE referrer = $1 AND "blockNumber" <= $2`,[referer,block]
+        `SELECT DISTINCT(r.address) AS referee FROM referrers r,invites v WHERE r.address = $1 AND r.address = v.address AND v."blockNumber" <= $2`,[referer,block]
     );
     return ret.map((r:any) => r.referee);
   }
