@@ -20,6 +20,13 @@ import { AccountPointsDto } from "src/api/dtos/tvl/accountPoints.dto";
 import { AccountReferTVLDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
 import { Invite } from "./entities/invite.entity";
 
+const L2_ETH_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
+const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+function isETH(token: string) {
+  return token.toLowerCase() == ETH_ADDRESS || token.toLowerCase() == L2_ETH_TOKEN_ADDRESS;
+}
+
 @Injectable()
 export class TVLService {
   constructor(
@@ -61,11 +68,14 @@ export class TVLService {
     var tokensMap = new Map(tokens.map((token) => [token.l2Address, token]));
 
     let result = tokenBalance.map((token) => {
+      const isEth = isETH(token.tokenAddress);
+      const cur_token = tokensMap.get(token.tokenAddress);
+      const symbol = isEth ? "Eth" : cur_token ? cur_token.symbol : "";
       let tvl: AccountTVLDto = {
         tvl: token.tvl,
         amount: token.balance,
         tokenAddress: token.tokenAddress,
-        symbol: tokensMap.get(token.tokenAddress)!.symbol,
+        symbol,
       };
       return tvl;
     });
