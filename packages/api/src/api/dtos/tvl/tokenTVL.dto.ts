@@ -11,6 +11,13 @@ export class TokenTVLDto {
 
   @ApiProperty({
     type: String,
+    description: "iconUrl",
+    example: "http",
+  })
+  public readonly iconURL: string;
+
+  @ApiProperty({
+    type: String,
     description: "token address",
     example: "0x23333",
   })

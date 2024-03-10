@@ -195,6 +195,7 @@ export class TVLService {
          tvl: token.tvl,
          type: "",
          yieldType: "",
+         iconURL: cur_token ? cur_token.iconURL : null,
        });
     }
 
