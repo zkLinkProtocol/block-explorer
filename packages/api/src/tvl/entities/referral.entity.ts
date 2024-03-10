@@ -10,7 +10,4 @@ export class Referral extends BaseEntity {
   @Index()
   @Column({ type: "bytea", transformer: normalizeAddressTransformer })
   public readonly referrer: string;
-
-  @Column({ type: "bigint" })
-  public readonly blockNumber?: number;
 }
