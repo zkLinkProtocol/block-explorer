@@ -201,10 +201,10 @@ export class BlockProcessor {
           //(1 + Group Booster + Growth Booster) * sum_all tokens in activity list
           // (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price/ ETH_Price )
           let newStakePoint = (1 + groupBooster + growthBooster) * addressAmount * earlyBirdMultiplier;
-          newStakePoint = Number(stakePoint.toFixed(2));
-          stakePoint = oldPoint.stakePoint + newStakePoint;
+          newStakePoint = Number(newStakePoint.toFixed(2));
+          let oldStakePoint = oldPoint?.stakePoint || 0;
+          stakePoint = oldStakePoint + newStakePoint;
           stakePointsCache.set(addrStr, stakePoint);
-          console.log(`account ${addrStr} point ${stakePoint} at ${fromBlockNumber} - ${toBlockNumber}`);
 
           //calc referral point
           let referees = await this.referralRepository.getReferralsByAddress(address, toBlockNumber);
@@ -218,7 +218,9 @@ export class BlockProcessor {
             refPoint += refereeStakePoint * 0.1;
           }
 
-          refPoint = oldPoint.refPoint + Number(refPoint.toFixed(2));
+          let oldRefPoint = oldPoint?.refPoint || 0;
+          refPoint = oldRefPoint + Number(refPoint.toFixed(2));
+          console.log(`account ${addrStr} point ${stakePoint} ${refPoint} at ${fromBlockNumber} - ${toBlockNumber}`);
         }
         const refNumber = 0;
         await this.pointsRepository.add(address, stakePoint, refPoint, refNumber);
