@@ -7,7 +7,7 @@
         </dt>
         <dd>
           <ContentLoader v-if="tvlLoading" class="h-full w-24" />
-          <span v-else>{{ formatMoney(tvl ?? 0, 2, 0) }}</span>
+          <span v-else>{{ formatMoney(tvl ?? 0, 2) }}</span>
         </dd>
       </div>
       <div class="stats-container">

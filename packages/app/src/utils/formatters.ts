@@ -5,13 +5,12 @@ import type { Token } from "@/composables/useToken";
 import type { HexDecimals } from "@/composables/useTrace";
 import type { Address } from "@/types";
 
-export function formatMoney(num: number, maximumFractionDigits = 1, minimumFractionDigits = 2) {
+export function formatMoney(num: number, maximumFractionDigits = 1) {
   return new Intl.NumberFormat("en-US", {
     notation: num > 99_999_999 ? "compact" : "standard",
     style: "currency",
     currency: "USD",
     maximumFractionDigits,
-    minimumFractionDigits,
   }).format(num);
 }
 
