@@ -5,7 +5,7 @@ import waitFor from "../utils/waitFor";
 import { TokenRepository,BalanceRepository,ReferralsRepository,TvlRepository } from "../repositories";
 import {TokenOffChainDataProvider} from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 import {TokenService} from "../token/token.service";
-
+import BigNumber from "bignumber.js";
 @Injectable()
 export class StatisticsTvlService extends Worker {
     private readonly statisticsTvlInterval: number;
@@ -69,11 +69,11 @@ export class StatisticsTvlService extends Worker {
                         }
                         let tokenPrice = tokenPrices.find(p => p.priceId == token.priceId);
                         let tokenDecimals = Math.pow(10,token.decimals);
-                        let balance = 0;
+                        let balance = new BigNumber(0);
                         for (const balanceOfToken of balancesOfToken) {
-                            balance += Number(balanceOfToken.balance)/tokenDecimals;
+                            balance = balance.plus(new BigNumber(balanceOfToken.balance).dividedBy(tokenDecimals)) ;
                         }
-                        let usdBalance = balance * tokenPrice.usdPrice;
+                        let usdBalance = balance.multipliedBy(tokenPrice.usdPrice).toNumber()  ;
                         let addressTokenTvl =  {
                             address: address,
                             tokenAddress:Buffer.from(token.l2Address.startsWith("0x") ? token.l2Address.substring(2) : token.l2Address, "hex"),
