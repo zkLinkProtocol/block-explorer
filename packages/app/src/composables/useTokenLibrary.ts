@@ -4,6 +4,7 @@ import { useMemoize } from "@vueuse/core";
 import { $fetch } from "ohmyfetch";
 
 import useContext, { type Context } from "@/composables/useContext";
+import { ETH_TOKEN_L1_ADDRESS } from "@/utils/constants";
 
 const retrieveTokens = useMemoize(
   async (context: Context): Promise<Api.Response.Token[]> => {
@@ -39,6 +40,7 @@ export default (context = useContext()) => {
   const isRequestPending = ref(false);
   const isRequestFailed = ref(false);
   const tokens = ref<Api.Response.Token[]>([]);
+  const sortTokens = ref<Api.Response.Token[]>([]);
 
   const getToken = (tokenAddress: string) => {
     return tokens.value.find((token) => token.l2Address === tokenAddress);
@@ -48,6 +50,11 @@ export default (context = useContext()) => {
     isRequestFailed.value = false;
     try {
       tokens.value = await retrieveTokens(context);
+      const arr = tokens.value.filter((e) => e.l1Address === ETH_TOKEN_L1_ADDRESS);
+      const noEthToken = tokens.value
+        .filter((e) => e.l1Address !== ETH_TOKEN_L1_ADDRESS)
+        .sort((a, b) => parseFloat(b.tvl!) - parseFloat(a.tvl!));
+      sortTokens.value = [...arr, ...noEthToken];
     } catch {
       isRequestFailed.value = true;
     } finally {
@@ -60,6 +67,7 @@ export default (context = useContext()) => {
     isRequestPending,
     isRequestFailed,
     tokens,
+    sortTokens,
     getToken,
     getTokens,
   };

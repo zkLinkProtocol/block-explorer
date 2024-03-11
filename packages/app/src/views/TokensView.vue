@@ -15,7 +15,7 @@
       <span v-if="isTokensFailed" class="error-message">
         {{ t("failedRequest") }}
       </span>
-      <TokenTable :tokens="tokens" :loading="isTokensPending"></TokenTable>
+      <TokenTable :tokens="sortTokens" :loading="isTokensPending"></TokenTable>
     </div>
   </div>
 </template>
@@ -30,7 +30,13 @@ import TokenTable from "@/components/token/TokenListTable.vue";
 
 import useTokenLibrary from "@/composables/useTokenLibrary";
 
-const { tokens, isRequestPending: isTokensPending, isRequestFailed: isTokensFailed, getTokens } = useTokenLibrary();
+const {
+  tokens,
+  sortTokens,
+  isRequestPending: isTokensPending,
+  isRequestFailed: isTokensFailed,
+  getTokens,
+} = useTokenLibrary();
 
 const { t } = useI18n();
 const breadcrumbItems = computed((): BreadcrumbItem[] => [
