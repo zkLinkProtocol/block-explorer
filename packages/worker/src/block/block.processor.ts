@@ -126,6 +126,17 @@ export class BlockProcessor {
     }
   }
 
+  public async getTokenPrice(priceId:string,ts:number): Promise<number> {
+    while (true) {
+      let price = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, ts);
+      if (!price) {
+        await utils.sleep(10000);
+      } else {
+        return price;
+      }
+    }
+  }
+
   public async handlePointsPeriod(fromBlockNumber: number,toBlockNumber: number): Promise<boolean> {
     const toBlock = await this.blockRepository.getLastBlock({
       where: {number: toBlockNumber}
@@ -137,7 +148,7 @@ export class BlockProcessor {
         clearTimeout(this.timer);
       }
       // get all addresses
-      const addresses = await this.balanceService.getAllAddresses();
+      const addresses = await this.referralRepository.getAllAddressesInOrder(toBlockNumber);
       if (!addresses.length) {
         return false;
       }
@@ -147,14 +158,14 @@ export class BlockProcessor {
 
       let tokenPrices = new Map();
       for ( const token of tokens ) {
-        const tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(token.cgPriceId, toBlock.timestamp.getTime());
+        const tokenPrice = await this.getTokenPrice(token.cgPriceId, toBlock.timestamp.getTime());
         tokenPrices.set(token.symbol,tokenPrice);
       }
 
       let stakePointsCache = new Map();
       let phase1EndDate = new Date(this.pointsPhase1EndTime);
       const earlyBirdMultiplier = this.getEarlyBirdMultiplier(toBlock.timestamp);
-      const ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", toBlock.timestamp.getTime());
+      let ethPrice = await this.getTokenPrice("ethereum", toBlock.timestamp.getTime());
       for ( const address of addresses ) {
         let stakePoint = 0;
         let refPoint = 0;
