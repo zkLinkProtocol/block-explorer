@@ -55,7 +55,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 
 import NetworkStats from "@/components/NetworkStats.vue";
@@ -79,7 +79,17 @@ const displayedBatches = computed(() => {
 });
 
 fetchNetworkStats();
-getTVL();
+
+let interval: ReturnType<typeof setInterval> | undefined = undefined;
+const startPolling = () => {
+  getTVL();
+  interval = setInterval(getTVL, 10000);
+};
+startPolling();
+onUnmounted(() => {
+  clearInterval(interval);
+  interval = undefined;
+});
 
 getBatches(1, new Date());
 </script>
