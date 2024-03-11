@@ -177,7 +177,7 @@ export class BlockProcessor {
               let balances = await this.balanceService.getAccountBalances(member);
               let balancesOfToken = balances.filter(balance => {
                 let tokenAddress = `0x${Buffer.from(balance.tokenAddress).toString("hex")}`;
-                return token.address.find(t => t.l2Address == tokenAddress);
+                return token.address.find(t => t.l2Address.toLowerCase() == tokenAddress);
               });
               for (const balance of balancesOfToken) {
                 const decimals = Math.pow(10, Number(token.decimals));
@@ -449,7 +449,6 @@ export class BlockProcessor {
         let deposits = transaction.transfers.filter(t => t.type == TransferType.Deposit);
         if (!deposits.length) { continue };
         console.log(`addBlock at ${block.number} deposits number is ${deposits.length}`);
-        let allTokens = await this.tokenService.getAllTokens();
         type TokenInfo = { multiplier: number, price: number, decimals: number };
         let tokenInfos = new Map();
         let ethPrice = 0;
@@ -475,11 +474,10 @@ export class BlockProcessor {
             }
             let tokenInfo: TokenInfo = tokenInfos.get(deposit.tokenAddress);
             if (!tokenInfo) {
-              let token = allTokens.find(t => t.l2Address == deposit.tokenAddress);
+              let token = this.tokenService.getSupportToken(deposit.tokenAddress);
               console.log(`addBlock deposit token is ${token.symbol}`);
               let tokenMultiplier = this.tokenService.getTokenMultiplier(token.symbol);
-              let priceId = this.tokenService.getCgIdByTokenSymbol(token.symbol);
-              let tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, block.timestamp * 1000);
+              let tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(token.cgPriceId, block.timestamp * 1000);
               tokenInfo = {
                 multiplier: tokenMultiplier,
                 price: tokenPrice,

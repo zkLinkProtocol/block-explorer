@@ -79,11 +79,20 @@ export class TokenService {
 
   public isSupportToken(tokenAddress: string): boolean {
     for (const token of this.supportTokens) {
-      if (token.address.find(t => t.l2Address == tokenAddress)) {
+      if (token.address.find(t => t.l2Address.toLowerCase() == tokenAddress.toLowerCase())) {
           return true;
       }
     }
     return false;
+  }
+
+  public getSupportToken(tokenAddress: string): Token | undefined {
+    for (const token of this.supportTokens) {
+      if (token.address.find(t => t.l2Address.toLowerCase() == tokenAddress.toLowerCase())) {
+        return token;
+      }
+    }
+    return undefined;
   }
 
   private async getERC20Token(contractAddress: string): Promise<{
