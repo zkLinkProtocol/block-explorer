@@ -44,7 +44,7 @@ export class AccountController {
     private readonly blockService: BlockService,
     private readonly transactionService: TransactionService,
     private readonly transferService: TransferService,
-    private readonly balanceService: BalanceService
+    private readonly balanceService: BalanceService,
   ) {
     this.logger = new Logger(AccountController.name);
   }
@@ -254,5 +254,10 @@ export class AccountController {
         blockReward: "0",
       })),
     };
+  }
+
+  @Get("/gettotalaccountnumber")
+  public async getTotalAccountNumber(): Promise<number> {
+    return this.transactionService.getTotalAccountNumber();
   }
 }
