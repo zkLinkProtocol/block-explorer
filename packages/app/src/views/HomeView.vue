@@ -7,9 +7,11 @@
       <NetworkStats
         v-if="networkStats || networkStatsPending"
         :loading="networkStatsPending"
+        :tvlLoading="tvlLoading"
         :committed="networkStats?.lastSealedBlock"
         :verified="networkStats?.lastVerifiedBlock"
         :transactions="networkStats?.totalTransactions"
+        :tvl="tvl"
         class="network-stats"
       />
     </div>
@@ -65,9 +67,11 @@ import TransactionsTable from "@/components/transactions/Table.vue";
 
 import useBatches from "@/composables/useBatches";
 import useNetworkStats from "@/composables/useNetworkStats";
+import useNetworkTvl from "@/composables/useNetworkTvl";
 
 const { t } = useI18n();
 const { fetch: fetchNetworkStats, pending: networkStatsPending, item: networkStats } = useNetworkStats();
+const { getTVL, tvl, isRequestPending: tvlLoading } = useNetworkTvl();
 const { load: getBatches, pending: isBatchesPending, failed: isBatchesFailed, data: batches } = useBatches();
 
 const displayedBatches = computed(() => {
@@ -75,6 +79,7 @@ const displayedBatches = computed(() => {
 });
 
 fetchNetworkStats();
+getTVL();
 
 getBatches(1, new Date());
 </script>

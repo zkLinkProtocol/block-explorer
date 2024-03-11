@@ -5,12 +5,13 @@ import type { Token } from "@/composables/useToken";
 import type { HexDecimals } from "@/composables/useTrace";
 import type { Address } from "@/types";
 
-export function formatMoney(num: number, maximumFractionDigits = 1) {
+export function formatMoney(num: number, maximumFractionDigits = 1, minimumFractionDigits = 2) {
   return new Intl.NumberFormat("en-US", {
     notation: num > 99_999_999 ? "compact" : "standard",
     style: "currency",
     currency: "USD",
     maximumFractionDigits,
+    minimumFractionDigits,
   }).format(num);
 }
 
@@ -18,6 +19,12 @@ export function formatPrice(num: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+  }).format(num);
+}
+export function formatNumber(num: number, minimumFractionDigits = 0, maximumFractionDigits = 2) {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits,
+    maximumFractionDigits,
   }).format(num);
 }
 
