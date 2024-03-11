@@ -62,7 +62,7 @@ export class StatisticsTvlService extends Worker {
                     for (const token of tokens) {
                         let balancesOfToken = balances.filter(b => {
                             let tokenAddress = `0x${Buffer.from(b.tokenAddress).toString("hex")}`;
-                            return token.l2Address == tokenAddress;
+                            return token.l2Address.toLowerCase() == tokenAddress.toLowerCase();
                         });
                         if (!balancesOfToken || balancesOfToken.length == 0) {
                             continue;

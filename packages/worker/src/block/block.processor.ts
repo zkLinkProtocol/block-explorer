@@ -158,7 +158,7 @@ export class BlockProcessor {
       for ( const address of addresses ) {
         let stakePoint = 0;
         let refPoint = 0;
-        let addrStr = `0x${address.toString('hex')}`;
+        let addrStr = `0x${address.toString("hex")}`;
         let eligible = this.addressEligibleCache.get(addrStr);
         if (eligible) {
           let addressAmount = 0;
@@ -210,11 +210,12 @@ export class BlockProcessor {
           let referees = await this.referralRepository.getReferralsByAddress(address, toBlockNumber);
           console.log(referees.length);
           for (const referee of referees) {
-            console.log(referee);
-            let refereeStakePoint = stakePointsCache.get(referee.toString("hex"));
+            const refereeStr = `0x${referee.toString("hex")}`;
+            let refereeStakePoint = stakePointsCache.get(refereeStr);
             if (!refereeStakePoint) {
               refereeStakePoint = await this.pointsRepository.getStakePointByAddress(referee);
             }
+            console.log(`${addrStr} invite ${refereeStr} point is ${refereeStakePoint}`);
             refPoint += refereeStakePoint * 0.1;
           }
 
