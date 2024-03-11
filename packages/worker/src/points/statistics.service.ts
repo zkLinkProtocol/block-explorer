@@ -77,7 +77,7 @@ export class StatisticsTvlService extends Worker {
                         let addressTokenTvl =  {
                             address: address,
                             tokenAddress:Buffer.from(token.l2Address.startsWith("0x") ? token.l2Address.substring(2) : token.l2Address, "hex"),
-                            balance: balance,
+                            balance: balance.toNumber(),
                             tvl: usdBalance,
                         };
                         addressTokenBalances.push(addressTokenTvl);
