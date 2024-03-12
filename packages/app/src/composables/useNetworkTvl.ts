@@ -1,5 +1,4 @@
 import { ref } from "vue";
-// import useFetch from "./common/useFetch";
 import { $fetch, FetchError } from "ohmyfetch";
 import useContext from "./useContext";
 
@@ -15,9 +14,6 @@ export interface NetworkTVL {
   tvl: string;
 }
 
-// export default (context = useContext()) => {
-//   return useFetch<NetworkTVL>(() => new URL(`${context.currentNetwork.value.apiUrl}/tokens/tvl?isall=false`));
-// };
 export default (context = useContext()) => {
   const isRequestPending = ref(false);
   const isRequestFailed = ref(false);
