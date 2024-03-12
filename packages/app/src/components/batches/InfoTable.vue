@@ -119,7 +119,7 @@ const tableInfoItems = computed(() => {
           tableItems.push(
             {
               label: t(`batches.finalizeTxHash`),
-              value: { value: mainBatch.value?.transactionHash, isShowIocn: true },
+              value: { value: mainBatch.value?.transactionHash, isShowIcon: true },
               component: CopyContent,
               url: `${ETH_BLOCKEXPLORER_URL}/tx/${mainBatch.value?.transactionHash}`,
             },

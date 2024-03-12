@@ -1,6 +1,6 @@
 <template>
   <div class="info-field-copy-content" :class="{ 'show-icon': isShowIcon }">
-    <Tooltip class="batches-tooltip" v-if="isShowIcon">
+    <Tooltip class="batches-tooltip inline-flex justify-self-start" v-if="isShowIcon">
       <img class="eth_block-icon" src="/img/ethereum.svg" alt=""/>
       <template #content>Ethereum</template>
     </Tooltip>
