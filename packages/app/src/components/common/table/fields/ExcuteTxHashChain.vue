@@ -45,7 +45,7 @@ const props = defineProps({
   },
 });
 const iconList = computed(() => {
-  const arr = excuteBatchList.map((item) => {
+  return excuteBatchList.map((item) => {
     if (item.chainId) {
       const current = props.batchRoot?.find((r) => r.chainId === item.chainId);
       return {
@@ -56,8 +56,6 @@ const iconList = computed(() => {
       };
     }
   });
-
-  return arr;
 });
 </script>
 
