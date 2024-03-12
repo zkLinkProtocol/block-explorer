@@ -1,13 +1,13 @@
 <template>
-  <div class="info-field-copy-content" :class="{ isshowicon: isShowIocn }">
-    <Tooltip class="batches-tooltip" v-if="isShowIocn">
-      <img class="eth_block-icon" src="/img/ethereum.svg" alt="" />
+  <div class="info-field-copy-content" :class="{ 'show-icon': isShowIcon }">
+    <Tooltip class="batches-tooltip" v-if="isShowIcon">
+      <img class="eth_block-icon" src="/img/ethereum.svg" alt=""/>
       <template #content>Ethereum</template>
     </Tooltip>
     <HashLabel :text="value">
-      <ExternalLinkIcon v-if="isExternalLink" />
+      <ExternalLinkIcon v-if="isExternalLink"/>
     </HashLabel>
-    <CopyButton :value="value" />
+    <CopyButton :value="value"/>
   </div>
 </template>
 
@@ -28,7 +28,7 @@ defineProps({
     type: Boolean,
     default: false,
   },
-  isShowIocn: {
+  isShowIcon: {
     type: Boolean,
     default: false,
   },
@@ -41,7 +41,8 @@ defineProps({
   .eth_block-icon {
     @apply h-7 w-7 rounded-full mr-1;
   }
-  &.isshowicon {
+
+  &.show-icon {
     @apply grid-cols-10;
   }
 }
