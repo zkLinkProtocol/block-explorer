@@ -177,7 +177,7 @@ export default [
     ],
     symbol: "sUSDe",
     decimals: 18,
-    cgPriceId: "ethena-staked-usde",
+    cgPriceId: "ethena-usde",
     type: "Synthetic",
     yieldType: ["NOVA Points", "Shard"],
     multiplier: 2,

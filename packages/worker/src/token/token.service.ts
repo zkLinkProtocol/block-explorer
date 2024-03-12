@@ -47,6 +47,17 @@ export class TokenService {
     });
   }
 
+  public getPriceCoef(symbol:string): number {
+    switch (symbol) {
+      case "sUSDe":
+        return 1.07;
+      case "nETH":
+        return 1.04;
+      default:
+        return 1;
+    }
+  }
+
   public getCgIdByTokenSymbol(tokenSymbol:string): string {
     let token = this.supportTokens.find(t => t.symbol == tokenSymbol);
     if (!token) {

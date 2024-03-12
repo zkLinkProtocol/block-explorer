@@ -67,13 +67,15 @@ export class StatisticsTvlService extends Worker {
                         if (!balancesOfToken || balancesOfToken.length == 0) {
                             continue;
                         }
-                        let tokenPrice = tokenPrices.find(p => p.priceId == token.priceId);
+                        let tokenPrice = tokenPrices.find(p => p.priceId == token.priceId).usdPrice;
+                        let coef = this.tokenService.getPriceCoef(token.symbol);
+                        tokenPrice = tokenPrice * coef;
                         let tokenDecimals = Math.pow(10,token.decimals);
                         let balance = new BigNumber(0);
                         for (const balanceOfToken of balancesOfToken) {
                             balance = balance.plus(new BigNumber(balanceOfToken.balance).dividedBy(tokenDecimals)) ;
                         }
-                        let usdBalance = balance.multipliedBy(tokenPrice.usdPrice).toNumber()  ;
+                        let usdBalance = balance.multipliedBy(tokenPrice).toNumber()  ;
                         let addressTokenTvl =  {
                             address: address,
                             tokenAddress:Buffer.from(token.l2Address.startsWith("0x") ? token.l2Address.substring(2) : token.l2Address, "hex"),

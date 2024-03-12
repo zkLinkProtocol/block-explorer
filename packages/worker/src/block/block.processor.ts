@@ -155,7 +155,9 @@ export class BlockProcessor {
 
       let tokenPrices = new Map();
       for ( const token of tokens ) {
-        const tokenPrice = await this.getTokenPrice(token.cgPriceId, toBlock.timestamp.getTime());
+        let tokenPrice = await this.getTokenPrice(token.cgPriceId, toBlock.timestamp.getTime());
+        let coef = this.tokenService.getPriceCoef(token.symbol);
+        tokenPrice = tokenPrice * coef;
         tokenPrices.set(token.symbol,tokenPrice);
       }
 
@@ -317,7 +319,6 @@ export class BlockProcessor {
       const pointsPhase1StartTime = new Date(this.pointsPhase1StartTime).getTime()/1000;
       console.log(`check ${blockTs} ${pointsPhase1StartTime}`);
       if (blockTs < pointsPhase1StartTime) {
-        //todo: save db
         this.lastHandlePointBlock = block.number;
       } else {
         // get previous handled block timestamp
@@ -441,7 +442,6 @@ export class BlockProcessor {
           let depositPoint = 0;
           let depositEthAmount = new BigNumber(0);
           if (this.checkTokenIsEth(deposit.tokenAddress)) {
-            // depositEthAmount = Number(deposit.amount) / Math.pow(10,18);
             depositEthAmount = new BigNumber(deposit.amount).dividedBy(new BigNumber(10).pow(18))
             const tokenMultiplier = this.tokenService.getTokenMultiplier("ETH");
             depositPoint = depositEthAmount.multipliedBy(10).multipliedBy(tokenMultiplier).toNumber();
