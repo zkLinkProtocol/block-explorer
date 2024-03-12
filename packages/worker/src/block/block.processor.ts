@@ -176,28 +176,27 @@ export class BlockProcessor {
           if (!members.length) {
             members = [address];
           }
-          let groupTvl =new BigNumber(0);
+          let groupTvl = new BigNumber(0);
           for (const member of members) {
             let memberAmount = new BigNumber(0);
-            for (const token of tokens) {
-              let tokenPrice = tokenPrices.get(token.symbol);
-              let tokenMultiplier = this.tokenService.getTokenMultiplier(token.symbol);
-              let balances = await this.balanceService.getAccountBalances(member);
-              let balancesOfToken = balances.filter(balance => {
+            let balances = await this.balanceService.getAccountBalances(member);
+            for (const balance of balances) {
+              let token = tokens.find(token => {
                 let tokenAddress = `0x${Buffer.from(balance.tokenAddress).toString("hex")}`;
                 return token.address.find(t => t.l2Address.toLowerCase() == tokenAddress);
               });
-              //todo: use bignumber
-              for (const balance of balancesOfToken) {
-                const decimals = Math.pow(10, Number(token.decimals));
-                const tokenBalance = new BigNumber(balance.balance).dividedBy(decimals) ;
-                console.log(`${member.toString("hex")} balance of ${token.symbol} is ${tokenBalance},price is ${tokenPrice}`);
-                const tokenAmount = tokenBalance.multipliedBy(tokenPrice) ;
-                if (member.compare(address)) {
-                  addressAmount = addressAmount.plus(tokenAmount.multipliedBy(tokenMultiplier));
-                }
-                memberAmount = memberAmount.plus(tokenAmount);
+              if (!token) {
+                continue;
               }
+              let tokenPrice = tokenPrices.get(token.symbol);
+              const decimals = Math.pow(10, Number(token.decimals));
+              const tokenBalance = new BigNumber(balance.balance).dividedBy(decimals) ;
+              console.log(`${member.toString("hex")} balance of ${token.symbol} is ${tokenBalance},price is ${tokenPrice}`);
+              const tokenAmount = tokenBalance.multipliedBy(tokenPrice) ;
+              if (member.equals(address)) {
+                addressAmount = addressAmount.plus(tokenAmount.multipliedBy(token.multiplier));
+              }
+              memberAmount = memberAmount.plus(tokenAmount);
             }
             groupTvl = groupTvl.plus(memberAmount) ;
           }
@@ -211,7 +210,7 @@ export class BlockProcessor {
           // (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price/ ETH_Price )
           let newStakePoint = (1 + groupBooster + growthBooster) * addressAmount.toNumber() * earlyBirdMultiplier/ethPrice;
           newStakePoint = Number(newStakePoint.toFixed(2));
-          let oldStakePoint = oldPoint?.stakePoint || 0;
+          let oldStakePoint = Number(oldPoint?.stakePoint || 0);
           stakePoint = oldStakePoint + newStakePoint;
           stakePointsCache.set(addrStr, stakePoint);
 
@@ -227,7 +226,7 @@ export class BlockProcessor {
             refPoint += refereeStakePoint * 0.1;
           }
 
-          let oldRefPoint = oldPoint?.refPoint || 0;
+          let oldRefPoint = Number(oldPoint?.refPoint || 0);
           refPoint = oldRefPoint + Number(refPoint.toFixed(2));
           console.log(`account ${addrStr} point ${stakePoint} ${refPoint} at ${fromBlockNumber} - ${toBlockNumber}`);
         }
@@ -477,7 +476,7 @@ export class BlockProcessor {
             let decimals = Math.pow(10, tokenInfo.decimals);
             let depositAmount =new BigNumber(deposit.amount).dividedBy(decimals)
             depositEthAmount = depositAmount.multipliedBy(tokenInfo.price).dividedBy(ethPrice);
-            depositPoint = depositEthAmount.multipliedBy(10).multipliedBy(tokenInfo.multiplier).multipliedBy(depositEthAmount).toNumber()
+            depositPoint = depositEthAmount.multipliedBy(10).multipliedBy(tokenInfo.multiplier).toNumber();
           }
           // check point eligible
           let eligible = this.addressEligibleCache.get(deposit.from);

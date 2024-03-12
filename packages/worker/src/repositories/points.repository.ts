@@ -55,7 +55,7 @@ export class PointsRepository {
 
     public async getPointByAddress(address: Buffer): Promise<Point> {
         const transactionManager = this.unitOfWork.getTransactionManager();
-        const accountPoint = await transactionManager.query(`SELECT * FROM points WHERE address = $1`,[address]);
+        const [accountPoint] = await transactionManager.query(`SELECT * FROM points WHERE address = $1`,[address]);
         return accountPoint || null;
     }
 
