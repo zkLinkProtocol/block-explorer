@@ -20,6 +20,12 @@ export function formatPrice(num: number) {
     currency: "USD",
   }).format(num);
 }
+export function formatNumber(num: number, minimumFractionDigits = 0, maximumFractionDigits = 2) {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(num);
+}
 
 export function formatWithSpaces(num: number) {
   return new Intl.NumberFormat("fr-FR").format(num);

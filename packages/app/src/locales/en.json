@@ -19,7 +19,8 @@
     "committed": "Committed Blocks",
     "verified": "Verified Blocks",
     "transactions": "Transactions",
-    "totalLocked": "Total Value Locked"
+    "totalLocked": "Total Value Locked",
+    "tvl": "TVL"
   },
   "breadcrumbs": {
     "home": "Dashboard"
