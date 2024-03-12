@@ -57,6 +57,17 @@ declare namespace Api {
       l1GasPrice: string;
       l2FairGasPrice: string;
     };
+    type BatchRootItem = {
+      number: string;
+      transactionHash: string | null;
+      rootHash: string | null;
+      executedAt: string | null;
+      l1BatchNumber: number | null;
+      chainId: number;
+      blockExplorersUrl?: string;
+      key?: string;
+      limitNumber?: number;
+    };
 
     type Log = {
       address: string;

@@ -6,7 +6,7 @@
       "bridgeUrl": "https://portal.zklink.io",
       "hostnames": [],
       "icon": "/images/icons/cion.png",
-      "l1ExplorerUrl": "https://lineascan.build/",
+      "l1ExplorerUrl": "https://lineascan.build",
       "l2ChainId": 810180,
       "l2NetworkName": "zkLink Nova Mainnet",
       "maintenance": false,
@@ -32,5 +32,31 @@
     "arbitrum": "Arbitrum Mainnet",
     "mantle": "Mantle Mainnet",
     "manta": "Manta Mainnet"
-  }
+  },
+  "excuteBatchList": [
+    {
+      "key": "zksync",
+      "limitNumber": 50,
+      "chainId": 324,
+      "blockExplorersUrl": "https://explorer.zksync.io"
+    },
+    {
+      "key": "arbitrum",
+      "limitNumber": 50,
+      "chainId": 42161,
+      "blockExplorersUrl": "https://arbiscan.io"
+    },
+    {
+      "key": "mantle",
+      "limitNumber": 50,
+      "chainId": 5000,
+      "blockExplorersUrl": "https://explorer.mantle.xyz"
+    },
+    {
+      "key": "manta",
+      "limitNumber": 50,
+      "chainId": 169,
+      "blockExplorersUrl": "https://pacific-explorer.manta.network"
+    }
+  ]
 }

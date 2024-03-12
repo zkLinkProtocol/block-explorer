@@ -16,10 +16,21 @@ export type NetworkConfig = {
 export type IconsList = {
   [key: string]: string;
 };
+export type ExcuteBatchItem = {
+  key: string;
+  limitNumber: number;
+  number?: string;
+  transactionHash?: string | null;
+  rootHash?: string | null;
+  executedAt?: string | null;
+  l1BatchNumber?: number | null;
+  chainId: number;
+};
 export type EnvironmentConfig = {
   networks: NetworkConfig[];
   iconsList: IconsList;
   chainNameList: IconsList;
+  excuteBatchList: ExcuteBatchItem[];
 };
 
 export type RuntimeConfig = {

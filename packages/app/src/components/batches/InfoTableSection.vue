@@ -4,7 +4,7 @@
       <template v-if="item.value !== undefined">
         <table-body-column v-if="item.label" class="batch-label-column">
           <span class="batch-info-field-label">{{ item.label }}</span>
-          <InfoTooltip class="batch-info-field-tooltip">{{ item.tooltip }}</InfoTooltip>
+          <InfoTooltip v-if="item.tooltip" class="batch-info-field-tooltip">{{ item.tooltip }}</InfoTooltip>
         </table-body-column>
         <table-body-column
           class="batch-info-field-value-container"

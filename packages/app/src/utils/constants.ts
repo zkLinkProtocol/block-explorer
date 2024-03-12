@@ -17,6 +17,7 @@ export const PROXY_CONTRACT_IMPLEMENTATION_ABI = [
     type: "function",
   },
 ];
+export const ETH_BLOCKEXPLORER_URL = "https://etherscan.io";
 export const NOVA_NATIVE_TOKEN = "Nova Native Token";
 
 export const NOVA_MERGED_TOKEN = "Merged Token";
