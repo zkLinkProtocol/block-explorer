@@ -1,5 +1,5 @@
-// Version 20240312-1300
-// Add Ethereum wstETH
+// Version 20240312-1400
+// Fix the type-Native issues
 
 export default [
   {
@@ -13,7 +13,7 @@ export default [
     symbol: "ETH",
     decimals: 18,
     cgPriceId: "ethereum",
-    type: "NATIVE",
+    type: "Native",
     yieldType: ["NOVA Points"],
     multiplier: 2,
   },
