@@ -26,7 +26,7 @@ declare namespace Api {
       usdPrice: number | null;
       liquidity: number | null;
       iconURL: string | null;
-      tvl?: string;
+      tvl: string;
     };
 
     type BatchListItem = {

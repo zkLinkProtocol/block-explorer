@@ -41,20 +41,19 @@ export default (context = useContext()) => {
   const isRequestFailed = ref(false);
   const tokens = ref<Api.Response.Token[]>([]);
   const sortTokens = ref<Api.Response.Token[]>([]);
+  const getToken = (tokenAddress: string) => tokens.value.find((token) => token.l2Address === tokenAddress);
 
-  const getToken = (tokenAddress: string) => {
-    return tokens.value.find((token) => token.l2Address === tokenAddress);
-  };
   const getTokens = async () => {
     isRequestPending.value = true;
     isRequestFailed.value = false;
     try {
       tokens.value = await retrieveTokens(context);
-      const arr = tokens.value.filter((e) => e.l1Address === ETH_TOKEN_L1_ADDRESS);
+      const ethToken = tokens.value.filter((e) => e.l1Address === ETH_TOKEN_L1_ADDRESS);
       const noEthToken = tokens.value
-        .filter((e) => e.l1Address !== ETH_TOKEN_L1_ADDRESS)
-        .sort((a, b) => parseFloat(b.tvl!) - parseFloat(a.tvl!));
-      sortTokens.value = [...arr, ...noEthToken];
+        .filter((token) => token.l1Address !== ETH_TOKEN_L1_ADDRESS)
+        .sort((a, b) => parseFloat(b.tvl) - parseFloat(a.tvl));
+
+      sortTokens.value = [...ethToken, ...noEthToken];
     } catch {
       isRequestFailed.value = true;
     } finally {
