@@ -226,8 +226,6 @@ export class BlockProcessor {
             refPoint += refereeStakePoint * 0.1;
           }
 
-          let oldRefPoint = Number(oldPoint?.refPoint || 0);
-          refPoint = oldRefPoint + Number(refPoint.toFixed(2));
           console.log(`account ${addrStr} point ${stakePoint} ${refPoint} at ${fromBlockNumber} - ${toBlockNumber}`);
         }
         const refNumber = 0;
@@ -332,13 +330,9 @@ export class BlockProcessor {
         const ts_interval = blockTs - prePointsBlockTs;
         console.log(`Current block ${block.number} ,timestamp interval ${ts_interval},config period ${this.pointsStatisticalPeriodSecs}`);
         if (ts_interval > this.pointsStatisticalPeriodSecs) {
-          let periods = (ts_interval / this.pointsStatisticalPeriodSecs) | 0;
-          console.log(`Ts interval periods ${periods}`);
           let fromBlockNumber = Math.min(preBlock.number + 1, block.number - 1);
           let toBlockNumber = block.number - 1;
-          for (let i = 0; i < periods; i++) {
-            await this.handlePointsPeriod(fromBlockNumber, toBlockNumber);
-          }
+          await this.handlePointsPeriod(fromBlockNumber, toBlockNumber);
         } else {
           console.log(`${preBlock.number} - ${block.number} block time interval does not reach the statistical period `);
         }
