@@ -34,7 +34,6 @@ export class SupportTokenDto {
   })
   public readonly symbol: string;
 
-
   @ApiProperty({ type: Number, description: "Token decimals value", example: 18 })
   public readonly decimals: number;
 

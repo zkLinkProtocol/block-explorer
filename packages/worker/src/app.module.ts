@@ -50,16 +50,16 @@ import {
   Balance,
   Point,
   PointsHistory,
-  Referral
+  Referral,
 } from "./entities";
-import { typeOrmModuleOptions,typeOrmReferModuleOptions } from "./typeorm.config";
+import { typeOrmModuleOptions, typeOrmReferModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
 import { RetryDelayProvider } from "./retryDelay.provider";
 import { MetricsModule } from "./metrics";
 import { DbMetricsService } from "./dbMetrics.service";
 import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
-import {StatisticsTvlService} from "./points/statistics.service";
+import { StatisticsTvlService } from "./points/statistics.service";
 
 @Module({
   imports: [
@@ -103,9 +103,7 @@ import {StatisticsTvlService} from "./points/statistics.service";
         };
       },
     }),
-    TypeOrmModule.forFeature([
-      Referral,
-    ],"refer"),
+    TypeOrmModule.forFeature([Referral], "refer"),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),
     MetricsModule,

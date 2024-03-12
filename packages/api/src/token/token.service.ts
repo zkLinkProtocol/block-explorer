@@ -13,9 +13,9 @@ export interface FilterTokensOptions {
 }
 
 export interface TokenL1Address {
-  chain: string,
-  l1Address: string,
-  l2Address: string,
+  chain: string;
+  l1Address: string;
+  l2Address: string;
 }
 export interface Token {
   address: TokenL1Address[];
@@ -27,7 +27,6 @@ export interface Token {
   multiplier: number;
 }
 
-
 @Injectable()
 export class TokenService {
   private supportTokens: Token[];
@@ -36,7 +35,7 @@ export class TokenService {
     private readonly tokenRepository: Repository<DbToken>
   ) {
     this.supportTokens = [];
-    tokens.forEach(token => {
+    tokens.forEach((token) => {
       this.supportTokens.push(token);
     });
   }
@@ -47,11 +46,14 @@ export class TokenService {
 
   public async findOne(address: string, fields?: FindOptionsSelect<DbToken>): Promise<DbToken> {
     const token = await this.tokenRepository.findOne({
-      where: [{
-        l2Address: address,
-      },{
-        l1Address: address,
-      }],
+      where: [
+        {
+          l2Address: address,
+        },
+        {
+          l1Address: address,
+        },
+      ],
       select: fields,
     });
     if (!token && address.toLowerCase() === ETH_TOKEN.l2Address.toLowerCase()) {

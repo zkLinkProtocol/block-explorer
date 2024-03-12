@@ -10,7 +10,7 @@ import { JsonRpcProviderBase } from "../rpcProvider";
 import { BLOCKCHAIN_RPC_CALL_DURATION_METRIC_NAME, BlockchainRpcCallMetricLabel } from "../metrics";
 import { RetryableContract } from "./retryableContract";
 
-type BridgeConfigFunction = (input: String) => string | undefined;
+type BridgeConfigFunction = (input: string) => string | undefined;
 export interface TraceTransactionResult {
   type: string;
   from: string;

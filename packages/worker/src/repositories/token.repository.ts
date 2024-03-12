@@ -83,7 +83,7 @@ export class TokenRepository extends BaseRepository<Token> {
     usdPrice?: number;
     updatedAt?: Date;
     iconURL?: string;
-    priceId?: string,
+    priceId?: string;
   }): Promise<void> {
     console.log(`updateTokenOffChainData ${l1Address} ${l2Address} ${usdPrice} ${priceId}`);
     if (!l1Address && !l2Address) {

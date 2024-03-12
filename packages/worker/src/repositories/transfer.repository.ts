@@ -10,12 +10,11 @@ export class TransferRepository extends BaseRepository<Transfer> {
     super(Transfer, unitOfWork);
   }
 
-  public async getDeposits(
-      address: Buffer,
-      blockNumber: number): Promise<Transfer[]> {
+  public async getDeposits(address: Buffer, blockNumber: number): Promise<Transfer[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     return await transactionManager.query(
-        `SELECT * FROM transfers WHERE type = 'deposit' AND "from" = $1 AND "blockNumber" <= $2;`,[address,blockNumber]
+      `SELECT * FROM transfers WHERE type = 'deposit' AND "from" = $1 AND "blockNumber" <= $2;`,
+      [address, blockNumber]
     );
   }
 

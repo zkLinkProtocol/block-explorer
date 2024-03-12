@@ -8,9 +8,9 @@ import { utils } from "zksync-web3";
 import {
   TokenOffChainDataProvider,
   ITokenOffChainData,
-  ITokenCurrentPrice
+  ITokenCurrentPrice,
 } from "../../tokenOffChainDataProvider.abstract";
-import {Token} from "../../../token.service";
+import { Token } from "../../../token.service";
 
 const API_NUMBER_OF_TOKENS_PER_REQUEST = 250;
 const API_INITIAL_RETRY_TIMEOUT = 5000;
@@ -88,13 +88,13 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
       if (tokenIdsPerRequest.length === API_NUMBER_OF_TOKENS_PER_REQUEST || i === tokens.length - 1) {
         const tokensMarkedData = await this.getTokensMarketData(tokenIdsPerRequest);
         tokensCurrentPrice.push(
-            ...tokensMarkedData.map((tokenMarketData) => {
-              const token = tokens.find((t) => t === tokenMarketData.id);
-              return {
-                priceId: tokenMarketData.id,
-                usdPrice: tokenMarketData.current_price,
-              };
-            })
+          ...tokensMarkedData.map((tokenMarketData) => {
+            const token = tokens.find((t) => t === tokenMarketData.id);
+            return {
+              priceId: tokenMarketData.id,
+              usdPrice: tokenMarketData.current_price,
+            };
+          })
         );
         tokenIdsPerRequest = [];
       }
@@ -102,13 +102,15 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     return tokensCurrentPrice;
   }
 
-  public async getTokenPriceByBlock(tokenId:string,blockTs: number): Promise<number> {
-    let getDate = new Date(blockTs - 3600*1000);
-    let marketChart = await this.getTokensMarketChart(tokenId,getDate);
-    getDate.setMinutes(0,0,0);
-    let nextHourDate = new Date(getDate);
+  public async getTokenPriceByBlock(tokenId: string, blockTs: number): Promise<number> {
+    const getDate = new Date(blockTs - 3600 * 1000);
+    const marketChart = await this.getTokensMarketChart(tokenId, getDate);
+    getDate.setMinutes(0, 0, 0);
+    const nextHourDate = new Date(getDate);
     nextHourDate.setHours(getDate.getHours() + 1);
-    let prices = marketChart.prices.filter(price => price[0] >= getDate.getTime() && price[0] < nextHourDate.getTime());
+    const prices = marketChart.prices.filter(
+      (price) => price[0] >= getDate.getTime() && price[0] < nextHourDate.getTime()
+    );
     return prices.length > 0 ? prices[0][1] : 0;
   }
 
@@ -126,10 +128,10 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
   }
 
   // start add by nick *get history price*
-  private getTokensMarketChart(tokenId: string,getDate: Date) {
+  private getTokensMarketChart(tokenId: string, getDate: Date) {
     const currentDate = new Date();
-    let diffDays = Math.ceil((currentDate.getTime() - getDate.getTime()) / 86400000);
-    let days = diffDays < 2 ? 2 : diffDays;
+    const diffDays = Math.ceil((currentDate.getTime() - getDate.getTime()) / 86400000);
+    const days = diffDays < 2 ? 2 : diffDays;
 
     return this.makeApiRequestRetryable<ITokenMarketChartProviderResponse>({
       path: `/coins/${tokenId}/market_chart`,

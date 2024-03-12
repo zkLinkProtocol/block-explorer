@@ -15,9 +15,9 @@ import { Token as TokenEntity } from "../entities";
 import tokens from "../../tokens";
 
 export interface TokenL1Address {
-  chain: string,
-  l1Address: string,
-  l2Address: string,
+  chain: string;
+  l1Address: string;
+  l2Address: string;
 }
 export interface Token {
   address: TokenL1Address[];
@@ -38,26 +38,26 @@ export class TokenService {
     private readonly addressRepository: AddressRepository,
     private readonly tokenRepository: TokenRepository,
     @InjectMetric(GET_TOKEN_INFO_DURATION_METRIC_NAME)
-    private readonly getTokenInfoDurationMetric: Histogram,
+    private readonly getTokenInfoDurationMetric: Histogram
   ) {
     this.logger = new Logger(TokenService.name);
     this.supportTokens = [];
-    tokens.forEach(token => {
+    tokens.forEach((token) => {
       this.supportTokens.push(token);
     });
   }
 
-  public getCgIdByTokenSymbol(tokenSymbol:string): string {
-    let token = this.supportTokens.find(t => t.symbol == tokenSymbol);
+  public getCgIdByTokenSymbol(tokenSymbol: string): string {
+    const token = this.supportTokens.find((t) => t.symbol == tokenSymbol);
     if (!token) {
       return "";
     } else {
-      return token.cgPriceId
+      return token.cgPriceId;
     }
   }
 
   public getTokenMultiplier(tokenSymbol: string): number {
-    let token = this.supportTokens.find(t => t.symbol == tokenSymbol);
+    const token = this.supportTokens.find((t) => t.symbol == tokenSymbol);
     if (!token) {
       return 0;
     } else {
@@ -79,8 +79,8 @@ export class TokenService {
 
   public isSupportToken(tokenAddress: string): boolean {
     for (const token of this.supportTokens) {
-      if (token.address.find(t => t.l2Address.toLowerCase() == tokenAddress.toLowerCase())) {
-          return true;
+      if (token.address.find((t) => t.l2Address.toLowerCase() == tokenAddress.toLowerCase())) {
+        return true;
       }
     }
     return false;
@@ -88,7 +88,7 @@ export class TokenService {
 
   public getSupportToken(tokenAddress: string): Token | undefined {
     for (const token of this.supportTokens) {
-      if (token.address.find(t => t.l2Address.toLowerCase() == tokenAddress.toLowerCase())) {
+      if (token.address.find((t) => t.l2Address.toLowerCase() == tokenAddress.toLowerCase())) {
         return token;
       }
     }

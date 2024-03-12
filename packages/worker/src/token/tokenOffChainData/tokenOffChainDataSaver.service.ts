@@ -4,7 +4,7 @@ import { Worker } from "../../common/worker";
 import waitFor from "../../utils/waitFor";
 import { TokenRepository } from "../../repositories/token.repository";
 import { TokenOffChainDataProvider } from "./tokenOffChainDataProvider.abstract";
-import {TokenService} from "../token.service";
+import { TokenService } from "../token.service";
 
 const UPDATE_TOKENS_BATCH_SIZE = 10;
 
@@ -38,7 +38,7 @@ export class TokenOffChainDataSaverService extends Worker {
       if (!nextUpdateTimeout) {
         // const bridgedTokens = await this.tokenRepository.getBridgedTokens();
         const tokensToUpdate = await this.tokenOffChainDataProvider.getTokensOffChainData(
-          this.tokenService.getAllSupportTokens(),
+          this.tokenService.getAllSupportTokens()
         );
         const updatedAt = new Date();
 

@@ -69,24 +69,20 @@ export class BalanceRepository extends BaseRepository<Balance> {
 
   public async getAllAddresses(): Promise<Buffer[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const result = await transactionManager.query(
-        `SELECT address FROM balances group by address;`
-    );
+    const result = await transactionManager.query(`SELECT address FROM balances group by address;`);
     const addresses = result.map((row: any) => row.address);
     return addresses;
   }
 
   public async getAccountBalances(address: Buffer): Promise<Balance[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const balances = await transactionManager.query(selectBalancesScript,[address]
-    );
+    const balances = await transactionManager.query(selectBalancesScript, [address]);
     return balances;
   }
 
-  public async getAccountBalancesByBlock(address: Buffer,block: number): Promise<Balance[]> {
+  public async getAccountBalancesByBlock(address: Buffer, block: number): Promise<Balance[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const balances = await transactionManager.query(selectBalancesByBlockScript,[address,block]
-    );
+    const balances = await transactionManager.query(selectBalancesByBlockScript, [address, block]);
     return balances;
   }
 

@@ -11,7 +11,7 @@ import { ConfigService } from "@nestjs/config";
 
 let getterContract: Contract = null;
 const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000";
-const ERROR_GATEWAY = "error"
+const ERROR_GATEWAY = "error";
 export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
   matches: (): boolean => true,
   extract: async (

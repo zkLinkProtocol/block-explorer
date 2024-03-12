@@ -25,17 +25,13 @@
         </div>
       </div>
       <div>
-        <a
-          class="refunded-link"
-          @click="showPopup"
-          >{{
-            t(
-              feeData?.isPaidByPaymaster
-                ? "transactions.table.feeDetails.whyPaymasterRefunded"
-                : "transactions.table.feeDetails.whyRefunded"
-            )
-          }}</a
-        >
+        <a class="refunded-link" @click="showPopup">{{
+          t(
+            feeData?.isPaidByPaymaster
+              ? "transactions.table.feeDetails.whyPaymasterRefunded"
+              : "transactions.table.feeDetails.whyRefunded"
+          )
+        }}</a>
         <a
           v-if="feeData?.isPaidByPaymaster"
           class="paymaster-link"
@@ -45,10 +41,7 @@
         >
       </div>
     </div>
-     <AskGotoZksyncDialog 
-          :outsideLink="linkAddress"
-          :opened="isShowPopUp"  
-          @close="closeModal" />
+    <AskGotoZksyncDialog :outsideLink="linkAddress" :opened="isShowPopUp" @close="closeModal" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -57,9 +50,9 @@ import { useI18n } from "vue-i18n";
 
 import { BigNumber } from "ethers";
 
+import AskGotoZksyncDialog from "@/components/AskGotoZksyncDialog.vue";
 import TokenAmountPrice from "@/components/TokenAmountPrice.vue";
 import TransferTableCell from "@/components/transactions/infoTable/TransferTableCell.vue";
-import AskGotoZksyncDialog from "@/components/AskGotoZksyncDialog.vue";
 
 import useToken from "@/composables/useToken";
 
@@ -96,17 +89,16 @@ const initialFee = computed(() => {
 const token = computed<Token | null>(() => {
   return tokenInfo.value;
 });
-const isShowPopUp = ref(false)
-const linkAddress = ref('https://docs.zksync.io/build/developer-reference/fee-model.html#refunds')
+const isShowPopUp = ref(false);
+const linkAddress = ref("https://docs.zksync.io/build/developer-reference/fee-model.html#refunds");
 const closeModal = () => {
-  isShowPopUp.value = false
-}
-const showPopup=()=>{
+  isShowPopUp.value = false;
+};
+const showPopup = () => {
   console.log(111);
-  
-   isShowPopUp.value = true
-}
 
+  isShowPopUp.value = true;
+};
 </script>
 <style lang="scss" scoped>
 .fee-info-container {
@@ -136,9 +128,8 @@ const showPopup=()=>{
   .paymaster-link {
     @apply ml-2;
   }
-  .refunded-link{
+  .refunded-link {
     cursor: pointer;
-
   }
 }
 </style>

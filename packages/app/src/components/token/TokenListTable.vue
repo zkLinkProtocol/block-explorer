@@ -87,6 +87,7 @@ import TableBodyColumn from "@/components/common/table/TableBodyColumn.vue";
 import TableHeadColumn from "@/components/common/table/TableHeadColumn.vue";
 import TokenPrice from "@/components/common/table/fields/TokenPrice.vue";
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
+
 // import { iconList } from "@/configs/hyperchain.config.json"
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 

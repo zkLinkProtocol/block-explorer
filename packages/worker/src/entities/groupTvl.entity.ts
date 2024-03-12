@@ -5,9 +5,9 @@ import { hexTransformer } from "../transformers/hex.transformer";
 @Entity({ name: "groupTvls" })
 @Index(["groupId"])
 export class GroupTvl extends BaseEntity {
-    @PrimaryColumn({type: "varchar"})
-    public readonly groupId: string;
+  @PrimaryColumn({ type: "varchar" })
+  public readonly groupId: string;
 
-    @Column("decimal", {scale:6} )
-    public readonly tvl: number;
+  @Column("decimal", { scale: 6 })
+  public readonly tvl: number;
 }

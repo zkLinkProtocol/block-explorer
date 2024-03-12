@@ -1,4 +1,4 @@
-import {Token} from "../token.service";
+import { Token } from "../token.service";
 
 export interface ITokenOffChainData {
   l1Address?: string;
@@ -15,7 +15,7 @@ export interface ITokenCurrentPrice {
 }
 
 export abstract class TokenOffChainDataProvider {
-  abstract getTokensOffChainData: (supportTokens: Token[] ) => Promise<ITokenOffChainData[]>;
-  abstract getTokenPriceByBlock: (tokenId:string,blockTs: number) => Promise<number>;
+  abstract getTokensOffChainData: (supportTokens: Token[]) => Promise<ITokenOffChainData[]>;
+  abstract getTokenPriceByBlock: (tokenId: string, blockTs: number) => Promise<number>;
   abstract getTokensCurrentPrice: (tokens: string[]) => Promise<ITokenCurrentPrice[]>;
 }

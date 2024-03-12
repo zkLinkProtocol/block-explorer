@@ -16,8 +16,8 @@ import { TokenTVLResponseDto } from "src/api/dtos/tvl/tokenTVL.dto";
 import { ReferralTotalTVLResponseDto } from "src/api/dtos/tvl/referralTotalTVL.dto";
 import { PagingOptionsDto } from "src/common/dtos";
 import { AccountReferTVLResponseDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
-import {ConfigService} from "@nestjs/config";
-import {DepositThresholdDto} from "../api/dtos/stats/depositThreshold.dto";
+import { ConfigService } from "@nestjs/config";
+import { DepositThresholdDto } from "../api/dtos/stats/depositThreshold.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -36,7 +36,7 @@ export class TVLController {
 
   @Get("/getDepositEthThreshold")
   public async getDepositEthThreshold(): Promise<DepositThresholdDto> {
-    let nowDate = new Date();
+    const nowDate = new Date();
     let threshold = 0;
     if (nowDate >= new Date(this.pointsPhase1StartTime) && nowDate <= new Date(this.pointsPhase1EndTime)) {
       if (nowDate <= new Date(this.pointsEarlyDepositEndTime)) {

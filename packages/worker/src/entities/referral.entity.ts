@@ -1,9 +1,9 @@
 import { Entity, Column, Index, PrimaryColumn } from "typeorm";
 import { hexTransformer } from "../transformers/hex.transformer";
-import {BaseEntity} from "./base.entity";
+import { BaseEntity } from "./base.entity";
 
 @Entity({ name: "referrers" })
-export class Referral extends BaseEntity{
+export class Referral extends BaseEntity {
   @PrimaryColumn({ type: "bytea", transformer: hexTransformer })
   public readonly address: string;
 
@@ -11,6 +11,6 @@ export class Referral extends BaseEntity{
   @Column({ type: "bytea", transformer: hexTransformer })
   public readonly referrer: string;
 
-  @Column({ type: "boolean",default:false})
+  @Column({ type: "boolean", default: false })
   public readonly active: boolean;
 }

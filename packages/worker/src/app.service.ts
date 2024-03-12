@@ -10,7 +10,7 @@ import { CounterService } from "./counter";
 import { BalancesCleanerService } from "./balance";
 import { TokenOffChainDataSaverService } from "./token/tokenOffChainData/tokenOffChainDataSaver.service";
 import runMigrations from "./utils/runMigrations";
-import {StatisticsTvlService} from "./points/statistics.service";
+import { StatisticsTvlService } from "./points/statistics.service";
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {
@@ -81,7 +81,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       this.counterService.stop(),
       this.balancesCleanerService.stop(),
       this.tokenOffChainDataSaverService.stop(),
-      this.statisticTvlService.stop()
+      this.statisticTvlService.stop(),
     ]);
   }
 }

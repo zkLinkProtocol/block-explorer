@@ -6,9 +6,9 @@ import { catchError, firstValueFrom } from "rxjs";
 import {
   TokenOffChainDataProvider,
   ITokenOffChainData,
-  ITokenCurrentPrice
+  ITokenCurrentPrice,
 } from "../../tokenOffChainDataProvider.abstract";
-import {Token} from "../../../token.service";
+import { Token } from "../../../token.service";
 
 const TOKENS_INFO_API_URL = "https://api.portals.fi/v2/tokens";
 const API_INITIAL_RETRY_TIMEOUT = 5000;
@@ -44,7 +44,7 @@ export class PortalsFiTokenOffChainDataProvider implements TokenOffChainDataProv
     return [];
   }
 
-  public async getTokenPriceByBlock(tokenId:string,blockTs: number):Promise<number> {
+  public async getTokenPriceByBlock(tokenId: string, blockTs: number): Promise<number> {
     return 0;
   }
 

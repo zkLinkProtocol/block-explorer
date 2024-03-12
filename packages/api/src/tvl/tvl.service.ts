@@ -57,20 +57,20 @@ export class TVLService {
       return [];
     }
 
-    let tokenAddresses = tokenBalance.map((token) => token.tokenAddress);
+    const tokenAddresses = tokenBalance.map((token) => token.tokenAddress);
 
-    let tokens = await this.tokenRepository.find({
+    const tokens = await this.tokenRepository.find({
       where: {
         l2Address: In(tokenAddresses),
       },
     });
 
-    var tokensMap = new Map(tokens.map((token) => [token.l2Address, token]));
+    const tokensMap = new Map(tokens.map((token) => [token.l2Address, token]));
 
-    let result = tokenBalance.map((token) => {
+    const result = tokenBalance.map((token) => {
       const cur_token = tokensMap.get(token.tokenAddress);
       const symbol = cur_token ? cur_token.symbol : "";
-      let tvl: AccountTVLDto = {
+      const tvl: AccountTVLDto = {
         tvl: token.tvl,
         amount: token.balance,
         tokenAddress: token.tokenAddress,
@@ -147,7 +147,7 @@ export class TVLService {
 
     const referMap = new Map(refererals.map((refer) => [refer.address, refer.referrer]));
 
-    let result: AccountRankDto[] = [];
+    const result: AccountRankDto[] = [];
     for (let i = 0; i < ranks.length; i++) {
       const rank = ranks[i];
       const address = normalizeAddressTransformer.from(rank.address);
@@ -175,28 +175,28 @@ export class TVLService {
     );
 
     const tokenAddresses = totalTokens.map((token) => normalizeAddressTransformer.from(token.tokenAddress));
-    let tokens = await this.tokenRepository.find({
+    const tokens = await this.tokenRepository.find({
       where: {
         l2Address: In(tokenAddresses),
       },
     });
 
-    var tokensMap = new Map(tokens.map((token) => [token.l2Address, token]));
+    const tokensMap = new Map(tokens.map((token) => [token.l2Address, token]));
 
-    let result: TokenTVLDto[] = [];
-    for (let token of totalTokens) {
+    const result: TokenTVLDto[] = [];
+    for (const token of totalTokens) {
       const hexAddress = normalizeAddressTransformer.from(token.tokenAddress);
-       const cur_token = tokensMap.get(hexAddress);
-       const symbol = cur_token ? cur_token.symbol : "";
-       result.push({
-         symbol,
-         tokenAddress: hexAddress,
-         amount: token.amount,
-         tvl: token.tvl,
-         type: "",
-         yieldType: "",
-         iconURL: cur_token ? cur_token.iconURL : null,
-       });
+      const cur_token = tokensMap.get(hexAddress);
+      const symbol = cur_token ? cur_token.symbol : "";
+      result.push({
+        symbol,
+        tokenAddress: hexAddress,
+        amount: token.amount,
+        tvl: token.tvl,
+        type: "",
+        yieldType: "",
+        iconURL: cur_token ? cur_token.iconURL : null,
+      });
     }
 
     return result;
@@ -208,7 +208,7 @@ export class TVLService {
   }
 
   public async getGroupTVL(address: string) {
-    let account = await this.inviteRepository.findOne({
+    const account = await this.inviteRepository.findOne({
       where: {
         address,
       },
@@ -218,7 +218,7 @@ export class TVLService {
       return 0;
     }
 
-    let groupTVL = await this.groupTVLRepository.findOne({
+    const groupTVL = await this.groupTVLRepository.findOne({
       where: {
         groupId: account.groupId,
       },
@@ -231,7 +231,7 @@ export class TVLService {
   }
 
   public async getAccountRefferals(address: string, page: PagingOptionsDto): Promise<AccountPointsDto[]> {
-    let invitees = await this.referralRepository.find({
+    const invitees = await this.referralRepository.find({
       where: {
         referrer: address,
       },
@@ -247,7 +247,7 @@ export class TVLService {
     }
 
     const addresses = invitees.map((invitee) => invitee.address);
-    let points = await this.pointRepository.find({
+    const points = await this.pointRepository.find({
       where: {
         address: In(addresses),
       },
@@ -255,9 +255,9 @@ export class TVLService {
 
     const pointsMap = new Map(points.map((point) => [point.address, point]));
 
-    let result: AccountPointsDto[] = invitees.map((invitee) => {
+    const result: AccountPointsDto[] = invitees.map((invitee) => {
       const point = pointsMap.get(invitee.address);
-      let account: AccountPointsDto = {
+      const account: AccountPointsDto = {
         novaPoint: point ? point.stakePoint : 0,
         referPoint: point ? point.refPoint : 0,
         address: invitee.address,
@@ -268,7 +268,7 @@ export class TVLService {
   }
 
   public async getAccountRefferalsTVL(address: string, page: PagingOptionsDto): Promise<AccountReferTVLDto[]> {
-    let invitees = await this.referralRepository.find({
+    const invitees = await this.referralRepository.find({
       where: {
         referrer: address,
       },
@@ -284,7 +284,7 @@ export class TVLService {
     }
 
     const addresses = invitees.map((invitee) => invitee.address);
-    let addressTvl = await this.addressTVLRepository.find({
+    const addressTvl = await this.addressTVLRepository.find({
       where: {
         address: In(addresses),
       },
@@ -292,9 +292,9 @@ export class TVLService {
 
     const addressTvlMap = new Map(addressTvl.map((address) => [address.address, address]));
 
-    let result: AccountReferTVLDto[] = invitees.map((invitee) => {
+    const result: AccountReferTVLDto[] = invitees.map((invitee) => {
       const tvl = addressTvlMap.get(invitee.address);
-      let account: AccountReferTVLDto = {
+      const account: AccountReferTVLDto = {
         address: invitee.address,
         tvl: tvl ? tvl.tvl : 0,
       };
