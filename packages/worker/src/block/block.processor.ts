@@ -33,7 +33,7 @@ import {unixTimeToDateString} from "../utils/date";
 import {TokenOffChainDataProvider} from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 import { utils } from "zksync-web3";
 import tokens from "../../tokens";
-
+import BigNumber from 'bignumber.js'
 @Injectable()
 export class BlockProcessor {
   private readonly logger: Logger;
@@ -45,7 +45,6 @@ export class BlockProcessor {
   private readonly pointsPhase1StartTime: string;
   private readonly pointsPhase1EndTime: string;
   private readonly pointsEarlyDepositEndTime: string;
-  private timer?: NodeJS.Timeout;
   // restart will handle from genesis block
   private lastHandlePointBlock: number;
   private addressEligibleCache: Map<string,boolean>;
@@ -126,6 +125,14 @@ export class BlockProcessor {
     }
   }
 
+  public async getTokenPrice(priceId:string,ts:number): Promise<number> {
+      let price = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, ts);
+      if (!price) {
+        throw new Error(`${priceId} price can't get at ${ts}`);
+      }
+      return price;
+  }
+
   public async handlePointsPeriod(fromBlockNumber: number,toBlockNumber: number): Promise<boolean> {
     const toBlock = await this.blockRepository.getLastBlock({
       where: {number: toBlockNumber}
@@ -133,11 +140,12 @@ export class BlockProcessor {
       console.log(`handlePointsPeriod ${fromBlockNumber} - ${toBlockNumber}`);
       this.lastHandlePointBlock = toBlock.number;
       // clear timer
-      if (this.timer) {
-        clearTimeout(this.timer);
-      }
+      // if (this.timer) {
+      //   clearTimeout(this.timer);
+      // }
       // get all addresses
-      const addresses = await this.balanceService.getAllAddresses();
+      //todo:batch
+      const addresses = await this.referralRepository.getAllAddressesInOrder(toBlockNumber);
       if (!addresses.length) {
         return false;
       }
@@ -147,79 +155,77 @@ export class BlockProcessor {
 
       let tokenPrices = new Map();
       for ( const token of tokens ) {
-        const tokenPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(token.cgPriceId, toBlock.timestamp.getTime());
+        const tokenPrice = await this.getTokenPrice(token.cgPriceId, toBlock.timestamp.getTime());
         tokenPrices.set(token.symbol,tokenPrice);
       }
 
       let stakePointsCache = new Map();
       let phase1EndDate = new Date(this.pointsPhase1EndTime);
       const earlyBirdMultiplier = this.getEarlyBirdMultiplier(toBlock.timestamp);
-      const ethPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock("ethereum", toBlock.timestamp.getTime());
+      let ethPrice = await this.getTokenPrice("ethereum", toBlock.timestamp.getTime());
       for ( const address of addresses ) {
         let stakePoint = 0;
         let refPoint = 0;
-        let addrStr = `0x${address.toString('hex')}`;
+        let addrStr = `0x${address.toString("hex")}`;
         let eligible = this.addressEligibleCache.get(addrStr);
         if (eligible) {
-          let addressAmount = 0;
+          let addressAmount = new BigNumber(0);
           // calc group TVL
           let members = await this.referralRepository.getGroupMembersByAddress(address, toBlockNumber);
           // should not empty,use for test
           if (!members.length) {
             members = [address];
           }
-          let groupTvl = 0;
+          let groupTvl = new BigNumber(0);
           for (const member of members) {
-            let memberAmount = 0;
-            for (const token of tokens) {
-              let tokenPrice = tokenPrices.get(token.symbol);
-              let tokenMultiplier = this.tokenService.getTokenMultiplier(token.symbol);
-              let balances = await this.balanceService.getAccountBalances(member);
-              let balancesOfToken = balances.filter(balance => {
+            let memberAmount = new BigNumber(0);
+            let balances = await this.balanceService.getAccountBalances(member);
+            for (const balance of balances) {
+              let token = tokens.find(token => {
                 let tokenAddress = `0x${Buffer.from(balance.tokenAddress).toString("hex")}`;
                 return token.address.find(t => t.l2Address.toLowerCase() == tokenAddress);
               });
-              for (const balance of balancesOfToken) {
-                const decimals = Math.pow(10, Number(token.decimals));
-                const tokenBalance = Number(balance.balance) / decimals;
-                console.log(`${member.toString("hex")} balance of ${token.symbol} is ${tokenBalance},price is ${tokenPrice}`);
-                const tokenAmount = tokenBalance * tokenPrice;
-                if (member.compare(address)) {
-                  addressAmount += tokenAmount * tokenMultiplier;
-                }
-                memberAmount += tokenAmount;
+              if (!token) {
+                continue;
               }
+              let tokenPrice = tokenPrices.get(token.symbol);
+              const decimals = Math.pow(10, Number(token.decimals));
+              const tokenBalance = new BigNumber(balance.balance).dividedBy(decimals) ;
+              console.log(`${member.toString("hex")} balance of ${token.symbol} is ${tokenBalance},price is ${tokenPrice}`);
+              const tokenAmount = tokenBalance.multipliedBy(tokenPrice) ;
+              if (member.equals(address)) {
+                addressAmount = addressAmount.plus(tokenAmount.multipliedBy(token.multiplier));
+              }
+              memberAmount = memberAmount.plus(tokenAmount);
             }
-            groupTvl += memberAmount;
+            groupTvl = groupTvl.plus(memberAmount) ;
           }
-          groupTvl = groupTvl / ethPrice;
+          groupTvl = groupTvl.dividedBy(ethPrice);
           // calc points for every account
-          let groupBooster = this.getGroupBooster(groupTvl);
+          let groupBooster = this.getGroupBooster(groupTvl.toNumber());
           //todo: growthBooster low priority
           let growthBooster = 0;
           let oldPoint = await this.pointsRepository.getPointByAddress(address);
           //(1 + Group Booster + Growth Booster) * sum_all tokens in activity list
           // (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price/ ETH_Price )
-          let newStakePoint = (1 + groupBooster + growthBooster) * addressAmount * earlyBirdMultiplier/ethPrice;
+          let newStakePoint = (1 + groupBooster + growthBooster) * addressAmount.toNumber() * earlyBirdMultiplier/ethPrice;
           newStakePoint = Number(newStakePoint.toFixed(2));
-          let oldStakePoint = oldPoint?.stakePoint || 0;
+          let oldStakePoint = Number(oldPoint?.stakePoint || 0);
           stakePoint = oldStakePoint + newStakePoint;
           stakePointsCache.set(addrStr, stakePoint);
 
           //calc referral point
           let referees = await this.referralRepository.getReferralsByAddress(address, toBlockNumber);
-          console.log(referees.length);
           for (const referee of referees) {
-            console.log(referee);
-            let refereeStakePoint = stakePointsCache.get(referee.toString("hex"));
+            const refereeStr = `0x${referee.toString("hex")}`;
+            let refereeStakePoint = stakePointsCache.get(refereeStr);
             if (!refereeStakePoint) {
               refereeStakePoint = await this.pointsRepository.getStakePointByAddress(referee);
             }
+            console.log(`${addrStr} invite ${refereeStr} point is ${refereeStakePoint}`);
             refPoint += refereeStakePoint * 0.1;
           }
 
-          let oldRefPoint = oldPoint?.refPoint || 0;
-          refPoint = oldRefPoint + Number(refPoint.toFixed(2));
           console.log(`account ${addrStr} point ${stakePoint} ${refPoint} at ${fromBlockNumber} - ${toBlockNumber}`);
         }
         const refNumber = 0;
@@ -227,39 +233,16 @@ export class BlockProcessor {
         await this.pointsHistoryRepository.add(addrStr, toBlockNumber, stakePoint, refPoint, refNumber);
       }
 
-    //calc referral point
-    //let referrals = [];
-    // let offset = BigInt(Number.MAX_SAFE_INTEGER);
-    // while (true) {
-    //   let ret = await this.referralRepository.getReferralsByBlock(toBlockNumber,offset);
-    //   if (ret.length == 0) {
-    //     break;
-    //   }
-    //   referrals.push(...ret);
-    //   offset = BigInt(ret[0].id);
-    // }
-    // console.log(referrals.length);
-    // let refPoints = new Map();
-    // for ( const referral of referrals ) {
-    //   console.log(referral.referee);
-    //   const referAddr = referral.address;
-    //   let p = refPoints.get(referAddr);
-    //   let referPoint = p === undefined ? 0: p;
-    //   const refereeStakePoint = await this.pointsRepository.getStakePointByAddress(referral.referee);
-    //   const newReferPoint = referPoint + refereeStakePoint*0.1;
-    //   refPoints.set(referAddr,newReferPoint);
-    // }
-
     // set timer
-    const timeOutFromBlock = toBlockNumber;
-    const timeOutToBlock =  timeOutFromBlock;
-    const fun = this.handlePointsPeriod;
-    this.timer = setTimeout(
-        async function ()  {
-          await fun(timeOutFromBlock, timeOutToBlock);
-          console.log("timer triggered");
-        }, this.pointsStatisticalPeriodSecs*1000,fun,timeOutFromBlock,timeOutToBlock,
-    )
+    // const timeOutFromBlock = toBlockNumber;
+    // const timeOutToBlock =  timeOutFromBlock;
+    // const fun = this.handlePointsPeriod;
+    // this.timer = setTimeout(
+    //     async function ()  {
+    //       await fun(timeOutFromBlock, timeOutToBlock);
+    //       console.log("timer triggered");
+    //     }, this.pointsStatisticalPeriodSecs*1000,fun,timeOutFromBlock,timeOutToBlock,
+    // )
 
     return true;
   }
@@ -334,10 +317,11 @@ export class BlockProcessor {
       const pointsPhase1StartTime = new Date(this.pointsPhase1StartTime).getTime()/1000;
       console.log(`check ${blockTs} ${pointsPhase1StartTime}`);
       if (blockTs < pointsPhase1StartTime) {
+        //todo: save db
         this.lastHandlePointBlock = block.number;
       } else {
         // get previous handled block timestamp
-        const preScanToBlockNumber = this.lastHandlePointBlock == 0 ? 1 : this.lastHandlePointBlock;
+        const preScanToBlockNumber = this.lastHandlePointBlock;
         console.log(`Last scan to block number ${preScanToBlockNumber}`);
         const preBlock = await this.blockRepository.getLastBlock({
           where: {number: preScanToBlockNumber}
@@ -346,13 +330,9 @@ export class BlockProcessor {
         const ts_interval = blockTs - prePointsBlockTs;
         console.log(`Current block ${block.number} ,timestamp interval ${ts_interval},config period ${this.pointsStatisticalPeriodSecs}`);
         if (ts_interval > this.pointsStatisticalPeriodSecs) {
-          let periods = (blockTs - prePointsBlockTs) / this.pointsStatisticalPeriodSecs;
-          console.log(`Ts interval periods ${periods}`);
-          let fromBlockNumber = this.lastHandlePointBlock == 0 ? 1 : Math.min(preBlock.number + 1, block.number - 1);
+          let fromBlockNumber = Math.min(preBlock.number + 1, block.number - 1);
           let toBlockNumber = block.number - 1;
-          for (let i = 0; i < periods; i++) {
-            await this.handlePointsPeriod(fromBlockNumber, toBlockNumber);
-          }
+          await this.handlePointsPeriod(fromBlockNumber, toBlockNumber);
         } else {
           console.log(`${preBlock.number} - ${block.number} block time interval does not reach the statistical period `);
         }
@@ -459,11 +439,12 @@ export class BlockProcessor {
           let addrBuf = Buffer.from(deposit.from.startsWith("0x") ? deposit.from.substring(2) : deposit.from, "hex");
           await this.referralRepository.updateReferralsBlock(addrBuf,block.number);
           let depositPoint = 0;
-          let depositEthAmount = 0;
+          let depositEthAmount = new BigNumber(0);
           if (this.checkTokenIsEth(deposit.tokenAddress)) {
-            depositEthAmount = Number(deposit.amount) / Math.pow(10,18);
+            // depositEthAmount = Number(deposit.amount) / Math.pow(10,18);
+            depositEthAmount = new BigNumber(deposit.amount).dividedBy(new BigNumber(10).pow(18))
             const tokenMultiplier = this.tokenService.getTokenMultiplier("ETH");
-            depositPoint = 10 * tokenMultiplier * depositEthAmount;
+            depositPoint = depositEthAmount.multipliedBy(10).multipliedBy(tokenMultiplier).toNumber();
           } else {
             //not support tokens
             if (!this.tokenService.isSupportToken(deposit.tokenAddress)) {
@@ -487,9 +468,9 @@ export class BlockProcessor {
             }
 
             let decimals = Math.pow(10, tokenInfo.decimals);
-            let depositAmount = Number(deposit.amount) / decimals;
-            depositEthAmount = depositAmount * tokenInfo.price / ethPrice;
-            depositPoint = 10 * tokenInfo.multiplier * depositEthAmount;
+            let depositAmount =new BigNumber(deposit.amount).dividedBy(decimals)
+            depositEthAmount = depositAmount.multipliedBy(tokenInfo.price).dividedBy(ethPrice);
+            depositPoint = depositEthAmount.multipliedBy(10).multipliedBy(tokenInfo.multiplier).toNumber();
           }
           // check point eligible
           let eligible = this.addressEligibleCache.get(deposit.from);
@@ -499,8 +480,8 @@ export class BlockProcessor {
             const phase1EndTime = new Date(this.pointsPhase1EndTime);
             const depositTime = new Date(deposit.timestamp);
             console.log(`addBlock check eligible ${depositEthAmount} ${depositTime}`);
-            newEligible = (depositEthAmount >= 0.1 && depositTime <= earlyDepositEndTime) ||
-                (depositEthAmount >= 0.25 && depositTime > earlyDepositEndTime && depositTime < phase1EndTime);
+            newEligible = (depositEthAmount.gte(0.09) && depositTime <= earlyDepositEndTime) ||
+                (depositEthAmount.gte(0.225) && depositTime > earlyDepositEndTime && depositTime < phase1EndTime);
           }
           if (!newEligible) {
             continue
