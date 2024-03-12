@@ -15,7 +15,7 @@
         </Tooltip>
       </a>
       <Tooltip v-else class="batches-tooltip">
-        <img class="from-chain-icon opacity-60" :src="item?.logoUrl" alt="" />
+        <img class="from-chain-icon opacity-30" :src="item?.logoUrl" alt="" />
         <template #content>{{ chainNameList[item?.key!] }} </template>
       </Tooltip>
     </template>

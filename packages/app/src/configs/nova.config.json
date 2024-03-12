@@ -25,13 +25,13 @@
     "manta": "/img/manta.jpg"
   },
   "chainNameList": {
-    "goerli": "Goerli Mainnet",
-    "primary": "Linea Mainnet",
+    "goerli": "Goerli",
+    "primary": "Linea",
     "ethereum": "Ethereum",
-    "zksync": "zkSync Mainnet",
-    "arbitrum": "Arbitrum Mainnet",
-    "mantle": "Mantle Mainnet",
-    "manta": "Manta Mainnet"
+    "zksync": "zkSync",
+    "arbitrum": "Arbitrum One",
+    "mantle": "Mantle",
+    "manta": "Manta Pacific"
   },
   "excuteBatchList": [
     {
