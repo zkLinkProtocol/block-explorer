@@ -70,4 +70,12 @@ export class PointsRepository {
     const [accountPoint] = await transactionManager.query(`SELECT * FROM points WHERE address = $1`, [address]);
     return accountPoint || null;
   }
+
+  public async getLastDepositStatisticalBlockNumber(): Promise<number> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const [fromBlockNumber] = await transactionManager.query(
+      `SELECT last_value FROM "depositPoint_statisticalBlockNumber";`
+    );
+    return Number(fromBlockNumber.last_value);
+  }
 }

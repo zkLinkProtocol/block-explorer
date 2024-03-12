@@ -18,6 +18,13 @@ export class TransferRepository extends BaseRepository<Transfer> {
     );
   }
 
+  public async getBlockDeposits(blockNumber: number): Promise<Transfer[]> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    return await transactionManager.query(`SELECT * FROM transfers WHERE type = 'deposit' AND "blockNumber" = $1;`, [
+      blockNumber,
+    ]);
+  }
+
   public override async addMany(records: Partial<Transfer>[]): Promise<void> {
     await super.addMany(records);
 
