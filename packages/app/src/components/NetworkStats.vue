@@ -104,7 +104,7 @@ const subtitle = computed(() =>
     @apply font-sans text-base text-neutral-400;
   }
   .stats-container {
-    @apply flex flex-col border-neutral-200 py-3 pr-8 text-xl text-neutral-500 last:border-0 last:pb-0 sm:border-r sm:py-0 lg:w-max;
+    @apply flex flex-col flex-1 shrink-0 border-neutral-200 py-3 pr-8 text-xl text-neutral-500 last:border-0 last:pb-0 sm:border-r sm:py-0;
     dd {
       @apply text-[1.65rem] font-bold text-primary-800 xl:text-3xl;
     }
@@ -113,7 +113,7 @@ const subtitle = computed(() =>
     }
   }
   .description-list {
-    @apply mt-4 gap-x-8 divide-y sm:flex sm:divide-y-0 lg:mt-0 justify-between;
+    @apply w-full mt-4 gap-x-8 divide-y sm:flex sm:divide-y-0 lg:mt-0 justify-between;
   }
 }
 </style>
