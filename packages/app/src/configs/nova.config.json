@@ -6,7 +6,7 @@
       "bridgeUrl": "https://portal.zklink.io",
       "hostnames": [],
       "icon": "/images/icons/cion.png",
-      "l1ExplorerUrl": "https://lineascan.build/",
+      "l1ExplorerUrl": "https://lineascan.build",
       "l2ChainId": 810180,
       "l2NetworkName": "zkLink Nova Mainnet",
       "maintenance": false,
