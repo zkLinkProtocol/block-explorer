@@ -348,15 +348,25 @@ export class BlockProcessor {
 
       dbTransactions = blocksToProcessChunks.map((blocksToProcessChunk) =>
         this.unitOfWork.useTransaction(async () => {
-          await Promise.all(blocksToProcessChunk.map((blockInfo) => this.addBlock(blockInfo)));
+          //TODO execute step by step, not parallel
+          for(const blockInfo of blocksToProcessChunk) {
+            await this.addBlock(blockInfo);
+          }
+          // await Promise.all(blocksToProcessChunk.map((blockInfo) => this.addBlock(blockInfo)));
         }, true)
       );
-      await Promise.all(dbTransactions.map((t) => t.waitForExecution()));
 
-      // sequentially commit transactions to preserve blocks order in DB
-      for (const dbTransaction of dbTransactions) {
+      // wait for all transactions to be executed, no parallel
+      for(const dbTransaction of dbTransactions) {
+        await dbTransaction.waitForExecution();
         await dbTransaction.commit();
       }
+      // await Promise.all(dbTransactions.map((t) => t.waitForExecution()));
+
+      // sequentially commit transactions to preserve blocks order in DB
+      // for (const dbTransaction of dbTransactions) {
+        // await dbTransaction.commit();
+      // }
 
       stopDurationMeasuring({ status: "success" });
     } catch (error) {
