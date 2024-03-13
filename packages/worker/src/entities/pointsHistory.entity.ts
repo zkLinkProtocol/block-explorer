@@ -1,6 +1,7 @@
 import { Entity, Column, Index, PrimaryColumn } from "typeorm";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { bigIntNumberTransformer } from "../transformers/bigIntNumber.transformer";
+import {stringTransformer} from "../transformers/string.transformer";
 
 @Entity({ name: "pointsHistory" })
 export class PointsHistory {
@@ -21,6 +22,6 @@ export class PointsHistory {
   @Column("decimal", {scale:2} )
   public readonly refPoint: number;
 
-  @Column({ type: "bigint", transformer: bigIntNumberTransformer })
-  public readonly refNumber: number;
+  @Column({ transformer: stringTransformer })
+  public readonly updateType: string;
 }
