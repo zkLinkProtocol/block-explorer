@@ -12,10 +12,11 @@ import { typeOrmReferModuleOptions } from "src/config/refer-typeorm.config";
 import { Repository } from "typeorm";
 import { Invite } from "./entities/invite.entity";
 import { GroupTvl } from "./entities/groupTvl.entity";
+import {PointsHistory} from "./entities/pointsHistory.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AddressTokenTvl, Token, Point, AddressTvl, GroupTvl]),
+    TypeOrmModule.forFeature([AddressTokenTvl, Token, Point, PointsHistory,AddressTvl, GroupTvl]),
     TypeOrmModule.forFeature([Referral], "refer"),
     TypeOrmModule.forFeature([Invite], "refer"),
     LogModule,
