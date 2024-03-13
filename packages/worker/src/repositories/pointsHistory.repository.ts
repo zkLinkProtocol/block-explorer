@@ -27,7 +27,7 @@ export class PointsHistoryRepository {
   public async getLastHandlePointBlock(): Promise<number> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     let [ret] = await transactionManager.query(
-        `SELECT MAX("blockNumber") FROM "pointsHistory" WHERE opType = 'PeriodUpdate'`);
+        `SELECT MAX("blockNumber") FROM "pointsHistory" WHERE "updateType" = 'PeriodUpdate'`);
     if (!ret) {
       return 0;
     } else {

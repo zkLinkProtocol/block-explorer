@@ -52,7 +52,8 @@ import {
   PointsHistory,
   Referral
 } from "./entities";
-import { typeOrmModuleOptions,typeOrmReferModuleOptions } from "./typeorm.config";
+import { typeOrmModuleOptions } from "./typeorm.config";
+import { typeOrmReferModuleOptions } from "./refer-typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
 import { RetryDelayProvider } from "./retryDelay.provider";
 import { MetricsModule } from "./metrics";
