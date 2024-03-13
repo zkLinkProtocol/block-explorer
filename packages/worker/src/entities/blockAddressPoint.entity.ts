@@ -15,6 +15,12 @@ export class BlockAddressPoint extends BaseEntity {
   public readonly depositPoint: number;
 
   @Column("decimal")
+  public readonly tvl: number;
+
+  @Column("decimal")
+  public readonly holdBasePoint: number;
+
+  @Column("decimal")
   public readonly holdPoint: number;
 
   @Column("decimal")

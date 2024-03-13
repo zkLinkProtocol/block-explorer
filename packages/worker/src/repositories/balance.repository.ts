@@ -67,23 +67,29 @@ export class BalanceRepository extends BaseRepository<Balance> {
     super(Balance, unitOfWork);
   }
 
+  public async getAllAddressesByBlock(blockNumber: number): Promise<Buffer[]> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const result = await transactionManager.query(
+      `SELECT address FROM balances WHERE "blockNumber" <= $1 group by address;`,
+      [blockNumber]
+    );
+    return result.map((row: any) => row.address);
+  }
+
   public async getAllAddresses(): Promise<Buffer[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const result = await transactionManager.query(`SELECT address FROM balances group by address;`);
-    const addresses = result.map((row: any) => row.address);
-    return addresses;
+    return result.map((row: any) => row.address);
   }
 
   public async getAccountBalances(address: Buffer): Promise<Balance[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const balances = await transactionManager.query(selectBalancesScript, [address]);
-    return balances;
+    return await transactionManager.query(selectBalancesScript, [address]);
   }
 
-  public async getAccountBalancesByBlock(address: Buffer, block: number): Promise<Balance[]> {
+  public async getAccountBalancesByBlock(address: Buffer, blockNumber: number): Promise<Balance[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const balances = await transactionManager.query(selectBalancesByBlockScript, [address, block]);
-    return balances;
+    return await transactionManager.query(selectBalancesByBlockScript, [address, blockNumber]);
   }
 
   public async deleteOldBalances(fromBlockNumber: number, toBlockNumber: number): Promise<void> {

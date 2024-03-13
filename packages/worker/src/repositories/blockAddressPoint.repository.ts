@@ -39,7 +39,7 @@ export class BlockAddressPointRepository extends BaseRepository<BlockAddressPoin
 
   public async upsertBlockAddressPoint(
     blocBlockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>,
-    transferId: number
+    transferId?: number
   ): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.transaction(async (entityManager) => {
@@ -47,7 +47,9 @@ export class BlockAddressPointRepository extends BaseRepository<BlockAddressPoin
         "blockNumber",
         "address",
       ]);
-      await entityManager.query(`SELECT setval('"pointParsedTransferId"', $1, false);`, [transferId]);
+      if (!!transferId) {
+        await entityManager.query(`SELECT setval('"pointParsedTransferId"', $1, false);`, [transferId]);
+      }
     });
   }
 }

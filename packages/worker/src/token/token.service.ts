@@ -43,6 +43,18 @@ export class TokenService {
     this.logger = new Logger(TokenService.name);
     this.supportTokens = [];
     tokens.forEach((token) => {
+      if (!token.decimals) {
+        throw new Error(`Token ${token.symbol} decimals not found`);
+      }
+      if (!token.cgPriceId) {
+        throw new Error(`Token ${token.symbol} cgPriceId not found`);
+      }
+      if (!token.type) {
+        throw new Error(`Token ${token.symbol} cgPriceId not found`);
+      }
+      if (!token.multiplier) {
+        throw new Error(`Token ${token.symbol} multiplier not found`);
+      }
       this.supportTokens.push(token);
     });
   }
