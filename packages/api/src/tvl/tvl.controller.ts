@@ -191,4 +191,18 @@ export class TVLController {
       result,
     };
   }
+
+  @ApiOperation({ summary: "get account points history" })
+  @Get("/getAccountPointsHistory")
+  public async getAccountPointsHistory(
+      @Query("address", new ParseAddressPipe()) address: string,
+      @Query() pagingOptions: PagingOptionsDto
+  ): Promise<PointsHistoryResponseDto> {
+    const result = await this.tvlService.getAccountPointsHistory(address,pagingOptions);
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result,
+    };
+  }
 }

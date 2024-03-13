@@ -332,4 +332,33 @@ export class TVLService {
     });
     return result;
   }
+
+  public async getAccountPointsHistory(address: string,page: PagingOptionsDto): Promise<PointHistoryDto[]> {
+    let pointsHistory = await this.pointsHistoryRepository.find({
+      where: {
+        address: address,
+      },
+      skip: (page.page - 1) * page.limit,
+      take: page.limit,
+      order: {
+        blockNumber: "desc",
+      },
+    });
+
+    if (pointsHistory.length === 0) {
+      return [];
+    }
+
+    let result: PointHistoryDto[] = pointsHistory.map((p) => {
+      let pointHistory: PointHistoryDto = {
+        address: p.address,
+        blockNumber: p.blockNumber,
+        stakePoint: p.stakePoint,
+        refPoint: p.refPoint,
+        updateType: p.updateType,
+      };
+      return pointHistory;
+    });
+    return result;
+  }
 }
