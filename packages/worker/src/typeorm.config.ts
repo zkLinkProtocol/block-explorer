@@ -47,9 +47,4 @@ const typeOrmCliDataSource = new DataSource({
   migrations: ["src/migrations/*.ts"],
 });
 
-const typeOrmReferCliDataSource = new DataSource({
-  ...typeOrmReferModuleOptions,
-  entities: ["src/**/*.entity.{ts,js}"],
-  migrations: [],
-});
 export default typeOrmCliDataSource;

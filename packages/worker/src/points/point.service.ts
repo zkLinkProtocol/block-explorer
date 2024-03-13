@@ -148,25 +148,39 @@ export class PointService extends Worker {
       await this.blockAddressPointRepository.setParsedTransferId(transferId);
       return;
     }
-    const newDepositPoint = await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices);
+    const newDepositPoint = (await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices)).toNumber();
     const blockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, from);
-    const upsert = {
-      blockNumber: blockNumber,
-      address: from,
-      depositPoint: newDepositPoint.toNumber(),
-      holdPoint: 0,
-      refPoint: 0,
-      totalStakePoint: newDepositPoint.toNumber(),
-      totalRefPoint: 0,
-    };
-    if (!!blockAddressPoint) {
-      upsert.depositPoint += Number(blockAddressPoint.depositPoint);
-      upsert.holdPoint = blockAddressPoint.holdPoint;
-      upsert.refPoint = blockAddressPoint.refPoint;
-      upsert.totalStakePoint += Number(blockAddressPoint.totalStakePoint);
-      upsert.totalRefPoint = blockAddressPoint.totalRefPoint;
+    if (!blockAddressPoint) {
+      // get the address point of exist max block number
+      const currentAddressPoint = await this.blockAddressPointRepository.getLatestPoint(from);
+      let totalStakePoint = Number(0);
+      let totalRefPoint = Number(0);
+      if (!!currentAddressPoint) {
+        totalStakePoint = Number(currentAddressPoint.totalStakePoint);
+        totalRefPoint = Number(currentAddressPoint.totalRefPoint);
+      }
+      const upsert = {
+        blockNumber: blockNumber,
+        address: from,
+        depositPoint: newDepositPoint,
+        holdPoint: Number(0),
+        refPoint: Number(0),
+        totalStakePoint: totalStakePoint + newDepositPoint,
+        totalRefPoint: totalRefPoint,
+      };
+      await this.blockAddressPointRepository.upsertBlockAddressPoint(upsert, transferId);
+    } else {
+      const upsert = {
+        blockNumber: blockNumber,
+        address: from,
+        depositPoint: Number(blockAddressPoint.depositPoint) + newDepositPoint,
+        holdPoint: blockAddressPoint.holdPoint,
+        refPoint: blockAddressPoint.refPoint,
+        totalStakePoint: Number(blockAddressPoint.totalStakePoint) + newDepositPoint,
+        totalRefPoint: blockAddressPoint.totalRefPoint,
+      };
+      await this.blockAddressPointRepository.upsertBlockAddressPoint(upsert, transferId);
     }
-    await this.blockAddressPointRepository.upsertBlockAddressPoint(upsert, transferId);
   }
 
   async calculateDepositPoint(

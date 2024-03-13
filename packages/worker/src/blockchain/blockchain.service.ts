@@ -169,5 +169,6 @@ export class BlockchainService implements OnModuleInit {
     return await erc20Contract.balanceOf(address, { blockTag });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public async onModuleInit(): Promise<void> {}
 }

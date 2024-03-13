@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { FindOptionsWhere, FindOptionsSelect, FindOptionsRelations } from "typeorm";
 import { UnitOfWork } from "../unitOfWork";
-import { Block, Point } from "../entities";
+import { Point } from "../entities";
 
 @Injectable()
 export class PointsRepository {

@@ -28,6 +28,15 @@ export class BlockAddressPointRepository extends BaseRepository<BlockAddressPoin
     });
   }
 
+  public async getLatestPoint(address: string): Promise<BlockAddressPoint> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    return await transactionManager.findOne<BlockAddressPoint>(BlockAddressPoint, {
+      select: { totalStakePoint: true, totalRefPoint: true },
+      where: { address },
+      order: { blockNumber: "DESC" },
+    });
+  }
+
   public async upsertBlockAddressPoint(
     blocBlockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>,
     transferId: number
