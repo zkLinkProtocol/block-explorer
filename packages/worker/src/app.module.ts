@@ -51,6 +51,7 @@ import {
   Point,
   PointsHistory,
   Referral,
+  BlockAddressPoint,
 } from "./entities";
 import { typeOrmModuleOptions, typeOrmReferModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -63,6 +64,7 @@ import { StatisticsTvlService } from "./points/statistics.service";
 import { PointService } from "./points/point.service";
 import { BlockTokenPriceRepository } from "./repositories/blockTokenPrice.repository";
 import { BlockTokenPrice } from "./entities/blockTokenPrice.entity";
+import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.repository";
 
 @Module({
   imports: [
@@ -94,6 +96,7 @@ import { BlockTokenPrice } from "./entities/blockTokenPrice.entity";
       Point,
       PointsHistory,
       BlockTokenPrice,
+      BlockAddressPoint,
     ]),
     TypeOrmModule.forRootAsync({
       name: "refer",
@@ -164,6 +167,7 @@ import { BlockTokenPrice } from "./entities/blockTokenPrice.entity";
     DbMetricsService,
     PointService,
     BlockTokenPriceRepository,
+    BlockAddressPointRepository,
   ],
 })
 export class AppModule {}

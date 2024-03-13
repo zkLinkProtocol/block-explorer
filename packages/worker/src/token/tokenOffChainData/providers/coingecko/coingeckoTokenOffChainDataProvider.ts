@@ -102,12 +102,36 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     return tokensCurrentPrice;
   }
 
+  // The price is order by timestamp asc
+  // {
+  //   "prices": [
+  //     [
+  //       1710317264136,
+  //       4043.3907598473666
+  //     ],
+  //     [
+  //       1710320738914,
+  //       4064.7920574616787
+  //     ],
+  //     [
+  //       1710324520774,
+  //       4052.906968480699
+  //     ],
+  //     [
+  //       1710327169000,
+  //       4054.5795290048804
+  //     ]
+  //   ]
+  // }
   public async getTokenPriceByBlock(tokenId: string, blockTs: number): Promise<number> {
     const getDate = new Date(blockTs);
     const marketChart = await this.getTokensMarketChart(tokenId, getDate);
     getDate.setMinutes(0, 0, 0);
     const nextHourDate = new Date(getDate);
     nextHourDate.setHours(getDate.getHours() + 1);
+    if (marketChart.prices.length === 0) {
+      throw new Error(`No prices return from coingeco for token ${tokenId}`);
+    }
     const prices = marketChart.prices.filter(
       (price) => price[0] >= getDate.getTime() && price[0] < nextHourDate.getTime()
     );

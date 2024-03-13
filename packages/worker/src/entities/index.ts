@@ -19,3 +19,5 @@ export * from "./referral.entity";
 export * from "./addressTokenTvl.entity";
 export * from "./addressTvl.entity";
 export * from "./groupTvl.entity";
+export * from "./blockTokenPrice.entity";
+export * from "./blockAddressPoint.entity";

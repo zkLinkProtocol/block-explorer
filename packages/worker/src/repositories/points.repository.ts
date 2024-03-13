@@ -76,4 +76,9 @@ export class PointsRepository {
     const [fromBlockNumber] = await transactionManager.query(`SELECT last_value FROM "pointStatisticalBlockNumber";`);
     return Number(fromBlockNumber.last_value);
   }
+
+  public async setStatisticalBlockNumber(blockNumber: number): Promise<void> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.query(`SELECT setval('"pointStatisticalBlockNumber"', $1, false);`, [blockNumber]);
+  }
 }

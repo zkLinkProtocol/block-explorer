@@ -88,7 +88,7 @@ export class TokenService {
 
   public getSupportToken(tokenAddress: string): Token | undefined {
     for (const token of this.supportTokens) {
-      if (token.address.find((t) => t.l2Address.toLowerCase() == tokenAddress.toLowerCase())) {
+      if (token.address.find((t) => t.l2Address.toLowerCase() === tokenAddress.toLowerCase())) {
         return token;
       }
     }
