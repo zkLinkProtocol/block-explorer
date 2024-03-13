@@ -103,7 +103,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
   }
 
   public async getTokenPriceByBlock(tokenId: string, blockTs: number): Promise<number> {
-    const getDate = new Date(blockTs - 3600 * 1000);
+    const getDate = new Date(blockTs);
     const marketChart = await this.getTokensMarketChart(tokenId, getDate);
     getDate.setMinutes(0, 0, 0);
     const nextHourDate = new Date(getDate);

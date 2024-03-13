@@ -71,11 +71,9 @@ export class PointsRepository {
     return accountPoint || null;
   }
 
-  public async getLastDepositStatisticalBlockNumber(): Promise<number> {
+  public async getLastStatisticalBlockNumber(): Promise<number> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const [fromBlockNumber] = await transactionManager.query(
-      `SELECT last_value FROM "depositPoint_statisticalBlockNumber";`
-    );
+    const [fromBlockNumber] = await transactionManager.query(`SELECT last_value FROM "pointStatisticalBlockNumber";`);
     return Number(fromBlockNumber.last_value);
   }
 }

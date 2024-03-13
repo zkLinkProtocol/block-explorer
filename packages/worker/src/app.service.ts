@@ -11,6 +11,7 @@ import { BalancesCleanerService } from "./balance";
 import { TokenOffChainDataSaverService } from "./token/tokenOffChainData/tokenOffChainDataSaver.service";
 import runMigrations from "./utils/runMigrations";
 import { StatisticsTvlService } from "./points/statistics.service";
+import { PointService } from "./points/point.service";
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {
@@ -24,6 +25,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     private readonly balancesCleanerService: BalancesCleanerService,
     private readonly tokenOffChainDataSaverService: TokenOffChainDataSaverService,
     private readonly statisticTvlService: StatisticsTvlService,
+    private readonly pointService: PointService,
     private readonly dataSource: DataSource,
     private readonly configService: ConfigService
   ) {
@@ -70,7 +72,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     if (enableTokenOffChainDataSaver) {
       tasks.push(this.tokenOffChainDataSaverService.start());
     }
-    tasks.push(this.statisticTvlService.start());
+    tasks.push(this.pointService.start());
     return Promise.all(tasks);
   }
 

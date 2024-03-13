@@ -15,3 +15,4 @@ export * from "./points.repository";
 export * from "./pointsHistory.repository";
 export * from "./referrals.repository";
 export * from "./tvl.repository";
+export * from "./blockTokenPrice.repository";

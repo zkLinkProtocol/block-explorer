@@ -60,6 +60,9 @@ import { DbMetricsService } from "./dbMetrics.service";
 import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
 import { StatisticsTvlService } from "./points/statistics.service";
+import { PointService } from "./points/point.service";
+import { BlockTokenPriceRepository } from "./repositories/blockTokenPrice.repository";
+import { BlockTokenPrice } from "./entities/blockTokenPrice.entity";
 
 @Module({
   imports: [
@@ -90,6 +93,7 @@ import { StatisticsTvlService } from "./points/statistics.service";
       Balance,
       Point,
       PointsHistory,
+      BlockTokenPrice,
     ]),
     TypeOrmModule.forRootAsync({
       name: "refer",
@@ -158,6 +162,8 @@ import { StatisticsTvlService } from "./points/statistics.service";
     Logger,
     RetryDelayProvider,
     DbMetricsService,
+    PointService,
+    BlockTokenPriceRepository,
   ],
 })
 export class AppModule {}
