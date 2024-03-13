@@ -27,21 +27,6 @@ export class ReferralsRepository {
           return ret.map((r:any) => r.address);
       }
   }
-    public async updateReferralsBlock(referee: Buffer,block: number): Promise<void> {
-        await this.refer.query(
-            `UPDATE invites SET "blockNumber" = $2 WHERE address = $1 AND "blockNumber" IS NULL`,[referee,block]
-        );
-    }
-
-    public async updateActives(addresses: Buffer[]): Promise<void> {
-      for (const address of addresses) {
-          await this.refer.query(
-              `UPDATE invites
-               SET active = true
-               WHERE address = $1`, [address]
-          );
-      }
-    }
 
     public async getAllAddressesInOrder(blockNumber:number): Promise<Buffer[]> {
         let ret = await this.refer.query(`SELECT address FROM invites WHERE "blockNumber" <= $1 ORDER BY "blockNumber" DESC`,[blockNumber]);
@@ -50,7 +35,7 @@ export class ReferralsRepository {
 
   public async getReferralsByAddress(referer: Buffer,block: number): Promise<Buffer[]> {
     const ret = await this.refer.query(
-        `SELECT DISTINCT(r.address) AS referee FROM referrers r,invites v WHERE r.referrer = $1 AND r.address = v.address AND v."blockNumber" <= $2`,[referer,block]
+        `SELECT DISTINCT(r.address) AS referee FROM referrers r,invites v WHERE r.referrer = $1 AND v.active = true AND r.address = v.address AND v."blockNumber" <= $2`,[referer,block]
     );
     return ret.map((r:any) => r.referee);
   }

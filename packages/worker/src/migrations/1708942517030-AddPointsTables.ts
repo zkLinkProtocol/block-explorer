@@ -9,7 +9,7 @@ export class AddPointsTables1708942517030 implements MigrationInterface {
     );
     await queryRunner.query(`CREATE UNIQUE INDEX "IDX_186821d745a802779bae61192c" ON "points" ("address") `);
     await queryRunner.query(
-      `CREATE TABLE "pointsHistory" ("id" BIGSERIAL NOT NULL, "address" bytea NOT NULL, "blockNumber" bigint NOT NULL, "stakePoint" decimal NOT NULL, "refPoint" decimal NOT NULL, "refNumber" bigint NOT NULL,CONSTRAINT "PK_3d3989db885fde70a502ffa3264" PRIMARY KEY ("id"))`
+      `CREATE TABLE "pointsHistory" ("id" BIGSERIAL NOT NULL, "address" bytea NOT NULL, "blockNumber" bigint NOT NULL, "stakePoint" decimal NOT NULL, "refPoint" decimal NOT NULL, "updateType" text NOT NULL,CONSTRAINT "PK_3d3989db885fde70a502ffa3264" PRIMARY KEY ("id"))`
     );
     await queryRunner.query(`CREATE INDEX "IDX_b1b95df312364b2d2ce420b2c8" ON "pointsHistory" ("address") `);
     await queryRunner.query(`ALTER TABLE "tokens" ADD COLUMN "priceId" character varying NULL`);
