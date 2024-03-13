@@ -16,9 +16,11 @@ import { normalizeAddressTransformer } from "src/common/transformers/normalizeAd
 import { TokenTVLDto } from "src/api/dtos/tvl/tokenTVL.dto";
 import { Referral } from "./entities/referral.entity";
 import { PagingOptionsDto } from "src/common/dtos";
-import { AccountPointsDto } from "src/api/dtos/tvl/accountPoints.dto";
+import {AccountPointsDto, PointHistoryDto} from "src/api/dtos/tvl/accountPoints.dto";
 import { AccountReferTVLDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
 import { Invite } from "./entities/invite.entity";
+import {PointsHistory} from "./entities/pointsHistory.entity";
+import {ApiProperty} from "@nestjs/swagger";
 
 const L2_ETH_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
 const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -36,6 +38,8 @@ export class TVLService {
     private readonly tokenRepository: Repository<Token>,
     @InjectRepository(Point)
     private readonly pointRepository: Repository<Point>,
+    @InjectRepository(PointsHistory)
+    private readonly pointsHistoryRepository: Repository<PointsHistory>,
     @InjectRepository(AddressTvl)
     private readonly addressTVLRepository: Repository<AddressTvl>,
     @InjectRepository(Referral, "refer")
@@ -299,6 +303,32 @@ export class TVLService {
         tvl: tvl ? tvl.tvl : 0,
       };
       return account;
+    });
+    return result;
+  }
+
+  public async getPointsHistory(page: PagingOptionsDto): Promise<PointHistoryDto[]> {
+    let pointsHistory = await this.pointsHistoryRepository.find({
+      skip: (page.page - 1) * page.limit,
+      take: page.limit,
+      order: {
+        blockNumber: "desc",
+      },
+    });
+
+    if (pointsHistory.length === 0) {
+      return [];
+    }
+
+    let result: PointHistoryDto[] = pointsHistory.map((p) => {
+      let pointHistory: PointHistoryDto = {
+        address: p.address,
+        blockNumber: p.blockNumber,
+        stakePoint: p.stakePoint,
+        refPoint: p.refPoint,
+        updateType: p.updateType,
+      };
+      return pointHistory;
     });
     return result;
   }

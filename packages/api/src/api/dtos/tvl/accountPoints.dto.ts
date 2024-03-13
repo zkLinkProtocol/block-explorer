@@ -33,6 +33,32 @@ export class AccountPointsResponseDto extends ResponseBaseDto {
   public readonly result: AccountPointsDto[];
 }
 
+export class PointHistoryDto {
+  @ApiProperty({ type: String })
+  public readonly address: string;
+
+  @ApiProperty({ type: Number })
+  public readonly blockNumber: number;
+
+  @ApiProperty({ type: Number } )
+  public readonly stakePoint: number;
+
+  @ApiProperty({ type: Number })
+  public readonly refPoint: number;
+
+  @ApiProperty({ type: String })
+  public readonly updateType: string;
+}
+
+export class PointsHistoryResponseDto extends ResponseBaseDto {
+  @ApiProperty({
+    description: "account points",
+    type: PointHistoryDto,
+    isArray: true,
+  })
+  public readonly result: PointHistoryDto[];
+}
+
 export class AccountPointResponseDto extends ResponseBaseDto {
   @ApiProperty({
     description: "account point",

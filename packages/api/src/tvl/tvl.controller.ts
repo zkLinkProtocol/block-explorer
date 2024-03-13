@@ -8,7 +8,12 @@ import { TVLService } from "./tvl.service";
 import { AccountTVLResponseDto } from "../api/dtos/tvl/accountTVL.dto";
 import { swagger } from "src/config/featureFlags";
 import { Point } from "./entities/points.entity";
-import { AccountPointResponseDto, AccountPointsResponseDto } from "src/api/dtos/tvl/accountPoints.dto";
+import {
+  AccountPointResponseDto,
+  AccountPointsResponseDto,
+  PointHistoryDto,
+  PointsHistoryResponseDto
+} from "src/api/dtos/tvl/accountPoints.dto";
 import { TotalTVLResponseDto } from "src/api/dtos/tvl/totalTVL.dto";
 import { AccountRankResponseDto } from "src/api/dtos/tvl/accountRank.dto";
 import { AccountsRankResponseDto } from "src/api/dtos/tvl/accountsRank.dto";
@@ -167,6 +172,19 @@ export class TVLController {
     @Query() pagingOptions: PagingOptionsDto
   ): Promise<AccountReferTVLResponseDto> {
     const result = await this.tvlService.getAccountRefferalsTVL(address, pagingOptions);
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result,
+    };
+  }
+
+  @ApiOperation({ summary: "get points history" })
+  @Get("/getPointsHistory")
+  public async getPointsHistory(
+      @Query() pagingOptions: PagingOptionsDto
+  ): Promise<PointsHistoryResponseDto> {
+    const result = await this.tvlService.getPointsHistory(pagingOptions);
     return {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,
