@@ -40,14 +40,17 @@ export class PortalsFiTokenOffChainDataProvider implements TokenOffChainDataProv
     this.logger = new Logger(PortalsFiTokenOffChainDataProvider.name);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async getTokensOffChainData(supportTokens: Token[]): Promise<ITokenOffChainData[]> {
     return [];
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async getTokenPriceByBlock(tokenId: string, blockTs: number): Promise<number> {
     return 0;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async getTokensCurrentPrice(tokens: string[]): Promise<ITokenCurrentPrice[]> {
     return [];
   }

@@ -1,9 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { FindOptionsWhere, FindOptionsSelect, FindOptionsRelations, Repository } from "typeorm";
-import { UnitOfWork } from "../unitOfWork";
-import { Point } from "../entities";
+import { Repository } from "typeorm";
 import { Referral } from "../entities/referral.entity";
-import { selectBalancesScript } from "./balance.repository";
 import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
@@ -13,7 +10,7 @@ export class ReferralsRepository {
     private readonly refer: Repository<Referral>
   ) {}
 
-  public async add(referrer: string, address: string, blockNumber: number): Promise<void> {
+  public async add(referrer: string, address: string): Promise<void> {
     await this.refer.insert({
       referrer,
       address,

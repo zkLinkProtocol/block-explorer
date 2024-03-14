@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { FindOptionsWhere, FindOptionsSelect, FindOptionsRelations } from "typeorm";
 import { UnitOfWork } from "../unitOfWork";
 import { PointsHistory } from "../entities";
 

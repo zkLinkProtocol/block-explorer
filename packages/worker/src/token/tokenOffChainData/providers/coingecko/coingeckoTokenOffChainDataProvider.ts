@@ -4,7 +4,6 @@ import { ConfigService } from "@nestjs/config";
 import { AxiosError } from "axios";
 import { setTimeout } from "timers/promises";
 import { catchError, firstValueFrom } from "rxjs";
-import { utils } from "zksync-web3";
 import {
   TokenOffChainDataProvider,
   ITokenOffChainData,
@@ -89,7 +88,6 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
         const tokensMarkedData = await this.getTokensMarketData(tokenIdsPerRequest);
         tokensCurrentPrice.push(
           ...tokensMarkedData.map((tokenMarketData) => {
-            const token = tokens.find((t) => t === tokenMarketData.id);
             return {
               priceId: tokenMarketData.id,
               usdPrice: tokenMarketData.current_price,
