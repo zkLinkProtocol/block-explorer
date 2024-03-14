@@ -161,7 +161,6 @@ export class BlockProcessor {
 
       let stakePointsCache = new Map();
       const earlyBirdMultiplier = this.getEarlyBirdMultiplier(toBlock.timestamp);
-      0.1 * 1.4 * 2 * 1.5
 
       let ethPrice = await this.getTokenPrice("ethereum", toBlock.timestamp.getTime());
       for ( const address of addresses ) {
