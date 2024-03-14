@@ -33,7 +33,6 @@ import {
   BalanceRepository,
   PointsRepository,
   PointsHistoryRepository,
-  ReferralsRepository,
   TvlRepository,
 } from "./repositories";
 import {
@@ -53,8 +52,8 @@ import {
   Referral,
   BlockAddressPoint,
   AddressActive,
-  Invite,
-} from "./entities";
+  Invite, AddressTvl, GroupTvl,
+} from './entities';
 import { typeOrmModuleOptions, typeOrmReferModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
 import { RetryDelayProvider } from "./retryDelay.provider";
@@ -69,6 +68,10 @@ import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.re
 import { AddressActiveRepository } from "./repositories/addressActive.repository";
 import { InviteRepository } from "./repositories/invite.repository";
 import { ReferrerRepository } from "./repositories/referrer.repository";
+import { BlockGroupTvl } from "./entities/blockGroupTvl.entity";
+import { BlockGroupTvlRepository } from "./repositories/blockGroupTvl.repository";
+import { GroupTvlRepository } from "./repositories/groupTvl.repository";
+import { AddressTvlRepository } from "./repositories/addressTvl.repository";
 
 @Module({
   imports: [
@@ -102,6 +105,9 @@ import { ReferrerRepository } from "./repositories/referrer.repository";
       BlockTokenPrice,
       BlockAddressPoint,
       AddressActive,
+      BlockGroupTvl,
+      AddressTvl,
+      GroupTvl
     ]),
     TypeOrmModule.forRootAsync({
       name: "refer",
@@ -174,6 +180,9 @@ import { ReferrerRepository } from "./repositories/referrer.repository";
     AddressActiveRepository,
     InviteRepository,
     ReferrerRepository,
+    BlockGroupTvlRepository,
+    GroupTvlRepository,
+    AddressTvlRepository,
   ],
 })
 export class AppModule {}

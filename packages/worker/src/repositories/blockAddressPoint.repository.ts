@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { BaseRepository } from "./base.repository";
 import { UnitOfWork } from "../unitOfWork";
-import { BlockAddressPoint, Point } from "../entities";
+import { AddressTvl, BlockAddressPoint, Point } from "../entities";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 @Injectable()
@@ -73,5 +73,23 @@ export class BlockAddressPointRepository extends BaseRepository<BlockAddressPoin
 
   public async upsertBlockAddressPoint(blockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>): Promise<void> {
     await this.upsert(blockAddressPoint, true, ["blockNumber", "address"]);
+  }
+
+  public async upsertUserAndReferrerTvl(
+    blocBlockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>,
+    addressTvl: QueryDeepPartialEntity<AddressTvl>,
+    referrerAddressTvl?: QueryDeepPartialEntity<AddressTvl>
+  ): Promise<void> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.transaction(async (entityManager) => {
+      await entityManager.upsert<BlockAddressPoint>(BlockAddressPoint, blocBlockAddressPoint, [
+        "blockNumber",
+        "address",
+      ]);
+      await entityManager.upsert<AddressTvl>(AddressTvl, addressTvl, ["address"]);
+      if (!!referrerAddressTvl) {
+        await entityManager.upsert<AddressTvl>(AddressTvl, referrerAddressTvl, ["address"]);
+      }
+    });
   }
 }

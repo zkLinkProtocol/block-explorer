@@ -5,7 +5,7 @@ import { PointsRepository, BlockRepository, TransferRepository, BalanceRepositor
 import { TokenOffChainDataProvider } from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 import { Token, TokenService } from "../token/token.service";
 import BigNumber from "bignumber.js";
-import { Block, BlockAddressPoint, Point, Transfer } from "../entities";
+import { Block, BlockAddressPoint, Point, Transfer, AddressTvl } from "../entities";
 import { BlockTokenPriceRepository } from "../repositories/blockTokenPrice.repository";
 import { BlockAddressPointRepository } from "../repositories/blockAddressPoint.repository";
 import { hexTransformer } from "../transformers/hex.transformer";
@@ -13,6 +13,9 @@ import { ConfigService } from "@nestjs/config";
 import { InviteRepository } from "../repositories/invite.repository";
 import { AddressActiveRepository } from "../repositories/addressActive.repository";
 import { ReferrerRepository } from "../repositories/referrer.repository";
+import { BlockGroupTvlRepository } from "../repositories/blockGroupTvl.repository";
+import { GroupTvlRepository } from "../repositories/groupTvl.repository";
+import { AddressTvlRepository } from "../repositories/addressTvl.repository";
 
 const STABLE_COIN_TYPE = "Stablecoin";
 const ETHEREUM_CG_PRICE_ID = "ethereum";
@@ -21,7 +24,7 @@ const EARLY_ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.09);
 const ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.225);
 const REFERRER_BONUS: BigNumber = new BigNumber(0.1);
 
-type AddressTvl = {
+type BlockAddressTvl = {
   tvl: BigNumber;
   holdBasePoint: BigNumber;
 };
@@ -41,6 +44,9 @@ export class PointService extends Worker {
     private readonly addressActiveRepository: AddressActiveRepository,
     private readonly inviteRepository: InviteRepository,
     private readonly referrerRepository: ReferrerRepository,
+    private readonly blockGroupTvlRepository: BlockGroupTvlRepository,
+    private readonly groupTvlRepository: GroupTvlRepository,
+    private readonly addressTvlRepository: AddressTvlRepository,
     private readonly tokenOffChainDataProvider: TokenOffChainDataProvider,
     private readonly configService: ConfigService
   ) {
@@ -73,8 +79,8 @@ export class PointService extends Worker {
         this.logger.log(`Handle point at block: ${currentRunBlockNumber}`);
         const tokenPrices = await this.updateTokenPrice(currentRunBlock);
         await this.handleDeposit(currentRunBlockNumber, tokenPrices);
-        // const addressTvlMap = await this.getAddressTvl(currentRunBlockNumber, tokenPrices);
-        // const groupTvlMap = await this.getGroupTvl(currentRunBlockNumber, addressTvlMap);
+        const addressTvlMap = await this.getAddressTvl(currentRunBlockNumber, tokenPrices);
+        const groupTvlMap = await this.getGroupTvl(currentRunBlockNumber, addressTvlMap);
         lastRunBlockNumber = currentRunBlockNumber;
       }
     } catch (err) {
@@ -247,15 +253,15 @@ export class PointService extends Worker {
     return [depositETHAmount, point];
   }
 
-  async getAddressTvl(blockNumber: number, tokenPrices: Map<string, BigNumber>): Promise<Map<string, AddressTvl>> {
-    const addressTvlMap: Map<string, AddressTvl> = new Map();
+  async getAddressTvl(blockNumber: number, tokenPrices: Map<string, BigNumber>): Promise<Map<string, BlockAddressTvl>> {
+    const addressTvlMap: Map<string, BlockAddressTvl> = new Map();
     const addressBufferList = await this.balanceRepository.getAllAddressesByBlock(blockNumber);
     this.logger.log(`The address list length: ${addressBufferList.length}`);
     for (const addressBuffer of addressBufferList) {
       const address = hexTransformer.from(addressBuffer);
       this.logger.log(`Get address tvl: ${address}`);
       const blockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, address);
-      let addressTvl: AddressTvl;
+      let addressTvl: BlockAddressTvl;
       if (!!blockAddressPoint && blockAddressPoint.tvl > 0) {
         this.logger.log(`Address tvl calculated: ${address}`);
         addressTvl = {
@@ -274,7 +280,7 @@ export class PointService extends Worker {
     address: string,
     blockNumber: number,
     tokenPrices: Map<string, BigNumber>
-  ): Promise<AddressTvl> {
+  ): Promise<BlockAddressTvl> {
     const addressBuffer: Buffer = hexTransformer.to(address);
     const addressBalances = await this.balanceRepository.getAccountBalancesByBlock(addressBuffer, blockNumber);
     let tvl: BigNumber = new BigNumber(0);
@@ -302,22 +308,65 @@ export class PointService extends Worker {
     }
     blockAddressPoint.tvl = tvl.toNumber();
     blockAddressPoint.holdBasePoint = holdBasePoint.toNumber();
-    await this.blockAddressPointRepository.upsertBlockAddressPoint(blockAddressPoint);
+    // update user and referrer address tvl
+    let addressTvl = await this.addressTvlRepository.getAddressTvl(address);
+    if (!addressTvl) {
+      addressTvl = this.addressTvlRepository.createDefaultAddressTvl(address);
+    }
+    addressTvl.tvl = Number(addressTvl.tvl) + blockAddressPoint.tvl;
+    const referral = await this.referrerRepository.getReferral(address);
+    const referrer = referral?.referrer;
+    let referrerAddressTvl: AddressTvl;
+    if (!!referrer) {
+      referrerAddressTvl = await this.addressTvlRepository.getAddressTvl(referrer);
+      if (!referrerAddressTvl) {
+        referrerAddressTvl = this.addressTvlRepository.createDefaultAddressTvl(referrer);
+      }
+      referrerAddressTvl.referralTvl = Number(referrerAddressTvl.referralTvl) + blockAddressPoint.tvl;
+      this.logger.log(`Referrer ${referrer} get ref tvl: ${blockAddressPoint.tvl}`);
+    }
+    await this.blockAddressPointRepository.upsertUserAndReferrerTvl(blockAddressPoint, addressTvl, referrerAddressTvl);
     return {
       tvl,
       holdBasePoint,
     };
   }
 
-  async getGroupTvl(blockNumber: number, addressTvlMap: Map<string, AddressTvl>): Promise<Map<string, BigNumber>> {
-    // todo 写入tvl明细表和总表
-    return new Map<string, BigNumber>();
+  async getGroupTvl(blockNumber: number, addressTvlMap: Map<string, BlockAddressTvl>): Promise<Map<string, BigNumber>> {
+    const groupTvlMap = new Map<string, BigNumber>();
+    const allGroupIds = await this.inviteRepository.getAllGroups();
+    for (const groupId of allGroupIds) {
+      let blockGroupTvl = await this.blockGroupTvlRepository.getGroupTvl(blockNumber, groupId);
+      if (!blockGroupTvl) {
+        let tvl = new BigNumber(0);
+        const members = await this.inviteRepository.getGroupMembers(groupId);
+        for (const member of members) {
+          const memberTvl = addressTvlMap.get(member);
+          if (!!memberTvl) {
+            tvl = tvl.plus(memberTvl.tvl);
+          }
+        }
+        blockGroupTvl = this.blockGroupTvlRepository.createDefaultBlockGroupTvl(blockNumber, groupId, tvl.toNumber());
+        let groupTvl = await this.groupTvlRepository.getGroupTvl(groupId);
+        if (!groupTvl) {
+          groupTvl = this.groupTvlRepository.createDefaultGroupTvl(groupId);
+        }
+        groupTvl.tvl = Number(groupTvl.tvl) + tvl.toNumber();
+        this.logger.log(`Block group tvl: ${blockGroupTvl.tvl}, group total tvl ${groupTvl.tvl}`);
+        await this.blockGroupTvlRepository.upsertGroupTvl(blockGroupTvl, groupTvl);
+        groupTvlMap.set(groupId, new BigNumber(groupTvl.tvl));
+      } else {
+        const groupTvl = await this.groupTvlRepository.getGroupTvl(groupId);
+        groupTvlMap.set(groupId, new BigNumber(groupTvl.tvl));
+      }
+    }
+    return groupTvlMap;
   }
 
   async handleHoldPoint(
     blockNumber: number,
     blockTs: Date,
-    addressTvlMap: Map<string, AddressTvl>,
+    addressTvlMap: Map<string, BlockAddressTvl>,
     groupTvlMap: Map<string, BigNumber>
   ) {
     for (const address in addressTvlMap) {

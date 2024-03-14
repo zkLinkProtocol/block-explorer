@@ -7,6 +7,6 @@ export class GroupTvl extends BaseEntity {
   @PrimaryColumn({ type: "varchar" })
   public readonly groupId: string;
 
-  @Column("decimal", { scale: 6 })
-  public readonly tvl: number;
+  @Column("decimal")
+  public tvl: number;
 }

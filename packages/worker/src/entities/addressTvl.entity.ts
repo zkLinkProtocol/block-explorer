@@ -8,9 +8,9 @@ export class AddressTvl extends BaseEntity {
   @PrimaryColumn({ type: "bytea", transformer: hexTransformer })
   public readonly address: string;
 
-  @Column("decimal", { scale: 6 })
-  public readonly tvl: number;
+  @Column("decimal")
+  public tvl: number;
 
-  @Column("decimal", { scale: 6 })
-  public readonly referralTvl: number;
+  @Column("decimal")
+  public referralTvl: number;
 }
