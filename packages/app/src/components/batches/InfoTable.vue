@@ -115,7 +115,8 @@ const tableInfoItems = computed(() => {
             component: TimeField,
           }
         );
-        if (mainBatch.value.executedAt) {
+
+        if (mainBatch && mainBatch.value?.executedAt) {
           tableItems.push(
             {
               label: t(`batches.finalizeTxHash`),
