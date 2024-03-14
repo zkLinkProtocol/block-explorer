@@ -108,16 +108,16 @@ export class BlockProcessor {
   }
 
   public getGroupBooster(groupTvl:number):number {
-    if (groupTvl > 20) {
-      return 0.1;
-    } else if (groupTvl > 100) {
-      return 0.2;
-    } else if (groupTvl > 500) {
-      return 0.3;
+    if (groupTvl > 5000) {
+      return 0.5;
     } else if (groupTvl > 1000) {
       return 0.4;
-    } else if (groupTvl > 5000) {
-      return 0.5;
+    } else if (groupTvl > 500) {
+      return 0.3;
+    } else if (groupTvl > 100) {
+      return 0.2;
+    } else if (groupTvl > 20) {
+      return 0.1;
     } else {
       return 0;
     }
@@ -161,6 +161,8 @@ export class BlockProcessor {
 
       let stakePointsCache = new Map();
       const earlyBirdMultiplier = this.getEarlyBirdMultiplier(toBlock.timestamp);
+      0.1 * 1.4 * 2 * 1.5
+
       let ethPrice = await this.getTokenPrice("ethereum", toBlock.timestamp.getTime());
       for ( const address of addresses ) {
         let stakePoint = 0;
