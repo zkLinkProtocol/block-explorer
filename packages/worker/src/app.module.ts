@@ -52,8 +52,10 @@ import {
   Referral,
   BlockAddressPoint,
   AddressActive,
-  Invite, AddressTvl, GroupTvl,
-} from './entities';
+  Invite,
+  AddressTvl,
+  GroupTvl,
+} from "./entities";
 import { typeOrmModuleOptions, typeOrmReferModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
 import { RetryDelayProvider } from "./retryDelay.provider";
@@ -107,7 +109,7 @@ import { AddressTvlRepository } from "./repositories/addressTvl.repository";
       AddressActive,
       BlockGroupTvl,
       AddressTvl,
-      GroupTvl
+      GroupTvl,
     ]),
     TypeOrmModule.forRootAsync({
       name: "refer",

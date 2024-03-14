@@ -33,6 +33,10 @@ type BlockAddressTvl = {
 export class PointService extends Worker {
   private readonly logger: Logger;
   private readonly pointsPhase1StartTime: Date;
+  private readonly pointsEarlyDepositEndTime: Date;
+  private readonly pointsPhase1EndTime: Date;
+  private readonly pointsStatisticalPeriodSecs: number;
+
   public constructor(
     private readonly tokenService: TokenService,
     private readonly pointsRepository: PointsRepository,
@@ -55,34 +59,32 @@ export class PointService extends Worker {
     this.pointsPhase1StartTime = new Date(this.configService.get<string>("points.pointsPhase1StartTime"));
     this.pointsEarlyDepositEndTime = new Date(this.configService.get<string>("points.pointsEarlyDepositEndTime"));
     this.pointsPhase1EndTime = new Date(this.configService.get<string>("points.pointsPhase1EndTime"));
+    this.pointsStatisticalPeriodSecs = configService.get<number>("points.pointsStatisticalPeriodSecs");
     this.logger.log(`Phase 1 start time: ${this.pointsPhase1StartTime}`);
     this.logger.log(`Early deposit end time: ${this.pointsEarlyDepositEndTime}`);
     this.logger.log(`Phase 1 end time: ${this.pointsPhase1EndTime}`);
+    this.logger.log(`Hold point statistical period in seconds: ${this.pointsStatisticalPeriodSecs}`);
   }
-  private readonly pointsEarlyDepositEndTime: Date;
-
-  private readonly pointsPhase1EndTime: Date;
 
   protected async runProcess(): Promise<void> {
     try {
-      let lastRunBlockNumber = await this.pointsRepository.getLastStatisticalBlockNumber();
+      const lastRunBlockNumber = await this.pointsRepository.getLastStatisticalBlockNumber();
       this.logger.log(`Last run block number: ${lastRunBlockNumber}`);
-      while (true) {
-        const currentRunBlock = await this.blockRepository.getLastBlock({
-          where: { number: lastRunBlockNumber + 1 },
-          select: { number: true, timestamp: true },
-        });
-        if (!currentRunBlock) {
-          break;
-        }
-        const currentRunBlockNumber = currentRunBlock.number;
-        this.logger.log(`Handle point at block: ${currentRunBlockNumber}`);
-        const tokenPrices = await this.updateTokenPrice(currentRunBlock);
-        await this.handleDeposit(currentRunBlockNumber, tokenPrices);
-        const addressTvlMap = await this.getAddressTvl(currentRunBlockNumber, tokenPrices);
-        const groupTvlMap = await this.getGroupTvl(currentRunBlockNumber, addressTvlMap);
-        lastRunBlockNumber = currentRunBlockNumber;
+      const currentRunBlock = await this.blockRepository.getLastBlock({
+        where: { number: lastRunBlockNumber + 1 },
+        select: { number: true, timestamp: true },
+      });
+      if (!currentRunBlock) {
+        return;
       }
+      const currentRunBlockNumber = currentRunBlock.number;
+      this.logger.log(`Handle point at block: ${currentRunBlockNumber}`);
+      const tokenPrices = await this.updateTokenPrice(currentRunBlock);
+      await this.handleDeposit(currentRunBlockNumber, tokenPrices);
+      const addressTvlMap = await this.getAddressTvl(currentRunBlockNumber, tokenPrices);
+      const groupTvlMap = await this.getGroupTvl(currentRunBlockNumber, addressTvlMap);
+      await this.handleHoldPoint(currentRunBlockNumber, currentRunBlock.timestamp, addressTvlMap, groupTvlMap);
+      await this.pointsRepository.setStatisticalBlockNumber(currentRunBlockNumber);
     } catch (err) {
       this.logger.error({
         message: "Failed to calculate point",
@@ -203,7 +205,7 @@ export class PointService extends Worker {
       fromAddressPoint = this.pointsRepository.createDefaultPoint(from);
     }
     fromBlockAddressPoint.depositPoint = Number(fromBlockAddressPoint.depositPoint) + depositPoint.toNumber();
-    fromAddressPoint.stakePoint = Number(fromBlockAddressPoint.depositPoint) + depositPoint.toNumber();
+    fromAddressPoint.stakePoint = Number(fromAddressPoint.stakePoint) + depositPoint.toNumber();
     // update point of referrer
     let referrerBlockAddressPoint: BlockAddressPoint;
     let referrerAddressPoint: Point;
@@ -224,7 +226,7 @@ export class PointService extends Worker {
       const referrerBonus = depositPoint.multipliedBy(REFERRER_BONUS);
       referrerBlockAddressPoint.refPoint = Number(referrerBlockAddressPoint.refPoint) + referrerBonus.toNumber();
       referrerAddressPoint.refPoint = Number(referrerAddressPoint.refPoint) + referrerBonus.toNumber();
-      this.logger.log(`Referrer ${referrer} get ref point: ${referrerBonus}`);
+      this.logger.log(`Referrer ${referrer} get ref point from deposit: ${referrerBonus}`);
     }
     await this.blockAddressPointRepository.upsertUserAndReferrerPoint(
       fromBlockAddressPoint,
@@ -259,7 +261,6 @@ export class PointService extends Worker {
     this.logger.log(`The address list length: ${addressBufferList.length}`);
     for (const addressBuffer of addressBufferList) {
       const address = hexTransformer.from(addressBuffer);
-      this.logger.log(`Get address tvl: ${address}`);
       const blockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, address);
       let addressTvl: BlockAddressTvl;
       if (!!blockAddressPoint && blockAddressPoint.tvl > 0) {
@@ -271,6 +272,7 @@ export class PointService extends Worker {
       } else {
         addressTvl = await this.calculateAddressTvl(address, blockNumber, tokenPrices);
       }
+      this.logger.log(`Address ${address}: [tvl: ${addressTvl.tvl}, holdBasePoint: ${addressTvl.holdBasePoint}]`);
       addressTvlMap.set(address, addressTvl);
     }
     return addressTvlMap;
@@ -335,6 +337,7 @@ export class PointService extends Worker {
   async getGroupTvl(blockNumber: number, addressTvlMap: Map<string, BlockAddressTvl>): Promise<Map<string, BigNumber>> {
     const groupTvlMap = new Map<string, BigNumber>();
     const allGroupIds = await this.inviteRepository.getAllGroups();
+    this.logger.log(`All group length: ${allGroupIds.length}`);
     for (const groupId of allGroupIds) {
       let blockGroupTvl = await this.blockGroupTvlRepository.getGroupTvl(blockNumber, groupId);
       if (!blockGroupTvl) {
@@ -352,7 +355,9 @@ export class PointService extends Worker {
           groupTvl = this.groupTvlRepository.createDefaultGroupTvl(groupId);
         }
         groupTvl.tvl = Number(groupTvl.tvl) + tvl.toNumber();
-        this.logger.log(`Block group tvl: ${blockGroupTvl.tvl}, group total tvl ${groupTvl.tvl}`);
+        if (groupTvl.tvl > 0) {
+          this.logger.log(`Block group ${groupTvl.groupId} tvl: ${blockGroupTvl.tvl}, group total tvl ${groupTvl.tvl}`);
+        }
         await this.blockGroupTvlRepository.upsertGroupTvl(blockGroupTvl, groupTvl);
         groupTvlMap.set(groupId, new BigNumber(groupTvl.tvl));
       } else {
@@ -369,18 +374,83 @@ export class PointService extends Worker {
     addressTvlMap: Map<string, BlockAddressTvl>,
     groupTvlMap: Map<string, BigNumber>
   ) {
+    const lastHoldPointStatisticalBlockNumber = await this.pointsRepository.getLastHoldPointStatisticalBlockNumber();
+    const lastHoldPointBlock = await this.blockRepository.getLastBlock({
+      where: { number: lastHoldPointStatisticalBlockNumber },
+      select: { number: true, timestamp: true },
+    });
+    if (!lastHoldPointBlock) {
+      throw new Error(`Last hold point statistical block not found: ${lastHoldPointStatisticalBlockNumber}`);
+    }
+    const lastHoldPointTs = lastHoldPointBlock.timestamp;
+    const ts_interval_seconds = (blockTs.getTime() - lastHoldPointTs.getTime()) / 1000;
+    if (ts_interval_seconds < this.pointsStatisticalPeriodSecs) {
+      this.logger.log(`Block time interval does not reach the statistical period`);
+      return;
+    }
     for (const address in addressTvlMap) {
+      const fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, address);
+      if (!!fromBlockAddressPoint && fromBlockAddressPoint.holdPoint > 0) {
+        this.logger.log(`Address hold point calculated: ${address}`);
+        continue;
+      }
       const addressTvl = addressTvlMap.get(address);
       const earlyBirdMultiplier = new BigNumber(this.getEarlyBirdMultiplier(blockTs));
-      const groupId = "1";
-      const groupBooster = new BigNumber(this.getGroupBooster(groupTvlMap.get(groupId).toNumber())).plus(
-        new BigNumber(1)
-      );
+      let groupBooster = new BigNumber(1);
+      const invite = await this.inviteRepository.getInvite(address);
+      if (!!invite) {
+        const groupTvl = groupTvlMap.get(invite.groupId);
+        if (!!groupTvl) {
+          groupBooster = groupBooster.plus(this.getGroupBooster(groupTvl));
+        }
+      }
+      // NOVA Point = sum_all tokens in activity list (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price * (1 + Group Booster + Growth Booster) / ETH_Price )
       const newHoldPoint = addressTvl.holdBasePoint.multipliedBy(earlyBirdMultiplier).multipliedBy(groupBooster);
-      // save to db
-      // todo 同步更新邀请人的invite point
-      // todo 同步更新两个address的总表
+      await this.updateHoldPoint(blockNumber, address, newHoldPoint);
     }
+    await this.pointsRepository.setHoldPointStatisticalBlockNumber(blockNumber);
+  }
+
+  async updateHoldPoint(blockNumber: number, from: string, holdPoint: BigNumber) {
+    // update point of user
+    let fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, from);
+    if (!fromBlockAddressPoint) {
+      fromBlockAddressPoint = this.blockAddressPointRepository.createDefaultBlockAddressPoint(blockNumber, from);
+    }
+    let fromAddressPoint = await this.pointsRepository.getPointByAddress(from);
+    if (!fromAddressPoint) {
+      fromAddressPoint = this.pointsRepository.createDefaultPoint(from);
+    }
+    fromBlockAddressPoint.holdPoint = Number(fromBlockAddressPoint.holdPoint) + holdPoint.toNumber();
+    fromAddressPoint.stakePoint = Number(fromAddressPoint.stakePoint) + holdPoint.toNumber();
+    // update point of referrer
+    let referrerBlockAddressPoint: BlockAddressPoint;
+    let referrerAddressPoint: Point;
+    const referral = await this.referrerRepository.getReferral(from);
+    const referrer = referral?.referrer;
+    if (!!referrer) {
+      referrerBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, referrer);
+      if (!referrerBlockAddressPoint) {
+        referrerBlockAddressPoint = this.blockAddressPointRepository.createDefaultBlockAddressPoint(
+          blockNumber,
+          referrer
+        );
+      }
+      referrerAddressPoint = await this.pointsRepository.getPointByAddress(referrer);
+      if (!referrerAddressPoint) {
+        referrerAddressPoint = this.pointsRepository.createDefaultPoint(referrer);
+      }
+      const referrerBonus = holdPoint.multipliedBy(REFERRER_BONUS);
+      referrerBlockAddressPoint.refPoint = Number(referrerBlockAddressPoint.refPoint) + referrerBonus.toNumber();
+      referrerAddressPoint.refPoint = Number(referrerAddressPoint.refPoint) + referrerBonus.toNumber();
+      this.logger.log(`Referrer ${referrer} get ref point from hold: ${referrerBonus}`);
+    }
+    await this.blockAddressPointRepository.upsertUserAndReferrerPoint(
+      fromBlockAddressPoint,
+      fromAddressPoint,
+      referrerBlockAddressPoint,
+      referrerAddressPoint
+    );
   }
 
   getTokenPrice(token: Token, tokenPrices: Map<string, BigNumber>): BigNumber {
@@ -404,36 +474,36 @@ export class PointService extends Worker {
     return ethPrice;
   }
 
-  getEarlyBirdMultiplier(blockTs: Date): number {
+  getEarlyBirdMultiplier(blockTs: Date): BigNumber {
     // 1st week: 2,second week:1.5,third,forth week:1.2,
     const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
     const startDate = this.pointsPhase1StartTime;
     const diffInMilliseconds = blockTs.getTime() - startDate.getTime();
     const diffInWeeks = Math.floor(diffInMilliseconds / millisecondsPerWeek);
     if (diffInWeeks < 1) {
-      return 2;
+      return new BigNumber(2);
     } else if (diffInWeeks < 2) {
-      return 1.5;
+      return new BigNumber(1.5);
     } else if (diffInWeeks < 4) {
-      return 1.2;
+      return new BigNumber(1.2);
     } else {
-      return 1;
+      return new BigNumber(1);
     }
   }
 
-  public getGroupBooster(groupTvl: number): number {
-    if (groupTvl > 20) {
-      return 0.1;
-    } else if (groupTvl > 100) {
-      return 0.2;
-    } else if (groupTvl > 500) {
-      return 0.3;
-    } else if (groupTvl > 1000) {
-      return 0.4;
-    } else if (groupTvl > 5000) {
-      return 0.5;
+  public getGroupBooster(groupTvl: BigNumber): BigNumber {
+    if (groupTvl.gte(20)) {
+      return new BigNumber(0.1);
+    } else if (groupTvl.gte(100)) {
+      return new BigNumber(0.2);
+    } else if (groupTvl.gte(500)) {
+      return new BigNumber(0.3);
+    } else if (groupTvl.gte(1000)) {
+      return new BigNumber(0.4);
+    } else if (groupTvl.gte(5000)) {
+      return new BigNumber(0.5);
     } else {
-      return 0;
+      return new BigNumber(0);
     }
   }
 }

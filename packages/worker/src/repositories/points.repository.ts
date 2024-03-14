@@ -91,4 +91,17 @@ export class PointsRepository {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.query(`SELECT setval('"pointStatisticalBlockNumber"', $1, false);`, [blockNumber]);
   }
+
+  public async getLastHoldPointStatisticalBlockNumber(): Promise<number> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const [fromBlockNumber] = await transactionManager.query(
+      `SELECT last_value FROM "holdPointStatisticalBlockNumber";`
+    );
+    return Number(fromBlockNumber.last_value);
+  }
+
+  public async setHoldPointStatisticalBlockNumber(blockNumber: number): Promise<void> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.query(`SELECT setval('"holdPointStatisticalBlockNumber"', $1, false);`, [blockNumber]);
+  }
 }

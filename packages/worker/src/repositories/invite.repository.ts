@@ -10,6 +10,13 @@ export class InviteRepository extends BaseRepository<Invite> {
     super(Invite, unitOfWork);
   }
 
+  public async getInvite(address: string): Promise<Invite> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    return await transactionManager.findOne<Invite>(Invite, {
+      where: { address },
+    });
+  }
+
   public async getAllGroups(): Promise<string[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const ret = await transactionManager.query(`SELECT DISTINCT("groupId") FROM invites`);
