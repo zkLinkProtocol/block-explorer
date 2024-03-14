@@ -10,7 +10,4 @@ export class Referral extends BaseEntity {
   @Index()
   @Column({ type: "bytea", transformer: hexTransformer })
   public readonly referrer: string;
-
-  @Column({ type: "boolean", default: false })
-  public readonly active: boolean;
 }

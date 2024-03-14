@@ -130,12 +130,16 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     const nextHourDate = new Date(getDate);
     nextHourDate.setHours(getDate.getHours() + 1);
     if (marketChart.prices.length === 0) {
-      throw new Error(`No prices return from coingeco for token ${tokenId}`);
+      throw new Error(`No prices return from coingeco for token: ${tokenId}`);
     }
     const prices = marketChart.prices.filter(
       (price) => price[0] >= getDate.getTime() && price[0] < nextHourDate.getTime()
     );
-    return prices.length > 0 ? prices[0][1] : 0;
+    if (prices.length > 0) {
+      return prices[0][1];
+    } else {
+      return marketChart.prices[marketChart.prices.length - 1][1];
+    }
   }
 
   private getTokensMarketData(tokenIds: string[]) {

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { BaseRepository } from "./base.repository";
 import { UnitOfWork } from "../unitOfWork";
-import { BlockAddressPoint } from "../entities";
+import { BlockAddressPoint, Point } from "../entities";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 @Injectable()
@@ -28,28 +28,50 @@ export class BlockAddressPointRepository extends BaseRepository<BlockAddressPoin
     });
   }
 
-  public async getLatestPoint(address: string): Promise<BlockAddressPoint> {
-    const transactionManager = this.unitOfWork.getTransactionManager();
-    return await transactionManager.findOne<BlockAddressPoint>(BlockAddressPoint, {
-      select: { totalStakePoint: true, totalRefPoint: true },
-      where: { address },
-      order: { blockNumber: "DESC" },
-    });
+  public createDefaultBlockAddressPoint(blockNumber: number, address: string): BlockAddressPoint {
+    return {
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      blockNumber: blockNumber,
+      address: address,
+      depositPoint: 0,
+      tvl: 0,
+      holdBasePoint: 0,
+      holdPoint: 0,
+      refPoint: 0,
+    };
   }
 
-  public async upsertBlockAddressPoint(
-    blocBlockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>,
+  public async upsertUserAndReferrerPoint(
+    fromBlocBlockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>,
+    fromAddressPoint: QueryDeepPartialEntity<Point>,
+    referrerBlocBlockAddressPoint?: QueryDeepPartialEntity<BlockAddressPoint>,
+    referrerAddressPoint?: QueryDeepPartialEntity<Point>,
     transferId?: number
   ): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.transaction(async (entityManager) => {
-      await entityManager.upsert<BlockAddressPoint>(BlockAddressPoint, blocBlockAddressPoint, [
+      await entityManager.upsert<BlockAddressPoint>(BlockAddressPoint, fromBlocBlockAddressPoint, [
         "blockNumber",
         "address",
       ]);
+      await entityManager.upsert<Point>(Point, fromAddressPoint, ["address"]);
+      if (!!referrerBlocBlockAddressPoint) {
+        await entityManager.upsert<BlockAddressPoint>(BlockAddressPoint, referrerBlocBlockAddressPoint, [
+          "blockNumber",
+          "address",
+        ]);
+      }
+      if (!!referrerAddressPoint) {
+        await entityManager.upsert<Point>(Point, referrerAddressPoint, ["address"]);
+      }
       if (!!transferId) {
         await entityManager.query(`SELECT setval('"pointParsedTransferId"', $1, false);`, [transferId]);
       }
     });
+  }
+
+  public async upsertBlockAddressPoint(blockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>): Promise<void> {
+    await this.upsert(blockAddressPoint, true, ["blockNumber", "address"]);
   }
 }

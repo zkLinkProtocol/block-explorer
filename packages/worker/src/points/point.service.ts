@@ -5,16 +5,21 @@ import { PointsRepository, BlockRepository, TransferRepository, BalanceRepositor
 import { TokenOffChainDataProvider } from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 import { Token, TokenService } from "../token/token.service";
 import BigNumber from "bignumber.js";
-import { Block, BlockAddressPoint, Transfer } from "../entities";
+import { Block, BlockAddressPoint, Point, Transfer } from "../entities";
 import { BlockTokenPriceRepository } from "../repositories/blockTokenPrice.repository";
 import { BlockAddressPointRepository } from "../repositories/blockAddressPoint.repository";
-import { sleep } from "zksync-web3/build/src/utils";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
+import { InviteRepository } from "../repositories/invite.repository";
+import { AddressActiveRepository } from "../repositories/addressActive.repository";
+import { ReferrerRepository } from "../repositories/referrer.repository";
 
 const STABLE_COIN_TYPE = "Stablecoin";
 const ETHEREUM_CG_PRICE_ID = "ethereum";
 const DEPOSIT_MULTIPLIER: BigNumber = new BigNumber(10);
+const EARLY_ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.09);
+const ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.225);
+const REFERRER_BONUS: BigNumber = new BigNumber(0.1);
 
 type AddressTvl = {
   tvl: BigNumber;
@@ -25,7 +30,6 @@ type AddressTvl = {
 export class PointService extends Worker {
   private readonly logger: Logger;
   private readonly pointsPhase1StartTime: Date;
-
   public constructor(
     private readonly tokenService: TokenService,
     private readonly pointsRepository: PointsRepository,
@@ -34,13 +38,24 @@ export class PointService extends Worker {
     private readonly blockAddressPointRepository: BlockAddressPointRepository,
     private readonly transferRepository: TransferRepository,
     private readonly balanceRepository: BalanceRepository,
+    private readonly addressActiveRepository: AddressActiveRepository,
+    private readonly inviteRepository: InviteRepository,
+    private readonly referrerRepository: ReferrerRepository,
     private readonly tokenOffChainDataProvider: TokenOffChainDataProvider,
     private readonly configService: ConfigService
   ) {
     super();
     this.logger = new Logger(PointService.name);
-    this.pointsPhase1StartTime = new Date(configService.get<string>("points.pointsPhase1StartTime"));
+    this.pointsPhase1StartTime = new Date(this.configService.get<string>("points.pointsPhase1StartTime"));
+    this.pointsEarlyDepositEndTime = new Date(this.configService.get<string>("points.pointsEarlyDepositEndTime"));
+    this.pointsPhase1EndTime = new Date(this.configService.get<string>("points.pointsPhase1EndTime"));
+    this.logger.log(`Phase 1 start time: ${this.pointsPhase1StartTime}`);
+    this.logger.log(`Early deposit end time: ${this.pointsEarlyDepositEndTime}`);
+    this.logger.log(`Phase 1 end time: ${this.pointsPhase1EndTime}`);
   }
+  private readonly pointsEarlyDepositEndTime: Date;
+
+  private readonly pointsPhase1EndTime: Date;
 
   protected async runProcess(): Promise<void> {
     try {
@@ -58,7 +73,8 @@ export class PointService extends Worker {
         this.logger.log(`Handle point at block: ${currentRunBlockNumber}`);
         const tokenPrices = await this.updateTokenPrice(currentRunBlock);
         await this.handleDeposit(currentRunBlockNumber, tokenPrices);
-        const addressTvlMap = await this.getAddressTvl(currentRunBlockNumber, tokenPrices);
+        // const addressTvlMap = await this.getAddressTvl(currentRunBlockNumber, tokenPrices);
+        // const groupTvlMap = await this.getGroupTvl(currentRunBlockNumber, addressTvlMap);
         lastRunBlockNumber = currentRunBlockNumber;
       }
     } catch (err) {
@@ -97,35 +113,17 @@ export class PointService extends Worker {
   async getTokenPriceAtBlockNumber(block: Block, priceId: string): Promise<BigNumber> {
     const blockTokenPrice = await this.blockTokenPriceRepository.getBlockTokenPrice(block.number, priceId);
     if (!blockTokenPrice) {
-      const usdPrice = await this.getTokenPriceFromCoingecko(priceId, block.timestamp);
+      const usdPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, block.timestamp.getTime());
       const entity = {
         blockNumber: block.number,
         priceId,
-        usdPrice: usdPrice.toNumber(),
+        usdPrice: usdPrice,
       };
       await this.blockTokenPriceRepository.add(entity);
-      return usdPrice;
+      return new BigNumber(usdPrice);
     } else {
       return new BigNumber(blockTokenPrice.usdPrice);
     }
-  }
-
-  async getTokenPriceFromCoingecko(priceId: string, blockTime: Date): Promise<BigNumber> {
-    // this interface will return 0 if no price found at the block time
-    // we need to wait until get the exactly right price
-    let usdPrice: number;
-    while (true) {
-      usdPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, blockTime.getTime());
-      if (usdPrice > 0) {
-        break;
-      }
-      this.logger.log(
-        `The latest price of token ${priceId} returned from data provider is delayed, sleep 1 minute for next try`
-      );
-      // wait one minute for the next try
-      await sleep(60000);
-    }
-    return new BigNumber(usdPrice);
   }
 
   async handleDeposit(blockNumber: number, tokenPrices: Map<string, BigNumber>) {
@@ -141,6 +139,7 @@ export class PointService extends Worker {
 
   async recordDepositPoint(transfer: Transfer, tokenPrices: Map<string, BigNumber>) {
     const blockNumber: number = transfer.blockNumber;
+    const blockTs: Date = new Date(transfer.timestamp);
     const from: string = hexTransformer.from(transfer.from);
     const tokenAddress: string = hexTransformer.from(transfer.tokenAddress);
     const tokenAmount: BigNumber = new BigNumber(transfer.amount);
@@ -159,64 +158,93 @@ export class PointService extends Worker {
       await this.blockAddressPointRepository.setParsedTransferId(transferId);
       return;
     }
-    const newDepositPoint = (await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices)).toNumber();
-    const blockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, from);
-    if (!blockAddressPoint) {
-      // get the address point of exist max block number
-      const currentAddressPoint = await this.blockAddressPointRepository.getLatestPoint(from);
-      let totalStakePoint = Number(0);
-      let totalRefPoint = Number(0);
-      if (!!currentAddressPoint) {
-        totalStakePoint = Number(currentAddressPoint.totalStakePoint);
-        totalRefPoint = Number(currentAddressPoint.totalRefPoint);
+    const depositResult = await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices);
+    const newDepositETHAmount = depositResult[0];
+    const newDepositPoint = depositResult[1];
+
+    // active user
+    await this.activeUser(blockNumber, blockTs, from, newDepositETHAmount);
+    // update deposit point for user and refer point for referrer
+    await this.updateDepositPoint(blockNumber, from, newDepositPoint, transferId);
+  }
+
+  async activeUser(blockNumber: number, blockTs: Date, from: string, depositETHAmount: BigNumber) {
+    if (
+      (depositETHAmount.gte(EARLY_ACTIVE_DEPOSIT_ETH_AMOUNT) && blockTs <= this.pointsEarlyDepositEndTime) ||
+      (depositETHAmount.gte(ACTIVE_DEPOSIT_ETH_AMOUNT) &&
+        blockTs > this.pointsEarlyDepositEndTime &&
+        blockTs <= this.pointsPhase1EndTime)
+    ) {
+      const addressActive = await this.addressActiveRepository.getAddressActive(from);
+      if (!addressActive) {
+        this.logger.log(`Active user: ${from}`);
+        await this.addressActiveRepository.add({
+          address: from,
+          blockNumber: blockNumber,
+        });
       }
-      const upsert = {
-        blockNumber: blockNumber,
-        address: from,
-        depositPoint: newDepositPoint,
-        tvl: Number(0),
-        holdBasePoint: Number(0),
-        holdPoint: Number(0),
-        refPoint: Number(0),
-        totalStakePoint: totalStakePoint + newDepositPoint,
-        totalRefPoint: totalRefPoint,
-      };
-      await this.blockAddressPointRepository.upsertBlockAddressPoint(upsert, transferId);
-    } else {
-      const upsert = {
-        blockNumber: blockNumber,
-        address: from,
-        depositPoint: Number(blockAddressPoint.depositPoint) + newDepositPoint,
-        tvl: blockAddressPoint.tvl,
-        holdBasePoint: blockAddressPoint.holdBasePoint,
-        holdPoint: blockAddressPoint.holdPoint,
-        refPoint: blockAddressPoint.refPoint,
-        totalStakePoint: Number(blockAddressPoint.totalStakePoint) + newDepositPoint,
-        totalRefPoint: blockAddressPoint.totalRefPoint,
-      };
-      await this.blockAddressPointRepository.upsertBlockAddressPoint(upsert, transferId);
     }
+  }
+
+  async updateDepositPoint(blockNumber: number, from: string, depositPoint: BigNumber, transferId: number) {
+    // update point of user
+    let fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, from);
+    if (!fromBlockAddressPoint) {
+      fromBlockAddressPoint = this.blockAddressPointRepository.createDefaultBlockAddressPoint(blockNumber, from);
+    }
+    let fromAddressPoint = await this.pointsRepository.getPointByAddress(from);
+    if (!fromAddressPoint) {
+      fromAddressPoint = this.pointsRepository.createDefaultPoint(from);
+    }
+    fromBlockAddressPoint.depositPoint = Number(fromBlockAddressPoint.depositPoint) + depositPoint.toNumber();
+    fromAddressPoint.stakePoint = Number(fromBlockAddressPoint.depositPoint) + depositPoint.toNumber();
+    // update point of referrer
+    let referrerBlockAddressPoint: BlockAddressPoint;
+    let referrerAddressPoint: Point;
+    const referral = await this.referrerRepository.getReferral(from);
+    const referrer = referral?.referrer;
+    if (!!referrer) {
+      referrerBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, referrer);
+      if (!referrerBlockAddressPoint) {
+        referrerBlockAddressPoint = this.blockAddressPointRepository.createDefaultBlockAddressPoint(
+          blockNumber,
+          referrer
+        );
+      }
+      referrerAddressPoint = await this.pointsRepository.getPointByAddress(referrer);
+      if (!referrerAddressPoint) {
+        referrerAddressPoint = this.pointsRepository.createDefaultPoint(referrer);
+      }
+      const referrerBonus = depositPoint.multipliedBy(REFERRER_BONUS);
+      referrerBlockAddressPoint.refPoint = Number(referrerBlockAddressPoint.refPoint) + referrerBonus.toNumber();
+      referrerAddressPoint.refPoint = Number(referrerAddressPoint.refPoint) + referrerBonus.toNumber();
+      this.logger.log(`Referrer ${referrer} get ref point: ${referrerBonus}`);
+    }
+    await this.blockAddressPointRepository.upsertUserAndReferrerPoint(
+      fromBlockAddressPoint,
+      fromAddressPoint,
+      referrerBlockAddressPoint,
+      referrerAddressPoint,
+      transferId
+    );
   }
 
   async calculateDepositPoint(
     tokenAmount: BigNumber,
     token: Token,
     tokenPrices: Map<string, BigNumber>
-  ): Promise<BigNumber> {
+  ): Promise<[BigNumber, BigNumber]> {
     // NOVA Points = 10 * Token multiplier * Deposit Amount * Token Price / ETH price
-    // The price of Stablecoin is 1 usd
     const price = this.getTokenPrice(token, tokenPrices);
     const ethPrice = this.getETHPrice(tokenPrices);
-    const tokenMultiplier = new BigNumber(token.multiplier);
     const depositAmount = tokenAmount.dividedBy(new BigNumber(10).pow(token.decimals));
-    const point = DEPOSIT_MULTIPLIER.multipliedBy(tokenMultiplier)
-      .multipliedBy(depositAmount)
-      .multipliedBy(price)
-      .dividedBy(ethPrice);
+    const depositETHAmount = depositAmount.multipliedBy(price).dividedBy(ethPrice);
+    const tokenMultiplier = new BigNumber(token.multiplier);
+    const point = DEPOSIT_MULTIPLIER.multipliedBy(tokenMultiplier).multipliedBy(depositETHAmount);
     this.logger.log(
-      `Deposit point = ${point}, [deposit multiplier = ${DEPOSIT_MULTIPLIER}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`
+      `Deposit ethAmount = ${depositETHAmount}, point = ${point}, [deposit multiplier = ${DEPOSIT_MULTIPLIER}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`
     );
-    return point;
+    return [depositETHAmount, point];
   }
 
   async getAddressTvl(blockNumber: number, tokenPrices: Map<string, BigNumber>): Promise<Map<string, AddressTvl>> {
@@ -268,46 +296,42 @@ export class PointService extends Worker {
       tvl = tvl.plus(tokenTvl);
       holdBasePoint = holdBasePoint.plus(tokenHoldBasePoint);
     }
-    const blockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, address);
+    let blockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, address);
     if (!blockAddressPoint) {
-      // get the address point of exist max block number
-      const currentAddressPoint = await this.blockAddressPointRepository.getLatestPoint(address);
-      let totalStakePoint = Number(0);
-      let totalRefPoint = Number(0);
-      if (!!currentAddressPoint) {
-        totalStakePoint = Number(currentAddressPoint.totalStakePoint);
-        totalRefPoint = Number(currentAddressPoint.totalRefPoint);
-      }
-      const upsert = {
-        blockNumber: blockNumber,
-        address: address,
-        depositPoint: Number(0),
-        tvl: tvl.toNumber(),
-        holdBasePoint: holdBasePoint.toNumber(),
-        holdPoint: Number(0),
-        refPoint: Number(0),
-        totalStakePoint: totalStakePoint,
-        totalRefPoint: totalRefPoint,
-      };
-      await this.blockAddressPointRepository.upsertBlockAddressPoint(upsert);
-    } else {
-      const upsert = {
-        blockNumber: blockNumber,
-        address: address,
-        depositPoint: blockAddressPoint.depositPoint,
-        tvl: tvl.toNumber(),
-        holdBasePoint: holdBasePoint.toNumber(),
-        holdPoint: blockAddressPoint.holdPoint,
-        refPoint: blockAddressPoint.refPoint,
-        totalStakePoint: blockAddressPoint.totalStakePoint,
-        totalRefPoint: blockAddressPoint.totalRefPoint,
-      };
-      await this.blockAddressPointRepository.upsertBlockAddressPoint(upsert);
+      blockAddressPoint = this.blockAddressPointRepository.createDefaultBlockAddressPoint(blockNumber, address);
     }
+    blockAddressPoint.tvl = tvl.toNumber();
+    blockAddressPoint.holdBasePoint = holdBasePoint.toNumber();
+    await this.blockAddressPointRepository.upsertBlockAddressPoint(blockAddressPoint);
     return {
       tvl,
       holdBasePoint,
     };
+  }
+
+  async getGroupTvl(blockNumber: number, addressTvlMap: Map<string, AddressTvl>): Promise<Map<string, BigNumber>> {
+    // todo 写入tvl明细表和总表
+    return new Map<string, BigNumber>();
+  }
+
+  async handleHoldPoint(
+    blockNumber: number,
+    blockTs: Date,
+    addressTvlMap: Map<string, AddressTvl>,
+    groupTvlMap: Map<string, BigNumber>
+  ) {
+    for (const address in addressTvlMap) {
+      const addressTvl = addressTvlMap.get(address);
+      const earlyBirdMultiplier = new BigNumber(this.getEarlyBirdMultiplier(blockTs));
+      const groupId = "1";
+      const groupBooster = new BigNumber(this.getGroupBooster(groupTvlMap.get(groupId).toNumber())).plus(
+        new BigNumber(1)
+      );
+      const newHoldPoint = addressTvl.holdBasePoint.multipliedBy(earlyBirdMultiplier).multipliedBy(groupBooster);
+      // save to db
+      // todo 同步更新邀请人的invite point
+      // todo 同步更新两个address的总表
+    }
   }
 
   getTokenPrice(token: Token, tokenPrices: Map<string, BigNumber>): BigNumber {
@@ -345,6 +369,22 @@ export class PointService extends Worker {
       return 1.2;
     } else {
       return 1;
+    }
+  }
+
+  public getGroupBooster(groupTvl: number): number {
+    if (groupTvl > 20) {
+      return 0.1;
+    } else if (groupTvl > 100) {
+      return 0.2;
+    } else if (groupTvl > 500) {
+      return 0.3;
+    } else if (groupTvl > 1000) {
+      return 0.4;
+    } else if (groupTvl > 5000) {
+      return 0.5;
+    } else {
+      return 0;
     }
   }
 }

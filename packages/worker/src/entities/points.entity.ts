@@ -11,12 +11,12 @@ export class Point {
   @Column({ type: "bytea", transformer: hexTransformer })
   public readonly address: string;
 
-  @Column("decimal", { scale: 2 })
-  public readonly stakePoint: number;
+  @Column("decimal")
+  public stakePoint: number;
 
-  @Column("decimal", { scale: 2 })
-  public readonly refPoint: number;
+  @Column("decimal")
+  public refPoint: number;
 
   @Column({ type: "bigint", transformer: bigIntNumberTransformer })
-  public readonly refNumber: number;
+  public refNumber: number;
 }

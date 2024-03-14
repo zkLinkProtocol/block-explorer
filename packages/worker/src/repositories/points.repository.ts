@@ -64,10 +64,21 @@ export class PointsRepository {
     return accountPoint?.stakePoint || 0;
   }
 
-  public async getPointByAddress(address: Buffer): Promise<Point> {
+  public async getPointByAddress(address: string): Promise<Point> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const [accountPoint] = await transactionManager.query(`SELECT * FROM points WHERE address = $1`, [address]);
-    return accountPoint || null;
+    return await transactionManager.findOne<Point>(Point, {
+      where: { address },
+    });
+  }
+
+  public createDefaultPoint(address: string): Point {
+    return {
+      id: 0,
+      address,
+      stakePoint: 0,
+      refPoint: 0,
+      refNumber: 0,
+    };
   }
 
   public async getLastStatisticalBlockNumber(): Promise<number> {

@@ -52,6 +52,8 @@ import {
   PointsHistory,
   Referral,
   BlockAddressPoint,
+  AddressActive,
+  Invite,
 } from "./entities";
 import { typeOrmModuleOptions, typeOrmReferModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -60,11 +62,13 @@ import { MetricsModule } from "./metrics";
 import { DbMetricsService } from "./dbMetrics.service";
 import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
-import { StatisticsTvlService } from "./points/statistics.service";
 import { PointService } from "./points/point.service";
 import { BlockTokenPriceRepository } from "./repositories/blockTokenPrice.repository";
 import { BlockTokenPrice } from "./entities/blockTokenPrice.entity";
 import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.repository";
+import { AddressActiveRepository } from "./repositories/addressActive.repository";
+import { InviteRepository } from "./repositories/invite.repository";
+import { ReferrerRepository } from "./repositories/referrer.repository";
 
 @Module({
   imports: [
@@ -97,6 +101,7 @@ import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.re
       PointsHistory,
       BlockTokenPrice,
       BlockAddressPoint,
+      AddressActive,
     ]),
     TypeOrmModule.forRootAsync({
       name: "refer",
@@ -110,7 +115,7 @@ import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.re
         };
       },
     }),
-    TypeOrmModule.forFeature([Referral], "refer"),
+    TypeOrmModule.forFeature([Invite, Referral], "refer"),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),
     MetricsModule,
@@ -140,7 +145,6 @@ import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.re
       inject: [ConfigService, HttpService],
     },
     TokenOffChainDataSaverService,
-    StatisticsTvlService,
     BatchRepository,
     BlockRepository,
     TransactionRepository,
@@ -154,7 +158,6 @@ import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.re
     LogRepository,
     PointsRepository,
     PointsHistoryRepository,
-    ReferralsRepository,
     TvlRepository,
     BlocksRevertService,
     BatchService,
@@ -168,6 +171,9 @@ import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.re
     PointService,
     BlockTokenPriceRepository,
     BlockAddressPointRepository,
+    AddressActiveRepository,
+    InviteRepository,
+    ReferrerRepository,
   ],
 })
 export class AppModule {}

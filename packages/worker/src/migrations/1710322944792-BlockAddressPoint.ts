@@ -10,13 +10,11 @@ export class BlockAddressPoint1710322944792 implements MigrationInterface {
                                              "depositPoint" decimal NOT NULL,
                                              "tvl" decimal NOT NULL,
                                              "holdBasePoint" decimal NOT NULL,
-                                            "holdPoint" decimal NOT NULL, 
+                                             "holdPoint" decimal NOT NULL, 
                                              "refPoint" decimal NOT NULL, 
-                                             "totalStakePoint" decimal NOT NULL, 
-                                             "totalRefPoint" decimal NOT NULL, 
                                              PRIMARY KEY ("blockNumber", "address"))`
     );
-    await queryRunner.query(`CREATE SEQUENCE "pointParsedTransferId" AS BIGINT MINVALUE -1`);
+    await queryRunner.query(`CREATE SEQUENCE "pointParsedTransferId" AS BIGINT MINVALUE 0`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
