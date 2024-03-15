@@ -7,6 +7,7 @@ import {
   ApiNotFoundResponse,
   ApiExcludeController,
   ApiQuery,
+  ApiOperation,
 } from "@nestjs/swagger";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { PagingOptionsDto, PagingOptionsWithMaxItemsLimitDto } from "../common/dtos";
@@ -28,6 +29,15 @@ const entityName = "tokens";
 @Controller(entityName)
 export class TokenController {
   constructor(private readonly tokenService: TokenService, private readonly transferService: TransferService) {}
+
+  @Get("/valid/checkExistDeposit")
+  @ApiOperation({ summary: "Check whether the address has a deposit transaction" })
+  public async getCheckExistDeposit(@Query("address", new ParseAddressPipe()) address: string) {
+    const exist = await this.tokenService.checkExistDeposit(address);
+    return {
+      result: exist,
+    };
+  }
 
   @Get("")
   @ApiListPageOkResponse(TokenDto, { description: "Successfully returned token list" })
