@@ -1,12 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, FindOptionsSelect, MoreThanOrEqual, Brackets } from "typeorm";
+import { Repository, FindOptionsSelect, MoreThanOrEqual, Brackets, In } from "typeorm";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { IPaginationOptions } from "../common/types";
 import { paginate } from "../common/utils";
 import { Token, ETH_TOKEN } from "./token.entity";
 import { BigNumber, ethers } from "ethers";
 import { LRUCache } from "lru-cache";
+import { Transfer, TransferType } from "src/transfer/transfer.entity";
+import TokenList from "./tokens";
 
 // const options: LRU. = { max: 500 };
 const options = {
@@ -44,7 +46,9 @@ export interface TokenTvl extends Token {
 export class TokenService {
   constructor(
     @InjectRepository(Token)
-    private readonly tokenRepository: Repository<Token>
+    private readonly tokenRepository: Repository<Token>,
+    @InjectRepository(Transfer)
+    private readonly transferRepository: Repository<Transfer>
   ) {}
 
   public async findOne(address: string, fields?: FindOptionsSelect<Token>): Promise<Token> {
@@ -93,7 +97,7 @@ export class TokenService {
   }
 
   public async getUserHighestDepositTvl(address: string): Promise<BigNumber> {
-    address=address.substring(2);
+    address = address.substring(2);
     const sql = `
     SELECT tokens."usdPrice", transfers.amount,
      transfers."tokenType", tokens.decimals
@@ -102,16 +106,35 @@ export class TokenService {
     WHERE transfers.type='deposit' and transfers."from" = '\\x${address}'
   `;
     const res = await this.tokenRepository.query(sql);
-    const a = res.map((item) =>
-      BigNumber.from(item.amount)
-        .mul(((item.usdPrice ?? 0) * 1000) | 0)
-        .div(1000)
-        .div(BigNumber.from(10).pow(item.decimals))
-    ).sort((a, b) => (a.gt(b) ? -1 : 1));
+    const a = res
+      .map((item) =>
+        BigNumber.from(item.amount)
+          .mul(((item.usdPrice ?? 0) * 1000) | 0)
+          .div(1000)
+          .div(BigNumber.from(10).pow(item.decimals))
+      )
+      .sort((a, b) => (a.gt(b) ? -1 : 1));
     if (a.length === 0) {
       return BigNumber.from(0);
     }
     return a[0];
+  }
+
+  public async checkExistDeposit(address: string): Promise<boolean> {
+    const l2AddressList = TokenList.map((token) => {
+      return token.address.map((address) => {
+        return address.l2Address;
+      });
+    }).flat();
+    const exist = await this.transferRepository.exist({
+      where: {
+        type: TransferType.Deposit,
+        from: address,
+        tokenAddress: In(l2AddressList),
+      },
+    });
+
+    return exist;
   }
 
   public async calculateTvl(onlyTotal = true): Promise<TokenTvl[]> {

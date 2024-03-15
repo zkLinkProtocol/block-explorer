@@ -32,6 +32,15 @@ const entityName = "tokens";
 export class TokenController {
   constructor(private readonly tokenService: TokenService, private readonly transferService: TransferService) {}
 
+  @Get("/valid/checkExistDeposit")
+  @ApiOperation({ summary: "Check whether the address has a deposit transaction" })
+  public async getCheckExistDeposit(@Query("address", new ParseAddressPipe()) address: string) {
+    const exist = await this.tokenService.checkExistDeposit(address);
+    return {
+      result: exist,
+    };
+  }
+
   @Get("")
   @ApiListPageOkResponse(TokenDto, { description: "Successfully returned token list" })
   @ApiBadRequestResponse({ description: "Paging query params are not valid or out of range" })
@@ -76,25 +85,33 @@ export class TokenController {
     };
   }
   @Post("/deposit-highest-tvl-record")
-  @ApiOperation({ summary: 'Get deposit tx highest TVL record', description: 'Only based on the address, check if there is any deposit transaction for the user where the deposit token value is at least $20. If such a condition is met, return true. The token price is updated every hour.'})
-  @ApiBody({ 
-    description: 'The payload data', 
+  @ApiOperation({
+    summary: "Get deposit tx highest TVL record",
+    description:
+      "Only based on the address, check if there is any deposit transaction for the user where the deposit token value is at least $20. If such a condition is met, return true. The token price is updated every hour.",
+  })
+  @ApiBody({
+    description: "The payload data",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        address: { type: 'string', description: "User's EVM address in lowercase", example:"0x9FA3b1D0D516E92b7576AC9DD2Ed8f9d3Fc34e27" },
-        twitter: { type: 'string', description: 'Twitter account ID' , example:""},
-        discord: { type: 'string', description: 'Discord username' ,example:""},
-        telegram: { type: 'string', description: 'Telegram user ID' ,example:""},
-        email: { type: 'string', description: 'Email address' ,example:""},
+        address: {
+          type: "string",
+          description: "User's EVM address in lowercase",
+          example: "0x9FA3b1D0D516E92b7576AC9DD2Ed8f9d3Fc34e27",
+        },
+        twitter: { type: "string", description: "Twitter account ID", example: "" },
+        discord: { type: "string", description: "Discord username", example: "" },
+        telegram: { type: "string", description: "Telegram user ID", example: "" },
+        email: { type: "string", description: "Email address", example: "" },
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'This API always return status code 200' })
+  @ApiResponse({ status: 200, description: "This API always return status code 200" })
   @HttpCode(200)
   public async getDepositTransferHighestTvlRecordPost(@Req() req: any): Promise<any> {
     const { address, twitter, discord, telegram, email } = req.body;
-    
+
     try {
       const checkedAddr = getChecksumAddress(address);
       return {
