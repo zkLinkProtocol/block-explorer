@@ -7,6 +7,7 @@ import {
   ApiNotFoundResponse,
   ApiExcludeController,
   ApiQuery,
+  ApiOperation,
 } from "@nestjs/swagger";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { PagingOptionsDto, PagingOptionsWithMaxItemsLimitDto } from "../common/dtos";
@@ -29,6 +30,15 @@ const entityName = "tokens";
 export class TokenController {
   constructor(private readonly tokenService: TokenService, private readonly transferService: TransferService) {}
 
+  @Get("/valid/checkExistDeposit")
+  @ApiOperation({ summary: "Check whether the address has a deposit transaction" })
+  public async getCheckExistDeposit(@Query("address", new ParseAddressPipe()) address: string) {
+    const exist = await this.tokenService.checkExistDeposit(address);
+    return {
+      result: exist,
+    };
+  }
+
   @Get("")
   @ApiListPageOkResponse(TokenDto, { description: "Successfully returned token list" })
   @ApiBadRequestResponse({ description: "Paging query params are not valid or out of range" })
@@ -39,7 +49,6 @@ export class TokenController {
     example: 100000,
     required: false,
   })
-
   public async getTokens(
     @Query() pagingOptions: PagingOptionsDto,
     @Query("minLiquidity", new ParseLimitedIntPipe({ min: 0, isOptional: true })) minLiquidity?: number,

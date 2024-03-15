@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, FindOptionsSelect, MoreThanOrEqual, Brackets } from "typeorm";
+import { Repository, FindOptionsSelect, MoreThanOrEqual, Brackets, In } from "typeorm";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { IPaginationOptions } from "../common/types";
 import { paginate } from "../common/utils";
 import { Token as DbToken, ETH_TOKEN } from "./token.entity";
 import tokens from "./tokens";
+import { Transfer, TransferType } from "src/transfer/transfer.entity";
 
 export interface FilterTokensOptions {
   minLiquidity?: number;
@@ -33,12 +34,33 @@ export class TokenService {
   private supportTokens: Token[];
   constructor(
     @InjectRepository(DbToken)
-    private readonly tokenRepository: Repository<DbToken>
+    private readonly tokenRepository: Repository<DbToken>,
+    @InjectRepository(Transfer)
+    private readonly transferRepository: Repository<Transfer>
   ) {
     this.supportTokens = [];
     tokens.forEach(token => {
       this.supportTokens.push(token);
     });
+  }
+
+  public async checkExistDeposit(address: string): Promise<boolean> {
+    const l2AddressList = tokens
+      .map((token) => {
+        return token.address.map((address) => {
+          return address.l2Address;
+        });
+      })
+      .flat();
+    const exist = await this.transferRepository.exist({
+      where: {
+        type: TransferType.Deposit,
+        from: address,
+        tokenAddress: In(l2AddressList),
+      },
+    });
+
+    return exist;
   }
 
   public getAllSupportTokens(): Token[] {
