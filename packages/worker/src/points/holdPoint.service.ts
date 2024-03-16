@@ -32,9 +32,6 @@ type BlockAddressTvl = {
 @Injectable()
 export class HoldPointService extends Worker {
   private readonly logger: Logger;
-  private readonly pointsPhase1StartTime: Date;
-  private readonly pointsEarlyDepositEndTime: Date;
-  private readonly pointsPhase1EndTime: Date;
   private readonly pointsStatisticalPeriodSecs: number;
 
   public constructor(
@@ -50,10 +47,7 @@ export class HoldPointService extends Worker {
   ) {
     super();
     this.logger = new Logger(HoldPointService.name);
-    this.pointsPhase1StartTime = new Date(this.configService.get<string>("points.pointsPhase1StartTime"));
-    this.pointsEarlyDepositEndTime = new Date(this.configService.get<string>("points.pointsEarlyDepositEndTime"));
-    this.pointsPhase1EndTime = new Date(this.configService.get<string>("points.pointsPhase1EndTime"));
-    this.pointsStatisticalPeriodSecs = configService.get<number>("points.pointsStatisticalPeriodSecs");
+    this.pointsStatisticalPeriodSecs = this.configService.get<number>("points.pointsStatisticalPeriodSecs");
   }
 
   protected async runProcess(): Promise<void> {
@@ -103,7 +97,7 @@ export class HoldPointService extends Worker {
     this.logger.log(`Statistic hold point at block: ${currentStatisticalBlock.number}`);
     const tokenPriceMap = await this.getTokenPriceMap(currentStatisticalBlock.number);
     const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, tokenPriceMap);
-    const groupTvlMap = await this.getGroupTvlMap(currentStatisticalBlock.number, addressTvlMap);
+    const groupTvlMap = await this.getGroupTvlMap(addressTvlMap);
     for (const address in addressTvlMap) {
       const fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(
         currentStatisticalBlock.number,
@@ -167,9 +161,9 @@ export class HoldPointService extends Worker {
       const tokenPrice = getTokenPrice(tokenInfo, tokenPrices);
       const ethPrice = getETHPrice(tokenPrices);
       const tokenAmount = new BigNumber(addressBalance.balance).dividedBy(new BigNumber(10).pow(tokenInfo.decimals));
-      const tokenTvl = tokenAmount.multipliedBy(tokenPrice);
+      const tokenTvl = tokenAmount.multipliedBy(tokenPrice).dividedBy(ethPrice);
       // base point = Token Multiplier * Token Amount * Token Price / ETH_Price
-      const tokenHoldBasePoint = tokenTvl.multipliedBy(new BigNumber(tokenInfo.multiplier)).dividedBy(ethPrice);
+      const tokenHoldBasePoint = tokenTvl.multipliedBy(new BigNumber(tokenInfo.multiplier));
       tvl = tvl.plus(tokenTvl);
       holdBasePoint = holdBasePoint.plus(tokenHoldBasePoint);
     }
@@ -179,10 +173,7 @@ export class HoldPointService extends Worker {
     };
   }
 
-  async getGroupTvlMap(
-    blockNumber: number,
-    addressTvlMap: Map<string, BlockAddressTvl>
-  ): Promise<Map<string, BigNumber>> {
+  async getGroupTvlMap(addressTvlMap: Map<string, BlockAddressTvl>): Promise<Map<string, BigNumber>> {
     const groupTvlMap = new Map<string, BigNumber>();
     const allGroupIds = await this.inviteRepository.getAllGroups();
     this.logger.log(`All group length: ${allGroupIds.length}`);

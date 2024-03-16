@@ -21,5 +21,4 @@ export * from "./addressTvl.entity";
 export * from "./groupTvl.entity";
 export * from "./blockTokenPrice.entity";
 export * from "./blockAddressPoint.entity";
-export * from "./addressActive.entity";
 export * from "./invite.entity";

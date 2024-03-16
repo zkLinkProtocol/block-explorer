@@ -18,7 +18,6 @@ export * from "./tvl.repository";
 export * from "./blockTokenPrice.repository";
 export * from "./blockAddressPoint.repository";
 export * from "./invite.repository";
-export * from "./addressActive.repository";
 export * from "./referrer.repository";
 export * from "./groupTvl.repository";
 export * from "./addressTvl.repository";

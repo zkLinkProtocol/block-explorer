@@ -51,7 +51,6 @@ import {
   PointsHistory,
   Referral,
   BlockAddressPoint,
-  AddressActive,
   Invite,
   AddressTvl,
   GroupTvl,
@@ -67,7 +66,6 @@ import { DepositPointService } from "./points/depositPoint.service";
 import { BlockTokenPriceRepository } from "./repositories";
 import { BlockTokenPrice } from "./entities";
 import { BlockAddressPointRepository } from "./repositories";
-import { AddressActiveRepository } from "./repositories";
 import { InviteRepository } from "./repositories";
 import { ReferrerRepository } from "./repositories";
 import { BlockGroupTvl } from "./entities/blockGroupTvl.entity";
@@ -107,7 +105,6 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
       PointsHistory,
       BlockTokenPrice,
       BlockAddressPoint,
-      AddressActive,
       BlockGroupTvl,
       AddressTvl,
       GroupTvl,
@@ -182,7 +179,6 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
     TvlStatisticalService,
     BlockTokenPriceRepository,
     BlockAddressPointRepository,
-    AddressActiveRepository,
     InviteRepository,
     ReferrerRepository,
     GroupTvlRepository,

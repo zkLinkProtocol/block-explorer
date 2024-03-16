@@ -7,7 +7,6 @@ import {
   TransferRepository,
   BlockTokenPriceRepository,
   BlockAddressPointRepository,
-  AddressActiveRepository,
   ReferrerRepository,
 } from "../repositories";
 import { TokenOffChainDataProvider } from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
@@ -20,8 +19,6 @@ import { ConfigService } from "@nestjs/config";
 export const STABLE_COIN_TYPE = "Stablecoin";
 export const ETHEREUM_CG_PRICE_ID = "ethereum";
 export const DEPOSIT_MULTIPLIER: BigNumber = new BigNumber(10);
-export const EARLY_ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.09);
-export const ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.225);
 export const REFERRER_BONUS: BigNumber = new BigNumber(0.1);
 
 export function getTokenPrice(token: Token, tokenPrices: Map<string, BigNumber>): BigNumber {
@@ -98,7 +95,6 @@ export class DepositPointService extends Worker {
     private readonly blockTokenPriceRepository: BlockTokenPriceRepository,
     private readonly blockAddressPointRepository: BlockAddressPointRepository,
     private readonly transferRepository: TransferRepository,
-    private readonly addressActiveRepository: AddressActiveRepository,
     private readonly referrerRepository: ReferrerRepository,
     private readonly tokenOffChainDataProvider: TokenOffChainDataProvider,
     private readonly configService: ConfigService
@@ -200,7 +196,6 @@ export class DepositPointService extends Worker {
 
   async recordDepositPoint(transfer: Transfer, tokenPrices: Map<string, BigNumber>) {
     const blockNumber: number = transfer.blockNumber;
-    const blockTs: Date = new Date(transfer.timestamp);
     const depositReceiver: string = hexTransformer.from(transfer.to);
     const tokenAddress: string = hexTransformer.from(transfer.tokenAddress);
     const tokenAmount: BigNumber = new BigNumber(transfer.amount);
@@ -215,36 +210,12 @@ export class DepositPointService extends Worker {
     }
     const tokenInfo = this.tokenService.getSupportToken(tokenAddress);
     if (!tokenInfo) {
-      this.logger.log(`Token ${tokenAddress} not support for point`);
       await this.blockAddressPointRepository.setParsedTransferId(transferId);
       return;
     }
-    const depositResult = await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices);
-    const newDepositETHAmount = depositResult[0];
-    const newDepositPoint = depositResult[1];
-
-    // active user
-    await this.activeUser(blockNumber, blockTs, depositReceiver, newDepositETHAmount);
+    const newDepositPoint = await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices);
     // update deposit point for user and refer point for referrer
     await this.updateDepositPoint(blockNumber, depositReceiver, newDepositPoint, transferId);
-  }
-
-  async activeUser(blockNumber: number, blockTs: Date, depositReceiver: string, depositETHAmount: BigNumber) {
-    if (
-      (depositETHAmount.gte(EARLY_ACTIVE_DEPOSIT_ETH_AMOUNT) && blockTs <= this.pointsEarlyDepositEndTime) ||
-      (depositETHAmount.gte(ACTIVE_DEPOSIT_ETH_AMOUNT) &&
-        blockTs > this.pointsEarlyDepositEndTime &&
-        blockTs <= this.pointsPhase1EndTime)
-    ) {
-      const addressActive = await this.addressActiveRepository.getAddressActive(depositReceiver);
-      if (!addressActive) {
-        this.logger.log(`Active user: ${depositReceiver}`);
-        await this.addressActiveRepository.add({
-          address: depositReceiver,
-          blockNumber: blockNumber,
-        });
-      }
-    }
   }
 
   async updateDepositPoint(blockNumber: number, depositReceiver: string, depositPoint: BigNumber, transferId: number) {
@@ -301,7 +272,7 @@ export class DepositPointService extends Worker {
     tokenAmount: BigNumber,
     token: Token,
     tokenPrices: Map<string, BigNumber>
-  ): Promise<[BigNumber, BigNumber]> {
+  ): Promise<BigNumber> {
     // NOVA Points = 10 * Token multiplier * Deposit Amount * Token Price / ETH price
     const price = getTokenPrice(token, tokenPrices);
     const ethPrice = getETHPrice(tokenPrices);
@@ -312,6 +283,6 @@ export class DepositPointService extends Worker {
     this.logger.log(
       `Deposit ethAmount = ${depositETHAmount}, point = ${point}, [deposit multiplier = ${DEPOSIT_MULTIPLIER}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`
     );
-    return [depositETHAmount, point];
+    return point;
   }
 }
