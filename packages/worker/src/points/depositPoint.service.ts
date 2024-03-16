@@ -78,11 +78,18 @@ export function getGroupBooster(groupTvl: BigNumber): BigNumber {
   }
 }
 
+type PriceCache = {
+  ts: Date;
+  price: BigNumber;
+};
+const PRICE_EXPIRATION_TIME = 300000; // 5 minutes
+
 @Injectable()
 export class DepositPointService extends Worker {
   private readonly logger: Logger;
   private readonly pointsEarlyDepositEndTime: Date;
   private readonly pointsPhase1EndTime: Date;
+  private readonly tokenPriceCache: Map<string, PriceCache>;
 
   public constructor(
     private readonly tokenService: TokenService,
@@ -100,6 +107,7 @@ export class DepositPointService extends Worker {
     this.logger = new Logger(DepositPointService.name);
     this.pointsEarlyDepositEndTime = new Date(this.configService.get<string>("points.pointsEarlyDepositEndTime"));
     this.pointsPhase1EndTime = new Date(this.configService.get<string>("points.pointsPhase1EndTime"));
+    this.tokenPriceCache = new Map<string, PriceCache>();
   }
 
   protected async runProcess(): Promise<void> {
@@ -158,27 +166,35 @@ export class DepositPointService extends Worker {
     });
     const tokenPrices: Map<string, BigNumber> = new Map();
     for (const priceId of allPriceIds) {
-      const price = await this.getTokenPriceAtBlockNumber(block, priceId);
+      const price = await this.storeTokenPriceAtBlockNumber(block, priceId);
       this.logger.log(`Token ${priceId} price: ${price}`);
       tokenPrices.set(priceId, price);
     }
     return tokenPrices;
   }
 
-  async getTokenPriceAtBlockNumber(block: Block, priceId: string): Promise<BigNumber> {
-    const blockTokenPrice = await this.blockTokenPriceRepository.getBlockTokenPrice(block.number, priceId);
-    if (!blockTokenPrice) {
-      // todo cache the price
-      const usdPrice = await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, block.timestamp.getTime());
-      const entity = {
-        blockNumber: block.number,
-        priceId,
-        usdPrice: usdPrice,
-      };
-      await this.blockTokenPriceRepository.add(entity);
-      return new BigNumber(usdPrice);
+  async storeTokenPriceAtBlockNumber(block: Block, priceId: string): Promise<BigNumber> {
+    const usdPrice = await this.getTokenPriceFromCacheOrDataProvider(priceId, block.timestamp);
+    const entity = {
+      blockNumber: block.number,
+      priceId,
+      usdPrice: usdPrice.toNumber(),
+    };
+    await this.blockTokenPriceRepository.upsert(entity, true, ["blockNumber", "priceId"]);
+    return usdPrice;
+  }
+
+  async getTokenPriceFromCacheOrDataProvider(priceId: string, blockTs: Date): Promise<BigNumber> {
+    const cache = this.tokenPriceCache.get(priceId);
+    const now = new Date();
+    if (!cache || cache.ts.getTime() + PRICE_EXPIRATION_TIME <= now.getTime()) {
+      const usdPrice = new BigNumber(
+        await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, blockTs.getTime())
+      );
+      this.tokenPriceCache.set(priceId, { ts: blockTs, price: usdPrice });
+      return usdPrice;
     } else {
-      return new BigNumber(blockTokenPrice.usdPrice);
+      return cache.price;
     }
   }
 
