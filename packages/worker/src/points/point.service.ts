@@ -153,12 +153,12 @@ export class PointService extends Worker {
   async recordDepositPoint(transfer: Transfer, tokenPrices: Map<string, BigNumber>) {
     const blockNumber: number = transfer.blockNumber;
     const blockTs: Date = new Date(transfer.timestamp);
-    const from: string = hexTransformer.from(transfer.from);
+    const depositReceiver: string = hexTransformer.from(transfer.to);
     const tokenAddress: string = hexTransformer.from(transfer.tokenAddress);
     const tokenAmount: BigNumber = new BigNumber(transfer.amount);
     const transferId: number = transfer.number;
     this.logger.log(
-      `Handle deposit: [from = ${from}, tokenAddress = ${tokenAddress}, tokenAmount = ${tokenAmount}, transferId = ${transferId}]`
+      `Handle deposit: [receiver = ${depositReceiver}, tokenAddress = ${tokenAddress}, tokenAmount = ${tokenAmount}, transferId = ${transferId}]`
     );
     const lastParsedTransferId = await this.blockAddressPointRepository.getLastParsedTransferId();
     if (transfer.number <= lastParsedTransferId) {
@@ -176,45 +176,52 @@ export class PointService extends Worker {
     const newDepositPoint = depositResult[1];
 
     // active user
-    await this.activeUser(blockNumber, blockTs, from, newDepositETHAmount);
+    await this.activeUser(blockNumber, blockTs, depositReceiver, newDepositETHAmount);
     // update deposit point for user and refer point for referrer
-    await this.updateDepositPoint(blockNumber, from, newDepositPoint, transferId);
+    await this.updateDepositPoint(blockNumber, depositReceiver, newDepositPoint, transferId);
   }
 
-  async activeUser(blockNumber: number, blockTs: Date, from: string, depositETHAmount: BigNumber) {
+  async activeUser(blockNumber: number, blockTs: Date, depositReceiver: string, depositETHAmount: BigNumber) {
     if (
       (depositETHAmount.gte(EARLY_ACTIVE_DEPOSIT_ETH_AMOUNT) && blockTs <= this.pointsEarlyDepositEndTime) ||
       (depositETHAmount.gte(ACTIVE_DEPOSIT_ETH_AMOUNT) &&
         blockTs > this.pointsEarlyDepositEndTime &&
         blockTs <= this.pointsPhase1EndTime)
     ) {
-      const addressActive = await this.addressActiveRepository.getAddressActive(from);
+      const addressActive = await this.addressActiveRepository.getAddressActive(depositReceiver);
       if (!addressActive) {
-        this.logger.log(`Active user: ${from}`);
+        this.logger.log(`Active user: ${depositReceiver}`);
         await this.addressActiveRepository.add({
-          address: from,
+          address: depositReceiver,
           blockNumber: blockNumber,
         });
       }
     }
   }
 
-  async updateDepositPoint(blockNumber: number, from: string, depositPoint: BigNumber, transferId: number) {
+  async updateDepositPoint(blockNumber: number, depositReceiver: string, depositPoint: BigNumber, transferId: number) {
     // update point of user
-    let fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, from);
-    if (!fromBlockAddressPoint) {
-      fromBlockAddressPoint = this.blockAddressPointRepository.createDefaultBlockAddressPoint(blockNumber, from);
+    let receiverBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(
+      blockNumber,
+      depositReceiver
+    );
+    if (!receiverBlockAddressPoint) {
+      receiverBlockAddressPoint = this.blockAddressPointRepository.createDefaultBlockAddressPoint(
+        blockNumber,
+        depositReceiver
+      );
     }
-    let fromAddressPoint = await this.pointsRepository.getPointByAddress(from);
-    if (!fromAddressPoint) {
-      fromAddressPoint = this.pointsRepository.createDefaultPoint(from);
+    let receiverAddressPoint = await this.pointsRepository.getPointByAddress(depositReceiver);
+    if (!receiverAddressPoint) {
+      receiverAddressPoint = this.pointsRepository.createDefaultPoint(depositReceiver);
     }
-    fromBlockAddressPoint.depositPoint = Number(fromBlockAddressPoint.depositPoint) + depositPoint.toNumber();
-    fromAddressPoint.stakePoint = Number(fromAddressPoint.stakePoint) + depositPoint.toNumber();
+    receiverBlockAddressPoint.depositPoint = Number(receiverBlockAddressPoint.depositPoint) + depositPoint.toNumber();
+    receiverAddressPoint.stakePoint = Number(receiverAddressPoint.stakePoint) + depositPoint.toNumber();
+    this.logger.log(`Address ${depositReceiver} get deposit point: ${depositPoint}`);
     // update point of referrer
     let referrerBlockAddressPoint: BlockAddressPoint;
     let referrerAddressPoint: Point;
-    const referral = await this.referrerRepository.getReferral(from);
+    const referral = await this.referrerRepository.getReferral(depositReceiver);
     const referrer = referral?.referrer;
     if (!!referrer) {
       referrerBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(blockNumber, referrer);
@@ -234,8 +241,8 @@ export class PointService extends Worker {
       this.logger.log(`Referrer ${referrer} get ref point from deposit: ${referrerBonus}`);
     }
     await this.blockAddressPointRepository.upsertUserAndReferrerPoint(
-      fromBlockAddressPoint,
-      fromAddressPoint,
+      receiverBlockAddressPoint,
+      receiverAddressPoint,
       referrerBlockAddressPoint,
       referrerAddressPoint,
       transferId
@@ -428,6 +435,7 @@ export class PointService extends Worker {
     }
     fromBlockAddressPoint.holdPoint = Number(fromBlockAddressPoint.holdPoint) + holdPoint.toNumber();
     fromAddressPoint.stakePoint = Number(fromAddressPoint.stakePoint) + holdPoint.toNumber();
+    this.logger.log(`Address ${from} get hold point: ${holdPoint}`);
     // update point of referrer
     let referrerBlockAddressPoint: BlockAddressPoint;
     let referrerAddressPoint: Point;

@@ -43,19 +43,19 @@ export class BlockAddressPointRepository extends BaseRepository<BlockAddressPoin
   }
 
   public async upsertUserAndReferrerPoint(
-    fromBlocBlockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>,
-    fromAddressPoint: QueryDeepPartialEntity<Point>,
+    receiverBlocBlockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>,
+    receiverAddressPoint: QueryDeepPartialEntity<Point>,
     referrerBlocBlockAddressPoint?: QueryDeepPartialEntity<BlockAddressPoint>,
     referrerAddressPoint?: QueryDeepPartialEntity<Point>,
     transferId?: number
   ): Promise<void> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.transaction(async (entityManager) => {
-      await entityManager.upsert<BlockAddressPoint>(BlockAddressPoint, fromBlocBlockAddressPoint, [
+      await entityManager.upsert<BlockAddressPoint>(BlockAddressPoint, receiverBlocBlockAddressPoint, [
         "blockNumber",
         "address",
       ]);
-      await entityManager.upsert<Point>(Point, fromAddressPoint, ["address"]);
+      await entityManager.upsert<Point>(Point, receiverAddressPoint, ["address"]);
       if (!!referrerBlocBlockAddressPoint) {
         await entityManager.upsert<BlockAddressPoint>(BlockAddressPoint, referrerBlocBlockAddressPoint, [
           "blockNumber",

@@ -4,7 +4,7 @@ import { InjectMetric } from "@willsoto/nestjs-prometheus";
 import { In } from "typeorm";
 import { Histogram } from "prom-client";
 import { LogType, isLogOfType } from "../log/logType";
-import { BlockchainService } from "../blockchain/blockchain.service";
+import { BlockchainService } from "../blockchain";
 import { AddressRepository, TokenRepository } from "../repositories";
 import { GET_TOKEN_INFO_DURATION_METRIC_NAME } from "../metrics";
 import { ContractAddress } from "../dataFetcher/types";
@@ -31,7 +31,8 @@ export interface Token {
 @Injectable()
 export class TokenService {
   private readonly logger: Logger;
-  private supportTokens: Token[];
+  private readonly supportTokens: Token[];
+  private readonly supportTokenL2AddressMap: Map<string, Token>;
 
   constructor(
     private readonly blockchainService: BlockchainService,
@@ -56,6 +57,9 @@ export class TokenService {
         throw new Error(`Token ${token.symbol} multiplier not found`);
       }
       this.supportTokens.push(token);
+      token.address.forEach((addr) => {
+        this.supportTokenL2AddressMap.set(addr.l2Address.toLowerCase(), token);
+      });
     });
   }
 
@@ -90,21 +94,11 @@ export class TokenService {
   }
 
   public isSupportToken(tokenAddress: string): boolean {
-    for (const token of this.supportTokens) {
-      if (token.address.find((t) => t.l2Address.toLowerCase() == tokenAddress.toLowerCase())) {
-        return true;
-      }
-    }
-    return false;
+    return !!this.supportTokenL2AddressMap.get(tokenAddress.toLowerCase());
   }
 
   public getSupportToken(tokenAddress: string): Token | undefined {
-    for (const token of this.supportTokens) {
-      if (token.address.find((t) => t.l2Address.toLowerCase() === tokenAddress.toLowerCase())) {
-        return token;
-      }
-    }
-    return undefined;
+    return this.supportTokenL2AddressMap.get(tokenAddress.toLowerCase());
   }
 
   private async getERC20Token(contractAddress: string): Promise<{
