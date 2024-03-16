@@ -8,8 +8,6 @@ export class BlockAddressPoint1710322944792 implements MigrationInterface {
                                              "blockNumber" bigint NOT NULL, 
                                              "address" bytea NOT NULL, 
                                              "depositPoint" decimal NOT NULL,
-                                             "tvl" decimal NOT NULL,
-                                             "holdBasePoint" decimal NOT NULL,
                                              "holdPoint" decimal NOT NULL, 
                                              "refPoint" decimal NOT NULL, 
                                              PRIMARY KEY ("blockNumber", "address"))`

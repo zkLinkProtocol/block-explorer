@@ -63,7 +63,7 @@ import { MetricsModule } from "./metrics";
 import { DbMetricsService } from "./dbMetrics.service";
 import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
-import { PointService } from "./points/point.service";
+import { DepositPointService } from "./points/depositPoint.service";
 import { BlockTokenPriceRepository } from "./repositories/blockTokenPrice.repository";
 import { BlockTokenPrice } from "./entities/blockTokenPrice.entity";
 import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.repository";
@@ -71,9 +71,10 @@ import { AddressActiveRepository } from "./repositories/addressActive.repository
 import { InviteRepository } from "./repositories/invite.repository";
 import { ReferrerRepository } from "./repositories/referrer.repository";
 import { BlockGroupTvl } from "./entities/blockGroupTvl.entity";
-import { BlockGroupTvlRepository } from "./repositories/blockGroupTvl.repository";
 import { GroupTvlRepository } from "./repositories/groupTvl.repository";
 import { AddressTvlRepository } from "./repositories/addressTvl.repository";
+import { HoldPointService } from './points/holdPoint.service';
+import { TvlStatisticalService } from './points/tvlStatistical.service';
 
 @Module({
   imports: [
@@ -176,13 +177,14 @@ import { AddressTvlRepository } from "./repositories/addressTvl.repository";
     Logger,
     RetryDelayProvider,
     DbMetricsService,
-    PointService,
+    DepositPointService,
+    HoldPointService,
+    TvlStatisticalService,
     BlockTokenPriceRepository,
     BlockAddressPointRepository,
     AddressActiveRepository,
     InviteRepository,
     ReferrerRepository,
-    BlockGroupTvlRepository,
     GroupTvlRepository,
     AddressTvlRepository,
   ],

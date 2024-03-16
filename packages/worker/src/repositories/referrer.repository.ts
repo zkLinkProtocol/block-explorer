@@ -15,4 +15,11 @@ export class ReferrerRepository extends BaseRepository<Referral> {
       where: { address },
     });
   }
+
+  public async getReferees(address: string): Promise<Referral[]> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    return await transactionManager.find<Referral>(Referral, {
+      where: { referrer: address },
+    });
+  }
 }

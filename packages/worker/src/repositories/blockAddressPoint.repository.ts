@@ -35,8 +35,6 @@ export class BlockAddressPointRepository extends BaseRepository<BlockAddressPoin
       blockNumber: blockNumber,
       address: address,
       depositPoint: 0,
-      tvl: 0,
-      holdBasePoint: 0,
       holdPoint: 0,
       refPoint: 0,
     };
@@ -69,10 +67,6 @@ export class BlockAddressPointRepository extends BaseRepository<BlockAddressPoin
         await entityManager.query(`SELECT setval('"pointParsedTransferId"', $1, false);`, [transferId]);
       }
     });
-  }
-
-  public async upsertBlockAddressPoint(blockAddressPoint: QueryDeepPartialEntity<BlockAddressPoint>): Promise<void> {
-    await this.upsert(blockAddressPoint, true, ["blockNumber", "address"]);
   }
 
   public async upsertUserAndReferrerTvl(

@@ -10,7 +10,9 @@ import { CounterService } from "./counter";
 import { BalancesCleanerService } from "./balance";
 import { TokenOffChainDataSaverService } from "./token/tokenOffChainData/tokenOffChainDataSaver.service";
 import runMigrations from "./utils/runMigrations";
-import { PointService } from "./points/point.service";
+import { DepositPointService } from "./points/depositPoint.service";
+import { HoldPointService } from './points/holdPoint.service';
+import { TvlStatisticalService } from './points/tvlStatistical.service';
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {
@@ -23,7 +25,9 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     private readonly blocksRevertService: BlocksRevertService,
     private readonly balancesCleanerService: BalancesCleanerService,
     private readonly tokenOffChainDataSaverService: TokenOffChainDataSaverService,
-    private readonly pointService: PointService,
+    private readonly depositPointService: DepositPointService,
+    private readonly holdPointService: HoldPointService,
+    private readonly tvlStatisticalService: TvlStatisticalService,
     private readonly dataSource: DataSource,
     private readonly configService: ConfigService
   ) {
@@ -70,7 +74,9 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     if (enableTokenOffChainDataSaver) {
       tasks.push(this.tokenOffChainDataSaverService.start());
     }
-    tasks.push(this.pointService.start());
+    tasks.push(this.depositPointService.start());
+    tasks.push(this.holdPointService.start());
+    tasks.push(this.tvlStatisticalService.start());
     return Promise.all(tasks);
   }
 
@@ -81,7 +87,9 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       this.counterService.stop(),
       this.balancesCleanerService.stop(),
       this.tokenOffChainDataSaverService.stop(),
-      this.pointService.stop(),
+      this.depositPointService.stop(),
+      this.holdPointService.stop(),
+      this.tvlStatisticalService.stop(),
     ]);
   }
 }

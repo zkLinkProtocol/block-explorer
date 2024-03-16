@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { FindOptionsWhere, FindOptionsSelect, FindOptionsRelations } from "typeorm";
+import { FindOptionsRelations, FindOptionsSelect, FindOptionsWhere } from "typeorm";
 import { types } from "zksync-web3";
 import { Block as BlockDto } from "../dataFetcher/types";
 import { unixTimeToDate } from "../utils/date";
@@ -39,6 +39,17 @@ export class BlockRepository {
       .limit(1)
       .getOne();
     return lastExecutedBlock?.number || 0;
+  }
+
+  public async getNextHoldPointStatisticalBlock(lastStatisticalTs: Date, nextStatisticalTs: Date): Promise<Block> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    return await transactionManager
+      .createQueryBuilder(Block, "block")
+      .select(["block.number", "block.timestamp"])
+      .where(`block.timestamp > $1 AND block.timestamp <= $2`, [lastStatisticalTs, nextStatisticalTs])
+      .orderBy("block.number", "DESC")
+      .limit(1)
+      .getOne();
   }
 
   public async add(blockDto: BlockDto, blockDetailsDto: types.BlockDetails): Promise<void> {

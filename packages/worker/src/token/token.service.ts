@@ -43,6 +43,7 @@ export class TokenService {
   ) {
     this.logger = new Logger(TokenService.name);
     this.supportTokens = [];
+    this.supportTokenL2AddressMap = new Map<string, Token>();
     tokens.forEach((token) => {
       if (!token.decimals) {
         throw new Error(`Token ${token.symbol} decimals not found`);

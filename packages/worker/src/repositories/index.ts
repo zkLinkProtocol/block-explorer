@@ -20,6 +20,5 @@ export * from "./blockAddressPoint.repository";
 export * from "./invite.repository";
 export * from "./addressActive.repository";
 export * from "./referrer.repository";
-export * from "./blockGroupTvl.repository";
 export * from "./groupTvl.repository";
 export * from "./addressTvl.repository";
