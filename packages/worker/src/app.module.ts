@@ -64,17 +64,17 @@ import { DbMetricsService } from "./dbMetrics.service";
 import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
 import { DepositPointService } from "./points/depositPoint.service";
-import { BlockTokenPriceRepository } from "./repositories/blockTokenPrice.repository";
-import { BlockTokenPrice } from "./entities/blockTokenPrice.entity";
-import { BlockAddressPointRepository } from "./repositories/blockAddressPoint.repository";
-import { AddressActiveRepository } from "./repositories/addressActive.repository";
-import { InviteRepository } from "./repositories/invite.repository";
-import { ReferrerRepository } from "./repositories/referrer.repository";
+import { BlockTokenPriceRepository } from "./repositories";
+import { BlockTokenPrice } from "./entities";
+import { BlockAddressPointRepository } from "./repositories";
+import { AddressActiveRepository } from "./repositories";
+import { InviteRepository } from "./repositories";
+import { ReferrerRepository } from "./repositories";
 import { BlockGroupTvl } from "./entities/blockGroupTvl.entity";
-import { GroupTvlRepository } from "./repositories/groupTvl.repository";
-import { AddressTvlRepository } from "./repositories/addressTvl.repository";
-import { HoldPointService } from './points/holdPoint.service';
-import { TvlStatisticalService } from './points/tvlStatistical.service';
+import { GroupTvlRepository } from "./repositories";
+import { AddressTvlRepository } from "./repositories";
+import { HoldPointService } from "./points/holdPoint.service";
+import { TvlStatisticalService } from "./points/tvlStatistical.service";
 
 @Module({
   imports: [

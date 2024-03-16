@@ -11,8 +11,8 @@ import { BalancesCleanerService } from "./balance";
 import { TokenOffChainDataSaverService } from "./token/tokenOffChainData/tokenOffChainDataSaver.service";
 import runMigrations from "./utils/runMigrations";
 import { DepositPointService } from "./points/depositPoint.service";
-import { HoldPointService } from './points/holdPoint.service';
-import { TvlStatisticalService } from './points/tvlStatistical.service';
+import { HoldPointService } from "./points/holdPoint.service";
+import { TvlStatisticalService } from "./points/tvlStatistical.service";
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {

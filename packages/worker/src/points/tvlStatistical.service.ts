@@ -10,13 +10,11 @@ import {
   GroupTvlRepository,
   ReferrerRepository,
 } from "../repositories";
-import { Token, TokenService } from "../token/token.service";
+import { TokenService } from "../token/token.service";
 import BigNumber from "bignumber.js";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
-
-const STABLE_COIN_TYPE = "Stablecoin";
-const ETHEREUM_CG_PRICE_ID = "ethereum";
+import { getETHPrice, getTokenPrice, STABLE_COIN_TYPE } from "./depositPoint.service";
 
 @Injectable()
 export class TvlStatisticalService extends Worker {
@@ -127,8 +125,8 @@ export class TvlStatisticalService extends Worker {
       if (!tokenInfo) {
         continue;
       }
-      const tokenPrice = this.getTokenPrice(tokenInfo, tokenPrices);
-      const ethPrice = this.getETHPrice(tokenPrices);
+      const tokenPrice = getTokenPrice(tokenInfo, tokenPrices);
+      const ethPrice = getETHPrice(tokenPrices);
       const tokenAmount = new BigNumber(addressBalance.balance).dividedBy(new BigNumber(10).pow(tokenInfo.decimals));
       const tokenTvl = tokenAmount.multipliedBy(tokenPrice).dividedBy(ethPrice);
       tvl = tvl.plus(tokenTvl);
@@ -190,26 +188,5 @@ export class TvlStatisticalService extends Worker {
         await this.addressTvlRepository.upsert(addressTvl, true, ["address"]);
       }
     }
-  }
-
-  getTokenPrice(token: Token, tokenPrices: Map<string, BigNumber>): BigNumber {
-    let price: BigNumber;
-    if (token.type === STABLE_COIN_TYPE) {
-      price = new BigNumber(1);
-    } else {
-      price = tokenPrices.get(token.cgPriceId);
-    }
-    if (!price) {
-      throw new Error(`Token ${token.symbol} price not found`);
-    }
-    return price;
-  }
-
-  getETHPrice(tokenPrices: Map<string, BigNumber>): BigNumber {
-    const ethPrice = tokenPrices.get(ETHEREUM_CG_PRICE_ID);
-    if (!ethPrice) {
-      throw new Error(`Ethereum price not found`);
-    }
-    return ethPrice;
   }
 }

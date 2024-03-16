@@ -17,20 +17,72 @@ import { Block, BlockAddressPoint, Point, Transfer } from "../entities";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
 
-const STABLE_COIN_TYPE = "Stablecoin";
-const ETHEREUM_CG_PRICE_ID = "ethereum";
-const DEPOSIT_MULTIPLIER: BigNumber = new BigNumber(10);
-const EARLY_ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.09);
-const ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.225);
-const REFERRER_BONUS: BigNumber = new BigNumber(0.1);
+export const STABLE_COIN_TYPE = "Stablecoin";
+export const ETHEREUM_CG_PRICE_ID = "ethereum";
+export const DEPOSIT_MULTIPLIER: BigNumber = new BigNumber(10);
+export const EARLY_ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.09);
+export const ACTIVE_DEPOSIT_ETH_AMOUNT: BigNumber = new BigNumber(0.225);
+export const REFERRER_BONUS: BigNumber = new BigNumber(0.1);
+
+export function getTokenPrice(token: Token, tokenPrices: Map<string, BigNumber>): BigNumber {
+  let price: BigNumber;
+  if (token.type === STABLE_COIN_TYPE) {
+    price = new BigNumber(1);
+  } else {
+    price = tokenPrices.get(token.cgPriceId);
+  }
+  if (!price) {
+    throw new Error(`Token ${token.symbol} price not found`);
+  }
+  return price;
+}
+
+export function getETHPrice(tokenPrices: Map<string, BigNumber>): BigNumber {
+  const ethPrice = tokenPrices.get(ETHEREUM_CG_PRICE_ID);
+  if (!ethPrice) {
+    throw new Error(`Ethereum price not found`);
+  }
+  return ethPrice;
+}
+
+export function getEarlyBirdMultiplier(blockTs: Date): BigNumber {
+  // 1st week: 2,second week:1.5,third,forth week:1.2,
+  const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
+  const startDate = this.pointsPhase1StartTime;
+  const diffInMilliseconds = blockTs.getTime() - startDate.getTime();
+  const diffInWeeks = Math.floor(diffInMilliseconds / millisecondsPerWeek);
+  if (diffInWeeks < 1) {
+    return new BigNumber(2);
+  } else if (diffInWeeks < 2) {
+    return new BigNumber(1.5);
+  } else if (diffInWeeks < 4) {
+    return new BigNumber(1.2);
+  } else {
+    return new BigNumber(1);
+  }
+}
+
+export function getGroupBooster(groupTvl: BigNumber): BigNumber {
+  if (groupTvl.gte(20)) {
+    return new BigNumber(0.1);
+  } else if (groupTvl.gte(100)) {
+    return new BigNumber(0.2);
+  } else if (groupTvl.gte(500)) {
+    return new BigNumber(0.3);
+  } else if (groupTvl.gte(1000)) {
+    return new BigNumber(0.4);
+  } else if (groupTvl.gte(5000)) {
+    return new BigNumber(0.5);
+  } else {
+    return new BigNumber(0);
+  }
+}
 
 @Injectable()
 export class DepositPointService extends Worker {
   private readonly logger: Logger;
-  private readonly pointsPhase1StartTime: Date;
   private readonly pointsEarlyDepositEndTime: Date;
   private readonly pointsPhase1EndTime: Date;
-  private readonly pointsStatisticalPeriodSecs: number;
 
   public constructor(
     private readonly tokenService: TokenService,
@@ -46,10 +98,8 @@ export class DepositPointService extends Worker {
   ) {
     super();
     this.logger = new Logger(DepositPointService.name);
-    this.pointsPhase1StartTime = new Date(this.configService.get<string>("points.pointsPhase1StartTime"));
     this.pointsEarlyDepositEndTime = new Date(this.configService.get<string>("points.pointsEarlyDepositEndTime"));
     this.pointsPhase1EndTime = new Date(this.configService.get<string>("points.pointsPhase1EndTime"));
-    this.pointsStatisticalPeriodSecs = configService.get<number>("points.pointsStatisticalPeriodSecs");
   }
 
   protected async runProcess(): Promise<void> {
@@ -237,8 +287,8 @@ export class DepositPointService extends Worker {
     tokenPrices: Map<string, BigNumber>
   ): Promise<[BigNumber, BigNumber]> {
     // NOVA Points = 10 * Token multiplier * Deposit Amount * Token Price / ETH price
-    const price = this.getTokenPrice(token, tokenPrices);
-    const ethPrice = this.getETHPrice(tokenPrices);
+    const price = getTokenPrice(token, tokenPrices);
+    const ethPrice = getETHPrice(tokenPrices);
     const depositAmount = tokenAmount.dividedBy(new BigNumber(10).pow(token.decimals));
     const depositETHAmount = depositAmount.multipliedBy(price).dividedBy(ethPrice);
     const tokenMultiplier = new BigNumber(token.multiplier);
@@ -247,26 +297,5 @@ export class DepositPointService extends Worker {
       `Deposit ethAmount = ${depositETHAmount}, point = ${point}, [deposit multiplier = ${DEPOSIT_MULTIPLIER}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`
     );
     return [depositETHAmount, point];
-  }
-
-  getTokenPrice(token: Token, tokenPrices: Map<string, BigNumber>): BigNumber {
-    let price: BigNumber;
-    if (token.type === STABLE_COIN_TYPE) {
-      price = new BigNumber(1);
-    } else {
-      price = tokenPrices.get(token.cgPriceId);
-    }
-    if (!price) {
-      throw new Error(`Token ${token.symbol} price not found`);
-    }
-    return price;
-  }
-
-  getETHPrice(tokenPrices: Map<string, BigNumber>): BigNumber {
-    const ethPrice = tokenPrices.get(ETHEREUM_CG_PRICE_ID);
-    if (!ethPrice) {
-      throw new Error(`Ethereum price not found`);
-    }
-    return ethPrice;
   }
 }

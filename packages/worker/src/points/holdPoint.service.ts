@@ -10,15 +10,19 @@ import {
   InviteRepository,
   ReferrerRepository,
 } from "../repositories";
-import { Token, TokenService } from "../token/token.service";
+import { TokenService } from "../token/token.service";
 import BigNumber from "bignumber.js";
 import { BlockAddressPoint, Point } from "../entities";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
-
-const STABLE_COIN_TYPE = "Stablecoin";
-const ETHEREUM_CG_PRICE_ID = "ethereum";
-const REFERRER_BONUS: BigNumber = new BigNumber(0.1);
+import {
+  getEarlyBirdMultiplier,
+  getETHPrice,
+  getGroupBooster,
+  getTokenPrice,
+  REFERRER_BONUS,
+  STABLE_COIN_TYPE,
+} from "./depositPoint.service";
 
 type BlockAddressTvl = {
   tvl: BigNumber;
@@ -110,13 +114,13 @@ export class HoldPointService extends Worker {
         continue;
       }
       const addressTvl = addressTvlMap.get(address);
-      const earlyBirdMultiplier = new BigNumber(this.getEarlyBirdMultiplier(currentStatisticalBlock.timestamp));
+      const earlyBirdMultiplier = new BigNumber(getEarlyBirdMultiplier(currentStatisticalBlock.timestamp));
       let groupBooster = new BigNumber(1);
       const invite = await this.inviteRepository.getInvite(address);
       if (!!invite) {
         const groupTvl = groupTvlMap.get(invite.groupId);
         if (!!groupTvl) {
-          groupBooster = groupBooster.plus(this.getGroupBooster(groupTvl));
+          groupBooster = groupBooster.plus(getGroupBooster(groupTvl));
         }
       }
       // NOVA Point = sum_all tokens in activity list (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price * (1 + Group Booster + Growth Booster) / ETH_Price )
@@ -160,8 +164,8 @@ export class HoldPointService extends Worker {
       if (!tokenInfo) {
         continue;
       }
-      const tokenPrice = this.getTokenPrice(tokenInfo, tokenPrices);
-      const ethPrice = this.getETHPrice(tokenPrices);
+      const tokenPrice = getTokenPrice(tokenInfo, tokenPrices);
+      const ethPrice = getETHPrice(tokenPrices);
       const tokenAmount = new BigNumber(addressBalance.balance).dividedBy(new BigNumber(10).pow(tokenInfo.decimals));
       const tokenTvl = tokenAmount.multipliedBy(tokenPrice);
       // base point = Token Multiplier * Token Amount * Token Price / ETH_Price
@@ -260,59 +264,5 @@ export class HoldPointService extends Worker {
       referrerBlockAddressPoint,
       referrerAddressPoint
     );
-  }
-
-  getTokenPrice(token: Token, tokenPrices: Map<string, BigNumber>): BigNumber {
-    let price: BigNumber;
-    if (token.type === STABLE_COIN_TYPE) {
-      price = new BigNumber(1);
-    } else {
-      price = tokenPrices.get(token.cgPriceId);
-    }
-    if (!price) {
-      throw new Error(`Token ${token.symbol} price not found`);
-    }
-    return price;
-  }
-
-  getETHPrice(tokenPrices: Map<string, BigNumber>): BigNumber {
-    const ethPrice = tokenPrices.get(ETHEREUM_CG_PRICE_ID);
-    if (!ethPrice) {
-      throw new Error(`Ethereum price not found`);
-    }
-    return ethPrice;
-  }
-
-  getEarlyBirdMultiplier(blockTs: Date): BigNumber {
-    // 1st week: 2,second week:1.5,third,forth week:1.2,
-    const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
-    const startDate = this.pointsPhase1StartTime;
-    const diffInMilliseconds = blockTs.getTime() - startDate.getTime();
-    const diffInWeeks = Math.floor(diffInMilliseconds / millisecondsPerWeek);
-    if (diffInWeeks < 1) {
-      return new BigNumber(2);
-    } else if (diffInWeeks < 2) {
-      return new BigNumber(1.5);
-    } else if (diffInWeeks < 4) {
-      return new BigNumber(1.2);
-    } else {
-      return new BigNumber(1);
-    }
-  }
-
-  public getGroupBooster(groupTvl: BigNumber): BigNumber {
-    if (groupTvl.gte(20)) {
-      return new BigNumber(0.1);
-    } else if (groupTvl.gte(100)) {
-      return new BigNumber(0.2);
-    } else if (groupTvl.gte(500)) {
-      return new BigNumber(0.3);
-    } else if (groupTvl.gte(1000)) {
-      return new BigNumber(0.4);
-    } else if (groupTvl.gte(5000)) {
-      return new BigNumber(0.5);
-    } else {
-      return new BigNumber(0);
-    }
   }
 }
