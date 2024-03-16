@@ -1,21 +1,26 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Worker } from "../common/worker";
 import waitFor from "../utils/waitFor";
-import { PointsRepository, BlockRepository, TransferRepository, BalanceRepository } from "../repositories";
+import {
+  PointsRepository,
+  BlockRepository,
+  TransferRepository,
+  BalanceRepository,
+  BlockTokenPriceRepository,
+  BlockAddressPointRepository,
+  InviteRepository,
+  AddressActiveRepository,
+  ReferrerRepository,
+  BlockGroupTvlRepository,
+  GroupTvlRepository,
+  AddressTvlRepository,
+} from "../repositories";
 import { TokenOffChainDataProvider } from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 import { Token, TokenService } from "../token/token.service";
 import BigNumber from "bignumber.js";
 import { Block, BlockAddressPoint, Point, Transfer, AddressTvl } from "../entities";
-import { BlockTokenPriceRepository } from "../repositories/blockTokenPrice.repository";
-import { BlockAddressPointRepository } from "../repositories/blockAddressPoint.repository";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
-import { InviteRepository } from "../repositories/invite.repository";
-import { AddressActiveRepository } from "../repositories/addressActive.repository";
-import { ReferrerRepository } from "../repositories/referrer.repository";
-import { BlockGroupTvlRepository } from "../repositories/blockGroupTvl.repository";
-import { GroupTvlRepository } from "../repositories/groupTvl.repository";
-import { AddressTvlRepository } from "../repositories/addressTvl.repository";
 
 const STABLE_COIN_TYPE = "Stablecoin";
 const ETHEREUM_CG_PRICE_ID = "ethereum";
