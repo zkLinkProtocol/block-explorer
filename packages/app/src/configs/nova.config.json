@@ -22,7 +22,8 @@
     "zksync": "/img/zksync.svg",
     "arbitrum": "/img/arbitrum-arb-logo.svg",
     "mantle": "/img/mantle.svg",
-    "manta": "/img/manta.jpg"
+    "manta": "/img/manta.jpg",
+    "blast":"/img/blast.svg"
   },
   "chainNameList": {
     "goerli": "Goerli",
@@ -31,7 +32,8 @@
     "zksync": "zkSync",
     "arbitrum": "Arbitrum One",
     "mantle": "Mantle",
-    "manta": "Manta Pacific"
+    "manta": "Manta Pacific",
+    "blast": "Blast"
   },
   "excuteBatchList": [
     {
@@ -57,6 +59,12 @@
       "limitNumber": 50,
       "chainId": 169,
       "blockExplorersUrl": "https://pacific-explorer.manta.network"
+    },
+    {
+      "key": "blast",
+      "limitNumber": 50,
+      "chainId": 81457,
+      "blockExplorersUrl": "https://blastscan.io"
     }
   ]
 }
