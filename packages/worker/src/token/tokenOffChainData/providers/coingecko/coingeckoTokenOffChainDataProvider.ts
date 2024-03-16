@@ -8,6 +8,7 @@ import {
   TokenOffChainDataProvider,
   ITokenOffChainData,
   ITokenCurrentPrice,
+  ITokenMarketChartProviderResponse,
 } from "../../tokenOffChainDataProvider.abstract";
 import { Token } from "../../../token.service";
 
@@ -25,12 +26,6 @@ interface ITokenMarketDataProviderResponse {
   image?: string;
   current_price?: number;
   market_cap?: number;
-}
-
-interface ITokenMarketChartProviderResponse {
-  prices: number[][];
-  market_caps: number[][];
-  total_volumes: number[][];
 }
 
 class ProviderResponseError extends Error {
@@ -154,10 +149,13 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
   }
 
   // start add by nick *get history price*
-  private getTokensMarketChart(tokenId: string, getDate: Date) {
+  public async getTokensMarketChart(tokenId: string, getDate: Date): Promise<ITokenMarketChartProviderResponse> {
     const currentDate = new Date();
     const diffDays = Math.ceil((currentDate.getTime() - getDate.getTime()) / 86400000);
     const days = diffDays < 2 ? 2 : diffDays;
+    if (diffDays > 90) {
+      throw new Error(`Diff days too large`);
+    }
 
     return this.makeApiRequestRetryable<ITokenMarketChartProviderResponse>({
       path: `/coins/${tokenId}/market_chart`,

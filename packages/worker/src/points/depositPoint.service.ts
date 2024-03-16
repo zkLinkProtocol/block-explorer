@@ -9,12 +9,14 @@ import {
   BlockAddressPointRepository,
   ReferrerRepository,
 } from "../repositories";
-import { TokenOffChainDataProvider } from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
+import {
+  ITokenMarketChartProviderResponse,
+  TokenOffChainDataProvider,
+} from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 import { Token, TokenService } from "../token/token.service";
 import BigNumber from "bignumber.js";
 import { Block, BlockAddressPoint, Point, Transfer } from "../entities";
 import { hexTransformer } from "../transformers/hex.transformer";
-import { ConfigService } from "@nestjs/config";
 
 export const STABLE_COIN_TYPE = "Stablecoin";
 export const ETHEREUM_CG_PRICE_ID = "ethereum";
@@ -75,18 +77,12 @@ export function getGroupBooster(groupTvl: BigNumber): BigNumber {
   }
 }
 
-type PriceCache = {
-  ts: Date;
-  price: BigNumber;
-};
 const PRICE_EXPIRATION_TIME = 300000; // 5 minutes
 
 @Injectable()
 export class DepositPointService extends Worker {
   private readonly logger: Logger;
-  private readonly pointsEarlyDepositEndTime: Date;
-  private readonly pointsPhase1EndTime: Date;
-  private readonly tokenPriceCache: Map<string, PriceCache>;
+  private readonly tokenPriceCache: Map<string, ITokenMarketChartProviderResponse>;
 
   public constructor(
     private readonly tokenService: TokenService,
@@ -96,14 +92,11 @@ export class DepositPointService extends Worker {
     private readonly blockAddressPointRepository: BlockAddressPointRepository,
     private readonly transferRepository: TransferRepository,
     private readonly referrerRepository: ReferrerRepository,
-    private readonly tokenOffChainDataProvider: TokenOffChainDataProvider,
-    private readonly configService: ConfigService
+    private readonly tokenOffChainDataProvider: TokenOffChainDataProvider
   ) {
     super();
     this.logger = new Logger(DepositPointService.name);
-    this.pointsEarlyDepositEndTime = new Date(this.configService.get<string>("points.pointsEarlyDepositEndTime"));
-    this.pointsPhase1EndTime = new Date(this.configService.get<string>("points.pointsPhase1EndTime"));
-    this.tokenPriceCache = new Map<string, PriceCache>();
+    this.tokenPriceCache = new Map<string, ITokenMarketChartProviderResponse>();
   }
 
   protected async runProcess(): Promise<void> {
@@ -142,13 +135,11 @@ export class DepositPointService extends Worker {
     // handle transfer where type is deposit
     const transfers = await this.transferRepository.getBlockDeposits(currentRunBlock.number);
     this.logger.log(`Block ${currentRunBlock.number} deposit num: ${transfers.length}`);
-    if (transfers.length === 0) {
-      return;
-    }
     for (const transfer of transfers) {
       await this.recordDepositPoint(transfer, tokenPriceMap);
     }
     await this.pointsRepository.setStatisticalBlockNumber(currentRunBlockNumber);
+    this.logger.log(`Deposit point statistic finish`);
   }
 
   async updateTokenPrice(block: Block): Promise<Map<string, BigNumber>> {
@@ -163,7 +154,6 @@ export class DepositPointService extends Worker {
     const tokenPrices: Map<string, BigNumber> = new Map();
     for (const priceId of allPriceIds) {
       const price = await this.storeTokenPriceAtBlockNumber(block, priceId);
-      this.logger.log(`Token ${priceId} price: ${price}`);
       tokenPrices.set(priceId, price);
     }
     return tokenPrices;
@@ -182,16 +172,31 @@ export class DepositPointService extends Worker {
 
   async getTokenPriceFromCacheOrDataProvider(priceId: string, blockTs: Date): Promise<BigNumber> {
     const cache = this.tokenPriceCache.get(priceId);
-    const now = new Date();
-    if (!cache || cache.ts.getTime() + PRICE_EXPIRATION_TIME <= now.getTime()) {
-      const usdPrice = new BigNumber(
-        await this.tokenOffChainDataProvider.getTokenPriceByBlock(priceId, blockTs.getTime())
-      );
-      this.tokenPriceCache.set(priceId, { ts: blockTs, price: usdPrice });
-      return usdPrice;
-    } else {
-      return cache.price;
+    if (!!cache) {
+      const tsInHour = new Date(blockTs).setMinutes(0, 0, 0);
+      const nextTsInHour = tsInHour + 3600000;
+      const prices = cache.prices.filter((price) => price[0] >= tsInHour && price[0] < nextTsInHour);
+      if (prices.length > 0) {
+        return new BigNumber(prices[0][1]);
+      }
+      const lastChart = cache.prices[cache.prices.length - 1];
+      if (lastChart[0] + PRICE_EXPIRATION_TIME > blockTs.getTime()) {
+        return new BigNumber(lastChart[1]);
+      }
     }
+    const marketChart = await this.tokenOffChainDataProvider.getTokensMarketChart(priceId, blockTs);
+    if (marketChart.prices.length === 0) {
+      throw new Error(`No prices return from coingeco for token: ${priceId}`);
+    }
+    const lastChart = marketChart.prices[marketChart.prices.length - 1];
+    this.logger.log(
+      `Current price of token '${priceId}': [timestamp: ${new Date(lastChart[0])}, price: ${lastChart[1]}]`
+    );
+    if (lastChart[0] + PRICE_EXPIRATION_TIME <= blockTs.getTime()) {
+      throw new Error(`Too old price, block ts: ${blockTs}`);
+    }
+    this.tokenPriceCache.set(priceId, marketChart);
+    return new BigNumber(lastChart[1]);
   }
 
   async recordDepositPoint(transfer: Transfer, tokenPrices: Map<string, BigNumber>) {
@@ -201,7 +206,7 @@ export class DepositPointService extends Worker {
     const tokenAmount: BigNumber = new BigNumber(transfer.amount);
     const transferId: number = transfer.number;
     this.logger.log(
-      `Handle deposit: [receiver = ${depositReceiver}, tokenAddress = ${tokenAddress}, tokenAmount = ${tokenAmount}, transferId = ${transferId}]`
+      `New deposit: [receiver = ${depositReceiver}, tokenAddress = ${tokenAddress}, tokenAmount = ${tokenAmount}, transferId = ${transferId}]`
     );
     const lastParsedTransferId = await this.blockAddressPointRepository.getLastParsedTransferId();
     if (transfer.number <= lastParsedTransferId) {

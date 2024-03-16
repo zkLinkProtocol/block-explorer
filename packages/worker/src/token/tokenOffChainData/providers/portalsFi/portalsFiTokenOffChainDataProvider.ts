@@ -7,6 +7,7 @@ import {
   TokenOffChainDataProvider,
   ITokenOffChainData,
   ITokenCurrentPrice,
+  ITokenMarketChartProviderResponse,
 } from "../../tokenOffChainDataProvider.abstract";
 import { Token } from "../../../token.service";
 
@@ -53,6 +54,11 @@ export class PortalsFiTokenOffChainDataProvider implements TokenOffChainDataProv
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async getTokensCurrentPrice(tokens: string[]): Promise<ITokenCurrentPrice[]> {
     return [];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async getTokensMarketChart(tokenId: string, getDate: Date): Promise<ITokenMarketChartProviderResponse> {
+    return null;
   }
 
   private async getTokensOffChainDataPageRetryable({

@@ -14,8 +14,15 @@ export interface ITokenCurrentPrice {
   usdPrice?: number;
 }
 
+export interface ITokenMarketChartProviderResponse {
+  prices: number[][];
+  market_caps: number[][];
+  total_volumes: number[][];
+}
+
 export abstract class TokenOffChainDataProvider {
   abstract getTokensOffChainData: (supportTokens: Token[]) => Promise<ITokenOffChainData[]>;
   abstract getTokenPriceByBlock: (tokenId: string, blockTs: number) => Promise<number>;
   abstract getTokensCurrentPrice: (tokens: string[]) => Promise<ITokenCurrentPrice[]>;
+  abstract getTokensMarketChart: (tokenId: string, getDate: Date) => Promise<ITokenMarketChartProviderResponse>;
 }

@@ -61,6 +61,9 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     const disableCountersProcessing = this.configService.get<boolean>("counters.disableCountersProcessing");
     const disableOldBalancesCleaner = this.configService.get<boolean>("balances.disableOldBalancesCleaner");
     const enableTokenOffChainDataSaver = this.configService.get<boolean>("tokens.enableTokenOffChainDataSaver");
+    const disableDepositPointService = this.configService.get<boolean>("points.disableDepositPointService");
+    const disableHoldPointService = this.configService.get<boolean>("points.disableHoldPointService");
+    const disableTvlStatisticService = this.configService.get<boolean>("points.disableTvlStatisticService");
     const tasks = [this.blockService.start()];
     if (!disableBatchesProcessing) {
       tasks.push(this.batchService.start());
@@ -74,9 +77,15 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     if (enableTokenOffChainDataSaver) {
       tasks.push(this.tokenOffChainDataSaverService.start());
     }
-    tasks.push(this.depositPointService.start());
-    tasks.push(this.holdPointService.start());
-    tasks.push(this.tvlStatisticalService.start());
+    if (!disableDepositPointService) {
+      tasks.push(this.depositPointService.start());
+    }
+    if (!disableHoldPointService) {
+      tasks.push(this.holdPointService.start());
+    }
+    if (!disableTvlStatisticService) {
+      tasks.push(this.tvlStatisticalService.start());
+    }
     return Promise.all(tasks);
   }
 
