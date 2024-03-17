@@ -41,13 +41,13 @@ export class BlockRepository {
     return lastExecutedBlock?.number || 0;
   }
 
-  public async getNextHoldPointStatisticalBlock(lastStatisticalTs: Date, nextStatisticalTs: Date): Promise<Block> {
+  public async getNextHoldPointStatisticalBlock(nextStatisticalTs: Date): Promise<Block> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     return await transactionManager
       .createQueryBuilder(Block, "block")
       .select(["block.number", "block.timestamp"])
-      .where(`block.timestamp > $1 AND block.timestamp <= $2`, [lastStatisticalTs, nextStatisticalTs])
-      .orderBy("block.number", "DESC")
+      .where("block.timestamp > :nextStatisticalTs", { nextStatisticalTs })
+      .orderBy("block.number", "ASC")
       .limit(1)
       .getOne();
   }

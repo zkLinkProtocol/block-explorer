@@ -44,39 +44,6 @@ export function getETHPrice(tokenPrices: Map<string, BigNumber>): BigNumber {
   return ethPrice;
 }
 
-export function getEarlyBirdMultiplier(blockTs: Date): BigNumber {
-  // 1st week: 2,second week:1.5,third,forth week:1.2,
-  const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
-  const startDate = this.pointsPhase1StartTime;
-  const diffInMilliseconds = blockTs.getTime() - startDate.getTime();
-  const diffInWeeks = Math.floor(diffInMilliseconds / millisecondsPerWeek);
-  if (diffInWeeks < 1) {
-    return new BigNumber(2);
-  } else if (diffInWeeks < 2) {
-    return new BigNumber(1.5);
-  } else if (diffInWeeks < 4) {
-    return new BigNumber(1.2);
-  } else {
-    return new BigNumber(1);
-  }
-}
-
-export function getGroupBooster(groupTvl: BigNumber): BigNumber {
-  if (groupTvl.gte(20)) {
-    return new BigNumber(0.1);
-  } else if (groupTvl.gte(100)) {
-    return new BigNumber(0.2);
-  } else if (groupTvl.gte(500)) {
-    return new BigNumber(0.3);
-  } else if (groupTvl.gte(1000)) {
-    return new BigNumber(0.4);
-  } else if (groupTvl.gte(5000)) {
-    return new BigNumber(0.5);
-  } else {
-    return new BigNumber(0);
-  }
-}
-
 const PRICE_EXPIRATION_TIME = 300000; // 5 minutes
 
 @Injectable()
@@ -104,7 +71,7 @@ export class DepositPointService extends Worker {
       await this.handleDeposit();
     } catch (err) {
       this.logger.error({
-        message: "Failed to calculate point",
+        message: "Failed to calculate deposit point",
         originalError: err,
       });
     }

@@ -15,14 +15,7 @@ import BigNumber from "bignumber.js";
 import { BlockAddressPoint, Point } from "../entities";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
-import {
-  getEarlyBirdMultiplier,
-  getETHPrice,
-  getGroupBooster,
-  getTokenPrice,
-  REFERRER_BONUS,
-  STABLE_COIN_TYPE,
-} from "./depositPoint.service";
+import { getETHPrice, getTokenPrice, REFERRER_BONUS, STABLE_COIN_TYPE } from "./depositPoint.service";
 
 type BlockAddressTvl = {
   tvl: BigNumber;
@@ -33,6 +26,7 @@ type BlockAddressTvl = {
 export class HoldPointService extends Worker {
   private readonly logger: Logger;
   private readonly pointsStatisticalPeriodSecs: number;
+  private readonly pointsPhase1StartTime: Date;
 
   public constructor(
     private readonly tokenService: TokenService,
@@ -48,6 +42,7 @@ export class HoldPointService extends Worker {
     super();
     this.logger = new Logger(HoldPointService.name);
     this.pointsStatisticalPeriodSecs = this.configService.get<number>("points.pointsStatisticalPeriodSecs");
+    this.pointsPhase1StartTime = new Date(this.configService.get<string>("points.pointsPhase1StartTime"));
   }
 
   protected async runProcess(): Promise<void> {
@@ -55,7 +50,7 @@ export class HoldPointService extends Worker {
       await this.handleHoldPoint();
     } catch (err) {
       this.logger.error({
-        message: "Failed to calculate point",
+        message: "Failed to calculate hold point",
         originalError: err,
       });
     }
@@ -80,11 +75,8 @@ export class HoldPointService extends Worker {
     }
     const lastStatisticalTs = lastStatisticalBlock.timestamp;
     const currentStatisticalTs = new Date(lastStatisticalTs.getTime() + this.pointsStatisticalPeriodSecs * 1000);
-    const currentStatisticalBlock = await this.blockRepository.getNextHoldPointStatisticalBlock(
-      lastStatisticalTs,
-      currentStatisticalTs
-    );
-    if (!!currentStatisticalBlock) {
+    const currentStatisticalBlock = await this.blockRepository.getNextHoldPointStatisticalBlock(currentStatisticalTs);
+    if (!currentStatisticalBlock) {
       this.logger.log(`Wait for the next hold point statistical block`);
       return;
     }
@@ -94,11 +86,14 @@ export class HoldPointService extends Worker {
       return;
     }
 
-    this.logger.log(`Statistic hold point at block: ${currentStatisticalBlock.number}`);
+    const elapsedTime = currentStatisticalBlock.timestamp.getTime() - lastStatisticalTs.getTime();
+    this.logger.log(
+      `Statistic hold point at block: ${currentStatisticalBlock.number}, elapsed time: ${elapsedTime / 1000} seconds`
+    );
     const tokenPriceMap = await this.getTokenPriceMap(currentStatisticalBlock.number);
     const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, tokenPriceMap);
     const groupTvlMap = await this.getGroupTvlMap(addressTvlMap);
-    for (const address in addressTvlMap) {
+    for (const address of addressTvlMap.keys()) {
       const fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(
         currentStatisticalBlock.number,
         address
@@ -108,13 +103,13 @@ export class HoldPointService extends Worker {
         continue;
       }
       const addressTvl = addressTvlMap.get(address);
-      const earlyBirdMultiplier = new BigNumber(getEarlyBirdMultiplier(currentStatisticalBlock.timestamp));
+      const earlyBirdMultiplier = this.getEarlyBirdMultiplier(currentStatisticalBlock.timestamp);
       let groupBooster = new BigNumber(1);
       const invite = await this.inviteRepository.getInvite(address);
       if (!!invite) {
         const groupTvl = groupTvlMap.get(invite.groupId);
         if (!!groupTvl) {
-          groupBooster = groupBooster.plus(getGroupBooster(groupTvl));
+          groupBooster = groupBooster.plus(this.getGroupBooster(groupTvl));
         }
       }
       // NOVA Point = sum_all tokens in activity list (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price * (1 + Group Booster + Growth Booster) / ETH_Price )
@@ -224,7 +219,7 @@ export class HoldPointService extends Worker {
     if (!fromAddressPoint) {
       fromAddressPoint = this.pointsRepository.createDefaultPoint(from);
     }
-    fromBlockAddressPoint.holdPoint = Number(fromBlockAddressPoint.holdPoint) + holdPoint.toNumber();
+    fromBlockAddressPoint.holdPoint = holdPoint.toNumber();
     fromAddressPoint.stakePoint = Number(fromAddressPoint.stakePoint) + holdPoint.toNumber();
     this.logger.log(`Address ${from} get hold point: ${holdPoint}`);
     // update point of referrer
@@ -255,5 +250,38 @@ export class HoldPointService extends Worker {
       referrerBlockAddressPoint,
       referrerAddressPoint
     );
+  }
+
+  getEarlyBirdMultiplier(blockTs: Date): BigNumber {
+    // 1st week: 2,second week:1.5,third,forth week:1.2,
+    const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const startDate = this.pointsPhase1StartTime;
+    const diffInMilliseconds = blockTs.getTime() - startDate.getTime();
+    const diffInWeeks = Math.floor(diffInMilliseconds / millisecondsPerWeek);
+    if (diffInWeeks < 1) {
+      return new BigNumber(2);
+    } else if (diffInWeeks < 2) {
+      return new BigNumber(1.5);
+    } else if (diffInWeeks < 4) {
+      return new BigNumber(1.2);
+    } else {
+      return new BigNumber(1);
+    }
+  }
+
+  getGroupBooster(groupTvl: BigNumber): BigNumber {
+    if (groupTvl.gte(20)) {
+      return new BigNumber(0.1);
+    } else if (groupTvl.gte(100)) {
+      return new BigNumber(0.2);
+    } else if (groupTvl.gte(500)) {
+      return new BigNumber(0.3);
+    } else if (groupTvl.gte(1000)) {
+      return new BigNumber(0.4);
+    } else if (groupTvl.gte(5000)) {
+      return new BigNumber(0.5);
+    } else {
+      return new BigNumber(0);
+    }
   }
 }
