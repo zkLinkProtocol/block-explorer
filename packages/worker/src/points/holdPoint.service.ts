@@ -92,7 +92,7 @@ export class HoldPointService extends Worker {
     );
     const tokenPriceMap = await this.getTokenPriceMap(currentStatisticalBlock.number);
     const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, tokenPriceMap);
-    const groupTvlMap = await this.getGroupTvlMap(addressTvlMap);
+    const groupTvlMap = await this.getGroupTvlMap(currentStatisticalBlock.number, addressTvlMap);
     for (const address of addressTvlMap.keys()) {
       const fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(
         currentStatisticalBlock.number,
@@ -168,13 +168,16 @@ export class HoldPointService extends Worker {
     };
   }
 
-  async getGroupTvlMap(addressTvlMap: Map<string, BlockAddressTvl>): Promise<Map<string, BigNumber>> {
+  async getGroupTvlMap(
+    blockNumber: number,
+    addressTvlMap: Map<string, BlockAddressTvl>
+  ): Promise<Map<string, BigNumber>> {
     const groupTvlMap = new Map<string, BigNumber>();
     const allGroupIds = await this.inviteRepository.getAllGroups();
     this.logger.log(`All group length: ${allGroupIds.length}`);
     for (const groupId of allGroupIds) {
       let groupTvl = new BigNumber(0);
-      const members = await this.inviteRepository.getGroupMembers(groupId);
+      const members = await this.inviteRepository.getGroupMembersByBlock(groupId, blockNumber);
       for (const member of members) {
         const memberTvl = addressTvlMap.get(member);
         if (!!memberTvl) {

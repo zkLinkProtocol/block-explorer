@@ -28,4 +28,13 @@ export class InviteRepository extends BaseRepository<Invite> {
     const members = await transactionManager.query(`SELECT address FROM invites WHERE "groupId" = $1`, [groupId]);
     return members.map((row: any) => hexTransformer.from(row.address));
   }
+
+  public async getGroupMembersByBlock(groupId: string, blockNumber: number): Promise<string[]> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const members = await transactionManager.query(
+      `SELECT address FROM invites WHERE "groupId" = $1 AND active = true AND "blockNumber" <= $2`,
+      [groupId, blockNumber]
+    );
+    return members.map((row: any) => hexTransformer.from(row.address));
+  }
 }
