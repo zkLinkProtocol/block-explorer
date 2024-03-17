@@ -152,6 +152,7 @@ export class TVLService {
     const referMap = new Map(refererals.map((refer) => [refer.address, refer.referrer]));
 
     let result: AccountRankDto[] = [];
+    let firstRank = (page.page - 1) * page.limit + 1;
     for (let i = 0; i < ranks.length; i++) {
       const rank = ranks[i];
       const address = normalizeAddressTransformer.from(rank.address);
@@ -159,7 +160,7 @@ export class TVLService {
       result.push({
         novaPoint: rank.stakePoint,
         referPoint: rank.refPoint,
-        rank: i + 1,
+        rank: firstRank + i,
         inviteBy: referer,
         address,
       });
