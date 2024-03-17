@@ -40,5 +40,13 @@
     "platforms": {
       "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
     }
+  },
+  {
+    "id": "renzo-restaked-eth",
+    "symbol": "ezeth",
+    "name": "ezETH",
+    "platforms": {
+      "arbitrum": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+    }
   }
 ]
