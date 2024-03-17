@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { IsNull, Not, FindOptionsSelect } from "typeorm";
-import { Token } from "../entities";
-import { BaseRepository } from "./base.repository";
-import { UnitOfWork } from "../unitOfWork";
+import { Injectable } from '@nestjs/common';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { FindOptionsSelect, IsNull, Not } from 'typeorm';
+import { Token } from '../entities';
+import { BaseRepository } from './base.repository';
+import { UnitOfWork } from '../unitOfWork';
 
 @Injectable()
 export class TokenRepository extends BaseRepository<Token> {
@@ -53,19 +53,17 @@ export class TokenRepository extends BaseRepository<Token> {
 
   public async getAllTokens(): Promise<Token[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const tokens = await transactionManager.find(this.entityTarget, {});
-    return tokens;
+    return await transactionManager.find(this.entityTarget, {});
   }
 
   public async getBridgedTokens(fields: FindOptionsSelect<Token> = { l1Address: true }): Promise<Token[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const tokens = await transactionManager.find(this.entityTarget, {
+    return await transactionManager.find(this.entityTarget, {
       where: {
         l1Address: Not(IsNull()),
       },
       select: fields,
     });
-    return tokens;
   }
 
   public async updateTokenOffChainData({
@@ -85,7 +83,6 @@ export class TokenRepository extends BaseRepository<Token> {
     iconURL?: string;
     priceId?: string;
   }): Promise<void> {
-    console.log(`updateTokenOffChainData ${l1Address} ${l2Address} ${usdPrice} ${priceId}`);
     if (!l1Address && !l2Address) {
       throw new Error("l1Address or l2Address must be provided");
     }

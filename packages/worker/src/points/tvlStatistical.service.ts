@@ -97,7 +97,7 @@ export class TvlStatisticalService extends Worker {
     for (const addressBuffer of addressBufferList) {
       const address = hexTransformer.from(addressBuffer);
       const addressTvl = await this.calculateAddressTvl(address, tokenPrices);
-      if (addressTvl.gte(new BigNumber(0))) {
+      if (addressTvl.gt(new BigNumber(0))) {
         this.logger.log(`Address ${address} tvl: ${addressTvl}`);
       }
       addressTvlMap.set(address, addressTvl);
@@ -168,7 +168,7 @@ export class TvlStatisticalService extends Worker {
             refTvl = refTvl.plus(tvl);
           }
         });
-        if (refTvl.gte(new BigNumber(0))) {
+        if (refTvl.gt(new BigNumber(0))) {
           this.logger.log(`Address ${address} ref tvl: ${refTvl}`);
           let addressTvl = await this.addressTvlRepository.getAddressTvl(address);
           if (!addressTvl) {

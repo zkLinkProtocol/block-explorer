@@ -129,7 +129,7 @@ export class HoldPointService extends Worker {
     for (const addressBuffer of addressBufferList) {
       const address = hexTransformer.from(addressBuffer);
       const addressTvl = await this.calculateAddressTvl(address, blockNumber, tokenPriceMap);
-      if (addressTvl.tvl.gte(new BigNumber(0))) {
+      if (addressTvl.tvl.gt(new BigNumber(0))) {
         this.logger.log(`Address ${address}: [tvl: ${addressTvl.tvl}, holdBasePoint: ${addressTvl.holdBasePoint}]`);
       }
       addressTvlMap.set(address, addressTvl);
@@ -181,7 +181,7 @@ export class HoldPointService extends Worker {
           groupTvl = groupTvl.plus(memberTvl.tvl);
         }
       }
-      if (groupTvl.gte(new BigNumber(0))) {
+      if (groupTvl.gt(new BigNumber(0))) {
         this.logger.log(`Group ${groupId} tvl: ${groupTvl}`);
       }
       groupTvlMap.set(groupId, new BigNumber(groupTvl));
