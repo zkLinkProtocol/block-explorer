@@ -48,11 +48,8 @@ export class HoldPointService extends Worker {
   protected async runProcess(): Promise<void> {
     try {
       await this.handleHoldPoint();
-    } catch (err) {
-      this.logger.error({
-        message: "Failed to calculate hold point",
-        originalError: err,
-      });
+    } catch (error) {
+      this.logger.error("Failed to calculate hold point", error.stack);
     }
 
     await waitFor(() => !this.currentProcessPromise, 60000, 60000);

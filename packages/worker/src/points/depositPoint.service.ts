@@ -69,11 +69,8 @@ export class DepositPointService extends Worker {
   protected async runProcess(): Promise<void> {
     try {
       await this.handleDeposit();
-    } catch (err) {
-      this.logger.error({
-        message: "Failed to calculate deposit point",
-        originalError: err,
-      });
+    } catch (error) {
+      this.logger.error("Failed to calculate deposit point", error.stack);
     }
 
     await waitFor(() => !this.currentProcessPromise, 1000, 1000);
@@ -168,7 +165,7 @@ export class DepositPointService extends Worker {
     this.logger.log(
       `Current price of token '${priceId}': [timestamp: ${new Date(lastChart[0])}, price: ${lastChart[1]}]`
     );
-    if (lastChart[0] + PRICE_EXPIRATION_TIME <= blockTs.getTime()) {
+    if (lastChart[0] + 3600000 <= blockTs.getTime()) {
       throw new Error(`Too old price, block ts: ${blockTs}`);
     }
     this.tokenPriceCache.set(priceId, marketChart);

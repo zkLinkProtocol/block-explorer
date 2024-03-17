@@ -40,11 +40,8 @@ export class TvlStatisticalService extends Worker {
   protected async runProcess(): Promise<void> {
     try {
       await this.handleTvlStatistical();
-    } catch (err) {
-      this.logger.error({
-        message: "Failed to calculate tvl",
-        originalError: err,
-      });
+    } catch (error) {
+      this.logger.error("Failed to calculate tvl", error.stack);
     }
 
     await waitFor(() => !this.currentProcessPromise, 60000, 60000);
