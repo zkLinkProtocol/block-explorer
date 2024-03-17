@@ -2,8 +2,6 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Worker } from "../common/worker";
 import waitFor from "../utils/waitFor";
 import {
-  PointsRepository,
-  BlockTokenPriceRepository,
   BalanceRepository,
   AddressTvlRepository,
   InviteRepository,
@@ -25,8 +23,6 @@ export class TvlStatisticalService extends Worker {
 
   public constructor(
     private readonly tokenService: TokenService,
-    private readonly pointsRepository: PointsRepository,
-    private readonly blockTokenPriceRepository: BlockTokenPriceRepository,
     private readonly balanceRepository: BalanceRepository,
     private readonly addressTvlRepository: AddressTvlRepository,
     private readonly inviteRepository: InviteRepository,
