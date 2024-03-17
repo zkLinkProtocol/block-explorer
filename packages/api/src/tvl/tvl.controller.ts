@@ -107,8 +107,8 @@ export class TVLController {
 
   @ApiOperation({ summary: "Get accounts rank" })
   @Get("/getAccountsRank")
-  public async getAccountsRank(): Promise<AccountsRankResponseDto> {
-    const result = await this.tvlService.getAccountsRank();
+  public async getAccountsRank(@Query() pagingOptions: PagingOptionsDto): Promise<AccountsRankResponseDto> {
+    const result = await this.tvlService.getAccountsRank(pagingOptions);
     return {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,
