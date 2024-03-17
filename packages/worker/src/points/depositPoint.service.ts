@@ -85,20 +85,28 @@ export class DepositPointService extends Worker {
   }
 
   async handleDeposit() {
+    const latestBlockNumber = await this.blockRepository.getLastBlockNumber();
+    this.logger.log(`Last block number: ${latestBlockNumber}`);
+    let lastStatisticalBlockNumber: number;
+    do {
+      lastStatisticalBlockNumber = await this.syncToTheLatestBlock(latestBlockNumber);
+    } while (lastStatisticalBlockNumber < latestBlockNumber);
+  }
+
+  async syncToTheLatestBlock(latestBlockNumber: number) {
     const lastRunBlockNumber = await this.pointsRepository.getLastStatisticalBlockNumber();
     this.logger.log(`Last deposit point statistical block number: ${lastRunBlockNumber}`);
+    if (lastRunBlockNumber >= latestBlockNumber) {
+      return lastRunBlockNumber;
+    }
     const currentRunBlock = await this.blockRepository.getLastBlock({
       where: { number: lastRunBlockNumber + 1 },
       select: { number: true, timestamp: true },
     });
-    if (!currentRunBlock) {
-      return;
-    }
     const currentRunBlockNumber = currentRunBlock.number;
     this.logger.log(`Handle deposit point at block: ${currentRunBlockNumber}`);
     // update token price at the block
     const tokenPriceMap = await this.updateTokenPrice(currentRunBlock);
-
     // handle transfer where type is deposit
     const transfers = await this.transferRepository.getBlockDeposits(currentRunBlock.number);
     this.logger.log(`Block ${currentRunBlock.number} deposit num: ${transfers.length}`);
@@ -106,7 +114,8 @@ export class DepositPointService extends Worker {
       await this.recordDepositPoint(transfer, tokenPriceMap);
     }
     await this.pointsRepository.setStatisticalBlockNumber(currentRunBlockNumber);
-    this.logger.log(`Deposit point statistic finish`);
+    this.logger.log(`Finish deposit point statistic for block: ${currentRunBlockNumber}`);
+    return currentRunBlockNumber;
   }
 
   async updateTokenPrice(block: Block): Promise<Map<string, BigNumber>> {

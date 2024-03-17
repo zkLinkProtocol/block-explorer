@@ -28,6 +28,17 @@ export class BlockRepository {
     });
   }
 
+  public async getLastBlockNumber(): Promise<number> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const lastBlock = await transactionManager
+      .createQueryBuilder(Block, "block")
+      .select("block.number")
+      .orderBy("block.number", "DESC")
+      .limit(1)
+      .getOne();
+    return lastBlock?.number || 0;
+  }
+
   public async getLastExecutedBlockNumber(): Promise<number> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const lastExecutedBlock = await transactionManager
