@@ -38,7 +38,7 @@
     "symbol": "wsteth",
     "name": "wstETH",
     "platforms": {
-      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
+      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F"
     }
   },
   {
@@ -46,7 +46,7 @@
     "symbol": "ezeth",
     "name": "ezETH",
     "platforms": {
-      "arbitrum": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+      "arbitrum": "0x2416092f143378750bb29b79eD961ab195CcEea5"
     }
   }
 ]
