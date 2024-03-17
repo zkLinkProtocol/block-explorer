@@ -15,6 +15,7 @@ import BigNumber from "bignumber.js";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
 import { getETHPrice, getTokenPrice, STABLE_COIN_TYPE } from "./depositPoint.service";
+import { TokenOffChainDataProvider } from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
 
 @Injectable()
 export class TvlStatisticalService extends Worker {
@@ -31,6 +32,7 @@ export class TvlStatisticalService extends Worker {
     private readonly inviteRepository: InviteRepository,
     private readonly groupTvlRepository: GroupTvlRepository,
     private readonly referrerRepository: ReferrerRepository,
+    private readonly tokenOffChainDataProvider: TokenOffChainDataProvider,
     private readonly configService: ConfigService
   ) {
     super();
@@ -49,7 +51,7 @@ export class TvlStatisticalService extends Worker {
       });
     }
 
-    await waitFor(() => !this.currentProcessPromise, 1000, 1000);
+    await waitFor(() => !this.currentProcessPromise, 60000, 60000);
     if (!this.currentProcessPromise) {
       return;
     }
@@ -67,15 +69,14 @@ export class TvlStatisticalService extends Worker {
       return;
     }
     this.logger.log(`Handle tvl statistical at: ${now}`);
-    const lastDepositStatisticalBlockNumber = await this.pointsRepository.getLastStatisticalBlockNumber();
-    const tokenPriceMap = await this.getTokenPriceMap(lastDepositStatisticalBlockNumber);
-    const addressTvlMap = await this.updateAddressTvl(lastDepositStatisticalBlockNumber, tokenPriceMap);
+    const tokenPriceMap = await this.getTokenPriceMap();
+    const addressTvlMap = await this.updateAddressTvl(tokenPriceMap);
     await this.updateReferralTvl(addressTvlMap);
     await this.updateGroupTvl(addressTvlMap);
     this.lastTvlStatisticalTime = now;
   }
 
-  async getTokenPriceMap(blockNumber: number): Promise<Map<string, BigNumber>> {
+  async getTokenPriceMap(): Promise<Map<string, BigNumber>> {
     const allSupportTokens = this.tokenService.getAllSupportTokens();
     const allPriceIds: Set<string> = new Set();
     // do not need to get the price of stable coin(they are default 1 usd)
@@ -85,23 +86,21 @@ export class TvlStatisticalService extends Worker {
       }
     });
     const tokenPrices: Map<string, BigNumber> = new Map();
-    for (const priceId of allPriceIds) {
-      const blockTokenPrice = await this.blockTokenPriceRepository.getBlockTokenPrice(blockNumber, priceId);
-      if (!blockTokenPrice) {
-        throw new Error(`Token ${priceId} price not found`);
-      }
-      tokenPrices.set(priceId, new BigNumber(blockTokenPrice.usdPrice));
+    const prices = await this.tokenOffChainDataProvider.getTokensCurrentPrice(Array.from(allPriceIds));
+    for (const price of prices) {
+      this.logger.log(`Token ${price.priceId} current price: ${price.usdPrice}`);
+      tokenPrices.set(price.priceId, new BigNumber(price.usdPrice));
     }
     return tokenPrices;
   }
 
-  async updateAddressTvl(blockNumber: number, tokenPrices: Map<string, BigNumber>): Promise<Map<string, BigNumber>> {
+  async updateAddressTvl(tokenPrices: Map<string, BigNumber>): Promise<Map<string, BigNumber>> {
     const addressTvlMap: Map<string, BigNumber> = new Map();
-    const addressBufferList = await this.balanceRepository.getAllAddressesByBlock(blockNumber);
+    const addressBufferList = await this.balanceRepository.getAllAddresses();
     this.logger.log(`The address list length: ${addressBufferList.length}`);
     for (const addressBuffer of addressBufferList) {
       const address = hexTransformer.from(addressBuffer);
-      const addressTvl = await this.calculateAddressTvl(address, blockNumber, tokenPrices);
+      const addressTvl = await this.calculateAddressTvl(address, tokenPrices);
       if (addressTvl.gte(new BigNumber(0))) {
         this.logger.log(`Address ${address} tvl: ${addressTvl}`);
       }
@@ -110,13 +109,9 @@ export class TvlStatisticalService extends Worker {
     return addressTvlMap;
   }
 
-  async calculateAddressTvl(
-    address: string,
-    blockNumber: number,
-    tokenPrices: Map<string, BigNumber>
-  ): Promise<BigNumber> {
+  async calculateAddressTvl(address: string, tokenPrices: Map<string, BigNumber>): Promise<BigNumber> {
     const addressBuffer: Buffer = hexTransformer.to(address);
-    const addressBalances = await this.balanceRepository.getAccountBalancesByBlock(addressBuffer, blockNumber);
+    const addressBalances = await this.balanceRepository.getAccountBalances(addressBuffer);
     let tvl: BigNumber = new BigNumber(0);
     for (const addressBalance of addressBalances) {
       // filter not support token
@@ -160,8 +155,8 @@ export class TvlStatisticalService extends Worker {
       groupTvl.tvl = tvl.toNumber();
       if (groupTvl.tvl > 0) {
         this.logger.log(`Group ${groupTvl.groupId} tvl: ${groupTvl.tvl}`);
+        await this.groupTvlRepository.upsert(groupTvl, true, ["groupId"]);
       }
-      await this.groupTvlRepository.upsert(groupTvl, true, ["groupId"]);
     }
   }
 
@@ -179,13 +174,13 @@ export class TvlStatisticalService extends Worker {
         });
         if (refTvl.gte(new BigNumber(0))) {
           this.logger.log(`Address ${address} ref tvl: ${refTvl}`);
+          let addressTvl = await this.addressTvlRepository.getAddressTvl(address);
+          if (!addressTvl) {
+            addressTvl = this.addressTvlRepository.createDefaultAddressTvl(address);
+          }
+          addressTvl.referralTvl = refTvl.toNumber();
+          await this.addressTvlRepository.upsert(addressTvl, true, ["address"]);
         }
-        let addressTvl = await this.addressTvlRepository.getAddressTvl(address);
-        if (!addressTvl) {
-          addressTvl = this.addressTvlRepository.createDefaultAddressTvl(address);
-        }
-        addressTvl.referralTvl = refTvl.toNumber();
-        await this.addressTvlRepository.upsert(addressTvl, true, ["address"]);
       }
     }
   }
