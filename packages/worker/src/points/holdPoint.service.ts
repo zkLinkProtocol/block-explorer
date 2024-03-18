@@ -83,10 +83,13 @@ export class HoldPointService extends Worker {
       return;
     }
 
-    const elapsedTime = currentStatisticalBlock.timestamp.getTime() - lastStatisticalTs.getTime();
+    const sinceLastTime = currentStatisticalBlock.timestamp.getTime() - lastStatisticalTs.getTime();
     this.logger.log(
-      `Statistic hold point at block: ${currentStatisticalBlock.number}, elapsed time: ${elapsedTime / 1000} seconds`
+      `Statistic hold point at block: ${currentStatisticalBlock.number}, since last: ${sinceLastTime / 1000} seconds`
     );
+    const statisticStartTime = new Date();
+    const earlyBirdMultiplier = this.getEarlyBirdMultiplier(currentStatisticalBlock.timestamp);
+    this.logger.log(`Early bird multiplier: ${earlyBirdMultiplier}`);
     const tokenPriceMap = await this.getTokenPriceMap(currentStatisticalBlock.number);
     const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, tokenPriceMap);
     const groupTvlMap = await this.getGroupTvlMap(currentStatisticalBlock.number, addressTvlMap);
@@ -100,7 +103,6 @@ export class HoldPointService extends Worker {
         continue;
       }
       const addressTvl = addressTvlMap.get(address);
-      const earlyBirdMultiplier = this.getEarlyBirdMultiplier(currentStatisticalBlock.timestamp);
       let groupBooster = new BigNumber(1);
       const invite = await this.inviteRepository.getInvite(address);
       if (!!invite) {
@@ -114,6 +116,14 @@ export class HoldPointService extends Worker {
       await this.updateHoldPoint(currentStatisticalBlock.number, address, newHoldPoint);
     }
     await this.pointsRepository.setHoldPointStatisticalBlockNumber(currentStatisticalBlock.number);
+
+    const statisticEndTime = new Date();
+    const statisticElapsedTime = statisticEndTime.getTime() - statisticStartTime.getTime();
+    this.logger.log(
+      `Finish hold point statistic for block: ${currentStatisticalBlock.number}, elapsed time: ${
+        statisticElapsedTime / 1000
+      } seconds`
+    );
   }
 
   async getAddressTvlMap(
