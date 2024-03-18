@@ -1,5 +1,5 @@
-// Version 20240312-1300
-// Add Ethereum wstETH
+// Version 20240317-1448
+// Add Arbitrum rsETH, please note that cg does not have Arbitrum rsETH price
 
 export default [
   {
@@ -389,6 +389,11 @@ export default [
         l1Address: "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7",
         l2Address: "0x186c0c42C617f1Ce65C4f7DF31842eD7C5fD8260",
       },
+      {
+        chain: "Arbitrum",
+        l1Address: "0x4186BFC76E2E237523CBC30FD220FE055156b41F",
+        l2Address: "0x4A2da287deB06163fB4D77c52901683d69bD06f4",
+      }
     ],
     symbol: "rsETH",
     decimals: 18,
