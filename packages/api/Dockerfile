@@ -1,4 +1,4 @@
-FROM node:18.17.1-alpine AS base-stage
+FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:18.17.1-alpine AS base-stage
 ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
