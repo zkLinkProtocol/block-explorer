@@ -280,16 +280,16 @@ export class HoldPointService extends Worker {
   }
 
   getGroupBooster(groupTvl: BigNumber): BigNumber {
-    if (groupTvl.gte(20)) {
-      return new BigNumber(0.1);
-    } else if (groupTvl.gte(100)) {
-      return new BigNumber(0.2);
-    } else if (groupTvl.gte(500)) {
-      return new BigNumber(0.3);
+    if (groupTvl.gte(5000)) {
+      return new BigNumber(0.5);
     } else if (groupTvl.gte(1000)) {
       return new BigNumber(0.4);
-    } else if (groupTvl.gte(5000)) {
-      return new BigNumber(0.5);
+    } else if (groupTvl.gte(500)) {
+      return new BigNumber(0.3);
+    } else if (groupTvl.gte(100)) {
+      return new BigNumber(0.2);
+    } else if (groupTvl.gte(20)) {
+      return new BigNumber(0.1);
     } else {
       return new BigNumber(0);
     }

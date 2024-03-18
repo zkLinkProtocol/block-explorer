@@ -174,7 +174,7 @@ export class DepositPointService extends Worker {
 
   async recordDepositPoint(transfer: Transfer, tokenPrices: Map<string, BigNumber>) {
     const blockNumber: number = transfer.blockNumber;
-    const depositReceiver: string = hexTransformer.from(transfer.to);
+    const depositReceiver: string = hexTransformer.from(transfer.from);
     const tokenAddress: string = hexTransformer.from(transfer.tokenAddress);
     const tokenAmount: BigNumber = new BigNumber(transfer.amount);
     const transferId: number = transfer.number;
