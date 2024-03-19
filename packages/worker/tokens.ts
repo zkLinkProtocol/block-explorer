@@ -1,5 +1,5 @@
-// Version 20240317-1448
-// Add Arbitrum rsETH, please note that cg does not have Arbitrum rsETH price
+// Version 20240312-1300
+// Add Ethereum wstETH
 
 export default [
   {
@@ -13,7 +13,7 @@ export default [
     symbol: "ETH",
     decimals: 18,
     cgPriceId: "ethereum",
-    type: "Native",
+    type: "NATIVE",
     yieldType: ["NOVA Points"],
     multiplier: 2,
   },
@@ -52,7 +52,7 @@ export default [
     ],
     symbol: "wBTC",
     decimals: 8,
-    cgPriceId: "bitcoin",
+    cgPriceId: "wrapped-bitcoin",
     type: "Native",
     yieldType: ["NOVA Points"],
     multiplier: 2,
@@ -163,7 +163,7 @@ export default [
     symbol: "USDe",
     decimals: 18,
     cgPriceId: "ethena-usde",
-    type: "Stablecoin",
+    type: "Synthetic",
     yieldType: ["NOVA Points", "Shard"],
     multiplier: 2,
   },
@@ -178,7 +178,7 @@ export default [
     symbol: "sUSDe",
     decimals: 18,
     cgPriceId: "ethena-staked-usde",
-    type: "Stablecoin",
+    type: "Synthetic",
     yieldType: ["NOVA Points", "Shard"],
     multiplier: 2,
   },
@@ -263,7 +263,7 @@ export default [
     symbol: "wUSDm",
     decimals: 18,
     cgPriceId: "wrapped-usdm",
-    type: "Stablecoin",
+    type: "RWA",
     yieldType: ["NOVA Points", "Native Yield"],
     multiplier: 1.5,
   },
@@ -282,7 +282,7 @@ export default [
     ],
     symbol: "Stone",
     decimals: 18,
-    cgPriceId: "ethereum",
+    cgPriceId: "stakestone-ether",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield"],
     multiplier: 1.5,
@@ -297,7 +297,7 @@ export default [
     ],
     symbol: "swETH",
     decimals: 18,
-    cgPriceId: "ethereum",
+    cgPriceId: "sweth",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield", "Pearls"],
     multiplier: 1.5,
@@ -317,7 +317,7 @@ export default [
     ],
     symbol: "mETH",
     decimals: 18,
-    cgPriceId: "ethereum",
+    cgPriceId: "mantle-staked-ether",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield"],
     multiplier: 1.5,
@@ -363,6 +363,66 @@ export default [
     multiplier: 1.5,
   },
   {
+    address:[
+      {
+        chain: "Ethereum",
+        l1Address: "0x14778860E937f509e651192a90589dE711Fb88a9",
+        l2Address: "0x9B370Be9cC8cf5190Ec7a22da9B1aE3B95b37A60",
+      }
+    ],
+    symbol: "CYBER",
+    decimals: 18,
+    cgPriceId: "cyberconnect",
+    type: "Altcoin",
+    yieldType: ["NOVA Points"],
+    multiplier: 1.5
+  },
+  {
+    address:[
+      {
+        chain: "Ethereum",
+        l1Address: "0x5fAa989Af96Af85384b8a938c2EdE4A7378D9875",
+        l2Address: "0x56BCb12b524Add1e89BEcA721CcfB6Cf47E30638",
+      }
+    ],
+    symbol: "GAL",
+    decimals: 18,
+    cgPriceId: "project-galaxy",
+    type: "Altcoin",
+    yieldType: ["NOVA Points"],
+    multiplier: 1.5
+  },
+  {
+    address:[
+      {
+        chain: "Ethereum",
+        l1Address: "0xA91ac63D040dEB1b7A5E4d4134aD23eb0ba07e14",
+        l2Address: "0xeC393a2939C47C58a695C0A7927295458e8054EE",
+      }
+    ],
+    symbol: "BEL",
+    decimals: 18,
+    cgPriceId: "bella-protocol",
+    type: "Altcoin",
+    yieldType: ["NOVA Points"],
+    multiplier: 1.5
+  },
+  {
+    address:[
+      {
+        chain: "Ethereum",
+        l1Address: "0xBA50933C268F567BDC86E1aC131BE072C6B0b71a",
+        l2Address: "0x380dD3344288bD6EFD7c3597b2B6114b722A0e65",
+      }
+    ],
+    symbol: "ARPA",
+    decimals: 18,
+    cgPriceId: "arpa",
+    type: "Altcoin",
+    yieldType: ["NOVA Points"],
+    multiplier: 1.5
+  },
+  {
     address: [
       {
         chain: "Ethereum",
@@ -377,7 +437,7 @@ export default [
     ],
     symbol: "weETH",
     decimals: 18,
-    cgPriceId: "ethereum",
+    cgPriceId: "wrapped-eeth",
     type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Loyalty Points"],
     multiplier: 1,
@@ -389,15 +449,10 @@ export default [
         l1Address: "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7",
         l2Address: "0x186c0c42C617f1Ce65C4f7DF31842eD7C5fD8260",
       },
-      {
-        chain: "Arbitrum",
-        l1Address: "0x4186BFC76E2E237523CBC30FD220FE055156b41F",
-        l2Address: "0x4A2da287deB06163fB4D77c52901683d69bD06f4",
-      }
     ],
     symbol: "rsETH",
     decimals: 18,
-    cgPriceId: "ethereum",
+    cgPriceId: "kelp-dao-restaked-eth",
     type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Kelp Miles"],
     multiplier: 1,
@@ -409,16 +464,11 @@ export default [
         l1Address: "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110",
         l2Address: "0xdA7Fa837112511F6E353091D7e388A4c45Ce7D6C",
       },
-      {
-        chain: "Arbitrum",
-        l1Address: "0x2416092f143378750bb29b79eD961ab195CcEea5",
-        l2Address: "0x3FDB1939daB8e2d4F7a04212F142469Cd52d6402",
-      },
     ],
     symbol: "ezETH",
     decimals: 18,
     type: "LRT",
-    cgPriceId: "ethereum",
+    cgPriceId: "renzo-restaked-eth",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "ezPoints"],
     multiplier: 1,
   },
@@ -432,7 +482,7 @@ export default [
     ],
     symbol: "pufETH",
     decimals: 18,
-    cgPriceId: "ethereum",
+    cgPriceId: "pufeth",
     type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Puffer Points"],
     multiplier: 1,
@@ -447,7 +497,7 @@ export default [
     ],
     decimals: 18,
     symbol: "rswETH",
-    cgPriceId: "ethereum",
+    cgPriceId: "restaked-swell-eth",
     type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "Swell Points", "Pearls"],
     multiplier: 1,
