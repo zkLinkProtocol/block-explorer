@@ -14,7 +14,7 @@ import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
 import { getETHPrice, getTokenPrice, STABLE_COIN_TYPE } from "./depositPoint.service";
 import { TokenOffChainDataProvider } from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
-import {AddressTokenTvlRepository} from "../repositories/addressTokenTvl.repository";
+import { AddressTokenTvlRepository } from "../repositories/addressTokenTvl.repository";
 
 @Injectable()
 export class TvlStatisticalService extends Worker {
@@ -120,13 +120,13 @@ export class TvlStatisticalService extends Worker {
       const tokenAmount = new BigNumber(addressBalance.balance).dividedBy(new BigNumber(10).pow(tokenInfo.decimals));
       const tokenTvl = tokenAmount.multipliedBy(tokenPrice).dividedBy(ethPrice);
       // update user and referrer address tvl by token
-      let addressTokenTvl = await this.addressTokenTvlRepository.getAddressTokenTvl(address,tokenAddress);
+      let addressTokenTvl = await this.addressTokenTvlRepository.getAddressTokenTvl(address, tokenAddress);
       if (!addressTokenTvl) {
-        addressTokenTvl = this.addressTokenTvlRepository.createDefaultAddressTokenTvl(address,tokenAddress);
+        addressTokenTvl = this.addressTokenTvlRepository.createDefaultAddressTokenTvl(address, tokenAddress);
       }
       addressTokenTvl.balance = tokenAmount.toNumber();
       addressTokenTvl.tvl = tokenTvl.toNumber();
-      await this.addressTokenTvlRepository.upsert(addressTokenTvl,true,["address","tokenAddress"]);
+      await this.addressTokenTvlRepository.upsert(addressTokenTvl, true, ["address", "tokenAddress"]);
       tvl = tvl.plus(tokenTvl);
     }
     // update user and referrer address tvl

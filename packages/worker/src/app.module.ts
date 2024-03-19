@@ -32,7 +32,8 @@ import {
   LogRepository,
   BalanceRepository,
   PointsRepository,
-  PointsHistoryRepository, AddressTokenTvlRepository,
+  PointsHistoryRepository,
+  AddressTokenTvlRepository,
 } from "./repositories";
 import {
   Batch,
