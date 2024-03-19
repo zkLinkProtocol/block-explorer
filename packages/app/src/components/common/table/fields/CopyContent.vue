@@ -4,10 +4,10 @@
       <img class="eth_block-icon" src="/img/ethereum.svg" alt=""/>
       <template #content>Ethereum</template>
     </Tooltip>
-    <HashLabel :text="value">
+    <HashLabel v-if="value" :text="value">
       <ExternalLinkIcon v-if="isExternalLink"/>
     </HashLabel>
-    <CopyButton :value="value"/>
+    <CopyButton v-if="value" :value="value"/>
   </div>
 </template>
 
