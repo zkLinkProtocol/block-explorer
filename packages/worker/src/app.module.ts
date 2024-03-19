@@ -33,7 +33,7 @@ import {
   BalanceRepository,
   PointsRepository,
   PointsHistoryRepository,
-  TvlRepository,
+  AddressTokenTvlRepository,
 } from "./repositories";
 import {
   Batch,
@@ -53,6 +53,7 @@ import {
   BlockAddressPoint,
   Invite,
   AddressTvl,
+  AddressTokenTvl,
   GroupTvl,
 } from "./entities";
 import { typeOrmModuleOptions, typeOrmReferModuleOptions } from "./typeorm.config";
@@ -107,6 +108,7 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
       BlockAddressPoint,
       BlockGroupTvl,
       AddressTvl,
+      AddressTokenTvl,
       GroupTvl,
     ]),
     TypeOrmModule.forRootAsync({
@@ -164,7 +166,6 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
     LogRepository,
     PointsRepository,
     PointsHistoryRepository,
-    TvlRepository,
     BlocksRevertService,
     BatchService,
     BlockProcessor,
@@ -183,6 +184,7 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
     ReferrerRepository,
     GroupTvlRepository,
     AddressTvlRepository,
+    AddressTokenTvlRepository,
   ],
 })
 export class AppModule {}

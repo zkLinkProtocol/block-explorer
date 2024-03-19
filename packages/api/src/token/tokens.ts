@@ -366,6 +366,66 @@ export default [
     address: [
       {
         chain: "Ethereum",
+        l1Address: "0x14778860E937f509e651192a90589dE711Fb88a9",
+        l2Address: "0x9B370Be9cC8cf5190Ec7a22da9B1aE3B95b37A60",
+      },
+    ],
+    symbol: "CYBER",
+    decimals: 18,
+    cgPriceId: "cyberconnect",
+    type: "Altcoin",
+    yieldType: ["NOVA Points"],
+    multiplier: 1.5,
+  },
+  {
+    address: [
+      {
+        chain: "Ethereum",
+        l1Address: "0x5fAa989Af96Af85384b8a938c2EdE4A7378D9875",
+        l2Address: "0x56BCb12b524Add1e89BEcA721CcfB6Cf47E30638",
+      },
+    ],
+    symbol: "GAL",
+    decimals: 18,
+    cgPriceId: "project-galaxy",
+    type: "Altcoin",
+    yieldType: ["NOVA Points"],
+    multiplier: 1.5,
+  },
+  {
+    address: [
+      {
+        chain: "Ethereum",
+        l1Address: "0xA91ac63D040dEB1b7A5E4d4134aD23eb0ba07e14",
+        l2Address: "0xeC393a2939C47C58a695C0A7927295458e8054EE",
+      },
+    ],
+    symbol: "BEL",
+    decimals: 18,
+    cgPriceId: "bella-protocol",
+    type: "Altcoin",
+    yieldType: ["NOVA Points"],
+    multiplier: 1.5,
+  },
+  {
+    address: [
+      {
+        chain: "Ethereum",
+        l1Address: "0xBA50933C268F567BDC86E1aC131BE072C6B0b71a",
+        l2Address: "0x380dD3344288bD6EFD7c3597b2B6114b722A0e65",
+      },
+    ],
+    symbol: "ARPA",
+    decimals: 18,
+    cgPriceId: "arpa",
+    type: "Altcoin",
+    yieldType: ["NOVA Points"],
+    multiplier: 1.5,
+  },
+  {
+    address: [
+      {
+        chain: "Ethereum",
         l1Address: "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee",
         l2Address: "0x35D5f1b41319e0ebb5a10e55C3BD23f121072da8",
       },
