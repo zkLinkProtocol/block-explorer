@@ -121,12 +121,14 @@ const tableInfoItems = computed(() => {
           tableItems.push(
             {
               label: t(`batches.finalizeTxHash`),
+              tooltip: t(`batches.finalizeTxHashTooltip`),
               value: { value: mainBatch.value?.transactionHash, isShowIcon: true },
               component: CopyContent,
               url: `${ETH_BLOCKEXPLORER_URL}/tx/${mainBatch.value?.transactionHash}`,
             },
             {
               label: t(`batches.finalizeAt`),
+              tooltip: t(`batches.finalizeAtTooltip`),
               value: { value: mainBatch.value?.executedAt },
               component: TimeField,
             }
@@ -135,6 +137,7 @@ const tableInfoItems = computed(() => {
           tableItems.push(
             {
               label: t(`batches.finalizeTxHash`),
+              tooltip: t(`batches.finalizeTxHashTooltip`),
               value: { value: '', isShowIcon: true },
               component: CopyContent,
               url: '',
