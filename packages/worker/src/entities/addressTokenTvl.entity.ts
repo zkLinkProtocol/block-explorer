@@ -12,8 +12,8 @@ export class AddressTokenTvl extends BaseEntity {
   public readonly tokenAddress: string;
 
   @Column("decimal", { scale: 6 })
-  public readonly balance: number;
+  public balance: number;
 
   @Column("decimal", { scale: 6 })
-  public readonly tvl: number;
+  public tvl: number;
 }
