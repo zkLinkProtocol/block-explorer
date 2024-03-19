@@ -17,6 +17,7 @@ import InfoTableSection from "@/components/batches/InfoTableSection.vue";
 import CopyContent from "@/components/common/table/fields/CopyContent.vue";
 import TimeField from "@/components/common/table/fields/TimeField.vue";
 import ExcuteTxHashChain from "../common/table/fields/ExcuteTxHashChain.vue";
+import PromptContent from "../common/table/fields/PromptContent.vue";
 
 import useContext from "@/composables/useContext";
 import { ETH_BLOCKEXPLORER_URL } from "@/utils/constants";
@@ -140,8 +141,8 @@ const tableInfoItems = computed(() => {
             },
             {
               label: t(`batches.finalizeAt`),
-              value: t(`batches.finalizeAtEmpty`),
-              // component: TimeField,
+              component: PromptContent,
+              value: {value:t(`batches.finalizeAtEmpty`)},
             }
           );
           
