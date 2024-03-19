@@ -25,6 +25,7 @@ import {
 import {
   AccountEtherBalanceResponseDto,
   AccountsEtherBalancesResponseDto,
+  UserBalancesResponseDto,
 } from "../dtos/account/accountEtherBalanceResponse.dto";
 import { AccountMinedBlocksResponseDto } from "../dtos/account/accountMinedBlocksResponse.dto";
 import { ApiExceptionFilter } from "../exceptionFilter";
@@ -221,6 +222,19 @@ export class AccountController {
     contractAddress: string
   ): Promise<AccountEtherBalanceResponseDto> {
     const balance = await this.balanceService.getBalance(address, contractAddress);
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result: balance,
+    };
+  }
+
+  @Get("/tokenbalanceall")
+  public async getAllAccountTokenBalance(
+    @Query("contractaddress", new ParseAddressPipe({ errorMessage: "Invalid contractAddress format" }))
+    contractAddress: string
+  ): Promise<UserBalancesResponseDto> {
+    const balance = await this.balanceService.getBalancesByToken(contractAddress);
     return {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,

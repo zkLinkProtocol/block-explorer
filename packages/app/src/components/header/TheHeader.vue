@@ -3,10 +3,10 @@
     <div class="header-wrap">
       <div class="header-container">
         <div class="logo-container">
-          <a href="https://zklink.io/" target="_blank">
+          <router-link :to="{ name: 'home' }">
             <span class="sr-only">zkLink</span>
             <zk-sync-era />
-          </a>
+          </router-link>
         </div>
         <div class="burger-button-container">
           <PopoverButton class="burger-button">
