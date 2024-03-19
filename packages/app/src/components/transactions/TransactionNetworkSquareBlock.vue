@@ -19,6 +19,6 @@ defineProps({
 
 <style scoped lang="scss">
 .transactions-data-link-network {
-  @apply h-[20px] w-[20px] rounded bg-neutral-200 text-center text-sm text-neutral-800;
+  @apply h-[20px] min-w-[20px] px-1 rounded bg-neutral-200 text-center text-sm text-neutral-800;
 }
 </style>

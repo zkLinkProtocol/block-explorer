@@ -307,8 +307,8 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
   return data.value?.map((transaction) => ({
     ...transaction,
     methodName: getTransactionMethod(transaction),
-    fromNetwork: transaction.isL1Originated ? "L1" : "L2",
-    toNetwork: "L2", // even withdrawals go through L2 addresses (800A or bridge addresses)
+    fromNetwork: transaction.isL1Originated ? "L1" : "nova",
+    toNetwork: "nova", // even withdrawals go through L2 addresses (800A or bridge addresses)
     statusColor: transaction.status === "failed" ? "danger" : "dark-success",
     statusIcon: ["failed", "included"].includes(transaction.status) ? ZkSyncIcon : EthereumIcon,
   }));
