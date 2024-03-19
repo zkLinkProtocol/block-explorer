@@ -115,7 +115,7 @@ const tableInfoItems = computed(() => {
             component: TimeField,
           }
         );
-
+        
         if (mainBatch && mainBatch.value?.executedAt) {
           tableItems.push(
             {
@@ -130,6 +130,22 @@ const tableInfoItems = computed(() => {
               component: TimeField,
             }
           );
+        }else{
+          tableItems.push(
+            {
+              label: t(`batches.finalizeTxHash`),
+              value: { value: '', isShowIcon: true },
+              component: CopyContent,
+              url: '',
+            },
+            {
+              label: t(`batches.finalizeAt`),
+              value: t(`batches.finalizeAtEmpty`),
+              // component: TimeField,
+            }
+          );
+          
+
         }
       } else {
         tableItems.push(

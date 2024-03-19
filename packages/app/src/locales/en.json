@@ -259,6 +259,7 @@
     "notYetSealed": "This batch is not sealed yet",
     "finalizeTxHash": "Finalize tx hash",
     "finalizeAt": "Finalized",
+    "finalizeAtEmpty": "Finalization will begin processing once the withdrawal is initiated.",
     "transactionTable": {
       "title": "Batch Transactions",
       "error": "Something went wrong",
