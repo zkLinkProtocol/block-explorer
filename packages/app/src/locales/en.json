@@ -259,7 +259,8 @@
     "notYetSealed": "This batch is not sealed yet",
     "finalizeTxHash": "Finalize tx hash",
     "finalizeAt": "Finalized",
-    "finalizeAtEmpty": "Finalization will begin processing once the withdrawal is initiated.",
+    "finalizeStatus": "Status",
+    "finalizePending": "Pending to be finalized on Ethereum",
     "transactionTable": {
       "title": "Batch Transactions",
       "error": "Something went wrong",

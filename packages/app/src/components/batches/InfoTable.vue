@@ -140,9 +140,9 @@ const tableInfoItems = computed(() => {
               url: '',
             },
             {
-              label: t(`batches.finalizeAt`),
+              label: t(`batches.finalizeStatus`),
               component: PromptContent,
-              value: {value:t(`batches.finalizeAtEmpty`)},
+              value: {value:t(`batches.finalizePending`)},
             }
           );
           
