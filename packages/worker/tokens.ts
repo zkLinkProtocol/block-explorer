@@ -366,6 +366,21 @@ export default [
     address:[
       {
         chain: "Ethereum",
+        l1Address: "0xF1376bceF0f78459C0Ed0ba5ddce976F1ddF51F4",
+        l2Address: "0x011E385631488F3318F0C5541A343306626200D7",
+      }
+    ],
+    symbol: "uniETH",
+    decimals: 18,
+    cgPriceId: "universal-eth",
+    type: "LST",
+    yieldType: ["NOVA Points", "Native Yield", "EL Points", "Bedrock Diamonds"],
+    multiplier: 1.5
+  },
+  {
+    address:[
+      {
+        chain: "Ethereum",
         l1Address: "0x14778860E937f509e651192a90589dE711Fb88a9",
         l2Address: "0x9B370Be9cC8cf5190Ec7a22da9B1aE3B95b37A60",
       }
