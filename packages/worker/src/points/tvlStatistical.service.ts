@@ -14,8 +14,7 @@ import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
 import { getETHPrice, getTokenPrice, STABLE_COIN_TYPE } from "./depositPoint.service";
 import { TokenOffChainDataProvider } from "../token/tokenOffChainData/tokenOffChainDataProvider.abstract";
-import { AddressTokenTvlRepository } from "../repositories/addressTokenTvl.repository";
-import { AddressTokenTvl } from "../entities";
+import { AddressTokenTvlRepository } from "../repositories";
 
 @Injectable()
 export class TvlStatisticalService extends Worker {
