@@ -82,8 +82,18 @@
           <ContentLoader class="w-16" />
         </TableBodyColumn>
         <TableBodyColumn>
+          <ContentLoader/>
+        </TableBodyColumn>
+        <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
+        <TableBodyColumn>
+          <ContentLoader />
+        </TableBodyColumn>
+        <TableBodyColumn>
+          <ContentLoader />
+        </TableBodyColumn>
+        
       </tr>
     </template>
   </Table>
