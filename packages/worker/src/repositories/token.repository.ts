@@ -63,7 +63,7 @@ export class TokenRepository extends BaseRepository<Token> {
     return tokens;
   }
 
-  public async getTotalTVL() {
+  public async getTotalTVL(): Promise<BigNumber> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const allTokens = await transactionManager.find(this.entityTarget);
     let totalTVL = BigNumber.from(0);

@@ -75,7 +75,7 @@ export class ValuesService extends Worker {
     return balance;
   }
 
-  private async recordTVLHistory() {
+  private async recordTVLHistory(): Promise<void> {
     const block: Block = await this.blockRepository.getLastBlock({ select: { number: true, timestamp: true } });
     const totalTVL = await this.tokenRepository.getTotalTVL();
 
