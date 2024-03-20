@@ -6,6 +6,7 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiExcludeController,
+  ApiOperation,
 } from "@nestjs/swagger";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { buildDateFilter } from "../common/utils";
@@ -16,6 +17,10 @@ import { BlockService } from "./block.service";
 import { BlockDto } from "./block.dto";
 import { BlockDetailsDto } from "./blockDetails.dto";
 import { swagger } from "../config/featureFlags";
+import { TVLHistory } from "./tvlHistory.entity";
+import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+import { TVLHistoryDto } from "./TVLHistory.dto";
 
 const entityName = "blocks";
 
@@ -23,7 +28,30 @@ const entityName = "blocks";
 @ApiExcludeController(!swagger.bffEnabled)
 @Controller(entityName)
 export class BlockController {
-  constructor(private readonly blockService: BlockService) {}
+  constructor(
+    private readonly blockService: BlockService,
+    @InjectRepository(TVLHistory)
+    private readonly tvlHistoryRepository: Repository<TVLHistory>
+  ) {}
+
+  @Get("/total/tvl")
+  @ApiOperation({ summary: "Get total tvl" })
+  public async getTotalTvl(@Query("number") number: number): Promise<TVLHistoryDto[]> {
+    const tvlHistorys: TVLHistory[] = await this.tvlHistoryRepository.find({
+      order: {
+        id: "desc",
+      },
+      take: number,
+    });
+
+    return tvlHistorys.map((tvlHistory) => {
+      return {
+        id: tvlHistory.id,
+        tvl: tvlHistory.tvl.toString(),
+        timestamp: tvlHistory.timestamp,
+      };
+    });
+  }
 
   @Get("")
   @ApiListPageOkResponse(BlockDto, { description: "Successfully returned blocks list" })
