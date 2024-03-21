@@ -18,6 +18,7 @@
           <LinksPopover :label="t('header.nav.blockExplorer')" :items="blockExplorerLinks" />
           <LinksPopover :label="t('header.nav.tools')" :items="toolsLinks" />
           <LinksPopover :label="t('header.nav.developer')" :items="developerLinks" />
+          <LinksPopoverNoChild :label="t('header.nav.charts')" :items="chartsLinks" />
         </PopoverGroup>
         <div class="header-right-side">
           <NetworkSwitch />
@@ -118,6 +119,7 @@ import { MenuIcon, XIcon } from "@heroicons/vue/outline";
 
 import LinksMobilePopover from "./LinksMobilePopover.vue";
 import LinksPopover from "./LinksPopover.vue";
+import LinksPopoverNoChild from "./LinksPopoverNoChild.vue";
 
 import LocaleSwitch from "@/components/LocaleSwitch.vue";
 import NetworkSwitch from "@/components/NetworkSwitch.vue";
@@ -168,7 +170,12 @@ const developerLinks = reactive([
     url: " https://docs.zklink.io/additional-resources/help",
   },
 ]);
-
+const chartsLinks = reactive([
+  {
+    label: computed(() => t('header.nav.charts')),
+    to: { name: "charts" },
+  },
+]);
 const links = [
   {
     label: computed(() => t("header.nav.apiDocs")),

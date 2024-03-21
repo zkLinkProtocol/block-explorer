@@ -285,6 +285,11 @@
       "failed": "Failed"
     }
   },
+
+  "charts": {
+    "batch": "Charts",
+    "title": "Charts&Stats"
+  },
   "header": {
     "nav": {
       "blockExplorer": "Block Explorer",
@@ -296,7 +301,8 @@
       "bridge": "Bridge",
       "developer": "Developer",
       "github": "Github",
-      "help": "Help"
+      "help": "Help",
+      "charts": "Charts&Stats"
     }
   },
   "locale": {

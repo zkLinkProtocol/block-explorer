@@ -95,6 +95,22 @@ export default [
     },
   },
   {
+    path: "/charts/",
+    name: "charts",
+    component: () => import("@/views/ChartsListView.vue"),
+    meta: {
+      title: "charts.title",
+    },
+  },
+  {
+    path: "/charts/chart",
+    name: "chart",
+    component: () => import("@/views/ChartView.vue"),
+    meta: {
+      title: "charts.title",
+    },
+  },
+  {
     path: "/batch/:id",
     name: "batch",
     component: () => import("@/views/BatchView.vue"),
