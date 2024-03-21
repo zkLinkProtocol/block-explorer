@@ -91,7 +91,7 @@ export class HoldPointService extends Worker {
     const earlyBirdMultiplier = this.getEarlyBirdMultiplier(currentStatisticalBlock.timestamp);
     this.logger.log(`Early bird multiplier: ${earlyBirdMultiplier}`);
     const tokenPriceMap = await this.getTokenPriceMap(currentStatisticalBlock.number);
-    const blockTs = currentStatisticalBlock.timestamp.getTime() / 1000;
+    const blockTs = currentStatisticalBlock.timestamp.getTime();
     const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, blockTs, tokenPriceMap);
     const groupTvlMap = await this.getGroupTvlMap(currentStatisticalBlock.number, addressTvlMap);
     for (const address of addressTvlMap.keys()) {

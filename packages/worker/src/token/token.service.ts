@@ -58,7 +58,7 @@ export class TokenService {
       if (!token.type) {
         throw new Error(`Token ${token.symbol} cgPriceId not found`);
       }
-      if (!token.multipliers) {
+      if (!token.multipliers || token.multipliers.length == 0) {
         throw new Error(`Token ${token.symbol} multipliers not found`);
       }
       this.supportTokens.push(token);
@@ -84,7 +84,7 @@ export class TokenService {
     const multipliers = token.multipliers;
     multipliers.sort((a, b) => b.timestamp - a.timestamp);
     for (const m of multipliers) {
-      if (blockTs >= m.timestamp) {
+      if (blockTs >= m.timestamp * 1000) {
         return m.multiplier;
       }
     }
