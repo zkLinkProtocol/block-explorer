@@ -12,7 +12,7 @@ import parseLog from "../utils/parseLog";
 import { stringTransformer } from "../transformers/string.transformer";
 import { CONTRACT_INTERFACES } from "../constants";
 import { Token as TokenEntity } from "../entities";
-import tokens from "../../tokens";
+import tokens from "../tokens";
 
 export interface TokenL1Address {
   chain: string;

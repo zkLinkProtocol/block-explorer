@@ -363,79 +363,79 @@ export default [
     multiplier: 1.5,
   },
   {
-    address:[
+    address: [
       {
         chain: "Ethereum",
         l1Address: "0xF1376bceF0f78459C0Ed0ba5ddce976F1ddF51F4",
         l2Address: "0x011E385631488F3318F0C5541A343306626200D7",
-      }
+      },
     ],
     symbol: "uniETH",
     decimals: 18,
     cgPriceId: "universal-eth",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Bedrock Diamonds"],
-    multiplier: 1.5
+    multiplier: 1.5,
   },
   {
-    address:[
+    address: [
       {
         chain: "Ethereum",
         l1Address: "0x14778860E937f509e651192a90589dE711Fb88a9",
         l2Address: "0x9B370Be9cC8cf5190Ec7a22da9B1aE3B95b37A60",
-      }
+      },
     ],
     symbol: "CYBER",
     decimals: 18,
     cgPriceId: "cyberconnect",
     type: "Altcoin",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5
+    multiplier: 1.5,
   },
   {
-    address:[
+    address: [
       {
         chain: "Ethereum",
         l1Address: "0x5fAa989Af96Af85384b8a938c2EdE4A7378D9875",
         l2Address: "0x56BCb12b524Add1e89BEcA721CcfB6Cf47E30638",
-      }
+      },
     ],
     symbol: "GAL",
     decimals: 18,
     cgPriceId: "project-galaxy",
     type: "Altcoin",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5
+    multiplier: 1.5,
   },
   {
-    address:[
+    address: [
       {
         chain: "Ethereum",
         l1Address: "0xA91ac63D040dEB1b7A5E4d4134aD23eb0ba07e14",
         l2Address: "0xeC393a2939C47C58a695C0A7927295458e8054EE",
-      }
+      },
     ],
     symbol: "BEL",
     decimals: 18,
     cgPriceId: "bella-protocol",
     type: "Altcoin",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5
+    multiplier: 1.5,
   },
   {
-    address:[
+    address: [
       {
         chain: "Ethereum",
         l1Address: "0xBA50933C268F567BDC86E1aC131BE072C6B0b71a",
         l2Address: "0x380dD3344288bD6EFD7c3597b2B6114b722A0e65",
-      }
+      },
     ],
     symbol: "ARPA",
     decimals: 18,
     cgPriceId: "arpa",
     type: "Altcoin",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5
+    multiplier: 1.5,
   },
   {
     address: [
@@ -468,7 +468,7 @@ export default [
         chain: "Arbitrum",
         l1Address: "0x4186BFC76E2E237523CBC30FD220FE055156b41F",
         l2Address: "0x4A2da287deB06163fB4D77c52901683d69bD06f4",
-      }
+      },
     ],
     symbol: "rsETH",
     decimals: 18,
