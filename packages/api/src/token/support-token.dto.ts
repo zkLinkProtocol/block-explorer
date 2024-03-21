@@ -19,6 +19,14 @@ export class TokenAddressDto {
   public readonly l2Address: string;
 }
 
+export class TokenMultiplierDto {
+  @ApiProperty({ type: Number })
+  public readonly timestamp: number;
+
+  @ApiProperty({ type: Number })
+  public readonly multiplier: number;
+}
+
 export class SupportTokenDto {
   @ApiProperty({
     type: TokenAddressDto,
@@ -38,11 +46,11 @@ export class SupportTokenDto {
   public readonly decimals: number;
 
   @ApiProperty({
-    type: Number,
+    type: TokenMultiplierDto,
     description: "Token multiplier",
-    example: 1.2,
+    isArray: true,
   })
-  public readonly multiplier: number;
+  public readonly multipliers: TokenMultiplierDto[];
 
   @ApiProperty({
     type: String,

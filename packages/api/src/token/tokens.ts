@@ -1,5 +1,5 @@
-// Version 20240312-1300
-// Add Ethereum wstETH
+// Version 20240317-1448
+// Add Arbitrum rsETH, please note that cg does not have Arbitrum rsETH price
 
 export default [
   {
@@ -13,9 +13,14 @@ export default [
     symbol: "ETH",
     decimals: 18,
     cgPriceId: "ethereum",
-    type: "NATIVE",
+    type: "Native",
     yieldType: ["NOVA Points"],
-    multiplier: 2,
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -52,10 +57,15 @@ export default [
     ],
     symbol: "wBTC",
     decimals: 8,
-    cgPriceId: "wrapped-bitcoin",
+    cgPriceId: "bitcoin",
     type: "Native",
     yieldType: ["NOVA Points"],
-    multiplier: 2,
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -70,7 +80,12 @@ export default [
     cgPriceId: "ethereum",
     type: "Native",
     yieldType: ["NOVA Points"],
-    multiplier: 2,
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -110,7 +125,12 @@ export default [
     cgPriceId: "tether",
     type: "Stablecoin",
     yieldType: ["NOVA Points"],
-    multiplier: 2,
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -150,7 +170,12 @@ export default [
     cgPriceId: "usd-coin",
     type: "Stablecoin",
     yieldType: ["NOVA Points"],
-    multiplier: 2,
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -163,9 +188,14 @@ export default [
     symbol: "USDe",
     decimals: 18,
     cgPriceId: "ethena-usde",
-    type: "Synthetic",
+    type: "Stablecoin",
     yieldType: ["NOVA Points", "Shard"],
-    multiplier: 2,
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -178,9 +208,14 @@ export default [
     symbol: "sUSDe",
     decimals: 18,
     cgPriceId: "ethena-staked-usde",
-    type: "Synthetic",
+    type: "Stablecoin",
     yieldType: ["NOVA Points", "Shard"],
-    multiplier: 2,
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -200,7 +235,12 @@ export default [
     cgPriceId: "arbitrum",
     type: "Native",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -215,7 +255,12 @@ export default [
     cgPriceId: "mantle",
     type: "Native",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -230,7 +275,12 @@ export default [
     cgPriceId: "mantle",
     type: "Native",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -245,7 +295,20 @@ export default [
     cgPriceId: "manta-network",
     type: "Native",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+      {
+        multiplier: 1.8,
+        timestamp: 1711015200,
+      },
+      {
+        multiplier: 1.5,
+        timestamp: 1712224800,
+      },
+    ],
   },
   {
     address: [
@@ -263,9 +326,22 @@ export default [
     symbol: "wUSDm",
     decimals: 18,
     cgPriceId: "wrapped-usdm",
-    type: "RWA",
+    type: "Stablecoin",
     yieldType: ["NOVA Points", "Native Yield"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+      {
+        multiplier: 1.8,
+        timestamp: 1711015200,
+      },
+      {
+        multiplier: 1.5,
+        timestamp: 1712224800,
+      },
+    ],
   },
   {
     address: [
@@ -282,10 +358,23 @@ export default [
     ],
     symbol: "Stone",
     decimals: 18,
-    cgPriceId: "stakestone-ether",
+    cgPriceId: "ethereum",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+      {
+        multiplier: 1.8,
+        timestamp: 1711015200,
+      },
+      {
+        multiplier: 1.5,
+        timestamp: 1712224800,
+      },
+    ],
   },
   {
     address: [
@@ -297,10 +386,15 @@ export default [
     ],
     symbol: "swETH",
     decimals: 18,
-    cgPriceId: "sweth",
+    cgPriceId: "ethereum",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield", "Pearls"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -317,10 +411,15 @@ export default [
     ],
     symbol: "mETH",
     decimals: 18,
-    cgPriceId: "mantle-staked-ether",
+    cgPriceId: "ethereum",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -345,7 +444,12 @@ export default [
     cgPriceId: "wrapped-steth",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -360,7 +464,12 @@ export default [
     cgPriceId: "ethereum",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -375,7 +484,12 @@ export default [
     cgPriceId: "universal-eth",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Bedrock Diamonds"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -390,7 +504,12 @@ export default [
     cgPriceId: "cyberconnect",
     type: "Altcoin",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -405,7 +524,12 @@ export default [
     cgPriceId: "project-galaxy",
     type: "Altcoin",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -420,7 +544,12 @@ export default [
     cgPriceId: "bella-protocol",
     type: "Altcoin",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -435,7 +564,12 @@ export default [
     cgPriceId: "arpa",
     type: "Altcoin",
     yieldType: ["NOVA Points"],
-    multiplier: 1.5,
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -452,10 +586,15 @@ export default [
     ],
     symbol: "weETH",
     decimals: 18,
-    cgPriceId: "wrapped-eeth",
+    cgPriceId: "ethereum",
     type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Loyalty Points"],
-    multiplier: 1,
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -464,13 +603,27 @@ export default [
         l1Address: "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7",
         l2Address: "0x186c0c42C617f1Ce65C4f7DF31842eD7C5fD8260",
       },
+      {
+        chain: "Arbitrum",
+        l1Address: "0x4186BFC76E2E237523CBC30FD220FE055156b41F",
+        l2Address: "0x4A2da287deB06163fB4D77c52901683d69bD06f4",
+      },
     ],
     symbol: "rsETH",
     decimals: 18,
-    cgPriceId: "kelp-dao-restaked-eth",
+    cgPriceId: "ethereum",
     type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Kelp Miles"],
-    multiplier: 1,
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+      {
+        multiplier: 1.2,
+        timestamp: 1711015200,
+      },
+    ],
   },
   {
     address: [
@@ -479,13 +632,23 @@ export default [
         l1Address: "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110",
         l2Address: "0xdA7Fa837112511F6E353091D7e388A4c45Ce7D6C",
       },
+      {
+        chain: "Arbitrum",
+        l1Address: "0x2416092f143378750bb29b79eD961ab195CcEea5",
+        l2Address: "0x3FDB1939daB8e2d4F7a04212F142469Cd52d6402",
+      },
     ],
     symbol: "ezETH",
     decimals: 18,
     type: "LRT",
-    cgPriceId: "renzo-restaked-eth",
+    cgPriceId: "ethereum",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "ezPoints"],
-    multiplier: 1,
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -497,10 +660,15 @@ export default [
     ],
     symbol: "pufETH",
     decimals: 18,
-    cgPriceId: "pufeth",
+    cgPriceId: "ethereum",
     type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Puffer Points"],
-    multiplier: 1,
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -512,10 +680,15 @@ export default [
     ],
     decimals: 18,
     symbol: "rswETH",
-    cgPriceId: "restaked-swell-eth",
+    cgPriceId: "ethereum",
     type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "Swell Points", "Pearls"],
-    multiplier: 1,
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -535,7 +708,12 @@ export default [
     cgPriceId: "dai",
     type: "Stablecoin",
     yieldType: ["NOVA Points"],
-    multiplier: 2,
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
   },
   {
     address: [
@@ -550,6 +728,11 @@ export default [
     cgPriceId: "savings-dai",
     type: "RWA",
     yieldType: ["NOVA Points", "Native Yield"],
-    multiplier: 1,
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
   },
 ];

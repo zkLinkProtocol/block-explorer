@@ -132,10 +132,15 @@ export class HoldPointService extends Worker {
   ): Promise<Map<string, BlockAddressTvl>> {
     const addressTvlMap: Map<string, BlockAddressTvl> = new Map();
     const addressBufferList = await this.balanceRepository.getAllAddressesByBlock(blockNumber);
+    const block = await this.blockRepository.getLastBlock({ where: { number: blockNumber } });
+    if (!block) {
+      throw new Error(`Get block ${blockNumber} failed`);
+    }
+    const blockTs = block.timestamp.getTime() / 1000;
     this.logger.log(`The address list length: ${addressBufferList.length}`);
     for (const addressBuffer of addressBufferList) {
       const address = hexTransformer.from(addressBuffer);
-      const addressTvl = await this.calculateAddressTvl(address, blockNumber, tokenPriceMap);
+      const addressTvl = await this.calculateAddressTvl(address, blockNumber, tokenPriceMap, blockTs);
       if (addressTvl.tvl.gt(new BigNumber(0))) {
         this.logger.log(`Address ${address}: [tvl: ${addressTvl.tvl}, holdBasePoint: ${addressTvl.holdBasePoint}]`);
       }
@@ -147,7 +152,8 @@ export class HoldPointService extends Worker {
   async calculateAddressTvl(
     address: string,
     blockNumber: number,
-    tokenPrices: Map<string, BigNumber>
+    tokenPrices: Map<string, BigNumber>,
+    blockTs: number
   ): Promise<BlockAddressTvl> {
     const addressBuffer: Buffer = hexTransformer.to(address);
     const addressBalances = await this.balanceRepository.getAccountBalancesByBlock(addressBuffer, blockNumber);
@@ -165,7 +171,8 @@ export class HoldPointService extends Worker {
       const tokenAmount = new BigNumber(addressBalance.balance).dividedBy(new BigNumber(10).pow(tokenInfo.decimals));
       const tokenTvl = tokenAmount.multipliedBy(tokenPrice).dividedBy(ethPrice);
       // base point = Token Multiplier * Token Amount * Token Price / ETH_Price
-      const tokenHoldBasePoint = tokenTvl.multipliedBy(new BigNumber(tokenInfo.multiplier));
+      const tokenMultiplier = this.tokenService.getTokenMultiplier(tokenInfo, blockTs);
+      const tokenHoldBasePoint = tokenTvl.multipliedBy(new BigNumber(tokenMultiplier));
       tvl = tvl.plus(tokenTvl);
       holdBasePoint = holdBasePoint.plus(tokenHoldBasePoint);
     }

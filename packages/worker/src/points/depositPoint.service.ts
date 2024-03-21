@@ -174,6 +174,13 @@ export class DepositPointService extends Worker {
 
   async recordDepositPoint(transfer: Transfer, tokenPrices: Map<string, BigNumber>) {
     const blockNumber: number = transfer.blockNumber;
+    const block = await this.blockRepository.getLastBlock({
+      where: { number: blockNumber },
+    });
+    if (!block) {
+      throw new Error(`Get block ${blockNumber} failed`);
+    }
+    const blockTs = block.timestamp.getTime() / 1000;
     const depositReceiver: string = hexTransformer.from(transfer.from);
     const tokenAddress: string = hexTransformer.from(transfer.tokenAddress);
     const tokenAmount: BigNumber = new BigNumber(transfer.amount);
@@ -191,7 +198,7 @@ export class DepositPointService extends Worker {
       await this.blockAddressPointRepository.setParsedTransferId(transferId);
       return;
     }
-    const newDepositPoint = await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices);
+    const newDepositPoint = await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices, blockTs);
     // update deposit point for user and refer point for referrer
     await this.updateDepositPoint(blockNumber, depositReceiver, newDepositPoint, transferId);
   }
@@ -249,14 +256,15 @@ export class DepositPointService extends Worker {
   async calculateDepositPoint(
     tokenAmount: BigNumber,
     token: Token,
-    tokenPrices: Map<string, BigNumber>
+    tokenPrices: Map<string, BigNumber>,
+    blockTs: number
   ): Promise<BigNumber> {
     // NOVA Points = 10 * Token multiplier * Deposit Amount * Token Price / ETH price
     const price = getTokenPrice(token, tokenPrices);
     const ethPrice = getETHPrice(tokenPrices);
     const depositAmount = tokenAmount.dividedBy(new BigNumber(10).pow(token.decimals));
     const depositETHAmount = depositAmount.multipliedBy(price).dividedBy(ethPrice);
-    const tokenMultiplier = new BigNumber(token.multiplier);
+    const tokenMultiplier = new BigNumber(this.tokenService.getTokenMultiplier(token, blockTs));
     const point = DEPOSIT_MULTIPLIER.multipliedBy(tokenMultiplier).multipliedBy(depositETHAmount);
     this.logger.log(
       `Deposit ethAmount = ${depositETHAmount}, point = ${point}, [deposit multiplier = ${DEPOSIT_MULTIPLIER}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`

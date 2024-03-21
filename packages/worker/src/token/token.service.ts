@@ -19,6 +19,10 @@ export interface TokenL1Address {
   l1Address: string;
   l2Address: string;
 }
+export interface TokenMultiplier {
+  multiplier: number;
+  timestamp: number;
+}
 export interface Token {
   address: TokenL1Address[];
   symbol: string;
@@ -26,7 +30,7 @@ export interface Token {
   cgPriceId: string;
   type: string;
   yieldType: string[];
-  multiplier: number;
+  multipliers: TokenMultiplier[];
 }
 @Injectable()
 export class TokenService {
@@ -54,8 +58,8 @@ export class TokenService {
       if (!token.type) {
         throw new Error(`Token ${token.symbol} cgPriceId not found`);
       }
-      if (!token.multiplier) {
-        throw new Error(`Token ${token.symbol} multiplier not found`);
+      if (!token.multipliers) {
+        throw new Error(`Token ${token.symbol} multipliers not found`);
       }
       this.supportTokens.push(token);
       token.address.forEach((addr) => {
@@ -63,28 +67,6 @@ export class TokenService {
       });
     });
   }
-
-  public getCgIdByTokenSymbol(tokenSymbol: string): string {
-    const token = this.supportTokens.find((t) => t.symbol == tokenSymbol);
-    if (!token) {
-      return "";
-    } else {
-      return token.cgPriceId;
-    }
-  }
-
-  public getTokenMultiplier(tokenSymbol: string): number {
-    const token = this.supportTokens.find((t) => t.symbol == tokenSymbol);
-    if (!token) {
-      return 0;
-    } else {
-      return token.multiplier;
-    }
-  }
-
-  // public async saveETH(): Promise<void> {
-  //   return await this.tokenRepository.saveETH();
-  // }
 
   public async getAllTokens(): Promise<TokenEntity[]> {
     return await this.tokenRepository.getAllTokens();
@@ -94,12 +76,19 @@ export class TokenService {
     return this.supportTokens;
   }
 
-  public isSupportToken(tokenAddress: string): boolean {
-    return !!this.supportTokenL2AddressMap.get(tokenAddress.toLowerCase());
-  }
-
   public getSupportToken(tokenAddress: string): Token | undefined {
     return this.supportTokenL2AddressMap.get(tokenAddress.toLowerCase());
+  }
+
+  public getTokenMultiplier(token: Token, blockTs: number): number {
+    const multipliers = token.multipliers;
+    multipliers.sort((a, b) => b.timestamp - a.timestamp);
+    for (const m of multipliers) {
+      if (blockTs >= m.timestamp) {
+        return m.multiplier;
+      }
+    }
+    return multipliers[multipliers.length - 1].multiplier;
   }
 
   private async getERC20Token(contractAddress: string): Promise<{

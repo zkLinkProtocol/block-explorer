@@ -17,6 +17,10 @@ export interface TokenL1Address {
   l1Address: string;
   l2Address: string;
 }
+export interface TokenMultiplier {
+  multiplier: number;
+  timestamp: number;
+}
 export interface Token {
   address: TokenL1Address[];
   symbol: string;
@@ -24,7 +28,7 @@ export interface Token {
   cgPriceId: string;
   type: string;
   yieldType: string[];
-  multiplier: number;
+  multipliers: TokenMultiplier[];
 }
 
 @Injectable()
