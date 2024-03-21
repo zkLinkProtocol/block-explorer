@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { BaseRepository } from "./base.repository";
 import { UnitOfWork } from "../unitOfWork";
-import { AddressTokenTvl, AddressTvl, BlockAddressPoint, Point } from "../entities";
+import { AddressTokenTvl, AddressTvl } from "../entities";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 @Injectable()
@@ -24,7 +24,7 @@ export class AddressTokenTvlRepository extends BaseRepository<AddressTokenTvl> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.transaction(async (entityManager) => {
       for (const addressTokenTvl of addressTokensTvl) {
-        await entityManager.upsert<AddressTokenTvl>(AddressTokenTvl, addressTokensTvl, ["address", "tokenAddress"]);
+        await entityManager.upsert<AddressTokenTvl>(AddressTokenTvl, addressTokenTvl, ["address", "tokenAddress"]);
       }
       await entityManager.upsert<AddressTvl>(AddressTvl, addressTvl, ["address"]);
     });
