@@ -46,7 +46,16 @@
     "symbol": "ezeth",
     "name": "ezETH",
     "platforms": {
-      "arbitrum": "0x2416092f143378750bb29b79eD961ab195CcEea5"
+      "arbitrum": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+      "blast": "0x2416092f143378750bb29b79eD961ab195CcEea5"
+    }
+  },
+  {
+    "id": "kelp-dao-restaked-eth",
+    "symbol": "rseth",
+    "name": "rsETH",
+    "platforms": {
+      "arbitrum": "0x4186BFC76E2E237523CBC30FD220FE055156b41F"
     }
   }
 ]
