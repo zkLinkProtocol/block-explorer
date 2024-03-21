@@ -77,12 +77,12 @@ export class ValuesService extends Worker {
 
   private async recordTVLHistory(): Promise<void> {
     const block: Block = await this.blockRepository.getLastBlock({ select: { number: true, timestamp: true } });
-    const totalTVL = await this.tokenRepository.getTotalTVL();
+    const totalTVL: BigNumber = await this.tokenRepository.getTotalTVL();
 
     await this.tvlHistoryRepository.add({
       blockNumber: block.number,
       timestamp: block.timestamp,
-      tvl: totalTVL,
+      tvl: BigNumber.from(totalTVL.toString()),
     });
   }
 }

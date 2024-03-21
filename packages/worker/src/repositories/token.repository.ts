@@ -68,7 +68,11 @@ export class TokenRepository extends BaseRepository<Token> {
     const allTokens = await transactionManager.find(this.entityTarget);
     let totalTVL = BigNumber.from(0);
     for (const token of allTokens) {
-      let tvl = BigNumber.from(token.usdPrice || 0).mul(token.totalSupply || 0);
+      let tvl = BigNumber.from(token.totalSupply)
+        .mul(((token.usdPrice ?? 0) * 1000) | 0)
+        .div(1000)
+        .div(BigNumber.from(10).pow(token.decimals));
+
       totalTVL = totalTVL.add(tvl);
     }
     return totalTVL;
