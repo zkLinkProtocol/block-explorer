@@ -174,13 +174,6 @@ export class DepositPointService extends Worker {
 
   async recordDepositPoint(transfer: Transfer, tokenPrices: Map<string, BigNumber>) {
     const blockNumber: number = transfer.blockNumber;
-    const block = await this.blockRepository.getLastBlock({
-      where: { number: blockNumber },
-    });
-    if (!block) {
-      throw new Error(`Get block ${blockNumber} failed`);
-    }
-    const blockTs = block.timestamp.getTime() / 1000;
     const depositReceiver: string = hexTransformer.from(transfer.from);
     const tokenAddress: string = hexTransformer.from(transfer.tokenAddress);
     const tokenAmount: BigNumber = new BigNumber(transfer.amount);
@@ -198,7 +191,8 @@ export class DepositPointService extends Worker {
       await this.blockAddressPointRepository.setParsedTransferId(transferId);
       return;
     }
-    const newDepositPoint = await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices, blockTs);
+    const depositTs = Math.floor(Number(transfer.timestamp) / 1000);
+    const newDepositPoint = await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices, depositTs);
     // update deposit point for user and refer point for referrer
     await this.updateDepositPoint(blockNumber, depositReceiver, newDepositPoint, transferId);
   }

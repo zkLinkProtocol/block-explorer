@@ -91,7 +91,8 @@ export class HoldPointService extends Worker {
     const earlyBirdMultiplier = this.getEarlyBirdMultiplier(currentStatisticalBlock.timestamp);
     this.logger.log(`Early bird multiplier: ${earlyBirdMultiplier}`);
     const tokenPriceMap = await this.getTokenPriceMap(currentStatisticalBlock.number);
-    const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, tokenPriceMap);
+    const blockTs = currentStatisticalBlock.timestamp.getTime() / 1000;
+    const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, blockTs, tokenPriceMap);
     const groupTvlMap = await this.getGroupTvlMap(currentStatisticalBlock.number, addressTvlMap);
     for (const address of addressTvlMap.keys()) {
       const fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(
@@ -128,15 +129,11 @@ export class HoldPointService extends Worker {
 
   async getAddressTvlMap(
     blockNumber: number,
+    blockTs: number,
     tokenPriceMap: Map<string, BigNumber>
   ): Promise<Map<string, BlockAddressTvl>> {
     const addressTvlMap: Map<string, BlockAddressTvl> = new Map();
     const addressBufferList = await this.balanceRepository.getAllAddressesByBlock(blockNumber);
-    const block = await this.blockRepository.getLastBlock({ where: { number: blockNumber } });
-    if (!block) {
-      throw new Error(`Get block ${blockNumber} failed`);
-    }
-    const blockTs = block.timestamp.getTime() / 1000;
     this.logger.log(`The address list length: ${addressBufferList.length}`);
     for (const addressBuffer of addressBufferList) {
       const address = hexTransformer.from(addressBuffer);
