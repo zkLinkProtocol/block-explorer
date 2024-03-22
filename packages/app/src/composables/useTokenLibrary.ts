@@ -13,7 +13,7 @@ const retrieveTokens = useMemoize(
       ...(context.currentNetwork.value.tokensMinLiquidity != null && {
         minLiquidity: context.currentNetwork.value.tokensMinLiquidity.toString(),
       }),
-      limit: "100",
+      limit: "200",
     };
     let page = 1;
     let hasMore = true;
