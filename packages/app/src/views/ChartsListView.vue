@@ -2,7 +2,7 @@
   <div>
     <h1>zkLink Nova  Charts &  Statistics</h1>
     <div class="batches-container">
-      <div class="p-4 flex flex-wrap">
+      <div class="p-4 md:flex flex-wrap">
         <div class="rounded flex-auto box">
           <div class="p-2 title">
             <a href="/charts/chart?type=TVL" class="no-underline">Daily TVL Chart</a>
@@ -13,7 +13,7 @@
             </a>
           </div>
         </div>
-        <div class="rounded flex-auto box">
+        <!-- <div class="rounded flex-auto box">
           <div class="p-2 title">
             <a href="/charts/chart?type=add" class="no-underline">Unique Addresses Chart</a>
           </div>
@@ -22,7 +22,7 @@
               <img class="img-fluid w-100" src="/images/address.svg" alt="">
             </a>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -74,6 +74,12 @@ watch(
     border-radius: calc(0.5rem - 1px) calc(0.5rem - 1px) 0 0;
   }
 }
+
+@media (max-width: 760px) {
+  .box {
+    max-width: 100%;
+  }
+}
 .box{
   max-width: 25%;
   margin-right: 20px;
@@ -110,6 +116,12 @@ watch(
         min-height: 30px;
       }
     }
+  }
+}
+
+@media (max-width: 760px) {
+  .box {
+    max-width: 100%;
   }
 }
 </style>

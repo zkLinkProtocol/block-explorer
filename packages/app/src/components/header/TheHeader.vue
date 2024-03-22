@@ -82,6 +82,10 @@
                 <div class="mobile-navigation">
                   <LinksMobilePopover :items="developerLinks" />
                 </div>
+                <div class="mobile-navigation-divider"></div>
+                <div class="mobile-navigation">
+                  <LinksMobilePopover :items="chartsLinks" />
+                </div>
               </nav>
             </div>
             <div class="mobile-network-switch-container">
