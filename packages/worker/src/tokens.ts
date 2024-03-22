@@ -637,6 +637,16 @@ export default [
         l1Address: "0x2416092f143378750bb29b79eD961ab195CcEea5",
         l2Address: "0x3FDB1939daB8e2d4F7a04212F142469Cd52d6402",
       },
+      {
+        chain: "Linea",
+        l1Address: "0x2416092f143378750bb29b79eD961ab195CcEea5",
+        l2Address: "0x8FEe71Ab3Ffd6F8Aec8Cd2707Da20f4Da2bf583D",
+      },
+      {
+        chain: "Blast",
+        l1Address: "0x2416092f143378750bb29b79eD961ab195CcEea5",
+        l2Address: "0x8eDFa0151dF300C2b14bba9dA9f07A805565009d",
+      },
     ],
     symbol: "ezETH",
     decimals: 18,
