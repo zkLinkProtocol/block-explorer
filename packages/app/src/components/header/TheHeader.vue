@@ -161,11 +161,11 @@ const developerLinks = reactive([
   },
   {
     label: computed(() => t("header.nav.github")),
-    url: "https://docs.zklink.io/additional-resources/github",
+    url: "https://github.com/zkLinkProtocol",
   },
   {
     label: computed(() => t("header.nav.help")),
-    url: " https://docs.zklink.io/additional-resources/help",
+    url: "https://docs.zklink.io/additional-resources/help",
   },
 ]);
 
