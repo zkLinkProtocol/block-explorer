@@ -31,6 +31,7 @@ import {
   AddressTransferRepository,
   LogRepository,
   BalanceRepository,
+  TVLHistoryRepository,
 } from "./repositories";
 import {
   Batch,
@@ -44,6 +45,7 @@ import {
   Transfer,
   AddressTransfer,
   Balance,
+  TVLHistory,
 } from "./entities";
 import { typeOrmModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -80,6 +82,7 @@ import { ValuesService } from "./values/values.service";
       Address,
       AddressTransfer,
       Transfer,
+      TVLHistory,
       Balance,
     ]),
     EventEmitterModule.forRoot(),
@@ -119,6 +122,7 @@ import { ValuesService } from "./values/values.service";
     TokenRepository,
     AddressRepository,
     TransferRepository,
+    TVLHistoryRepository,
     AddressTransferRepository,
     BalanceRepository,
     LogRepository,
