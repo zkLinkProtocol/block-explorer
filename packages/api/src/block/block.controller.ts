@@ -21,6 +21,18 @@ import { TVLHistory } from "./tvlHistory.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { TVLHistoryDto } from "./TVLHistory.dto";
+import { LRUCache } from "lru-cache";
+
+const options = {
+  // how long to live in ms
+  ttl: 1000 * 10,
+  // return stale items before removing from cache?
+  allowStale: false,
+  ttlAutopurge: true,
+};
+
+const cache = new LRUCache(options);
+const HISTORY_TVL_CACHE_KEY = "history-tvl-cache";
 
 const entityName = "blocks";
 
@@ -36,21 +48,38 @@ export class BlockController {
 
   @Get("/total/tvl")
   @ApiOperation({ summary: "Get total tvl" })
-  public async getTotalTvl(@Query("number") number: number): Promise<TVLHistoryDto[]> {
-    const tvlHistorys: TVLHistory[] = await this.tvlHistoryRepository.find({
+  public async getTotalTvl(): Promise<TVLHistoryDto[]> {
+    const tvls = cache.get(HISTORY_TVL_CACHE_KEY) as TVLHistoryDto[];
+    if (tvls) {
+      return tvls;
+    }
+
+    const tvlHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
+      'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
+    );
+    const latest: TVLHistory = await this.tvlHistoryRepository.findOne({
+      // can't miss where
+      where: {},
       order: {
         id: "desc",
       },
-      take: number,
     });
 
-    return tvlHistorys.map((tvlHistory) => {
+    let history = tvlHistorys.map((tvlHistory) => {
       return {
         id: tvlHistory.id,
         tvl: tvlHistory.tvl.toString(),
         timestamp: tvlHistory.timestamp,
       };
     });
+    history.push({
+      id: latest.id,
+      tvl: latest.tvl.toString(),
+      timestamp: latest.timestamp,
+    });
+    history.reverse();
+    cache.set(HISTORY_TVL_CACHE_KEY, history);
+    return history;
   }
 
   @Get("")
