@@ -481,7 +481,7 @@ export default [
     ],
     symbol: "uniETH",
     decimals: 18,
-    cgPriceId: "universal-eth",
+    cgPriceId: "ethereum",
     type: "LST",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Bedrock Diamonds"],
     multipliers: [
