@@ -597,7 +597,8 @@
       "tokenName": "Token Name",
       "price": "Price",
       "tokenAddress": "Token Address",
-      "fromChain": "From Chain"
+      "fromChain": "From Chain",
+      "totalQty": "Total qty"
     }
   },
   "pageError": {

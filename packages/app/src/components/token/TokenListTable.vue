@@ -3,6 +3,7 @@
     <template #table-head>
       <table-head-column>{{ t("tokensView.table.tokenName") }}</table-head-column>
       <table-head-column>{{ t("tokensView.table.price") }}</table-head-column>
+      <table-head-column>{{ t("tokensView.table.totalQty") }}</table-head-column>
       <table-head-column>Tvl</table-head-column>
       <table-head-column class="text-center">{{ t("tokensView.table.fromChain") }}</table-head-column>
       <table-head-column>Nova ADDRESS</table-head-column>
@@ -21,15 +22,14 @@
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
         <TokenPrice :address="item.l2Address" />
       </TableBodyColumn>
+      <TableBodyColumn :data-heading="t('tokensView.table.totalQty')">
+        <TotalQTY :totalSupply="item.totalSupply" :decimals="item.decimals"/>
+      </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
         <TokenTVL :tvl="item.tvl" />
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.fromChain')">
-        <div v-if="iconsList[item.networkKey]">
-          <Tooltip class="batches-tooltip">
-            <img class="from-chain-icon" :src="iconsList[item.networkKey]" :alt="item.networkKey" />
-            <template #content>{{ chainNameList[item.networkKey] }}</template>
-          </Tooltip>
+        <div v-if="chainNameList[item.networkKey]" class="from-chain-text">{{ chainNameList[item.networkKey] }}
         </div>
         <div v-else-if="ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="from-chain-text">{{ NOVA_MERGED_TOKEN }}</div>
         <div v-else class="from-chain-text">{{ NOVA_NATIVE_TOKEN }}</div>
@@ -84,6 +84,9 @@
         <TableBodyColumn>
           <ContentLoader/>
         </TableBodyColumn>
+         <TableBodyColumn>
+          <ContentLoader/>
+        </TableBodyColumn>
         <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
@@ -115,6 +118,7 @@ import TableBodyColumn from "@/components/common/table/TableBodyColumn.vue";
 import TableHeadColumn from "@/components/common/table/TableHeadColumn.vue";
 import TokenPrice from "@/components/common/table/fields/TokenPrice.vue";
 import TokenTVL from "@/components/common/table/fields/TokenTVL.vue";
+import TotalQTY from "@/components/common/table/fields/TotalQTY.vue"
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
 
 // import { iconList } from "@/configs/hyperchain.config.json"
