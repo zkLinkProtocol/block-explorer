@@ -23,7 +23,9 @@
     "arbitrum": "/img/arbitrum-arb-logo.svg",
     "mantle": "/img/mantle.svg",
     "manta": "/img/manta.jpg",
-    "blast":"/img/blast.svg"
+    "blast":"/img/blast.svg",
+    "optimism": "/img/optimism.svg",
+    "base": "/img/base.svg"
   },
   "chainNameList": {
     "goerli": "Goerli",
@@ -33,7 +35,9 @@
     "arbitrum": "Arbitrum One",
     "mantle": "Mantle",
     "manta": "Manta Pacific",
-    "blast": "Blast"
+    "blast": "Blast",
+    "optimism": "Optimism",
+    "base": "Base"
   },
   "excuteBatchList": [
     {
@@ -65,6 +69,18 @@
       "limitNumber": 50,
       "chainId": 81457,
       "blockExplorersUrl": "https://blastscan.io"
+    },
+    {
+      "key": "optimism",
+      "limitNumber": 50,
+      "chainId": 10,
+      "blockExplorersUrl": "https://optimistic.etherscan.io"
+    },
+    {
+      "key": "base",
+      "limitNumber": 50,
+      "chainId": 8453,
+      "blockExplorersUrl": "https://basescan.org"
     }
   ]
 }
