@@ -32,7 +32,6 @@ const format = (str:string,type:string,isNow:boolean) => {
   var hours = date.getHours();
   var minutes = date.getMinutes();
   var seconds = date.getSeconds();
-  // 格式化时间，确保显示两位数的时、分、秒
   var hour = (hours < 10) ? '0' + hours : hours;
   var minute = (minutes < 10) ? '0' + minutes : minutes;
   var second = (seconds < 10) ? '0' + seconds : seconds;
@@ -64,14 +63,14 @@ watch(
       tooltip: {
           trigger: 'axis',
           formatter: function (params:any) {
-            const timer = format(params[0].data.date, 'tooltip',params[0].data.type||false) // X 轴的数据
-            var yValue = params[0].data.value; // Y 轴的数据
+            const timer = format(params[0].data.date, 'tooltip',params[0].data.type||false)
+            var yValue = params[0].data.value;
             return timer + '<br />TVL: $ ' + yValue.toLocaleString();
           }
       },
       grid: {
-          left: '18%',    // 左边距
-          right: '10%',   // 右边距
+          left: '18%',
+          right: '10%',
       },
       xAxis: {
           type: 'category',
@@ -92,22 +91,20 @@ watch(
           }
       },
         dataZoom: [{
-            type: 'slider', // 缩放类型为滑动条
-            start: 0, // 起始位置
-            end: 100 // 结束位置
+            type: 'slider',
+            start: 0,
+            end: 100
         }],
       series: [{
           type: 'line',
-          smooth: true, // 开启平滑曲线
+          smooth: true,
           data: xData,
-          symbol: 'none', // 不显示数据点
+          symbol: 'none',
           emphasis: {
               focus: 'series'
           },
-          // 配置点击下钻
           onclick: function (params:any) {
-              console.log(params); // 点击事件参数
-              // 进行下钻操作，例如切换数据或者跳转到详情页
+              console.log(params);
           }
       }]
     };
