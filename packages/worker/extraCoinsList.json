@@ -1,10 +1,11 @@
 [
   {
-    "id": "wrapped-usdm",
+    "id": "usd-coin",
     "symbol": "wusdm",
     "name": "Wrapped USDM",
     "platforms": {
-      "manta-pacific": "0xbdAd407F77f44F7Da6684B416b1951ECa461FB07"
+      "extra": "0xbdAd407F77f44F7Da6684B416b1951ECa461FB07",
+      "extra2": "0x57F5E098CaD7A3D1Eed53991D4d66C45C9AF7812"
     }
   },
   {
@@ -46,7 +47,7 @@
     "symbol": "ezeth",
     "name": "ezETH",
     "platforms": {
-      "arbitrum": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+      "arbitrum-one": "0x2416092f143378750bb29b79eD961ab195CcEea5",
       "blast": "0x2416092f143378750bb29b79eD961ab195CcEea5"
     }
   },
@@ -55,7 +56,7 @@
     "symbol": "rseth",
     "name": "rsETH",
     "platforms": {
-      "arbitrum": "0x4186BFC76E2E237523CBC30FD220FE055156b41F"
+      "arbitrum-one": "0x4186BFC76E2E237523CBC30FD220FE055156b41F"
     }
   }
 ]
