@@ -17,6 +17,12 @@ interface ITokenListItemProviderResponse {
   platforms: Record<string, string>;
 }
 
+export interface IExtraTokenAttribute {
+  address: string;
+  image: string;
+  market_cap: number;
+}
+
 interface ITokenMarketDataProviderResponse {
   id: string;
   image?: string;
@@ -38,6 +44,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
   private readonly apiUrl: string;
   private readonly platformIds: Array<string>;
   private readonly extraCoinsList: ITokenListItemProviderResponse[];
+  private readonly extraTokenAttributes: IExtraTokenAttribute[];
   private readonly proxyUrl: string;
   private readonly enableProxy: boolean;
   private readonly agent: HttpsProxyAgent<string>;
@@ -54,6 +61,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
       this.platformIds = _platformIds;
     }
     this.extraCoinsList = configService.get<ITokenListItemProviderResponse[]>("tokens.coingecko.extraCoinsList");
+    this.extraTokenAttributes = configService.get<IExtraTokenAttribute[]>("tokens.coingecko.extraTokenAttributes");
 
     this.proxyUrl = configService.get<string>("tokens.coingecko.proxyUrl");
     this.enableProxy = configService.get<boolean>("tokens.coingecko.enableProxy");
@@ -86,27 +94,31 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
         const tokensMarkedData = await this.getTokensMarketData(tokenIdsPerRequest);
         for (let tokenMarketData of tokensMarkedData) {
           const token = supportedTokens.find((t) => t.id === tokenMarketData.id);
-          if (!token) {
+          if (!token || !tokenMarketData.current_price) {
+            // tokenMarketData.current_price maybe null
             continue;
           }
-          for (const platform of this.platformIds) {
-            if (token.platforms[platform]) {
-              if (platform === "zklink-nova") {
-                tokensOffChainData.push({
-                  l1Address: null,
-                  l2Address: token.platforms["zklink-nova"], // unless the nova token is list on coingecko, this will not take effect here
-                  liquidity: tokenMarketData.market_cap,
-                  usdPrice: tokenMarketData.current_price,
-                  iconURL: tokenMarketData.image,
-                });
-              } else {
-                tokensOffChainData.push({
-                  l1Address: token.platforms[platform],
-                  l2Address: null,
-                  usdPrice: tokenMarketData.current_price,
-                  iconURL: tokenMarketData.image,
-                });
-              }
+          for (const platform of Object.keys(token.platforms)) {
+            if (!token.platforms[platform]) {
+              continue;
+            }
+            const [market_cap, image] = this.getMarketCapAndImage(token.platforms[platform], tokenMarketData);
+            if (platform === "zklink-nova") {
+              tokensOffChainData.push({
+                l1Address: null,
+                l2Address: token.platforms["zklink-nova"], // unless the nova token is list on coingecko, this will not take effect here
+                liquidity: market_cap,
+                usdPrice: tokenMarketData.current_price,
+                iconURL: image,
+              });
+            } else {
+              tokensOffChainData.push({
+                l1Address: token.platforms[platform],
+                l2Address: null,
+                liquidity: market_cap,
+                usdPrice: tokenMarketData.current_price,
+                iconURL: image,
+              });
             }
           }
           if (token.id === "ethereum") {
@@ -137,7 +149,14 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
       },
     });
   }
-
+  //if addrss is found in extraCoinsList, return market_cap and image from tokenMarketData
+  private getMarketCapAndImage(address: string, tokenMarketData: ITokenMarketDataProviderResponse): [number, string] {
+    const extraCoin = this.extraTokenAttributes.find((item) => item.address === address.toLowerCase());
+    if (!extraCoin) {
+      return [tokenMarketData.market_cap, tokenMarketData.image];
+    }
+    return [extraCoin.market_cap ?? tokenMarketData.market_cap, extraCoin.image ?? tokenMarketData.image];
+  }
   private async getTokensList() {
     const list = await this.makeApiRequestRetryable<ITokenListItemProviderResponse[]>({
       path: "/coins/list",
