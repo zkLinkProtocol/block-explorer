@@ -38,6 +38,9 @@ export default async () => {
     UPDATE_TOTAL_LOCKED_VALUE_INTERVAL,
     UPDATE_TOTAL_LOCKED_VALUE_DELAY,
     ENABLE_TOTAL_LOCKED_VALUE_UPDATER,
+
+    COINGECKO_PROXY_URL,
+    COINGECKO_ENABLE_PROXY,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -106,6 +109,8 @@ export default async () => {
         apiKey: COINGECKO_API_KEY,
         platformIds: COINGECKO_PLATFORM_IDS.split(","),
         extraCoinsList: await getExtraCoinsList(),
+        proxyUrl: COINGECKO_PROXY_URL,
+        enableProxy: COINGECKO_ENABLE_PROXY === "true",
       },
       updateTotalLockedValueInterval: parseInt(UPDATE_TOTAL_LOCKED_VALUE_INTERVAL, 10) || 30000,
       updateTotalLockedValueDelay: parseInt(UPDATE_TOTAL_LOCKED_VALUE_DELAY, 10) || 500,
