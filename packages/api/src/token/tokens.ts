@@ -265,7 +265,7 @@ export default [
   {
     address: [
       {
-        chain: "Optimism", // add
+        chain: "Optimism",
         l1Address: "0x4200000000000000000000000000000000000042",
         l2Address: "0x6d5E52c673a95Ab839d25Dd98BAE6A7c216672da",
       },
@@ -484,7 +484,7 @@ export default [
         l2Address: "0x8354CDEda1f27a146c36a01719C858b473CB3310",
       },
       {
-        chain: "Base", // add
+        chain: "Base",
         l1Address: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
         l2Address: "0xBBAeCf969a0b239dc4A21C2489BdD16e17EAF4e8",
       },
@@ -763,12 +763,12 @@ export default [
         l2Address: "0x087e4D2D60da117835F681965Ea1CCC189e51599",
       },
       {
-        chain: "Optimism", // add
+        chain: "Optimism",
         l1Address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
         l2Address: "0xCA68d516E9EE73093e14c048f18cb12e81C58a93",
       },
       {
-        chain: "Base", // add
+        chain: "Base",
         l1Address: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
         l2Address: "0x845D40825baE9bBE13819E639615b0152d84C4fE",
       },
