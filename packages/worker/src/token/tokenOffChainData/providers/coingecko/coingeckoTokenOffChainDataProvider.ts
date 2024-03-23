@@ -6,6 +6,7 @@ import { setTimeout } from "timers/promises";
 import { catchError, firstValueFrom } from "rxjs";
 import { utils } from "zksync-web3";
 import { TokenOffChainDataProvider, ITokenOffChainData } from "../../tokenOffChainDataProvider.abstract";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 const API_NUMBER_OF_TOKENS_PER_REQUEST = 250;
 const API_INITIAL_RETRY_TIMEOUT = 5000;
@@ -37,6 +38,10 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
   private readonly apiUrl: string;
   private readonly platformIds: Array<string>;
   private readonly extraCoinsList: ITokenListItemProviderResponse[];
+  private readonly proxyUrl: string;
+  private readonly enableProxy: boolean;
+  private readonly agent: HttpsProxyAgent<string>;
+
   constructor(configService: ConfigService, private readonly httpService: HttpService) {
     this.logger = new Logger(CoingeckoTokenOffChainDataProvider.name);
     this.isProPlan = configService.get<boolean>("tokens.coingecko.isProPlan");
@@ -49,6 +54,12 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
       this.platformIds = _platformIds;
     }
     this.extraCoinsList = configService.get<ITokenListItemProviderResponse[]>("tokens.coingecko.extraCoinsList");
+
+    this.proxyUrl = configService.get<string>("tokens.coingecko.proxyUrl");
+    this.enableProxy = configService.get<boolean>("tokens.coingecko.enableProxy");
+    if (this.enableProxy) {
+      this.agent = new HttpsProxyAgent(this.proxyUrl);
+    }
   }
 
   public async getTokensOffChainData({
@@ -227,33 +238,35 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     }).toString();
 
     const { data } = await firstValueFrom<{ data: T }>(
-      this.httpService.get(`${this.apiUrl}${path}?${queryString}`).pipe(
-        catchError((error: AxiosError) => {
-          if (error.response?.status === 429) {
-            const rateLimitReset = error.response.headers["x-ratelimit-reset"];
-            // use specified reset date or 60 seconds by default
-            const rateLimitResetDate = rateLimitReset
-              ? new Date(rateLimitReset)
-              : new Date(new Date().getTime() + 60000);
-            this.logger.debug({
-              message: `Reached coingecko rate limit, reset at ${rateLimitResetDate}`,
+      this.httpService
+        .get(`${this.apiUrl}${path}?${queryString}`, { httpsAgent: this.enableProxy ? this.agent : undefined })
+        .pipe(
+          catchError((error: AxiosError) => {
+            if (error.response?.status === 429) {
+              const rateLimitReset = error.response.headers["x-ratelimit-reset"];
+              // use specified reset date or 60 seconds by default
+              const rateLimitResetDate = rateLimitReset
+                ? new Date(rateLimitReset)
+                : new Date(new Date().getTime() + 60000);
+              this.logger.debug({
+                message: `Reached coingecko rate limit, reset at ${rateLimitResetDate}`,
+                stack: error.stack,
+                status: error.response.status,
+                response: error.response.data,
+                provider: CoingeckoTokenOffChainDataProvider.name,
+              });
+              throw new ProviderResponseError(error.message, error.response.status, rateLimitResetDate);
+            }
+            this.logger.error({
+              message: `Failed to fetch data at ${path} from coingecko`,
               stack: error.stack,
-              status: error.response.status,
-              response: error.response.data,
+              status: error.response?.status,
+              response: error.response?.data,
               provider: CoingeckoTokenOffChainDataProvider.name,
             });
-            throw new ProviderResponseError(error.message, error.response.status, rateLimitResetDate);
-          }
-          this.logger.error({
-            message: `Failed to fetch data at ${path} from coingecko`,
-            stack: error.stack,
-            status: error.response?.status,
-            response: error.response?.data,
-            provider: CoingeckoTokenOffChainDataProvider.name,
-          });
-          throw new ProviderResponseError(error.message, error.response?.status);
-        })
-      )
+            throw new ProviderResponseError(error.message, error.response?.status);
+          })
+        )
     );
     return data;
   }
