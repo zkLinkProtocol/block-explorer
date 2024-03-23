@@ -162,7 +162,7 @@ export class TVLService {
         referPoint: rank.refPoint,
         rank: firstRank + i,
         inviteBy: referer,
-        address,
+        address: address.replace(/^(\w{6})\w*(\w{4})$/, "$1******$2"),
       });
     }
     return result;
