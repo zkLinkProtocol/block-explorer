@@ -4,12 +4,13 @@
     <div class="batches-container">
       <div class="p-4 md:flex flex-wrap">
         <div class="rounded flex-auto box">
-          <div class="p-2 title">
-            <a href="/charts/chart?type=TVL" class="no-underline">Daily TVL Chart</a>
+          <div class="title">
+            <a href="/charts/chart?type=TVL" class="p-2 inline-block w-full no-underline">Daily TVL Chart</a>
           </div>
           <div class="p-2 content">
-            <a href="/charts/chart?type=TVL" class="inline-block w-full">
-              <img class="img-fluid w-100" src="/images/transactionhistory.svg" alt="">
+            <a href="/charts/chart?type=TVL" class="inline-block w-full relative">
+              <div class="absolute w-full h-full top-0 left-0 z-10"></div>
+              <div class="w-full h-28" id="TVLChart"></div>
             </a>
           </div>
         </div>
@@ -28,26 +29,113 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, watch } from "vue";
+import { computed, watch, onMounted, onUnmounted, ref, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import useBatches from "@/composables/useBatches";
 import useContext from "@/composables/useContext";
-
+import useChartsData from "@/composables/useChartsData";
+import * as echarts from 'echarts';
+const { getData,data } = useChartsData();
+const format = (str:string,type:string,isNow:boolean) => {
+  const date = new Date(str)
+  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var dayOfWeek = days[date.getDay()];
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var day = date.getDate();
+  var month = months[date.getMonth()];
+  var year = date.getFullYear();
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var seconds = date.getSeconds();
+  var hour = (hours < 10) ? '0' + hours : hours;
+  var minute = (minutes < 10) ? '0' + minutes : minutes;
+  var second = (seconds < 10) ? '0' + seconds : seconds;
+  var formattedDate = type === 'yLine'? (month + ' \'' + day): (month + ' ' + day + ', ' + year);
+  formattedDate = isNow? formattedDate + '  ' + hour + ':' + minute + ':' +second:formattedDate
+  return formattedDate;
+}
 const { t } = useI18n();
 
 const context = useContext();
 const route = useRoute();
 
-const { load, pending, failed, data, total, pageSize, page } = useBatches(context);
-
-watch(
-  () => route.query.page,
-  (page) => {
-
-  },
-  { immediate: true }
-);
+onMounted(async() => {
+  await getData()
+    let xData: any[] = [];
+    let yData: string[] = []
+    data && data.value.map((i:{tvl:string,timestamp:string},index)=>{
+      if (index) {
+        xData.unshift({value: i.tvl, date: i.timestamp, type: false})
+        const timer = format(i.timestamp,'yLine',false)
+        yData.unshift(timer)
+      } else {
+        xData.unshift({value: i.tvl, date: i.timestamp, type: true})
+        yData.unshift('Now')
+      }
+    })
+    const option = {
+      animation: false,
+      interactive: false,
+      grid: {
+          top: '10%',
+          left: '15%',
+          right: '5%',
+          bottom: '15%'
+      },
+      xAxis: {
+          type: 'category',
+          data: yData,
+          axisTick: {
+            show: false
+          },
+          axisLabel: {
+              textStyle: {
+                  fontSize: 6
+              },
+          }
+      },
+      yAxis: {
+          type: 'value',
+          axisLabel: {
+              textStyle: {
+                  fontSize: 6
+              },
+              formatter: function (value:any, index:number) {
+                  if (value < 1000) {
+                      return '$ '+value;
+                  } else if (value < 1000000) {
+                      return '$ '+(value / 1000).toFixed(0) + 'K';
+                  } else {
+                      return '$ '+(value / 1000000).toFixed(0) + 'M';
+                  }
+              }
+          }
+      },
+      series: [{
+          type: 'line',
+          smooth: true,
+          data: xData,
+          symbol: 'none',
+          emphasis: {
+              focus: 'series'
+          },
+          onclick: function (params:any) {
+              console.log(params);
+          },
+          lineStyle: {
+              width: 1
+          },
+          itemStyle: {
+            normal: {
+                color: '#000'
+            }
+          }
+      }]
+    };
+    var myChart = echarts.init(document.getElementById('TVLChart'));
+    myChart.setOption(option);
+});
 </script>
 
 <style lang="scss">
@@ -98,7 +186,6 @@ watch(
   border-radius: 0.5rem;
   .title{
     background-color: #f8f9fa;
-    padding: 0.75rem;
     margin-bottom: 0;
     background-color: #f8f9fa !important;
     border-bottom: 1px solid #e7eaf3;
