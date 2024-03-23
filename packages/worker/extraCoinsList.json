@@ -39,7 +39,8 @@
     "symbol": "wsteth",
     "name": "wstETH",
     "platforms": {
-      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F"
+      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
+      "base" : "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb"
     }
   },
   {
