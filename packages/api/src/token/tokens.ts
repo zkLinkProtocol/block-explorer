@@ -54,6 +54,11 @@ export default [
         l1Address: "0xCAbAE6f6Ea1ecaB08Ad02fE02ce9A44F09aebfA2",
         l2Address: "0x84e66eeB38C57A4C9548198F10f738bAe9f811ca",
       },
+      {
+        chain: "Optimism",
+        l1Address: "0x68f180fcce6836688e9084f035309e29bf0a2095",
+        l2Address: "0xA011145882C392e17C468CF0A85d2b385eAeDdd9",
+      },
     ],
     symbol: "wBTC",
     decimals: 8,
@@ -119,6 +124,11 @@ export default [
         l1Address: "0x201EBa5CC46D216Ce6DC03F6a759e8E766e956aE",
         l2Address: "0x7356804be101E88C260e074a5b34fC0E0D2d569b",
       },
+      {
+        chain: "Optimism",
+        l1Address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
+        l2Address: "0x6aFb043b4955505fc9B2B965FCF6972Fa561291d",
+      },
     ],
     symbol: "USDT",
     decimals: 6,
@@ -163,6 +173,16 @@ export default [
         chain: "Mantle",
         l1Address: "0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9",
         l2Address: "0x4E340B4Ea46ca1D1CE6e2dF7b21e649e2921521f",
+      },
+      {
+        chain: "Optimism",
+        l1Address: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+        l2Address: "0xd4A037d77AAFf6d7a396562fC5beaC76041A9EAf",
+      },
+      {
+        chain: "Base",
+        l1Address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        l2Address: "0x70064389730D2BDBcF85D8565A855716Cda0Bfca",
       },
     ],
     decimals: 6,
@@ -233,6 +253,26 @@ export default [
     symbol: "ARB",
     decimals: 18,
     cgPriceId: "arbitrum",
+    type: "Native",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "Optimism",
+        l1Address: "0x4200000000000000000000000000000000000042",
+        l2Address: "0x6d5E52c673a95Ab839d25Dd98BAE6A7c216672da",
+      },
+    ],
+    symbol: "OP",
+    decimals: 18,
+    cgPriceId: "optimism",
     type: "Native",
     yieldType: ["NOVA Points"],
     multipliers: [
@@ -437,6 +477,16 @@ export default [
         chain: "Linea",
         l1Address: "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
         l2Address: "0x31ff1E8ee3B71f05f12BE3705C195aC88085b9Ac",
+      },
+      {
+        chain: "Optimism",
+        l1Address: "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb",
+        l2Address: "0x8354CDEda1f27a146c36a01719C858b473CB3310",
+      },
+      {
+        chain: "Base",
+        l1Address: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
+        l2Address: "0xBBAeCf969a0b239dc4A21C2489BdD16e17EAF4e8",
       },
     ],
     symbol: "wstETH",
@@ -711,6 +761,16 @@ export default [
         chain: "Arbitrum",
         l1Address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
         l2Address: "0x087e4D2D60da117835F681965Ea1CCC189e51599",
+      },
+      {
+        chain: "Optimism",
+        l1Address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+        l2Address: "0xCA68d516E9EE73093e14c048f18cb12e81C58a93",
+      },
+      {
+        chain: "Base",
+        l1Address: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
+        l2Address: "0x845D40825baE9bBE13819E639615b0152d84C4fE",
       },
     ],
     decimals: 18,
