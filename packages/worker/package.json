@@ -10,7 +10,6 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "postbuild": "cp ./extraCoinsList.json dist/extraCoinsList.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "dev": "nest start",
     "dev:watch": "nest start --watch",
