@@ -1,10 +1,11 @@
 [
   {
-    "id": "wrapped-usdm",
+    "id": "usd-coin",
     "symbol": "wusdm",
     "name": "Wrapped USDM",
     "platforms": {
-      "manta-pacific": "0xbdAd407F77f44F7Da6684B416b1951ECa461FB07"
+      "extra": "0xbdAd407F77f44F7Da6684B416b1951ECa461FB07",
+      "extra2": "0x57F5E098CaD7A3D1Eed53991D4d66C45C9AF7812"
     }
   },
   {
@@ -38,7 +39,17 @@
     "symbol": "wsteth",
     "name": "wstETH",
     "platforms": {
-      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F"
+      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
+      "base": "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
+      "ethereum": "0x49446A0874197839D15395B908328a74ccc96Bc0"
+    }
+  },
+  {
+    "id": "sweth",
+    "symbol": "swETH",
+    "name": "Swell Ethereum",
+    "platforms": {
+      "ethereum": "0x32bd822d615A3658A68b6fDD30c2fcb2C996D678"
     }
   },
   {
@@ -46,7 +57,7 @@
     "symbol": "ezeth",
     "name": "ezETH",
     "platforms": {
-      "arbitrum": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+      "arbitrum-one": "0x2416092f143378750bb29b79eD961ab195CcEea5",
       "blast": "0x2416092f143378750bb29b79eD961ab195CcEea5"
     }
   },
@@ -55,7 +66,7 @@
     "symbol": "rseth",
     "name": "rsETH",
     "platforms": {
-      "arbitrum": "0x4186BFC76E2E237523CBC30FD220FE055156b41F"
+      "arbitrum-one": "0x4186BFC76E2E237523CBC30FD220FE055156b41F"
     }
   }
 ]

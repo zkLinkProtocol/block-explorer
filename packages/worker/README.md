@@ -90,3 +90,14 @@ npm run migration:create -name=UpdateTxsFee
 ```
 
 this command will simply create an empty migration where the custom migration logic can be added.
+
+### Mapping Tokens
+If a token (Token A) retrieved from the Coingecko API lacks a price, follow these steps:
+- Find another token (Token B) which have price in Coingecko API and share a similar price with Token A.
+- Use token B's Coingecko API ID in the `id` field.
+- In the `platforms` field, use "extra" as the key and input Token A's address.
+
+If a token (Token A) on a specific blockchain lacks a price on the Coingecko API but has a price on another blockchain, follow these steps:
+- Utilize Token A's Coingecko API ID in the `id` field.
+- In the `platforms` field, use the name of the blockchain where Token A lacks a price and input Token A's address.
+

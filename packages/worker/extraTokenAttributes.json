@@ -1,0 +1,14 @@
+[
+  {
+    "name": "wUSDM-ethereum",
+    "address": "0x57F5E098CaD7A3D1Eed53991D4d66C45C9AF7812",
+    "image": "https://assets.coingecko.com/coins/images/33785/large/wUSDM_PNG_240px.png?1702981552",
+    "market_cap": 1
+  },
+  {
+    "name": "wUSDM-manta",
+    "address": "0xbdAd407F77f44F7Da6684B416b1951ECa461FB07",
+    "image": "https://assets.coingecko.com/coins/images/33785/large/wUSDM_PNG_240px.png?1702981552",
+    "market_cap": 1
+  }
+]

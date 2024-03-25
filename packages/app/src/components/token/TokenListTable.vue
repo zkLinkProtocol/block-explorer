@@ -61,7 +61,7 @@
         </div>
         <div v-else class="from-chain-text">{{ NOVA_NATIVE_TOKEN }}</div>
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
+      <TableBodyColumn :data-heading="t('tokensView.table.novaAddress')">
         <div class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="Nova" />-->
           <AddressLink
@@ -74,11 +74,8 @@
           <CopyButton :value="item.l2Address" />
         </div>
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
-        <div
-          v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)"
-          class="token-address-container max-w-sm"
-        >
+      <TableBodyColumn :data-heading="t('tokensView.table.originAddress')">
+        <div v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="ORIGIN" />-->
           <div v-if="!item.networkKey">
             {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
@@ -95,7 +92,7 @@
           </AddressLink>
           <CopyButton :value="item.l1Address" />
         </div>
-        <div v-else></div>
+        <div v-else class="min-h-[20px]"></div>
       </TableBodyColumn>
     </template>
     <template #loading>
@@ -122,9 +119,6 @@
         </TableBodyColumn>
         <TableBodyColumn>
           <ContentLoader />
-        </TableBodyColumn>
-         <TableBodyColumn>
-          <ContentLoader/>
         </TableBodyColumn>
         <TableBodyColumn>
           <ContentLoader />
@@ -303,5 +297,11 @@ function sortBy(column: string) {
 }
 .tool-wrap {
   @apply flex items-center;
+}
+@media (max-width: 760px) {
+  .token-icon-label {
+    display: flex;
+    flex-direction: row-reverse;
+  }
 }
 </style>

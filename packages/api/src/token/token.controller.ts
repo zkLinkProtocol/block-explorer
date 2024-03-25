@@ -67,6 +67,7 @@ export class TokenController {
         return {
           ...token,
           tvl: token.totalSupply
+            //TODO The calculation of the price needs to be more precise. It should start from the non-zero digit
             .mul(Math.floor((token.usdPrice ?? 0) * 10 ** 6))
             .div(10 ** 6)
             .div(BigNumber.from(10).pow(token.decimals))
@@ -103,6 +104,8 @@ export class TokenController {
           message: "",
         },
         data: {
+          //TODO check if the user has a deposit transaction where the deposit token value is at least $20
+          // but it should be more flexible and support custom input quantities.
           result: (await this.tokenService.getUserHighestDepositTvl(checkedAddr)).gte(19),
         },
       };

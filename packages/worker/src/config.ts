@@ -2,7 +2,9 @@ export type NetworkKey = string;
 import * as fs from "fs";
 import * as JSONStream from "JSONStream";
 import * as path from "path";
-const extraCoinsListPath = "./extraCoinsList.json";
+import { IExtraTokenAttribute } from "./token/tokenOffChainData/providers/coingecko/coingeckoTokenOffChainDataProvider";
+const extraCoinsListPath = "../extraCoinsList.json";
+const extraTokenAttributesPath = "../extraTokenAttributes.json";
 export default async () => {
   const {
     PORT,
@@ -38,6 +40,9 @@ export default async () => {
     UPDATE_TOTAL_LOCKED_VALUE_INTERVAL,
     UPDATE_TOTAL_LOCKED_VALUE_DELAY,
     ENABLE_TOTAL_LOCKED_VALUE_UPDATER,
+
+    COINGECKO_PROXY_URL,
+    COINGECKO_ENABLE_PROXY,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -106,6 +111,9 @@ export default async () => {
         apiKey: COINGECKO_API_KEY,
         platformIds: COINGECKO_PLATFORM_IDS.split(","),
         extraCoinsList: await getExtraCoinsList(),
+        extraTokenAttributes: await getExtraTokenAttributes(),
+        proxyUrl: COINGECKO_PROXY_URL,
+        enableProxy: COINGECKO_ENABLE_PROXY === "true",
       },
       updateTotalLockedValueInterval: parseInt(UPDATE_TOTAL_LOCKED_VALUE_INTERVAL, 10) || 30000,
       updateTotalLockedValueDelay: parseInt(UPDATE_TOTAL_LOCKED_VALUE_DELAY, 10) || 500,
@@ -143,6 +151,25 @@ async function getExtraCoinsList() {
   return (res as ITokenListItemProviderResponse[]).map((item) => ({
     ...item,
     platforms: Object.fromEntries(Object.entries(item.platforms).map(([key, value]) => [key, value.toLowerCase()])),
+  }));
+}
+async function getExtraTokenAttributes(): Promise<IExtraTokenAttribute[]> {
+  const readStream = fs.createReadStream(path.join(__dirname, extraTokenAttributesPath));
+  const jsonStream = JSONStream.parse("*");
+
+  readStream.pipe(jsonStream);
+  const res = [];
+  await new Promise((resolve, reject) => {
+    jsonStream.on("data", (item: any) => {
+      res.push(item);
+    });
+
+    jsonStream.on("end", resolve);
+    jsonStream.on("error", reject);
+  });
+  return (res as IExtraTokenAttribute[]).map((item) => ({
+    ...item,
+    address: item.address.toLowerCase(),
   }));
 }
 interface ITokenListItemProviderResponse {

@@ -80,7 +80,7 @@ export class TransferService {
       .where({
         to: address,
         tokenAddress,
-        type: "deposit",
+        // type: "deposit",
       })
       .orderBy("number", "ASC")
       .take(1);
