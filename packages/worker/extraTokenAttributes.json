@@ -34,5 +34,11 @@
     "address": "0x8a053350ca5F9352a16deD26ab333e2D251DAd7c",
     "image": "https://etherscan.io/token/images/mmeth_32.png",
     "market_cap": 1
+  },
+  {
+    "name": "nETH-ethereum",
+    "address": "0xC6572019548dfeBA782bA5a2093C836626C7789A",
+    "image": "https://web3-public.s3.ap-northeast-1.amazonaws.com/oss/console/1711358488472.png",
+    "market_cap": 1
   }
 ]
