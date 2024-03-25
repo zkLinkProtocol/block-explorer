@@ -1,10 +1,34 @@
 <template>
-  <Table :data-testid="$testId.tokensTable" :loading="loading" :items="tokens" ref="table">
+  <Table :data-testid="$testId.tokensTable" :loading="loading" :items="filteredData" ref="table">
     <template #table-head>
-      <table-head-column>{{ t("tokensView.table.tokenName") }}</table-head-column>
-      <table-head-column>{{ t("tokensView.table.price") }}</table-head-column>
-      <table-head-column>Tvl</table-head-column>
-      <table-head-column class="text-center">{{ t("tokensView.table.fromChain") }}</table-head-column>
+      <table-head-column @click="sortBy('name')">
+        <div class="th-box">
+          <span>{{ t("tokensView.table.tokenName") }}</span>
+          <div class="tool-wrap">
+            <ranking :sort-order="sortOrder" />
+            <TableFilterModel @click="handleChildClick" />
+          </div>
+        </div>
+      </table-head-column>
+      <table-head-column @click="sortBy('price')">
+        <div class="th-box">
+          <span>{{ t("tokensView.table.price") }}</span>
+          <ranking :sort-order="sortOrder" />
+        </div>
+      </table-head-column>
+      <table-head-column>
+        <div class="th-box">
+          Tvl
+          <ranking :sort-order="sortOrder" />
+        </div>
+      </table-head-column>
+      <table-head-column class="text-center">
+        <div class="th-box">
+          <span>{{ t("tokensView.table.fromChain") }}</span>
+          <ranking :sort-order="sortOrder" />
+          <TableFilterModel @filter="filterChain" :filterOptions="fromChainOptions" :isSearch="false" />
+        </div>
+      </table-head-column>
       <table-head-column>Nova ADDRESS</table-head-column>
       <table-head-column>Origin Address</table-head-column>
     </template>
@@ -25,33 +49,44 @@
         <TokenTVL :tvl="item.tvl" />
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.fromChain')">
-        <div v-if="iconsList[item.networkKey]">
-          <Tooltip class="batches-tooltip">
-            <img class="from-chain-icon" :src="iconsList[item.networkKey]" :alt="item.networkKey" />
-            <template #content>{{ chainNameList[item.networkKey] }}</template>
-          </Tooltip>
+        <div v-if="chainNameList[item.networkKey]" class="from-chain-text">
+          {{ chainNameList[item.networkKey] }}
         </div>
-        <div v-else-if="ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="from-chain-text">{{ NOVA_MERGED_TOKEN }}</div>
+        <div v-else-if="ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="from-chain-text">
+          {{ NOVA_MERGED_TOKEN }}
+        </div>
         <div v-else class="from-chain-text">{{ NOVA_NATIVE_TOKEN }}</div>
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
         <div class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="Nova" />-->
-          <AddressLink :data-testid="$testId.tokenAddress" :address="item.l2Address"
-            class="token-address block max-w-sm">
+          <AddressLink
+            :data-testid="$testId.tokenAddress"
+            :address="item.l2Address"
+            class="token-address block max-w-sm"
+          >
             {{ shortenFitText(item.l2Address, "left", 100, subtraction) }}
           </AddressLink>
           <CopyButton :value="item.l2Address" />
         </div>
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
-        <div v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="token-address-container max-w-sm">
+        <div
+          v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)"
+          class="token-address-container max-w-sm"
+        >
           <!--          <TransactionNetworkSquareBlock network="ORIGIN" />-->
           <div v-if="!item.networkKey">
             {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
           </div>
-          <AddressLink v-else :data-testid="$testId.tokenAddress" :address="item.l1Address" network="origin"
-            :networkKey="item.networkKey" class="token-address block max-w-sm">
+          <AddressLink
+            v-else
+            :data-testid="$testId.tokenAddress"
+            :address="item.l1Address"
+            network="origin"
+            :networkKey="item.networkKey"
+            class="token-address block max-w-sm"
+          >
             {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
           </AddressLink>
           <CopyButton :value="item.l1Address" />
@@ -82,9 +117,6 @@
           <ContentLoader class="w-16" />
         </TableBodyColumn>
         <TableBodyColumn>
-          <ContentLoader/>
-        </TableBodyColumn>
-        <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
         <TableBodyColumn>
@@ -93,13 +125,15 @@
         <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
-        
+        <TableBodyColumn>
+          <ContentLoader />
+        </TableBodyColumn>
       </tr>
     </template>
   </Table>
 </template>
 <script lang="ts" setup>
-import { type PropType, ref, watch } from "vue";
+import { type PropType, ref, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { useElementSize } from "@vueuse/core";
@@ -115,8 +149,11 @@ import TableBodyColumn from "@/components/common/table/TableBodyColumn.vue";
 import TableHeadColumn from "@/components/common/table/TableHeadColumn.vue";
 import TokenPrice from "@/components/common/table/fields/TokenPrice.vue";
 import TokenTVL from "@/components/common/table/fields/TokenTVL.vue";
+import IconArrowDown from "@/components/icons/IconArrowDown.vue";
+import IconArrowUp from "@/components/icons/IconArrowUp.vue";
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
-
+import Ranking from "./TableRanking.vue";
+import TableFilterModel from "./TableFilterModal.vue";
 // import { iconList } from "@/configs/hyperchain.config.json"
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 
@@ -126,7 +163,7 @@ const { iconsList, chainNameList } = useEnvironmentConfig();
 
 import type { Token } from "@/composables/useToken";
 
-defineProps({
+const props = defineProps({
   tokens: {
     type: Array as PropType<Token[]>,
     default: () => [],
@@ -144,13 +181,62 @@ const { width } = useElementSize(table);
 watch(width, () => {
   width.value <= 500 ? (subtraction.value = 10) : (subtraction.value = 5);
 });
+const handleChildClick = (e: MouseEvent) => {
+  e.stopPropagation();
+};
 
+const fromChainOptions = computed((): string[] | [] => {
+  return [NOVA_MERGED_TOKEN, NOVA_NATIVE_TOKEN, ...Object.values(chainNameList)];
+});
+const filterChain = (selectedList) => {
+  filteredData.value = props.tokens.filter((item) => {
+    const networkName = item.networkKey
+      ? chainNameList[item.networkKey]
+      : ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)
+      ? NOVA_MERGED_TOKEN
+      : NOVA_NATIVE_TOKEN;
+
+    const optionMatch = selectedList.value.includes(networkName);
+    return optionMatch;
+  });
+};
+const sortColumn = ref<string>("");
+
+const sortType = ref<string>("value");
+const sortOrder = ref<string>("");
+
+const sortedData = computed(() => {
+  if (sortColumn.value && sortOrder.value) {
+    return [...props.tokens].sort((a, b) => {
+      const key = sortColumn.value as keyof Token;
+      const valueA = a[key]!;
+      const valueB = b[key]!;
+      if (sortOrder.value === "asc") {
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+      } else if (sortOrder.value === "desc") {
+        return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+      } else {
+        return 0;
+      }
+    });
+  } else {
+    return props.tokens;
+  }
+});
+
+function sortBy(column: string) {
+  if (sortColumn.value === column) {
+    sortOrder.value = sortOrder.value === "asc" ? "desc" : sortOrder.value === "desc" ? "none" : "asc";
+  } else {
+    sortColumn.value = column;
+    sortOrder.value = "asc";
+  }
+}
 </script>
 
 <style scoped lang="scss">
 .table-body-col {
   @apply relative flex flex-col items-end justify-end text-right md:table-cell md:w-1/3 md:text-left;
-
   &:before {
     @apply absolute left-4 top-3 whitespace-nowrap pr-5 text-left text-xs uppercase text-neutral-400 content-[attr(data-heading)] md:content-none;
   }
@@ -182,12 +268,32 @@ watch(width, () => {
   }
 
   .from-chain-text {
-    text-align: center;
+    // text-align: center;
   }
 }
 
 .text-center {
   min-width: 240px;
-  @apply flex items-center justify-center;
+  // @apply flex items-center justify-center;
+}
+.filter-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  cursor: pointer;
+  .active {
+    @apply text-design-200;
+  }
+}
+.th-box {
+  display: flex;
+  flex: auto;
+  align-items: center;
+  justify-content: left;
+}
+.tool-wrap {
+  @apply flex items-center;
 }
 </style>
