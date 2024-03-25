@@ -21,7 +21,6 @@ const props = defineProps({
     default:0
   }
 });
-console.log('decimals',props.decimals);
 
 
 const totalCount = computed(() => { 

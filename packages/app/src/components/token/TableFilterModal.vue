@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-sm px-1">
-    <Popover v-slot="{ open }" class="relative">
-      <PopoverButton class="group inline-flex items-center px-1 text-base font-medium focus:outline-none">
+    <Popover v-slot="{ open,close  }" class="relative">
+      <PopoverButton  class="group inline-flex items-center px-1 text-base font-medium focus:outline-none">
         <FilterIcon class="w-4 h-4 text-black" />
       </PopoverButton>
 
@@ -13,10 +13,11 @@
         leave-from-class="translate-y-0 opacity-100"
         leave-to-class="translate-y-1 opacity-0"
       >
-        <PopoverPanel class="absolute left-1/2 z-10 mt-3 max-w-sm -translate-x-1/2 transform px-4 sm:px-0">
+        <PopoverPanel v-if="open" class="absolute left-1/2 z-10 mt-3 max-w-sm -translate-x-1/2 transform px-4 sm:px-0">
           <div class="rounded-lg shadow-lg bg-rounded bg-white md:min-w-[200px]">
             <div class="search-wrap" v-if="isSearch">
-              <Input v-model="filterKeyword" type="text" placeholder="" />
+              <Input v-model="filterKeyword" @keyup="handleKeyUp" type="text" placeholder="" />
+              
             </div>
 
             <ul class="options-wrap">
@@ -28,8 +29,8 @@
               </li>
             </ul>
             <div class="footer-wrap">
-              <button @click="resetFilter" class="btn btn-reset">Reset</button>
-              <button @click="applyFilter" class="btn">confirm</button>
+              <button @click="resetFilter(close)" class="btn btn-reset">Reset</button>
+              <button @click="applyFilter(close)" class="btn">confirm</button>
             </div>
           </div>
         </PopoverPanel>
@@ -53,27 +54,47 @@ const props = defineProps({
     type: String,
     default: "",
   },
-  selected: {
-    type: Array,
-    default: [],
-  },
+  // selected: {
+  //   type: Array,
+  //   default: [],
+  // },
   isSearch: {
     type: Boolean,
     default: true,
   },
+  modelValue: {
+    type: String,
+    default: null,
+    required: false,
+  },
 });
 const emit = defineEmits<{
-  (e: "filter", value: string[]): void;
+  (eventName: "update:modelValue", value: string): void;
+  (eventName: "update:selected", value: string[]): void;
+
 }>();
 const filterKeyword = ref(props.keyword);
-const selectedFilters = ref(props.selected);
-const applyFilter = () => {
-  emit("filter", selectedFilters);
+const selectedFilters = ref([]);
+
+const applyFilter = (close) => {
+  close()
+  emit("update:selected", selectedFilters.value);
 };
-const resetFilter = () => {
+const resetFilter = (close) => {
+  close()
   selectedFilters.value = [];
-  emit("filter", []);
+  filterKeyword.value=''
+  emit("update:selected", []);
 };
+const handleKeyUp=(event)=>{
+  const value = event.target.value.trim();
+  emit("update:modelValue", value);
+}
+
+
+
+
+
 </script>
 <style lang="scss" scoped>
 .search-wrap {
