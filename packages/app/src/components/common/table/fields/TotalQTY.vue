@@ -1,0 +1,39 @@
+<template>
+  <div class="token-price-container">
+    <div v-if="$props.totalSupply?.hex" class="token-price">
+      {{ totalCount }}
+    </div>
+    <div v-else>0</div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { computed } from "vue";
+
+import { formatBigNumberish } from "@/utils/formatters";
+
+const props = defineProps({
+  totalSupply: {
+    type: Object,
+  },
+  decimals:{
+    type: Number,
+    default:0
+  }
+});
+console.log('decimals',props.decimals);
+
+
+const totalCount = computed(() => { 
+  if (props.totalSupply?.hex) {
+    return formatBigNumberish(props.totalSupply.hex, props.decimals)
+  }
+  return "0";
+});
+</script>
+
+<style scoped lang="scss">
+.token-price-container {
+  @apply h-[20px];
+}
+</style>

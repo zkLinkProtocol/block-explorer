@@ -16,6 +16,7 @@
           <ranking :sort-order="sortOrder" />
         </div>
       </table-head-column>
+      <table-head-column>{{ t("tokensView.table.totalQty") }}</table-head-column>
       <table-head-column>
         <div class="th-box">
           Tvl
@@ -44,6 +45,9 @@
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
         <TokenPrice :address="item.l2Address" />
+      </TableBodyColumn>
+      <TableBodyColumn :data-heading="t('tokensView.table.totalQty')">
+        <TotalQTY :totalSupply="item.totalSupply" :decimals="item.decimals"/>
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
         <TokenTVL :tvl="item.tvl" />
@@ -119,6 +123,9 @@
         <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
+         <TableBodyColumn>
+          <ContentLoader/>
+        </TableBodyColumn>
         <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
@@ -151,6 +158,7 @@ import TokenPrice from "@/components/common/table/fields/TokenPrice.vue";
 import TokenTVL from "@/components/common/table/fields/TokenTVL.vue";
 import IconArrowDown from "@/components/icons/IconArrowDown.vue";
 import IconArrowUp from "@/components/icons/IconArrowUp.vue";
+import TotalQTY from "@/components/common/table/fields/TotalQTY.vue"
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
 import Ranking from "./TableRanking.vue";
 import TableFilterModel from "./TableFilterModal.vue";
