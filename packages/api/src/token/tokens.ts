@@ -785,7 +785,7 @@ export default [
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Eigenpie Points"],
     multipliers: [
       {
-        multiplier: 1,
+        multiplier: 1.5,
         timestamp: 0,
       },
     ],
@@ -805,7 +805,7 @@ export default [
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Eigenpie Points"],
     multipliers: [
       {
-        multiplier: 1,
+        multiplier: 1.5,
         timestamp: 0,
       },
     ],
@@ -825,7 +825,7 @@ export default [
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Eigenpie Points"],
     multipliers: [
       {
-        multiplier: 1,
+        multiplier: 1.5,
         timestamp: 0,
       },
     ],
