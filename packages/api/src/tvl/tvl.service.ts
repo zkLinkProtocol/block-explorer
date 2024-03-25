@@ -128,10 +128,10 @@ export class TVLService {
     };
   }
 
-  public async getAccountsRank(): Promise<AccountRankDto[]> {
+  public async getAccountsRank(page: PagingOptionsDto): Promise<AccountRankDto[]> {
     const ranks: Point[] = await this.addressTVLRepository.query(
-      `select * from "points" order by "refPoint" + "stakePoint" desc limit $1`,
-      [50]
+      `select * from "points" order by "refPoint" + "stakePoint" desc limit $1 offset $2`,
+      [page.limit, (page.page - 1) * page.limit]
     );
 
     if (ranks.length === 0) {
@@ -148,6 +148,7 @@ export class TVLService {
     const referMap = new Map(refererals.map((refer) => [refer.address, refer.referrer]));
 
     const result: AccountRankDto[] = [];
+    const firstRank = (page.page - 1) * page.limit + 1;
     for (let i = 0; i < ranks.length; i++) {
       const rank = ranks[i];
       const address = normalizeAddressTransformer.from(rank.address);
@@ -155,7 +156,7 @@ export class TVLService {
       result.push({
         novaPoint: rank.stakePoint,
         referPoint: rank.refPoint,
-        rank: i + 1,
+        rank: firstRank + i,
         inviteBy: referer,
         address,
       });
