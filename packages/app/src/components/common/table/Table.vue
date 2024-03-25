@@ -108,7 +108,6 @@ defineProps({
     tbody {
       tr {
         border-bottom-width: 1px;
-        opacity: 1;
       }
       tr:nth-child(even) {
         background-color: rgba(245, 247, 250, 0.02);

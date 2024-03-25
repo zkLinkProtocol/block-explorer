@@ -34,7 +34,7 @@
         <div v-else-if="ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="from-chain-text">{{ NOVA_MERGED_TOKEN }}</div>
         <div v-else class="from-chain-text">{{ NOVA_NATIVE_TOKEN }}</div>
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
+      <TableBodyColumn :data-heading="t('tokensView.table.novaAddress')">
         <div class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="Nova" />-->
           <AddressLink :data-testid="$testId.tokenAddress" :address="item.l2Address"
@@ -44,7 +44,7 @@
           <CopyButton :value="item.l2Address" />
         </div>
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
+      <TableBodyColumn :data-heading="t('tokensView.table.originAddress')">
         <div v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="ORIGIN" />-->
           <div v-if="!item.networkKey">
