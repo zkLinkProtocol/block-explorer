@@ -754,6 +754,86 @@ export default [
     address: [
       {
         chain: "Ethereum",
+        l1Address: "0x49446A0874197839D15395B908328a74ccc96Bc0",
+        l2Address: "0x7b1fcd81F8b91C5eF3743c4d56bf7C1E52c93360",
+      },
+    ],
+    decimals: 18,
+    symbol: "mstETH",
+    cgPriceId: "ethereum",
+    type: "LRT",
+    yieldType: ["NOVA Points", "Native Yield", "EL Points", "Eigenpie Points"],
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "Ethereum",
+        l1Address: "0x32bd822d615A3658A68b6fDD30c2fcb2C996D678",
+        l2Address: "0xBB68f4548A1c26B6611cbB8087c25A616eDd8569",
+      },
+    ],
+    decimals: 18,
+    symbol: "mswETH",
+    cgPriceId: "ethereum",
+    type: "LRT",
+    yieldType: ["NOVA Points", "Native Yield", "EL Points", "Eigenpie Points"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "Ethereum",
+        l1Address: "0x8a053350ca5F9352a16deD26ab333e2D251DAd7c", //add
+        l2Address: "0xB5B8C247C740d53b6Fbab10f1C17922788baeD54", //add
+      },
+    ],
+    decimals: 18,
+    symbol: "mmETH",
+    cgPriceId: "ethereum",
+    type: "LRT",
+    yieldType: ["NOVA Points", "Native Yield", "EL Points", "Eigenpie Points"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "Ethereum",
+        l1Address: "0xE46a5E19B19711332e33F33c2DB3eA143e86Bc10",
+        l2Address: "0x7F62B7a0A9848D5e261960Ff4B4009206aD00bd5",
+      },
+    ],
+    decimals: 18,
+    symbol: "mwBETH",
+    cgPriceId: "ethereum",
+    type: "LRT",
+    yieldType: ["NOVA Points", "Native Yield", "EL Points", "Eigenpie Points"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "Ethereum",
         l1Address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
         l2Address: "0x075893f535b9DDE1D28492EA13085f27ecEf6320",
       },
