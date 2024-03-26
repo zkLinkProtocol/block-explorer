@@ -15,7 +15,7 @@ export class AddressTransferRepository extends BaseRepository<AddressTransfer> {
         .select("addressTransfer.address")
         .distinct(true)
         .getCount();
-    console.log("uaw number : ",count);
+    // console.log("uaw number : ",count);
     return count;
   }
 }
