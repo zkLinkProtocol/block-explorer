@@ -2,7 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import waitFor from "../utils/waitFor";
 import { Worker } from "../common/worker";
-import { BlockRepository, TVLHistoryRepository, TokenRepository } from "../repositories";
+import {BlockRepository, TVLHistoryRepository, TokenRepository, AddressTransferRepository} from "../repositories";
 import { Block } from "../entities";
 import { BigNumber } from "ethers";
 
@@ -13,7 +13,7 @@ export class HistoryService extends Worker {
 
   public constructor(
     private readonly tokenRepository: TokenRepository,
-
+    private readonly addressTransferRepository:AddressTransferRepository,
     private readonly blockRepository: BlockRepository,
     private readonly tvlHistoryRepository: TVLHistoryRepository,
     configService: ConfigService
@@ -44,11 +44,12 @@ export class HistoryService extends Worker {
   private async recordTVLHistory(): Promise<void> {
     const block: Block = await this.blockRepository.getLastBlock({ select: { number: true, timestamp: true } });
     const totalTVL: BigNumber = await this.tokenRepository.getTotalTVL();
-
+    const totalUaw: number = await this.addressTransferRepository.getUawNumber();
     await this.tvlHistoryRepository.add({
       blockNumber: block.number,
       timestamp: block.timestamp,
       tvl: BigNumber.from(totalTVL.toString()),
+      uaw: Number(totalUaw),
     });
   }
 }
