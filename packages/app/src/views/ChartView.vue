@@ -42,7 +42,7 @@ const format = (str:string,type:string,isNow:boolean) => {
 watch(
   () => route.query.type,
   async () => {
-    await getData()
+    await getData(searchParams.value?.type?.toString() || '')
     let xData: any[] = [];
     let yData: string[] = []
     data && data.value.map((i:{tvl:string,timestamp:string},index)=>{

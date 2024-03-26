@@ -10,9 +10,10 @@ export type TVL = {
 };
 export default (context = useContext()) => {
   const data = ref([]);
-  const getData = async () => {
+  const getData = async (type:string) => {
     try {
-      data.value = await $fetch(`${context.currentNetwork.value.apiUrl}/blocks/total/tvl`);
+      const url = type === 'TVL'? 'blocks/total/tvl': 'blocks/total/uaw'
+      data.value = await $fetch(`${context.currentNetwork.value.apiUrl}/${url}`);
     } catch (error: unknown) {
       data.value = [];
     }
