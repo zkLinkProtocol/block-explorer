@@ -2,14 +2,9 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import waitFor from "../utils/waitFor";
 import { Worker } from "../common/worker";
-import {
-  BlockRepository,
-  TVLHistoryRepository,
-  TokenRepository,
-  AddressTransferRepository
-} from "../repositories";
+import { TokenRepository } from "../repositories";
 import { JsonRpcProviderBase } from "../rpcProvider";
-import { Block, Token } from "../entities";
+import { Token } from "../entities";
 import { BigNumber } from "ethers";
 import { sleep } from "zksync-web3/build/src/utils";
 const UPDATE_TOKENS_BATCH_SIZE = 3;
@@ -22,10 +17,7 @@ export class ValuesService extends Worker {
 
   public constructor(
     private readonly tokenRepository: TokenRepository,
-    private readonly tvlHistoryRepository: TVLHistoryRepository,
-    private readonly blockRepository: BlockRepository,
     private readonly provider: JsonRpcProviderBase,
-    private readonly addressTransferRepository:AddressTransferRepository,
     configService: ConfigService
   ) {
     super();
@@ -58,8 +50,6 @@ export class ValuesService extends Worker {
           updateTokensTasks = [];
         }
       }
-
-      await this.recordTVLHistory();
     } catch (err) {
       this.logger.error({
         message: "Failed to update tokens total supply data",
@@ -79,17 +69,5 @@ export class ValuesService extends Worker {
     const balance = await this.provider.send("eth_call", [{ to: token.l2Address, data: "0x18160ddd" }, "latest"]);
     this.logger.debug(` ${token.symbol} total supply: ${balance.toString()} `);
     return balance;
-  }
-
-  private async recordTVLHistory(): Promise<void> {
-    const block: Block = await this.blockRepository.getLastBlock({ select: { number: true, timestamp: true } });
-    const totalTVL: BigNumber = await this.tokenRepository.getTotalTVL();
-    const uaw = await this.addressTransferRepository.getUawNumber();
-    await this.tvlHistoryRepository.add({
-      blockNumber: block.number,
-      timestamp: block.timestamp,
-      tvl: BigNumber.from(totalTVL.toString()),
-      uaw: Number(uaw)
-    });
   }
 }
