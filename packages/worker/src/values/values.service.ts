@@ -2,7 +2,12 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import waitFor from "../utils/waitFor";
 import { Worker } from "../common/worker";
-import { BlockRepository, TVLHistoryRepository, TokenRepository } from "../repositories";
+import {
+  BlockRepository,
+  TVLHistoryRepository,
+  TokenRepository,
+  AddressTransferRepository
+} from "../repositories";
 import { JsonRpcProviderBase } from "../rpcProvider";
 import { Block, Token } from "../entities";
 import { BigNumber } from "ethers";
@@ -20,6 +25,7 @@ export class ValuesService extends Worker {
     private readonly tvlHistoryRepository: TVLHistoryRepository,
     private readonly blockRepository: BlockRepository,
     private readonly provider: JsonRpcProviderBase,
+    private readonly addressTransferRepository:AddressTransferRepository,
     configService: ConfigService
   ) {
     super();
@@ -78,11 +84,12 @@ export class ValuesService extends Worker {
   private async recordTVLHistory(): Promise<void> {
     const block: Block = await this.blockRepository.getLastBlock({ select: { number: true, timestamp: true } });
     const totalTVL: BigNumber = await this.tokenRepository.getTotalTVL();
-
+    const uaw = await this.addressTransferRepository.getUawNumber();
     await this.tvlHistoryRepository.add({
       blockNumber: block.number,
       timestamp: block.timestamp,
       tvl: BigNumber.from(totalTVL.toString()),
+      uaw: Number(uaw)
     });
   }
 }

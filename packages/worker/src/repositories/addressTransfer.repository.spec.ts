@@ -43,7 +43,7 @@ describe("AddressTransferRepository", () => {
     expect(repository).toBeInstanceOf(BaseRepository<AddressTransfer>);
   });
   it("should return the count of distinct addresses", async () => {
-    const count = await repository.getDistinctAddressCount();
+    const count = await repository.getUawNumber();
     expect(count).toBe(10);
   });
 });
