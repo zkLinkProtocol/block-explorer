@@ -42,19 +42,33 @@ const format = (str:string,type:string,isNow:boolean) => {
 watch(
   () => route.query.type,
   async () => {
-    await getData(searchParams.value?.type?.toString() || '')
+    const type = searchParams.value?.type?.toString() || ''
+    await getData(type)
     let xData: any[] = [];
     let yData: string[] = []
-    data && data.value.map((i:{tvl:string,timestamp:string},index)=>{
-      if (index) {
-        xData.unshift({value: i.tvl, date: i.timestamp, type: false})
-        const timer = format(i.timestamp,'yLine',false)
-        yData.unshift(timer)
-      } else {
-        xData.unshift({value: i.tvl, date: i.timestamp, type: true})
-        yData.unshift('Now')
-      }
-    })
+    if (type === 'TVL') {
+      data && data.value.map((i:{tvl:string,timestamp:string},index)=>{
+        if (index) {
+          xData.unshift({value: i.tvl, date: i.timestamp, type: false})
+          const timer = format(i.timestamp,'yLine',false)
+          yData.unshift(timer)
+        } else {
+          xData.unshift({value: i.tvl, date: i.timestamp, type: true})
+          yData.unshift('Now')
+        }
+      })
+    } else {
+      data && data.value.map((i:{uaw:string,timestamp:string},index)=>{
+        if (index) {
+          xData.unshift({value: i.uaw, date: i.timestamp, type: false})
+          const timer = format(i.timestamp,'yLine',false)
+          yData.unshift(timer)
+        } else {
+          xData.unshift({value: i.uaw, date: i.timestamp, type: true})
+          yData.unshift('Now')
+        }
+      })
+    }
     const option = {
       title: {
         text: Title,
@@ -65,7 +79,7 @@ watch(
           formatter: function (params:any) {
             const timer = format(params[0].data.date, 'tooltip',params[0].data.type||false)
             var yValue = params[0].data.value;
-            return timer + '<br />TVL: $ ' + yValue.toLocaleString();
+            return timer + '<br />'+ type +': $ ' + yValue.toLocaleString();
           }
       },
       grid: {
