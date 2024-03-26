@@ -19,7 +19,7 @@
           <span v-else>{{ formatNumber(committed ?? 0) }}</span>
         </dd>
       </div>
-      <div class="stats-container">
+      <!-- <div class="stats-container">
         <dt>
           <router-link :to="{ name: 'blocks' }">{{ t("networkStats.verified") }}</router-link>
         </dt>
@@ -27,7 +27,7 @@
           <ContentLoader v-if="loading" class="h-full w-24" />
           <span v-else>{{ formatNumber(verified ?? 0) }}</span>
         </dd>
-      </div>
+      </div> -->
       <div class="stats-container">
         <dt>
           <router-link :to="{ name: 'transactions' }">{{ t("networkStats.transactions") }}</router-link>

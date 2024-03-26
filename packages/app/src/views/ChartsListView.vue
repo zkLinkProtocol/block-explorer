@@ -14,16 +14,17 @@
             </a>
           </div>
         </div>
-        <!-- <div class="rounded flex-auto box">
-          <div class="p-2 title">
-            <a href="/charts/chart?type=add" class="no-underline">Unique Addresses Chart</a>
+        <div class="rounded flex-auto box">
+          <div class="title">
+            <a href="/charts/chart?type=add" class="p-2 inline-block w-full no-underline">Unique Addresses Chart</a>
           </div>
           <div class="p-2 content">
-            <a href="/charts/chart?type=add" class="inline-block w-full">
-              <img class="img-fluid w-100" src="/images/address.svg" alt="">
+            <a href="/charts/chart?type=add" class="inline-block w-full relative">
+              <div class="absolute w-full h-full top-0 left-0 z-10"></div>
+              <div class="w-full h-28" id="addChart"></div>
             </a>
           </div>
-        </div> -->
+        </div>
       </div>
     </div>
   </div>
@@ -61,7 +62,7 @@ const context = useContext();
 const route = useRoute();
 
 onMounted(async() => {
-  await getData()
+  await getData('TVL')
     let xData: any[] = [];
     let yData: string[] = []
     data && data.value.map((i:{tvl:string,timestamp:string},index)=>{
@@ -74,7 +75,7 @@ onMounted(async() => {
         yData.unshift('Now')
       }
     })
-    const option = {
+    let option = {
       animation: false,
       interactive: false,
       grid: {
@@ -135,6 +136,78 @@ onMounted(async() => {
     };
     var myChart = echarts.init(document.getElementById('TVLChart'));
     myChart.setOption(option);
+    await getData('add')
+    data && data.value.map((i:{tvl:string,timestamp:string},index)=>{
+      if (index) {
+        xData.unshift({value: i.tvl, date: i.timestamp, type: false})
+        const timer = format(i.timestamp,'yLine',false)
+        yData.unshift(timer)
+      } else {
+        xData.unshift({value: i.tvl, date: i.timestamp, type: true})
+        yData.unshift('Now')
+      }
+    })
+    option = {
+      animation: false,
+      interactive: false,
+      grid: {
+          top: '10%',
+          left: '15%',
+          right: '5%',
+          bottom: '15%'
+      },
+      xAxis: {
+          type: 'category',
+          data: yData,
+          axisTick: {
+            show: false
+          },
+          axisLabel: {
+              textStyle: {
+                  fontSize: 6
+              },
+          }
+      },
+      yAxis: {
+          type: 'value',
+          axisLabel: {
+              textStyle: {
+                  fontSize: 6
+              },
+              formatter: function (value:any, index:number) {
+                  if (value < 1000) {
+                      return '$ '+value;
+                  } else if (value < 1000000) {
+                      return '$ '+(value / 1000).toFixed(0) + 'K';
+                  } else {
+                      return '$ '+(value / 1000000).toFixed(0) + 'M';
+                  }
+              }
+          }
+      },
+      series: [{
+          type: 'line',
+          smooth: true,
+          data: xData,
+          symbol: 'none',
+          emphasis: {
+              focus: 'series'
+          },
+          onclick: function (params:any) {
+              console.log(params);
+          },
+          lineStyle: {
+              width: 1
+          },
+          itemStyle: {
+            normal: {
+                color: '#000'
+            }
+          }
+      }]
+    };
+    var addChart = echarts.init(document.getElementById('addChart'));
+    addChart.setOption(option);
 });
 </script>
 

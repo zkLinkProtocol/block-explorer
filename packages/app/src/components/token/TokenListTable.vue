@@ -3,10 +3,10 @@
     <template #table-head>
       <table-head-column>{{ t("tokensView.table.tokenName") }}</table-head-column>
       <table-head-column>{{ t("tokensView.table.price") }}</table-head-column>
-      <table-head-column>Tvl</table-head-column>
+      <table-head-column>{{ t("tokensView.table.tvl") }}</table-head-column>
       <table-head-column class="text-center">{{ t("tokensView.table.fromChain") }}</table-head-column>
-      <table-head-column>Nova ADDRESS</table-head-column>
-      <table-head-column>Origin Address</table-head-column>
+      <table-head-column>{{ t("tokensView.table.novaAddress") }}</table-head-column>
+      <table-head-column>{{ t("tokensView.table.originAddress") }}</table-head-column>
     </template>
     <template #table-row="{ item }: { item: any }">
       <TableBodyColumn :data-heading="t('tokensView.table.tokenName')">
@@ -21,7 +21,7 @@
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
         <TokenPrice :address="item.l2Address" />
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.price')">
+      <TableBodyColumn :data-heading="t('tokensView.table.tvl')">
         <TokenTVL :tvl="item.tvl" />
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.fromChain')">
@@ -34,7 +34,7 @@
         <div v-else-if="ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="from-chain-text">{{ NOVA_MERGED_TOKEN }}</div>
         <div v-else class="from-chain-text">{{ NOVA_NATIVE_TOKEN }}</div>
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
+      <TableBodyColumn :data-heading="t('tokensView.table.novaAddress')">
         <div class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="Nova" />-->
           <AddressLink :data-testid="$testId.tokenAddress" :address="item.l2Address"
@@ -44,7 +44,7 @@
           <CopyButton :value="item.l2Address" />
         </div>
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.tokenAddress')">
+      <TableBodyColumn :data-heading="t('tokensView.table.originAddress')">
         <div v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)" class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="ORIGIN" />-->
           <div v-if="!item.networkKey">
@@ -56,7 +56,7 @@
           </AddressLink>
           <CopyButton :value="item.l1Address" />
         </div>
-        <div v-else></div>
+        <div v-else class="min-h-[20px]"></div>
       </TableBodyColumn>
     </template>
     <template #loading>
@@ -82,9 +82,6 @@
           <ContentLoader class="w-16" />
         </TableBodyColumn>
         <TableBodyColumn>
-          <ContentLoader/>
-        </TableBodyColumn>
-        <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
         <TableBodyColumn>
@@ -93,7 +90,9 @@
         <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
-        
+        <TableBodyColumn>
+          <ContentLoader />
+        </TableBodyColumn>
       </tr>
     </template>
   </Table>
@@ -189,5 +188,11 @@ watch(width, () => {
 .text-center {
   min-width: 240px;
   @apply flex items-center justify-center;
+}
+@media (max-width: 760px) {
+  .token-icon-label {
+    display: flex;
+    flex-direction: row-reverse;
+  }
 }
 </style>
