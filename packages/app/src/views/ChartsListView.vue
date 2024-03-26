@@ -137,6 +137,8 @@ onMounted(async() => {
     var myChart = echarts.init(document.getElementById('TVLChart'));
     myChart.setOption(option);
     await getData('add')
+    xData = []
+    yData = []
     data && data.value.map((i:{uaw:string,timestamp:string},index)=>{
       if (index) {
         xData.unshift({value: i.uaw, date: i.timestamp, type: false})
