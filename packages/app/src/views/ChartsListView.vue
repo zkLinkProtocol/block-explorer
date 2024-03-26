@@ -16,10 +16,10 @@
         </div>
         <div class="rounded flex-auto box">
           <div class="title">
-            <a href="/charts/chart?type=add" class="p-2 inline-block w-full no-underline">Unique Addresses Chart</a>
+            <a href="/charts/chart?type=UAW" class="p-2 inline-block w-full no-underline">Unique Addresses Chart</a>
           </div>
           <div class="p-2 content">
-            <a href="/charts/chart?type=add" class="inline-block w-full relative">
+            <a href="/charts/chart?type=UAW" class="inline-block w-full relative">
               <div class="absolute w-full h-full top-0 left-0 z-10"></div>
               <div class="w-full h-28" id="addChart"></div>
             </a>
@@ -137,13 +137,13 @@ onMounted(async() => {
     var myChart = echarts.init(document.getElementById('TVLChart'));
     myChart.setOption(option);
     await getData('add')
-    data && data.value.map((i:{tvl:string,timestamp:string},index)=>{
+    data && data.value.map((i:{uaw:string,timestamp:string},index)=>{
       if (index) {
-        xData.unshift({value: i.tvl, date: i.timestamp, type: false})
+        xData.unshift({value: i.uaw, date: i.timestamp, type: false})
         const timer = format(i.timestamp,'yLine',false)
         yData.unshift(timer)
       } else {
-        xData.unshift({value: i.tvl, date: i.timestamp, type: true})
+        xData.unshift({value: i.uaw, date: i.timestamp, type: true})
         yData.unshift('Now')
       }
     })
