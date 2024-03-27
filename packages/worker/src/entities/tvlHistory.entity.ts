@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { Entity, Column, PrimaryColumn, Index, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 import { bigNumberTransformer } from "../transformers/bigNumber.transformer";
 import { BaseEntity } from "./base.entity";
 
@@ -11,9 +11,12 @@ export class TVLHistory extends BaseEntity {
   @Column({ type: "bigint" })
   public readonly blockNumber: number;
 
-  @Column({ type: "varchar", length: 256, transformer: bigNumberTransformer, default: "", nullable: false })
+  @Column({ type: "varchar", length: 256, transformer: bigNumberTransformer, default: "0", nullable: false })
   public readonly tvl: BigNumber;
 
   @Column({ type: "timestamp" })
   public readonly timestamp: Date;
+
+  @Column({ type: "int", default: '0'})
+  public readonly uaw: number;
 }
