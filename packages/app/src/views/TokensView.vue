@@ -15,7 +15,7 @@
       <span v-if="isTokensFailed" class="error-message">
         {{ t("failedRequest") }}
       </span>
-      <TokenTable :tokens="sortTokens" :loading="isTokensPending"></TokenTable>
+      <TokenTable :tokens="tokens" :loading="isTokensPending"></TokenTable>
     </div>
   </div>
 </template>
