@@ -54,10 +54,6 @@ export class BlockController {
     if (tvls) {
       return tvls;
     }
-
-    const tvlHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
-      'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
-    );
     const latest: TVLHistory = await this.tvlHistoryRepository.findOne({
       // can't miss where
       where: {},
@@ -65,6 +61,13 @@ export class BlockController {
         id: "desc",
       },
     });
+    if (!latest){
+      return [];
+    }
+
+    const tvlHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
+      'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
+    );
 
     let history = tvlHistorys.map((tvlHistory) => {
       return {
@@ -73,11 +76,11 @@ export class BlockController {
         timestamp: tvlHistory.timestamp,
       };
     });
-    history.push({
-      id: latest.id,
-      tvl: latest.tvl.toString(),
-      timestamp: latest.timestamp,
-    });
+      history.push({
+        id: latest.id,
+        tvl: latest.tvl.toString(),
+        timestamp: latest.timestamp,
+      });
     history.reverse();
     cache.set(HISTORY_TVL_CACHE_KEY, history);
     return history;
@@ -89,10 +92,6 @@ export class BlockController {
     if (uaws) {
       return uaws;
     }
-
-    const uawHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
-        'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
-    );
     const latest: TVLHistory = await this.tvlHistoryRepository.findOne({
       // can't miss where
       where: {},
@@ -100,6 +99,12 @@ export class BlockController {
         id: "desc",
       },
     });
+    if (!latest){
+      return [];
+    }
+    const uawHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
+        'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
+    );
 
     let history = uawHistorys.map((tvlHistory) => {
       return {
@@ -109,12 +114,12 @@ export class BlockController {
         uaw: tvlHistory.uaw.toString(),
       };
     });
-    history.push({
-      id: latest.id,
-      tvl: latest.tvl.toString(),
-      timestamp: latest.timestamp,
-      uaw: latest.uaw.toString(),
-    });
+      history.push({
+        id: latest.id,
+        tvl: latest.tvl.toString(),
+        timestamp: latest.timestamp,
+        uaw: latest.uaw.toString(),
+      });
     history.reverse();
     cache.set(HISTORY_TVL_CACHE_KEY, history);
     return history;
