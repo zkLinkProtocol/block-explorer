@@ -23,7 +23,8 @@
     "name": "WETH",
     "platforms": {
       "extra": "0xC6572019548dfeBA782bA5a2093C836626C7789A",
-      "zklink-nova": "0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169"
+      "zklink-nova": "0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169",
+      "ethereum": "0xE46a5E19B19711332e33F33c2DB3eA143e86Bc10"
     }
   },
   {
@@ -31,7 +32,18 @@
     "symbol": "meth",
     "name": "mETH",
     "platforms": {
-      "mantle": "0xcDA86A272531e8640cD7F1a92c01839911B90bb0"
+      "mantle": "0xcDA86A272531e8640cD7F1a92c01839911B90bb0",
+      "ethereum": "0x8a053350ca5F9352a16deD26ab333e2D251DAd7c"
+    }
+  },
+  {
+    "id": "wrapped-steth",
+    "symbol": "wsteth",
+    "name": "wstETH",
+    "platforms": {
+      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
+      "base": "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
+      "ethereum": "0x49446A0874197839D15395B908328a74ccc96Bc0"
     }
   },
   {

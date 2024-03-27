@@ -33,6 +33,7 @@ const options = {
 
 const cache = new LRUCache(options);
 const HISTORY_TVL_CACHE_KEY = "history-tvl-cache";
+const HISTORY_USW_CACHE_KEY = "history-usw-cache"
 
 const entityName = "blocks";
 
@@ -76,6 +77,43 @@ export class BlockController {
       id: latest.id,
       tvl: latest.tvl.toString(),
       timestamp: latest.timestamp,
+    });
+    history.reverse();
+    cache.set(HISTORY_TVL_CACHE_KEY, history);
+    return history;
+  }
+  @Get("/total/uaw")
+  @ApiOperation({ summary: "Get total usw" })
+  public async getTotalUsw(): Promise<TVLHistoryDto[]> {
+    const uaws = cache.get(HISTORY_USW_CACHE_KEY) as TVLHistoryDto[];
+    if (uaws) {
+      return uaws;
+    }
+
+    const uawHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
+        'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
+    );
+    const latest: TVLHistory = await this.tvlHistoryRepository.findOne({
+      // can't miss where
+      where: {},
+      order: {
+        id: "desc",
+      },
+    });
+
+    let history = uawHistorys.map((tvlHistory) => {
+      return {
+        id: tvlHistory.id,
+        tvl: tvlHistory.tvl.toString(),
+        timestamp: tvlHistory.timestamp,
+        uaw: tvlHistory.uaw.toString(),
+      };
+    });
+    history.push({
+      id: latest.id,
+      tvl: latest.tvl.toString(),
+      timestamp: latest.timestamp,
+      uaw: latest.uaw.toString(),
     });
     history.reverse();
     cache.set(HISTORY_TVL_CACHE_KEY, history);
