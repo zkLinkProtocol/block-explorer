@@ -10,7 +10,7 @@
         <TokenIconLabel
           class="token-icon"
           :address="item.token.l2Address"
-          :symbol="item.token.symbol"
+          :symbol="item.token.symbol + handleNetworkKey(item.token.networkKey)"
           :icon-url="item.token.iconURL"
           show-link-symbol
         />
@@ -76,7 +76,10 @@ const props = defineProps({
     default: true,
   },
 });
-
+const handleNetworkKey = (networkKey:string) => {
+  let str = (networkKey?(networkKey === 'optimistic-ethereum'? 'optimism': networkKey): '')
+  return '.'+str.charAt(0).toUpperCase() + str.slice(1);
+}
 const {
   getToken: getLibraryToken,
   getTokens: getLibraryTokens,
@@ -157,7 +160,7 @@ const displayedBalances = computed(() => {
     @apply text-xs text-gray-400;
   }
   .token-icon a {
-    @apply flex-row-reverse;
+    @apply flex-row-reverse no-underline;
   }
   .balance-data-icon {
     @apply inline-block h-5 w-5 rounded-full;
