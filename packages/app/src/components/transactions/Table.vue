@@ -224,6 +224,8 @@ import type { NetworkOrigin } from "@/types";
 
 import { ETH_TOKEN_L2_ADDRESS } from "@/utils/constants";
 import { utcStringFromISOString } from "@/utils/helpers";
+import useAddress, { type Account, type Contract } from "@/composables/useAddress";
+const { item, getByAddress } = useAddress();
 
 const { t, te } = useI18n();
 
@@ -263,7 +265,7 @@ const isLoading = computed(() => pending.value || isLoadingEthTokenInfo.value);
 
 const activePage = ref(props.useQueryPagination ? parseInt(route.query.page as string) || 1 : 1);
 const toDate = new Date();
-
+let addressArr: { [key: string]: any } = {};
 watch(
   [activePage, searchParams],
   ([page]) => {
@@ -287,10 +289,24 @@ const getTransactionMethod = (transaction: TransactionListItem) => {
         props.contractAbi
       )?.name ?? sighash
     );
+  } else if (!Object.keys(addressArr).includes(transaction.to)) {
+    getByAddress(transaction.to)
+    addressArr[transaction.to] = item
   }
   const methodIndex = sighash as keyof typeof contractsMethodNames;
   if (contractsMethodNames[methodIndex]) {
     return contractsMethodNames[methodIndex];
+  }
+  if (addressArr[transaction.to].value?.verificationInfo?.artifacts?.abi) {
+    const arr = addressArr[transaction.to].value?.verificationInfo.artifacts.abi
+    const str = decodeDataWithABI(
+        {
+          calldata: transaction.data,
+          value: transaction.value,
+        },
+        arr
+      )?.name
+    return str || sighash;
   }
   return sighash;
 };
