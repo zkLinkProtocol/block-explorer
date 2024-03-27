@@ -33,7 +33,7 @@ const options = {
 
 const cache = new LRUCache(options);
 const HISTORY_TVL_CACHE_KEY = "history-tvl-cache";
-const HISTORY_USW_CACHE_KEY = "history-usw-cache"
+const HISTORY_UAW_CACHE_KEY = "history-uaw-cache"
 
 const entityName = "blocks";
 
@@ -86,9 +86,9 @@ export class BlockController {
     return history;
   }
   @Get("/total/uaw")
-  @ApiOperation({ summary: "Get total usw" })
-  public async getTotalUsw(): Promise<TVLHistoryDto[]> {
-    const uaws = cache.get(HISTORY_USW_CACHE_KEY) as TVLHistoryDto[];
+  @ApiOperation({ summary: "Get total uaw" })
+  public async getTotalUaw(): Promise<TVLHistoryDto[]> {
+    const uaws = cache.get(HISTORY_UAW_CACHE_KEY) as TVLHistoryDto[];
     if (uaws) {
       return uaws;
     }
