@@ -10,22 +10,21 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import { formatBigNumberish } from "@/utils/formatters";
+import { formatBigNumberish, formatNumberPretty } from "@/utils/formatters";
 
 const props = defineProps({
   totalSupply: {
     type: Object,
   },
-  decimals:{
+  decimals: {
     type: Number,
-    default:0
-  }
+    default: 0,
+  },
 });
 
-
-const totalCount = computed(() => { 
+const totalCount = computed(() => {
   if (props.totalSupply?.hex) {
-    return formatBigNumberish(props.totalSupply.hex, props.decimals)
+    return formatNumberPretty(formatBigNumberish(props.totalSupply.hex, props.decimals));
   }
   return "0";
 });

@@ -1,8 +1,8 @@
 <template>
   <div class="max-w-sm px-1">
-    <Popover v-slot="{ open,close  }" class="relative">
-      <PopoverButton  class="group inline-flex items-center px-1 text-base font-medium focus:outline-none">
-        <FilterIcon class="w-4 h-4 text-black" />
+    <Popover v-slot="{ open, close }" class="relative">
+      <PopoverButton class="group inline-flex items-center px-1 text-base font-medium focus:outline-none">
+        <FilterIcon class="w-4 h-4 text-black" :class="{ 'text-design-200': selected.length > 0 }" />
       </PopoverButton>
 
       <transition
@@ -17,7 +17,6 @@
           <div class="rounded-lg shadow-lg bg-rounded bg-white md:min-w-[200px]">
             <div class="search-wrap" v-if="isSearch">
               <Input v-model="filterKeyword" @keyup="handleKeyUp" type="text" placeholder="" />
-              
             </div>
 
             <ul class="options-wrap">
@@ -40,24 +39,24 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/vue";
 import { FilterIcon } from "@heroicons/vue/outline";
 import Input from "../common/Input.vue";
 
 const props = defineProps({
   filterOptions: {
-    type: Array,
+    type: Array<string>,
     default: [],
   },
   keyword: {
     type: String,
     default: "",
   },
-  // selected: {
-  //   type: Array,
-  //   default: [],
-  // },
+  selected: {
+    type: Array<string>,
+    default: [],
+  },
   isSearch: {
     type: Boolean,
     default: true,
@@ -71,30 +70,32 @@ const props = defineProps({
 const emit = defineEmits<{
   (eventName: "update:modelValue", value: string): void;
   (eventName: "update:selected", value: string[]): void;
-
+  (eventName: "filter"): void;
 }>();
 const filterKeyword = ref(props.keyword);
-const selectedFilters = ref([]);
+const selectedFilters = ref<string[]>([]);
 
-const applyFilter = (close) => {
-  close()
+const applyFilter = (close: any) => {
+  close();
   emit("update:selected", selectedFilters.value);
+  emit("filter");
 };
-const resetFilter = (close) => {
-  close()
+const resetFilter = (close: any) => {
+  close();
   selectedFilters.value = [];
-  filterKeyword.value=''
+  filterKeyword.value = "";
   emit("update:selected", []);
 };
-const handleKeyUp=(event)=>{
+const handleKeyUp = (event: any) => {
   const value = event.target.value.trim();
   emit("update:modelValue", value);
-}
-
-
-
-
-
+};
+watch(
+  () => props.selected,
+  (val: string[], oldval) => {
+    selectedFilters.value = val;
+  }
+);
 </script>
 <style lang="scss" scoped>
 .search-wrap {
