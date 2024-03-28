@@ -265,7 +265,7 @@ const isLoading = computed(() => pending.value || isLoadingEthTokenInfo.value);
 
 const activePage = ref(props.useQueryPagination ? parseInt(route.query.page as string) || 1 : 1);
 const toDate = new Date();
-let addressArr: { [key: string]: any } = {};
+let obj: { [key: string]: any } = {};
 watch(
   [activePage, searchParams],
   ([page]) => {
@@ -289,16 +289,11 @@ const getTransactionMethod = (transaction: TransactionListItem) => {
         props.contractAbi
       )?.name ?? sighash
     );
-  } else if (!Object.keys(addressArr).includes(transaction.to)) {
+  } else if (!Object.keys(obj).includes(transaction.to)) {
     getByAddress(transaction.to)
-    addressArr[transaction.to] = item
   }
-  const methodIndex = sighash as keyof typeof contractsMethodNames;
-  if (contractsMethodNames[methodIndex]) {
-    return contractsMethodNames[methodIndex];
-  }
-  if (addressArr[transaction.to].value?.verificationInfo?.artifacts?.abi) {
-    const arr = addressArr[transaction.to].value?.verificationInfo.artifacts.abi
+  if (!Object.keys(obj).includes(transaction.to) && item.value?.verificationInfo?.artifacts?.abi) {
+    const arr = item.value?.verificationInfo.artifacts.abi
     const str = decodeDataWithABI(
         {
           calldata: transaction.data,
@@ -306,7 +301,15 @@ const getTransactionMethod = (transaction: TransactionListItem) => {
         },
         arr
       )?.name
+      obj[transaction.to] = str
     return str || sighash;
+  }
+  if (obj[transaction.to]) {
+    return obj[transaction.to];
+  }
+  const methodIndex = sighash as keyof typeof contractsMethodNames;
+  if (contractsMethodNames[methodIndex]) {
+    return contractsMethodNames[methodIndex];
   }
   return sighash;
 };
