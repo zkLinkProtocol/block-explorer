@@ -4,6 +4,7 @@ import { Worker } from "../../common/worker";
 import waitFor from "../../utils/waitFor";
 import { TokenRepository } from "../../repositories/token.repository";
 import { TokenOffChainDataProvider } from "./tokenOffChainDataProvider.abstract";
+import {PriceHistoryRepository} from "../../repositories/priceHistory.repository";
 
 const UPDATE_TOKENS_BATCH_SIZE = 100;
 
@@ -15,6 +16,7 @@ export class TokenOffChainDataSaverService extends Worker {
   public constructor(
     private readonly tokenRepository: TokenRepository,
     private readonly tokenOffChainDataProvider: TokenOffChainDataProvider,
+    private readonly priceHistoryRepository:PriceHistoryRepository,
     configService: ConfigService
   ) {
     super();
@@ -52,6 +54,13 @@ export class TokenOffChainDataSaverService extends Worker {
               iconURL: tokensToUpdate[i].iconURL,
             })
           );
+          updateTokensTasks.push(
+              this.priceHistoryRepository.add({
+                l2Address: tokensToUpdate[i].l2Address,
+                timestamp:updatedAt,
+                usdPrice:tokensToUpdate[i].usdPrice,
+              })
+          );
           if (updateTokensTasks.length === UPDATE_TOKENS_BATCH_SIZE || i === tokensToUpdate.length - 1) {
             await Promise.all(updateTokensTasks);
             updateTokensTasks = [];
@@ -61,7 +70,6 @@ export class TokenOffChainDataSaverService extends Worker {
         this.logger.log("Updated tokens offchain data", {
           totalTokensUpdated: tokensToUpdate.length,
         });
-
         nextUpdateTimeout = this.updateTokenOffChainDataInterval;
       }
     } catch (err) {

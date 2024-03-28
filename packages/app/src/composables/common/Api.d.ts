@@ -16,7 +16,7 @@ declare namespace Api {
         previous: string;
       };
     };
-
+    type TotalSupply = { type: string; hex: string };
     type Token = {
       l2Address: string;
       l1Address: string | null;
@@ -27,6 +27,8 @@ declare namespace Api {
       liquidity: number | null;
       iconURL: string | null;
       tvl: string;
+      networkKey?: string;
+      totalSupply?: TotalSupply;
     };
 
     type BatchListItem = {

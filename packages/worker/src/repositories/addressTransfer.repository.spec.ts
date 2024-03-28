@@ -1,5 +1,5 @@
-import { Test } from "@nestjs/testing";
-import { EntityManager } from "typeorm";
+import { Test, TestingModule } from "@nestjs/testing";
+import { EntityManager, SelectQueryBuilder } from "typeorm";
 import { mock } from "jest-mock-extended";
 import { BaseRepository } from "./base.repository";
 import { AddressTransferRepository } from "./addressTransfer.repository";
@@ -8,15 +8,25 @@ import { AddressTransfer } from "../entities";
 
 describe("AddressTransferRepository", () => {
   let repository: AddressTransferRepository;
+  let unitOfWorkMock: UnitOfWork;
   let entityManagerMock: EntityManager;
+  let queryBuilderMock: SelectQueryBuilder<AddressTransfer>;
 
   beforeEach(async () => {
-    entityManagerMock = mock<EntityManager>();
-    const unitOfWorkMock = mock<UnitOfWork>({
-      getTransactionManager: jest.fn().mockReturnValue(entityManagerMock),
+    queryBuilderMock = mock<SelectQueryBuilder<AddressTransfer>>({
+      select: jest.fn().mockReturnThis(),
+      from: jest.fn().mockReturnThis(),
+      distinct: jest.fn().mockReturnThis(),
+      getCount: jest.fn().mockResolvedValue(10),
     });
 
-    const app = await Test.createTestingModule({
+    entityManagerMock = mock<EntityManager>({
+      createQueryBuilder: jest.fn().mockReturnValue(queryBuilderMock),
+    });
+
+    unitOfWorkMock = mock<UnitOfWork>({ getTransactionManager: jest.fn().mockReturnValue(entityManagerMock) });
+
+    const app: TestingModule = await Test.createTestingModule({
       providers: [
         AddressTransferRepository,
         {
@@ -31,5 +41,9 @@ describe("AddressTransferRepository", () => {
 
   it("extends BaseRepository<AddressTransfer>", () => {
     expect(repository).toBeInstanceOf(BaseRepository<AddressTransfer>);
+  });
+  it("should return the count of distinct addresses", async () => {
+    const count = await repository.getUawNumber();
+    expect(count).toBe(10);
   });
 });

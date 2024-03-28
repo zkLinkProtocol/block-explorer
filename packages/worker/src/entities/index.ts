@@ -14,3 +14,4 @@ export * from "./balance.entity";
 export * from "./counter.entity";
 export * from "./counterState.entity";
 export * from "./tvlHistory.entity";
+export * from "./priceHistory.entity";
