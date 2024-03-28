@@ -66,15 +66,13 @@ export class TokenController {
       items: res.items.map((token) => {
         let price_t = 6;
         if (token.usdPrice < 1){
-          const priceStr = token.usdPrice.toString();
-          const index = priceStr.indexOf(".");
-          if (index !== -1) {
-            let firstNonZeroIndex = index + 1;
-            while (firstNonZeroIndex < priceStr.length && priceStr[firstNonZeroIndex] === '0') {
-              firstNonZeroIndex++;
-            }
-            price_t = firstNonZeroIndex - index - 1 + price_t;
+          let priceNum = token.usdPrice;
+          let num = 0;
+          while(priceNum<1 && priceNum > 0){
+            priceNum *= 10;
+            num++;
           }
+          price_t = price_t + num;
         }else {
           if ((token.usdPrice * 10 ** price_t)>=Number.MAX_VALUE) {
             price_t = 0;
