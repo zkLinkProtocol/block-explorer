@@ -73,7 +73,7 @@ export class TokenController {
             while (firstNonZeroIndex < priceStr.length && priceStr[firstNonZeroIndex] === '0') {
               firstNonZeroIndex++;
             }
-            price_t = firstNonZeroIndex - index - 1;
+            price_t = firstNonZeroIndex - index;
           }
         }
         return {
