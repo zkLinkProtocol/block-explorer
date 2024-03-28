@@ -69,7 +69,11 @@ export class TokenController {
           const priceStr = token.usdPrice.toString();
           const index = priceStr.indexOf(".");
           if (index !== -1) {
-            price_t = priceStr.length - index - 1;
+            let firstNonZeroIndex = index + 1;
+            while (firstNonZeroIndex < priceStr.length && priceStr[firstNonZeroIndex] === '0') {
+              firstNonZeroIndex++;
+            }
+            price_t = firstNonZeroIndex - index - 1;
           }
         }
         return {
