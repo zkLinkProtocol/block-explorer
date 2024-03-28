@@ -74,6 +74,19 @@ export class TransferService {
       return await paginate<Transfer>(queryBuilder, paginationOptions);
     }
   }
+  public async findFirstDeposit(address: string, tokenAddress: string): Promise<Transfer> {
+    const queryBuilder = this.transferRepository.createQueryBuilder("transfer");
+    queryBuilder
+      .where({
+        to: address,
+        tokenAddress,
+        // type: "deposit",
+      })
+      .orderBy("number", "ASC")
+      .take(1);
+    const res = await queryBuilder.getOne();
+    return res;
+  }
 
   public async findTokenTransfers({
     tokenAddress,

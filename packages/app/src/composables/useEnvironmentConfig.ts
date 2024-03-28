@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 
-import type { EnvironmentConfig, IconsList, NetworkConfig, RuntimeConfig } from "@/configs";
+import type { EnvironmentConfig, NetworkConfig, IconsList, RuntimeConfig } from "@/configs";
+import type { BatchRootItem } from "@/composables/useBatchRoot";
 
 const config = ref<EnvironmentConfig | null>(null);
 
@@ -35,5 +36,7 @@ export default () => {
         : []
     ),
     iconsList: config.value?.iconsList as IconsList,
+    excuteBatchList: (config.value?.excuteBatchList as BatchRootItem[]) ?? [],
+    chainNameList: config.value?.chainNameList as IconsList,
   };
 };

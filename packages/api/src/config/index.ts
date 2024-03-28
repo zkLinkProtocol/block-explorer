@@ -1,7 +1,5 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import * as featureFlags from "./featureFlags";
-import { DataSourceOptions } from "typeorm";
-import { typeOrmReferModuleOptions } from "./refer-typeorm.config";
 
 export default () => {
   const {
@@ -14,9 +12,6 @@ export default () => {
     DATABASE_CONNECTION_IDLE_TIMEOUT_MS,
     DATABASE_STATEMENT_TIMEOUT_MS,
     CONTRACT_VERIFICATION_API_URL,
-    POINTS_PHASE1_START_TIME,
-    POINTS_EARLY_DEPOSIT_END_TIME,
-    POINTS_PHASE1_END_TIME,
   } = process.env;
 
   const MAX_NUMBER_OF_REPLICA = 100;
@@ -77,11 +72,7 @@ export default () => {
       collectDbConnectionPoolMetricsInterval: parseInt(COLLECT_DB_CONNECTION_POOL_METRICS_INTERVAL, 10) || 10000,
     },
     typeORM: getTypeOrmModuleOptions(),
-    referORM: typeOrmReferModuleOptions,
     contractVerificationApiUrl: CONTRACT_VERIFICATION_API_URL || "http://127.0.0.1:3070",
-    pointsPhase1StartTime: POINTS_PHASE1_START_TIME,
-    pointsEarlyDepositEndTime: POINTS_EARLY_DEPOSIT_END_TIME,
-    pointsPhase1EndTime: POINTS_PHASE1_END_TIME,
     featureFlags,
   };
 };

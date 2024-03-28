@@ -20,6 +20,12 @@ export function formatPrice(num: number) {
     currency: "USD",
   }).format(num);
 }
+export function formatNumber(num: number, minimumFractionDigits = 0, maximumFractionDigits = 2) {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(num);
+}
 
 export function formatWithSpaces(num: number) {
   return new Intl.NumberFormat("fr-FR").format(num);
@@ -82,5 +88,13 @@ export function formatPricePretty(amount: BigNumberish, decimals: number, usdPri
     return `<${formatMoney(0.00001, 5)}`;
   } else {
     return `${formatMoney(price, priceDecimals)}`;
+  }
+}
+export function formatNumberPretty(value: number | string): string {
+  const numericValue = typeof value === "string" ? parseFloat(value) : value;
+  if (numericValue < 0.01) {
+    return "<0.01";
+  } else {
+    return numericValue.toFixed(2).replace(/\.00$/g, "");
   }
 }

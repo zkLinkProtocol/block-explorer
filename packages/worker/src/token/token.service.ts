@@ -4,39 +4,28 @@ import { InjectMetric } from "@willsoto/nestjs-prometheus";
 import { In } from "typeorm";
 import { Histogram } from "prom-client";
 import { LogType, isLogOfType } from "../log/logType";
-import { BlockchainService } from "../blockchain";
+import { BlockchainService } from "../blockchain/blockchain.service";
 import { AddressRepository, TokenRepository } from "../repositories";
 import { GET_TOKEN_INFO_DURATION_METRIC_NAME } from "../metrics";
 import { ContractAddress } from "../dataFetcher/types";
 import parseLog from "../utils/parseLog";
 import { stringTransformer } from "../transformers/string.transformer";
 import { CONTRACT_INTERFACES } from "../constants";
-import { Token as TokenEntity } from "../entities";
-import tokens from "../tokens";
 
-export interface TokenL1Address {
-  chain: string;
-  l1Address: string;
-  l2Address: string;
-}
-export interface TokenMultiplier {
-  multiplier: number;
-  timestamp: number;
-}
 export interface Token {
-  address: TokenL1Address[];
+  l2Address: string;
+  l1Address: string;
   symbol: string;
   decimals: number;
-  cgPriceId: string;
-  type: string;
-  yieldType: string[];
-  multipliers: TokenMultiplier[];
+  name: string;
+  blockNumber: number;
+  transactionHash: string;
+  logIndex: number;
 }
+
 @Injectable()
 export class TokenService {
   private readonly logger: Logger;
-  private readonly supportTokens: Token[];
-  private readonly supportTokenL2AddressMap: Map<string, Token>;
 
   constructor(
     private readonly blockchainService: BlockchainService,
@@ -46,49 +35,6 @@ export class TokenService {
     private readonly getTokenInfoDurationMetric: Histogram
   ) {
     this.logger = new Logger(TokenService.name);
-    this.supportTokens = [];
-    this.supportTokenL2AddressMap = new Map<string, Token>();
-    tokens.forEach((token) => {
-      if (!token.decimals) {
-        throw new Error(`Token ${token.symbol} decimals not found`);
-      }
-      if (!token.cgPriceId) {
-        throw new Error(`Token ${token.symbol} cgPriceId not found`);
-      }
-      if (!token.type) {
-        throw new Error(`Token ${token.symbol} cgPriceId not found`);
-      }
-      if (!token.multipliers || token.multipliers.length == 0) {
-        throw new Error(`Token ${token.symbol} multipliers not found`);
-      }
-      this.supportTokens.push(token);
-      token.address.forEach((addr) => {
-        this.supportTokenL2AddressMap.set(addr.l2Address.toLowerCase(), token);
-      });
-    });
-  }
-
-  public async getAllTokens(): Promise<TokenEntity[]> {
-    return await this.tokenRepository.getAllTokens();
-  }
-
-  public getAllSupportTokens(): Token[] {
-    return this.supportTokens;
-  }
-
-  public getSupportToken(tokenAddress: string): Token | undefined {
-    return this.supportTokenL2AddressMap.get(tokenAddress.toLowerCase());
-  }
-
-  public getTokenMultiplier(token: Token, blockTs: number): number {
-    const multipliers = token.multipliers;
-    multipliers.sort((a, b) => b.timestamp - a.timestamp);
-    for (const m of multipliers) {
-      if (blockTs >= m.timestamp * 1000) {
-        return m.multiplier;
-      }
-    }
-    return multipliers[multipliers.length - 1].multiplier;
   }
 
   private async getERC20Token(contractAddress: string): Promise<{

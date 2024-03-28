@@ -9,6 +9,17 @@ import { TransactionDetails } from "./entities/transactionDetails.entity";
 import { AddressTransaction } from "./entities/addressTransaction.entity";
 import { Batch } from "../batch/batch.entity";
 import { CounterService } from "../counter/counter.service";
+import { LRUCache } from "lru-cache";
+// const options: LRU. = { max: 500 };
+const options = {
+  // how long to live in ms
+  ttl: 1000 * 10,
+  // return stale items before removing from cache?
+  allowStale: false,
+  ttlAutopurge: true,
+};
+
+const cache = new LRUCache(options);
 
 export interface FilterTransactionsOptions {
   blockNumber?: number;
@@ -173,5 +184,17 @@ export class TransactionService {
 
   public count(criteria: CounterCriteria<Transaction> = {}): Promise<number> {
     return this.counterService.count(Transaction, criteria);
+  }
+
+  public async getTotalAccountNumber(): Promise<number> {
+    const total = cache.get("totalAccountNumber");
+    if(total) {
+      return total as number;
+    }
+    const queryBuilder = this.addressTransactionRepository.createQueryBuilder("addressTransaction");
+    queryBuilder.select("COUNT(DISTINCT address)", "count");
+    const ntotal = (await queryBuilder.getRawOne()).count;
+    cache.set("totalAccountNumber", ntotal);
+    return ntotal;
   }
 }

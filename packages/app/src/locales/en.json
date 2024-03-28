@@ -19,7 +19,8 @@
     "committed": "Committed Blocks",
     "verified": "Verified Blocks",
     "transactions": "Transactions",
-    "totalLocked": "Total Value Locked"
+    "totalLocked": "Total Value Locked",
+    "tvl": "TVL"
   },
   "breadcrumbs": {
     "home": "Dashboard"
@@ -232,30 +233,36 @@
     "title": "Batches",
     "breadcrumbsTitle": "Batches",
     "index": "Batch Index",
-    "indexTooltip": "The L1 Batch number indicates the length of L1 Batches produced by grouping L2 blocks to be proven on Ethereum",
+    "indexTooltip": "The Batch number produced by grouping Nova(L3) blocks to be proven on the primary chain(L2)",
     "size": "Batch Size",
-    "sizeTooltip": "Number of transactions inside of the L1 Batch",
+    "sizeTooltip": "Number of transactions inside the Nova(L3) Batch",
     "timestamp": "Timestamp",
-    "timestampTooltip": "The date and time at which L1 Batch is produced",
+    "timestampTooltip": "The date and time at which the Batch is produced on Nova(L3)",
     "rootHash": "Batch Root",
-    "rootHashTooltip": "The L1 Batch Root is a cryptographic hash (or Merkle root) that summarizes a batch of L2 transactions or data and is submitted to the L1 blockchain as a single transaction",
+    "rootHashTooltip": "The Batch Root is a cryptographic hash (or Merkle root) that summarizes a batch of transactions or data and is submitted to the Primary chain blockchain as a single transaction",
     "noRootHashYet": "No root hash yet",
     "commitTxHash": "Commit tx hash",
-    "commitTxHashTooltip": "Hash of L1 transaction on which this L1 Batch was committed",
+    "commitTxHashTooltip": "Hash of the transaction on which this Batch was committed to the Primary Chain(L2)",
     "committedAt": "Committed",
-    "committedAtTooltip": "The date and time at which L1 Batch is committed to Ethereum",
+    "committedAtTooltip": "The date and time at which the Batch is committed to the Primary Chain(L2)",
     "notYetCommitted": "Not yet committed",
     "proveTxHash": "Prove tx hash",
-    "proveTxHashTooltip": "Hash of L1 transaction on which this L1 Batch was proven",
+    "proveTxHashTooltip": "Hash of the transaction on which this Batch was proven on the Primary chain(L2)",
     "provenAt": "Proven",
-    "provenAtTooltip": "The date and time at which L1 Batch is proven to Ethereum",
+    "provenAtTooltip": "The date and time at which the Batch is proven on the Primary chain(L2)",
     "notYetProven": "Not yet proven",
     "executeTxHash": "Execute tx hash",
-    "executeTxHashTooltip": "Hash of L1 transaction on which this L1 Batch was executed",
+    "executeTxHashTooltip": "Hash of the transaction on which this Batch was executed",
     "executedAt": "Executed",
-    "executedAtTooltip": "The date and time at which L1 Batch is executed on Ethereum",
+    "executedAtTooltip": "The date and time at which the Batch is executed to the Primary chain(L2)",
     "notYetExecuted": "Not yet executed",
     "notYetSealed": "This batch is not sealed yet",
+    "finalizeTxHash": "Finalize tx hash",
+    "finalizeTxHashTooltip": "Hash of the transaction on which this Batch was finalized on Ethereum",
+    "finalizeAt": "Finalized",
+    "finalizeAtTooltip": "The date and time at which the Batch is finalized on Ethereum",
+    "finalizeStatus": "Status",
+    "finalizePending": "Pending to be finalized on Ethereum",
     "transactionTable": {
       "title": "Batch Transactions",
       "error": "Something went wrong",
@@ -278,6 +285,11 @@
       "failed": "Failed"
     }
   },
+
+  "charts": {
+    "batch": "Charts",
+    "title": "Charts&Stats"
+  },
   "header": {
     "nav": {
       "blockExplorer": "Block Explorer",
@@ -289,7 +301,8 @@
       "bridge": "Bridge",
       "developer": "Developer",
       "github": "Github",
-      "help": "Help"
+      "help": "Help",
+      "charts": "Charts&Stats"
     }
   },
   "locale": {
@@ -590,7 +603,11 @@
       "tokenName": "Token Name",
       "price": "Price",
       "tokenAddress": "Token Address",
-      "fromChain": "From Chain"
+      "fromChain": "From Chain",
+      "totalQty": "Total qty",
+      "tvl": "Tvl",
+      "novaAddress": "Nova ADDRESS",
+      "originAddress": "Origin Address"
     }
   },
   "pageError": {
@@ -678,11 +695,11 @@
     "contactSupport": "contact support"
   },
   "maintenance": {
-    "title": "zkSync {network} is on maintainance",
-    "description": "zkSync {network} is unavailable due to maintainance, you can find updates in our {twitter} or on {uptime}",
-    "twitterLink": "zkSync Developers",
+    "title": " {network} is on maintainance",
+    "description": " {network} is unavailable due to maintainance, you can find updates in our {twitter} or on {uptime}",
+    "twitterLink": " Developers",
     "uptimeLink": "UpTime",
-    "twitterButton": "zkSync Developers"
+    "twitterButton": " Developers"
   },
   "tabs": {
     "transactions": "Transactions",
@@ -727,8 +744,8 @@
     }
   },
   "systemAlert": {
-    "indexerDelayed": "Transaction indexing is {indexerDelayInHours} hours behind. Transactions are being processed normally and will gradually show up. You can also use other <a href=\"https://zksync.io/explore/\" style=\"color: inherit\">explorers</a> meanwhile.",
-    "indexerDelayedDueToHeavyLoad": "The network is under a heavy load at the moment and transaction indexing on the explorer is {indexerDelayInHours} hours behind. Transactions are being processed normally and will gradually show up. You can also use other <a href=\"https://zksync.io/explore/\" style=\"color: inherit\">explorers</a> meanwhile."
+    "indexerDelayed": "Transaction indexing is {indexerDelayInHours} hours behind. Transactions are being processed normally and will gradually show up.",
+    "indexerDelayedDueToHeavyLoad": "The network is under a heavy load at the moment and transaction indexing on the explorer is {indexerDelayInHours} hours behind. Transactions are being processed normally and will gradually show up."
   },
   "GoOutsidePageDialog": {
     "title": "Note",

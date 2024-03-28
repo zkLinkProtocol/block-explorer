@@ -25,6 +25,7 @@ import {
 import {
   AccountEtherBalanceResponseDto,
   AccountsEtherBalancesResponseDto,
+  UserBalancesResponseDto,
 } from "../dtos/account/accountEtherBalanceResponse.dto";
 import { AccountMinedBlocksResponseDto } from "../dtos/account/accountMinedBlocksResponse.dto";
 import { ApiExceptionFilter } from "../exceptionFilter";
@@ -44,7 +45,7 @@ export class AccountController {
     private readonly blockService: BlockService,
     private readonly transactionService: TransactionService,
     private readonly transferService: TransferService,
-    private readonly balanceService: BalanceService
+    private readonly balanceService: BalanceService,
   ) {
     this.logger = new Logger(AccountController.name);
   }
@@ -228,6 +229,19 @@ export class AccountController {
     };
   }
 
+  @Get("/tokenbalanceall")
+  public async getAllAccountTokenBalance(
+    @Query("contractaddress", new ParseAddressPipe({ errorMessage: "Invalid contractAddress format" }))
+    contractAddress: string
+  ): Promise<UserBalancesResponseDto> {
+    const balance = await this.balanceService.getBalancesByToken(contractAddress);
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result: balance,
+    };
+  }
+
   @Get("/getminedblocks")
   public async getAccountMinedBlocks(
     @Query("address", new ParseAddressPipe()) address: string,
@@ -254,5 +268,10 @@ export class AccountController {
         blockReward: "0",
       })),
     };
+  }
+
+  @Get("/gettotalaccountnumber")
+  public async getTotalAccountNumber(): Promise<number> {
+    return this.transactionService.getTotalAccountNumber();
   }
 }

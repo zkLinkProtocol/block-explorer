@@ -3,13 +3,7 @@ import { HttpService } from "@nestjs/axios";
 import { AxiosError } from "axios";
 import { setTimeout } from "timers/promises";
 import { catchError, firstValueFrom } from "rxjs";
-import {
-  TokenOffChainDataProvider,
-  ITokenOffChainData,
-  ITokenCurrentPrice,
-  ITokenMarketChartProviderResponse,
-} from "../../tokenOffChainDataProvider.abstract";
-import { Token } from "../../../token.service";
+import { TokenOffChainDataProvider, ITokenOffChainData } from "../../tokenOffChainDataProvider.abstract";
 
 const TOKENS_INFO_API_URL = "https://api.portals.fi/v2/tokens";
 const API_INITIAL_RETRY_TIMEOUT = 5000;
@@ -41,24 +35,30 @@ export class PortalsFiTokenOffChainDataProvider implements TokenOffChainDataProv
     this.logger = new Logger(PortalsFiTokenOffChainDataProvider.name);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async getTokensOffChainData(supportTokens: Token[]): Promise<ITokenOffChainData[]> {
-    return [];
-  }
+  public async getTokensOffChainData({
+    bridgedTokensToInclude,
+  }: {
+    bridgedTokensToInclude: string[];
+  }): Promise<ITokenOffChainData[]> {
+    let page = 0;
+    let hasMore = true;
+    const tokens = [];
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async getTokenPriceByBlock(tokenId: string, blockTs: number): Promise<number> {
-    return 0;
-  }
+    // This provider only supports bridged tokens
+    if (!bridgedTokensToInclude.length) {
+      return [];
+    }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async getTokensCurrentPrice(tokens: string[]): Promise<ITokenCurrentPrice[]> {
-    return [];
-  }
+    while (hasMore) {
+      const tokensInfoPage = await this.getTokensOffChainDataPageRetryable({ page });
+      tokens.push(...tokensInfoPage.tokens);
+      page++;
+      hasMore = tokensInfoPage.hasMore;
+    }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async getTokensMarketChart(tokenId: string, getDate: Date): Promise<ITokenMarketChartProviderResponse> {
-    return null;
+    return tokens.filter((token) =>
+      bridgedTokensToInclude.find((bridgetTokenAddress) => bridgetTokenAddress === token.l1Address)
+    );
   }
 
   private async getTokensOffChainDataPageRetryable({

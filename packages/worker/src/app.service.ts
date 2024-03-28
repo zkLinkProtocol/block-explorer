@@ -9,10 +9,9 @@ import { BatchService } from "./batch";
 import { CounterService } from "./counter";
 import { BalancesCleanerService } from "./balance";
 import { TokenOffChainDataSaverService } from "./token/tokenOffChainData/tokenOffChainDataSaver.service";
+import { ValuesService } from "./values/values.service";
 import runMigrations from "./utils/runMigrations";
-import { DepositPointService } from "./points/depositPoint.service";
-import { HoldPointService } from "./points/holdPoint.service";
-import { TvlStatisticalService } from "./points/tvlStatistical.service";
+import { HistoryService } from "./values/history.service";
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {
@@ -25,11 +24,10 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     private readonly blocksRevertService: BlocksRevertService,
     private readonly balancesCleanerService: BalancesCleanerService,
     private readonly tokenOffChainDataSaverService: TokenOffChainDataSaverService,
-    private readonly depositPointService: DepositPointService,
-    private readonly holdPointService: HoldPointService,
-    private readonly tvlStatisticalService: TvlStatisticalService,
+    private readonly valuesService: ValuesService,
     private readonly dataSource: DataSource,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly historyService: HistoryService
   ) {
     this.logger = new Logger(AppService.name);
   }
@@ -61,9 +59,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     const disableCountersProcessing = this.configService.get<boolean>("counters.disableCountersProcessing");
     const disableOldBalancesCleaner = this.configService.get<boolean>("balances.disableOldBalancesCleaner");
     const enableTokenOffChainDataSaver = this.configService.get<boolean>("tokens.enableTokenOffChainDataSaver");
-    const disableDepositPointService = this.configService.get<boolean>("points.disableDepositPointService");
-    const disableHoldPointService = this.configService.get<boolean>("points.disableHoldPointService");
-    const disableTvlStatisticService = this.configService.get<boolean>("points.disableTvlStatisticService");
+    const enableTotalLockedValueUpdater = this.configService.get<boolean>("tokens.enableTotalLockedValueUpdater");
     const tasks = [this.blockService.start()];
     if (!disableBatchesProcessing) {
       tasks.push(this.batchService.start());
@@ -77,14 +73,9 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     if (enableTokenOffChainDataSaver) {
       tasks.push(this.tokenOffChainDataSaverService.start());
     }
-    if (!disableDepositPointService) {
-      tasks.push(this.depositPointService.start());
-    }
-    if (!disableHoldPointService) {
-      tasks.push(this.holdPointService.start());
-    }
-    if (!disableTvlStatisticService) {
-      tasks.push(this.tvlStatisticalService.start());
+    if (enableTotalLockedValueUpdater) {
+      tasks.push(this.valuesService.start());
+      tasks.push(this.historyService.start());
     }
     return Promise.all(tasks);
   }
@@ -96,9 +87,8 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       this.counterService.stop(),
       this.balancesCleanerService.stop(),
       this.tokenOffChainDataSaverService.stop(),
-      this.depositPointService.stop(),
-      this.holdPointService.stop(),
-      this.tvlStatisticalService.stop(),
+      this.valuesService.stop(),
+      this.historyService.stop(),
     ]);
   }
 }

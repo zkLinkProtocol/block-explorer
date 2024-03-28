@@ -30,7 +30,13 @@ import TokenTable from "@/components/token/TokenListTable.vue";
 
 import useTokenLibrary from "@/composables/useTokenLibrary";
 
-const { tokens, isRequestPending: isTokensPending, isRequestFailed: isTokensFailed, getTokens } = useTokenLibrary();
+const {
+  tokens,
+  sortTokens,
+  isRequestPending: isTokensPending,
+  isRequestFailed: isTokensFailed,
+  getTokens,
+} = useTokenLibrary();
 
 const { t } = useI18n();
 const breadcrumbItems = computed((): BreadcrumbItem[] => [

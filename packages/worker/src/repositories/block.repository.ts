@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { FindOptionsRelations, FindOptionsSelect, FindOptionsWhere } from "typeorm";
+import { FindOptionsWhere, FindOptionsSelect, FindOptionsRelations } from "typeorm";
 import { types } from "zksync-web3";
 import { Block as BlockDto } from "../dataFetcher/types";
 import { unixTimeToDate } from "../utils/date";
@@ -28,17 +28,6 @@ export class BlockRepository {
     });
   }
 
-  public async getLastBlockNumber(): Promise<number> {
-    const transactionManager = this.unitOfWork.getTransactionManager();
-    const lastBlock = await transactionManager
-      .createQueryBuilder(Block, "block")
-      .select("block.number")
-      .orderBy("block.number", "DESC")
-      .limit(1)
-      .getOne();
-    return lastBlock?.number || 0;
-  }
-
   public async getLastExecutedBlockNumber(): Promise<number> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const lastExecutedBlock = await transactionManager
@@ -50,17 +39,6 @@ export class BlockRepository {
       .limit(1)
       .getOne();
     return lastExecutedBlock?.number || 0;
-  }
-
-  public async getNextHoldPointStatisticalBlock(nextStatisticalTs: Date): Promise<Block> {
-    const transactionManager = this.unitOfWork.getTransactionManager();
-    return await transactionManager
-      .createQueryBuilder(Block, "block")
-      .select(["block.number", "block.timestamp"])
-      .where("block.timestamp > :nextStatisticalTs", { nextStatisticalTs })
-      .orderBy("block.number", "ASC")
-      .limit(1)
-      .getOne();
   }
 
   public async add(blockDto: BlockDto, blockDetailsDto: types.BlockDetails): Promise<void> {

@@ -1,9 +1,9 @@
 {
   "networks": [
     {
-      "apiUrl": "https://goerli.explorer-api.zklink.network",
-      "verificationApiUrl": "https://goerli.verification.zklink.network",
-      "bridgeUrl": "https://goerli.portal.zklink.network",
+      "apiUrl": "https://goerli.explorer-api.zklink.io",
+      "verificationApiUrl": "https://goerli.explorer.zklink.io",
+      "bridgeUrl": "https://goerli.portal.zklink.io",
       "hostnames": [],
       "icon": "/images/icons/cion.png",
       "l1ExplorerUrl": "https://goerli.lineascan.build",
@@ -12,11 +12,24 @@
       "maintenance": false,
       "name": "goerli",
       "published": true,
-      "rpcUrl": "https://goerli.rpc.zklink.network"
+      "rpcUrl": "https://goerli.rpc.zklink.io"
     }
   ],
-  "iconsList":{
+  "iconsList": {
     "goerli": "/img/ethereum.svg",
-    "primary":"/img/linea.svg"
+    "primary": "/img/linea.svg",
+    "ethereum": "/img/ethereum.svg",
+    "zksync": "/img/zksync.svg",
+    "arbitrum": "/img/arbitrum-arb-logo.svg",
+    "mantle": "/img/mantle.svg",
+    "manta": "/img/manta.jpg"
+  },
+  "chainNameList": {
+    "goerli": "Ethereum Goerli Testnet",
+    "primary": "Linea Goerli Testnet",
+    "zksync": "zkSync Testnet",
+    "arbitrum": "Arbitrum Testnet",
+    "mantle": "Mantle Goerli Testnet",
+    "manta": "Manta Testnet"
   }
 }

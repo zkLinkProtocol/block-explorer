@@ -1,9 +1,12 @@
 <template>
-  <a
-    v-if="network === 'L1' && !!currentNetwork.l1ExplorerUrl"
-    target="_blank"
-    :href="`${currentNetwork.l1ExplorerUrl}/address/${formattedAddress}`"
-  >
+  <a v-if="network === 'L1' && !!currentNetwork.l1ExplorerUrl" target="_blank"
+    :href="`${currentNetwork.l1ExplorerUrl}/address/${formattedAddress}`">
+    <slot>
+      {{ formattedAddress }}
+    </slot>
+  </a>
+  <a v-else-if="network === 'origin' && networkKey" target="_blank"
+    :href="`${getExplorerUrlPrefix(networkKey)}/address/${formattedAddress}`">
     <slot>
       {{ formattedAddress }}
     </slot>
@@ -28,6 +31,7 @@ import useContext from "@/composables/useContext";
 import type { Address } from "@/types";
 import type { NetworkOrigin } from "@/types";
 
+import { getExplorerUrlPrefix } from "@/configs/networkKey";
 import { checksumAddress } from "@/utils/formatters";
 
 const props = defineProps({
@@ -39,6 +43,10 @@ const props = defineProps({
   network: {
     type: String as PropType<NetworkOrigin>,
     default: "L2",
+  },
+  networkKey: {
+    type: String,
+    default: "",
   },
 });
 

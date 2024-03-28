@@ -1,0 +1,44 @@
+[
+  {
+    "name": "wUSDM-ethereum",
+    "address": "0x57F5E098CaD7A3D1Eed53991D4d66C45C9AF7812",
+    "image": "https://assets.coingecko.com/coins/images/33785/large/wUSDM_PNG_240px.png?1702981552",
+    "market_cap": 1
+  },
+  {
+    "name": "wUSDM-manta",
+    "address": "0xbdAd407F77f44F7Da6684B416b1951ECa461FB07",
+    "image": "https://assets.coingecko.com/coins/images/33785/large/wUSDM_PNG_240px.png?1702981552",
+    "market_cap": 1
+  },
+  {
+    "name": "mstETH-ethereum",
+    "address": "0x49446A0874197839D15395B908328a74ccc96Bc0",
+    "image": "https://etherscan.io/token/images/msteth_32.png",
+    "market_cap": 1
+  },
+  {
+    "name": "mswETH-ethereum",
+    "address": "0x32bd822d615A3658A68b6fDD30c2fcb2C996D678",
+    "image": "https://etherscan.io/token/images/msweth_32.png",
+    "market_cap": 1
+  },
+  {
+    "name": "mwBETH-ethereum",
+    "address": "0xE46a5E19B19711332e33F33c2DB3eA143e86Bc10",
+    "image": "https://etherscan.io/token/images/mwbeth_32.png",
+    "market_cap": 1
+  },
+  {
+    "name": "mmETH-ethereum",
+    "address": "0x8a053350ca5F9352a16deD26ab333e2D251DAd7c",
+    "image": "https://etherscan.io/token/images/mmeth_32.png",
+    "market_cap": 1
+  },
+  {
+    "name": "nETH-ethereum",
+    "address": "0xC6572019548dfeBA782bA5a2093C836626C7789A",
+    "image": "https://web3-public.s3.ap-northeast-1.amazonaws.com/oss/console/1711358488472.png",
+    "market_cap": 1
+  }
+]

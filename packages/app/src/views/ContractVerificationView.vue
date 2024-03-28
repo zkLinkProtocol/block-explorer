@@ -17,8 +17,8 @@
         <i18n-t scope="global" keypath="contractVerification.resources.title" tag="span">
           <template #hardhat>
             <a @click="changeLink(1)" class="btn-link">
-              {{ t("contractVerification.resources.links.hardhat") }}
-            </a>
+                {{ t("contractVerification.resources.links.hardhat") }}
+              </a>
           </template>
         </i18n-t>
       </Alert>
@@ -83,9 +83,10 @@
           :label="t(`contractVerification.form.${selectedZkCompiler.name}Version.label`)"
           class="label-inline-block"
         >
-          <a @click="changeLink(2)" class="docs-link">{{
-            t(`contractVerification.form.${selectedZkCompiler.name}Version.details`)
-          }}</a>
+          <a @click="changeLink(2)"
+            class="docs-link"
+            >{{ t(`contractVerification.form.${selectedZkCompiler.name}Version.details`) }}</a
+          >
           <Dropdown
             class="clear-both"
             v-model="selectedZkCompilerVersion"
@@ -260,7 +261,10 @@
       </div>
     </ContentCard>
     <SuccessScreen v-else class="content-container" :contract-address="(form.contractAddress as Address)" />
-    <AskGotoZksyncDialog :outsideLink="linkAddress" :opened="isShowPopUp" @close="closeModal" />
+    <AskGotoZksyncDialog 
+        :outsideLink="linkAddress"
+        :opened="isShowPopUp"  
+        @close="closeModal" />
   </div>
 </template>
 
@@ -273,7 +277,6 @@ import { ExclamationIcon } from "@heroicons/vue/outline";
 import { useVuelidate } from "@vuelidate/core";
 import { createI18nMessage, required } from "@vuelidate/validators";
 
-import AskGotoZksyncDialog from "@/components/AskGotoZksyncDialog.vue";
 import ContentCard from "@/components/ContentCard.vue";
 import SearchForm from "@/components/SearchForm.vue";
 import SolidityEditor from "@/components/SolidityEditor.vue";
@@ -288,6 +291,7 @@ import RadioInput from "@/components/common/RadioInput.vue";
 import MultiFileVerification from "@/components/contract/verification/MultiFileVerification.vue";
 import SuccessScreen from "@/components/contract/verification/SuccessScreen.vue";
 import FormItem from "@/components/form/FormItem.vue";
+import AskGotoZksyncDialog from "@/components/AskGotoZksyncDialog.vue";
 
 import useContractVerification from "@/composables/useContractVerification";
 
@@ -352,19 +356,22 @@ const breadcrumbItems = computed((): BreadcrumbItem[] => [
 ]);
 
 const isZkVMSolcCompiler = ref(false);
-const isShowPopUp = ref(false);
-const linkAddress = ref("");
-const closeModal = () => {
-  isShowPopUp.value = false;
-};
-const changeLink = (val: number) => {
-  isShowPopUp.value = true;
-  if (val === 1) {
-    linkAddress.value = "https://docs.zksync.io/build/tooling/hardhat/hardhat-zksync-verify.html";
-  } else {
-    linkAddress.value = "https://docs.zksync.io/build/tooling/block-explorer/contract-verification.html#user-interface";
+const isShowPopUp=ref(false)
+const linkAddress=ref('')
+const closeModal=()=>{
+  isShowPopUp.value=false
+  
+}
+const changeLink=(val:number)=>{
+  isShowPopUp.value=true;
+  if(val===1){
+    linkAddress.value = "https://docs.zksync.io/build/tooling/hardhat/hardhat-zksync-verify.html"
+  }else{
+    linkAddress.value = "https://docs.zksync.io/build/tooling/block-explorer/contract-verification.html#user-interface"
   }
-};
+  
+    
+}
 const selectedCompilationType = ref(CompilationTypeOptionsEnum.soliditySingleFile);
 const isSingleFile = computed(() =>
   [CompilationTypeOptionsEnum.soliditySingleFile, CompilationTypeOptionsEnum.vyperSingleFile].includes(
@@ -616,7 +623,7 @@ async function submitForm() {
 }
 .form-container {
   @apply md:grid-cols-4;
-  .btn-link {
+  .btn-link{
     cursor: pointer;
   }
 

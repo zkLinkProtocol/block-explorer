@@ -25,7 +25,7 @@ async function bootstrap() {
   if (configService.get<boolean>("featureFlags.swagger.enabled")) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle("Block explorer API")
-      .setDescription("ZkSync Block Explorer API")
+      .setDescription("zkLink Nova Block Explorer API")
       .setVersion("1.0")
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);

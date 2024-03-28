@@ -5,6 +5,8 @@ import { bigIntNumberTransformer } from "../transformers/bigIntNumber.transforme
 import { stringTransformer } from "../transformers/string.transformer";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { BaseEntity } from "./base.entity";
+import { BigNumber } from "ethers";
+import { bigNumberTransformer } from "..//transformers/bigNumber.transformer";
 
 export enum TokenType {
   ETH = "ETH",
@@ -23,7 +25,7 @@ export class Token extends BaseEntity {
   @Column({ type: "bytea", nullable: true, transformer: hexTransformer })
   public readonly l1Address?: string;
 
-  @Column({ transformer: stringTransformer })
+  @Column({ nullable: true, transformer: stringTransformer })
   public readonly networkKey?: string;
 
   @Column({ generated: true, type: "bigint" })
@@ -69,6 +71,6 @@ export class Token extends BaseEntity {
   @Column({ type: "timestamp", nullable: true })
   public readonly offChainDataUpdatedAt?: Date;
 
-  @Column({ nullable: true })
-  public readonly priceId?: string;
+  @Column({ type: "varchar", length: 256, transformer: bigNumberTransformer, default: "", nullable: true })
+  public readonly totalSupply?: BigNumber;
 }

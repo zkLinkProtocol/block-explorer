@@ -1,5 +1,11 @@
 export type NetworkKey = string;
-export default () => {
+import * as fs from "fs";
+import * as JSONStream from "JSONStream";
+import * as path from "path";
+import { IExtraTokenAttribute } from "./token/tokenOffChainData/providers/coingecko/coingeckoTokenOffChainDataProvider";
+const extraCoinsListPath = "../extraCoinsList.json";
+const extraTokenAttributesPath = "../extraTokenAttributes.json";
+export default async () => {
   const {
     PORT,
     BLOCKCHAIN_RPC_URL,
@@ -30,14 +36,13 @@ export default () => {
     COINGECKO_IS_PRO_PLAN,
     COINGECKO_API_KEY,
     BRIDGE_NETWORK_KEYS,
-    DISABLE_DEPOSIT_POINT_SERVICE,
-    DISABLE_HOLD_POINT_SERVICE,
-    DISABLE_TVL_STATISTIC_SERVICE,
-    POINTS_STATISTICAL_PERIOD_SECS,
-    POINTS_PHASE1_START_TIME,
-    POINTS_EARLY_DEPOSIT_END_TIME,
-    POINTS_PHASE1_END_TIME,
-    POINTS_STATISTICS_TVL_INTERVAL,
+    COINGECKO_PLATFORM_IDS,
+    UPDATE_TOTAL_LOCKED_VALUE_INTERVAL,
+    UPDATE_TOTAL_LOCKED_VALUE_DELAY,
+    ENABLE_TOTAL_LOCKED_VALUE_UPDATER,
+    UPDATE_TVL_HISTORY_INTERVAL,
+    COINGECKO_PROXY_URL,
+    COINGECKO_ENABLE_PROXY,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -104,7 +109,16 @@ export default () => {
       coingecko: {
         isProPlan: COINGECKO_IS_PRO_PLAN === "true",
         apiKey: COINGECKO_API_KEY,
+        platformIds: COINGECKO_PLATFORM_IDS.split(","),
+        extraCoinsList: await getExtraCoinsList(),
+        extraTokenAttributes: await getExtraTokenAttributes(),
+        proxyUrl: COINGECKO_PROXY_URL,
+        enableProxy: COINGECKO_ENABLE_PROXY === "true",
       },
+      updateTotalLockedValueInterval: parseInt(UPDATE_TOTAL_LOCKED_VALUE_INTERVAL, 10) || 30000,
+      updateTotalLockedValueDelay: parseInt(UPDATE_TOTAL_LOCKED_VALUE_DELAY, 10) || 500,
+      updateTvlHistoryInterval: parseInt(UPDATE_TVL_HISTORY_INTERVAL, 10) || 3600000,// 1 hour = 3600000
+      enableTotalLockedValueUpdater: ENABLE_TOTAL_LOCKED_VALUE_UPDATER === "true",
     },
     metrics: {
       collectDbConnectionPoolMetricsInterval: parseInt(COLLECT_DB_CONNECTION_POOL_METRICS_INTERVAL, 10) || 10000,
@@ -119,15 +133,47 @@ export default () => {
       getNetworkKeyByL2Erc20Bridge: (bridgeAddress: string): NetworkKey | undefined =>
         L22Key[bridgeAddress.toLowerCase()],
     },
-    points: {
-      disableDepositPointService: DISABLE_DEPOSIT_POINT_SERVICE === "true",
-      disableHoldPointService: DISABLE_HOLD_POINT_SERVICE === "true",
-      disableTvlStatisticService: DISABLE_TVL_STATISTIC_SERVICE === "true",
-      pointsStatisticalPeriodSecs: parseInt(POINTS_STATISTICAL_PERIOD_SECS, 10) || 3600,
-      pointsPhase1StartTime: POINTS_PHASE1_START_TIME,
-      pointsPhase1EndTime: POINTS_PHASE1_END_TIME,
-      pointsEarlyDepositEndTime: POINTS_EARLY_DEPOSIT_END_TIME,
-      pointsStatistsTvlInterval: POINTS_STATISTICS_TVL_INTERVAL,
-    },
   };
 };
+async function getExtraCoinsList() {
+  const readStream = fs.createReadStream(path.join(__dirname, extraCoinsListPath));
+  const jsonStream = JSONStream.parse("*");
+
+  readStream.pipe(jsonStream);
+  const res = [];
+  await new Promise((resolve, reject) => {
+    jsonStream.on("data", (item: any) => {
+      res.push(item);
+    });
+
+    jsonStream.on("end", resolve);
+    jsonStream.on("error", reject);
+  });
+  return (res as ITokenListItemProviderResponse[]).map((item) => ({
+    ...item,
+    platforms: Object.fromEntries(Object.entries(item.platforms).map(([key, value]) => [key, value.toLowerCase()])),
+  }));
+}
+async function getExtraTokenAttributes(): Promise<IExtraTokenAttribute[]> {
+  const readStream = fs.createReadStream(path.join(__dirname, extraTokenAttributesPath));
+  const jsonStream = JSONStream.parse("*");
+
+  readStream.pipe(jsonStream);
+  const res = [];
+  await new Promise((resolve, reject) => {
+    jsonStream.on("data", (item: any) => {
+      res.push(item);
+    });
+
+    jsonStream.on("end", resolve);
+    jsonStream.on("error", reject);
+  });
+  return (res as IExtraTokenAttribute[]).map((item) => ({
+    ...item,
+    address: item.address.toLowerCase(),
+  }));
+}
+interface ITokenListItemProviderResponse {
+  id: string;
+  platforms: Record<string, string>;
+}

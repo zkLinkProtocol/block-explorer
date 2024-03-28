@@ -10,7 +10,7 @@ import { JsonRpcProviderBase } from "../rpcProvider";
 import { BLOCKCHAIN_RPC_CALL_DURATION_METRIC_NAME, BlockchainRpcCallMetricLabel } from "../metrics";
 import { RetryableContract } from "./retryableContract";
 
-type BridgeConfigFunction = (input: string) => string | undefined;
+type BridgeConfigFunction = (input: String) => string | undefined;
 export interface TraceTransactionResult {
   type: string;
   from: string;
@@ -169,6 +169,5 @@ export class BlockchainService implements OnModuleInit {
     return await erc20Contract.balanceOf(address, { blockTag });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public async onModuleInit(): Promise<void> {}
 }

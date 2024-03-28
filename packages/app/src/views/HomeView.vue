@@ -7,9 +7,11 @@
       <NetworkStats
         v-if="networkStats || networkStatsPending"
         :loading="networkStatsPending"
+        :tvlLoading="tvlLoading"
         :committed="networkStats?.lastSealedBlock"
         :verified="networkStats?.lastVerifiedBlock"
         :transactions="networkStats?.totalTransactions"
+        :tvl="tvl"
         class="network-stats"
       />
     </div>
@@ -53,7 +55,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 
 import NetworkStats from "@/components/NetworkStats.vue";
@@ -65,9 +67,11 @@ import TransactionsTable from "@/components/transactions/Table.vue";
 
 import useBatches from "@/composables/useBatches";
 import useNetworkStats from "@/composables/useNetworkStats";
+import useNetworkTvl from "@/composables/useNetworkTvl";
 
 const { t } = useI18n();
 const { fetch: fetchNetworkStats, pending: networkStatsPending, item: networkStats } = useNetworkStats();
+const { getTVL, tvl, isRequestPending: tvlLoading } = useNetworkTvl();
 const { load: getBatches, pending: isBatchesPending, failed: isBatchesFailed, data: batches } = useBatches();
 
 const displayedBatches = computed(() => {
@@ -75,6 +79,17 @@ const displayedBatches = computed(() => {
 });
 
 fetchNetworkStats();
+
+let interval: ReturnType<typeof setInterval> | undefined = undefined;
+const startPolling = () => {
+  getTVL();
+  interval = setInterval(getTVL, 10000);
+};
+startPolling();
+onUnmounted(() => {
+  clearInterval(interval);
+  interval = undefined;
+});
 
 getBatches(1, new Date());
 </script>

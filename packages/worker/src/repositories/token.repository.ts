@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { FindOptionsSelect, IsNull, Not } from "typeorm";
+import { IsNull, Not, FindOptionsSelect } from "typeorm";
 import { Token } from "../entities";
 import { BaseRepository } from "./base.repository";
 import { UnitOfWork } from "../unitOfWork";
+import { BigNumber } from "ethers";
 
 @Injectable()
 export class TokenRepository extends BaseRepository<Token> {
@@ -51,19 +52,30 @@ export class TokenRepository extends BaseRepository<Token> {
     return token?.offChainDataUpdatedAt;
   }
 
-  public async getAllTokens(): Promise<Token[]> {
-    const transactionManager = this.unitOfWork.getTransactionManager();
-    return await transactionManager.find(this.entityTarget, {});
-  }
-
   public async getBridgedTokens(fields: FindOptionsSelect<Token> = { l1Address: true }): Promise<Token[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    return await transactionManager.find(this.entityTarget, {
+    const tokens = await transactionManager.find(this.entityTarget, {
       where: {
         l1Address: Not(IsNull()),
       },
       select: fields,
     });
+    return tokens;
+  }
+
+  public async getTotalTVL(): Promise<BigNumber> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const allTokens = await transactionManager.find(this.entityTarget);
+    let totalTVL = BigNumber.from(0);
+    for (const token of allTokens) {
+      let tvl = BigNumber.from(token.totalSupply)
+        .mul(((token.usdPrice ?? 0) * 1000) | 0)
+        .div(1000)
+        .div(BigNumber.from(10).pow(token.decimals));
+
+      totalTVL = totalTVL.add(tvl);
+    }
+    return totalTVL;
   }
 
   public async updateTokenOffChainData({
@@ -73,7 +85,6 @@ export class TokenRepository extends BaseRepository<Token> {
     usdPrice,
     updatedAt,
     iconURL,
-    priceId,
   }: {
     l1Address?: string;
     l2Address?: string;
@@ -81,7 +92,6 @@ export class TokenRepository extends BaseRepository<Token> {
     usdPrice?: number;
     updatedAt?: Date;
     iconURL?: string;
-    priceId?: string;
   }): Promise<void> {
     if (!l1Address && !l2Address) {
       throw new Error("l1Address or l2Address must be provided");
@@ -99,9 +109,28 @@ export class TokenRepository extends BaseRepository<Token> {
         ...(iconURL && {
           iconURL,
         }),
-        ...(priceId && {
-          priceId,
-        }),
+      }
+    );
+  }
+
+  public async updateTokenTotalSupply({
+    l2Address,
+    totalSupply,
+  }: {
+    l2Address?: string;
+    totalSupply: BigNumber;
+  }): Promise<void> {
+    if (!l2Address) {
+      throw new Error("l2Address must be provided");
+    }
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update(
+      this.entityTarget,
+      {
+        l2Address,
+      },
+      {
+        totalSupply,
       }
     );
   }

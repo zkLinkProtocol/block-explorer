@@ -16,7 +16,7 @@ declare namespace Api {
         previous: string;
       };
     };
-
+    type TotalSupply = { type: string; hex: string };
     type Token = {
       l2Address: string;
       l1Address: string | null;
@@ -26,6 +26,9 @@ declare namespace Api {
       usdPrice: number | null;
       liquidity: number | null;
       iconURL: string | null;
+      tvl: string;
+      networkKey?: string;
+      totalSupply?: TotalSupply;
     };
 
     type BatchListItem = {
@@ -55,6 +58,17 @@ declare namespace Api {
       provenAt: string | null;
       l1GasPrice: string;
       l2FairGasPrice: string;
+    };
+    type BatchRootItem = {
+      number: string;
+      transactionHash: string | null;
+      rootHash: string | null;
+      executedAt: string | null;
+      l1BatchNumber: number | null;
+      chainId: number;
+      blockExplorersUrl?: string;
+      key?: string;
+      limitNumber?: number;
     };
 
     type Log = {

@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import { Histogram } from "prom-client";
 import { InjectMetric } from "@willsoto/nestjs-prometheus";
 import { BalanceRepository } from "../repositories";
-import { Balance, TokenType } from "../entities";
+import { TokenType } from "../entities";
 import { Balance as ChangedBalance } from "../dataFetcher/types";
 
 import { DELETE_OLD_BALANCES_DURATION_METRIC_NAME, DELETE_ZERO_BALANCES_DURATION_METRIC_NAME } from "../metrics";
@@ -26,18 +26,6 @@ export class BalanceService {
 
   public async saveChangedBalances(changedBalances: ChangedBalance[]): Promise<void> {
     await this.balanceRepository.addMany(changedBalances);
-  }
-
-  public async getAllAddresses(): Promise<Buffer[]> {
-    return await this.balanceRepository.getAllAddresses();
-  }
-
-  public async getAccountBalances(address: Buffer): Promise<Balance[]> {
-    return await this.balanceRepository.getAccountBalances(address);
-  }
-
-  public async getAccountBalancesByBlock(address: Buffer, block: number): Promise<Balance[]> {
-    return await this.balanceRepository.getAccountBalancesByBlock(address, block);
   }
 
   public getERC20TokensForChangedBalances(changedBalances: ChangedBalance[]): string[] {

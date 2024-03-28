@@ -31,9 +31,7 @@ import {
   AddressTransferRepository,
   LogRepository,
   BalanceRepository,
-  PointsRepository,
-  PointsHistoryRepository,
-  AddressTokenTvlRepository,
+  TVLHistoryRepository,
 } from "./repositories";
 import {
   Batch,
@@ -47,33 +45,17 @@ import {
   Transfer,
   AddressTransfer,
   Balance,
-  Point,
-  PointsHistory,
-  Referral,
-  BlockAddressPoint,
-  Invite,
-  AddressTvl,
-  AddressTokenTvl,
-  GroupTvl,
+  TVLHistory,
 } from "./entities";
-import { typeOrmModuleOptions, typeOrmReferModuleOptions } from "./typeorm.config";
+import { typeOrmModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
 import { RetryDelayProvider } from "./retryDelay.provider";
 import { MetricsModule } from "./metrics";
 import { DbMetricsService } from "./dbMetrics.service";
 import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
-import { DepositPointService } from "./points/depositPoint.service";
-import { BlockTokenPriceRepository } from "./repositories";
-import { BlockTokenPrice } from "./entities";
-import { BlockAddressPointRepository } from "./repositories";
-import { InviteRepository } from "./repositories";
-import { ReferrerRepository } from "./repositories";
-import { BlockGroupTvl } from "./entities/blockGroupTvl.entity";
-import { GroupTvlRepository } from "./repositories";
-import { AddressTvlRepository } from "./repositories";
-import { HoldPointService } from "./points/holdPoint.service";
-import { TvlStatisticalService } from "./points/tvlStatistical.service";
+import { ValuesService } from "./values/values.service";
+import { HistoryService } from "./values/history.service";
 
 @Module({
   imports: [
@@ -101,29 +83,9 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
       Address,
       AddressTransfer,
       Transfer,
+      TVLHistory,
       Balance,
-      Point,
-      PointsHistory,
-      BlockTokenPrice,
-      BlockAddressPoint,
-      BlockGroupTvl,
-      AddressTvl,
-      AddressTokenTvl,
-      GroupTvl,
     ]),
-    TypeOrmModule.forRootAsync({
-      name: "refer",
-      imports: [ConfigModule],
-      useFactory: () => {
-        return {
-          ...typeOrmReferModuleOptions,
-          autoLoadEntities: true,
-          retryDelay: 3000, // to cover 3 minute DB failover window
-          retryAttempts: 70, // try to reconnect for 3.5 minutes,
-        };
-      },
-    }),
-    TypeOrmModule.forFeature([Invite, Referral], "refer"),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),
     MetricsModule,
@@ -161,11 +123,10 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
     TokenRepository,
     AddressRepository,
     TransferRepository,
+    TVLHistoryRepository,
     AddressTransferRepository,
     BalanceRepository,
     LogRepository,
-    PointsRepository,
-    PointsHistoryRepository,
     BlocksRevertService,
     BatchService,
     BlockProcessor,
@@ -175,16 +136,8 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
     Logger,
     RetryDelayProvider,
     DbMetricsService,
-    DepositPointService,
-    HoldPointService,
-    TvlStatisticalService,
-    BlockTokenPriceRepository,
-    BlockAddressPointRepository,
-    InviteRepository,
-    ReferrerRepository,
-    GroupTvlRepository,
-    AddressTvlRepository,
-    AddressTokenTvlRepository,
+    ValuesService,
+    HistoryService,
   ],
 })
 export class AppModule {}

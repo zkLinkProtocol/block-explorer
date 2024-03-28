@@ -31,6 +31,7 @@ import {
 import {
   AccountEtherBalanceResponseDto,
   AccountsEtherBalancesResponseDto,
+  UserBalancesResponseDto,
 } from "./dtos/account/accountEtherBalanceResponse.dto";
 import { AccountTokenBalanceResponseDto } from "./dtos/account/accountTokenBalanceResponse.dto";
 import { AccountMinedBlock } from "./dtos/account/accountMinedBlock.dto";
@@ -401,6 +402,23 @@ export class ApiController {
     type: AccountTokenBalanceResponseDto,
   })
   public async getAccountTokenBalance(): Promise<AccountTokenBalanceResponseDto> {
+    return null;
+  }
+
+  @ApiTags("Account API")
+  @Get("api?module=account&action=tokenbalanceall")
+  @ApiOperation({ summary: "Retrieve all user balances for a specific contract address" })
+  @ApiQuery({
+    name: "contractaddress",
+    description: "The Token contract address to get balance for",
+    example: constants.erc20TokenAddress,
+    required: true,
+  })
+  @ApiOkResponse({
+    description: "User balances",
+    type: UserBalancesResponseDto,
+  })
+  public async getAllAccountTokenBalance(): Promise<UserBalancesResponseDto> {
     return null;
   }
 

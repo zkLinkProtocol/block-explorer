@@ -24,8 +24,6 @@ import { metricProviders } from "./metrics";
 import { DbMetricsService } from "./dbMetrics.service";
 import { disableExternalAPI } from "./config/featureFlags";
 import config from "./config";
-import { TVLModule } from "./tvl/tvl.module";
-import { typeOrmReferModuleOptions } from "./config/refer-typeorm.config";
 
 @Module({
   imports: [
@@ -33,12 +31,6 @@ import { typeOrmReferModuleOptions } from "./config/refer-typeorm.config";
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => configService.get<TypeOrmModuleOptions>("typeORM"),
-      inject: [ConfigService],
-    }),
-    TypeOrmModule.forRootAsync({
-      name: "refer",
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => configService.get<TypeOrmModuleOptions>("referORM"),
       inject: [ConfigService],
     }),
     ApiModule,
@@ -57,7 +49,6 @@ import { typeOrmReferModuleOptions } from "./config/refer-typeorm.config";
     LogModule,
     StatsModule,
     HealthModule,
-    TVLModule,
   ],
   providers: [Logger, ...metricProviders, DbMetricsService],
 })

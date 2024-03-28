@@ -6,6 +6,7 @@ import { IPaginationOptions } from "../common/types";
 import { paginate } from "../common/utils";
 import { Batch } from "./batch.entity";
 import { BatchDetails } from "./batchDetails.entity";
+import { BatchRootEventLogs } from "./batchRootEventLogs.entity";
 
 @Injectable()
 export class BatchService {
@@ -13,7 +14,9 @@ export class BatchService {
     @InjectRepository(Batch)
     private readonly batchRepository: Repository<Batch>,
     @InjectRepository(BatchDetails)
-    private readonly batchDetailsRepository: Repository<BatchDetails>
+    private readonly batchDetailsRepository: Repository<BatchDetails>,
+    @InjectRepository(BatchRootEventLogs)
+    private readonly batchRootEventLogsRepository: Repository<BatchRootEventLogs>
   ) {}
 
   private getLastBatch(filterOptions: FindOptionsWhere<Batch>): Promise<Batch> {
@@ -59,5 +62,9 @@ export class BatchService {
       .orderBy("batch.number", "DESC");
 
     return paginate<Batch>(queryBuilder, paginationOptions, () => this.count(filterOptions));
+  }
+
+  public findOneBatchRoot(batchNumber: number): Promise<BatchRootEventLogs[]> {
+    return this.batchRootEventLogsRepository.findBy({ l1BatchNumber: batchNumber });
   }
 }
