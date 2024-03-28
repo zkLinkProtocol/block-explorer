@@ -64,12 +64,20 @@ export class TokenController {
     return {
       ...res,
       items: res.items.map((token) => {
+        let price_t = 6;
+        if (token.usdPrice < 10 ** -6){
+          const priceStr = token.usdPrice.toString();
+          const index = priceStr.indexOf(".");
+          if (index !== -1) {
+            price_t = priceStr.length - index - 1;
+          }
+        }
         return {
           ...token,
           tvl: token.totalSupply
             //TODO The calculation of the price needs to be more precise. It should start from the non-zero digit
-            .mul(Math.floor((token.usdPrice ?? 0) * 10 ** 6))
-            .div(10 ** 6)
+            .mul(Math.floor((token.usdPrice ?? 0) * 10 ** price_t))
+            .div(10 ** price_t)
             .div(BigNumber.from(10).pow(token.decimals))
             .toString(),
         };
