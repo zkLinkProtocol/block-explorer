@@ -33,7 +33,7 @@ const options = {
 
 const cache = new LRUCache(options);
 const HISTORY_TVL_CACHE_KEY = "history-tvl-cache";
-const HISTORY_USW_CACHE_KEY = "history-usw-cache"
+const HISTORY_UAW_CACHE_KEY = "history-uaw-cache"
 
 const entityName = "blocks";
 
@@ -55,9 +55,6 @@ export class BlockController {
       return tvls;
     }
 
-    const tvlHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
-      'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
-    );
     const latest: TVLHistory = await this.tvlHistoryRepository.findOne({
       // can't miss where
       where: {},
@@ -65,6 +62,13 @@ export class BlockController {
         id: "desc",
       },
     });
+    if (!latest){
+      return [];
+    }
+
+    const tvlHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
+      'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
+    );
 
     let history = tvlHistorys.map((tvlHistory) => {
       return {
@@ -84,15 +88,12 @@ export class BlockController {
   }
   @Get("/total/uaw")
   @ApiOperation({ summary: "Get total usw" })
-  public async getTotalUsw(): Promise<TVLHistoryDto[]> {
-    const uaws = cache.get(HISTORY_USW_CACHE_KEY) as TVLHistoryDto[];
+  public async getTotalUaw(): Promise<TVLHistoryDto[]> {
+    const uaws = cache.get(HISTORY_UAW_CACHE_KEY) as TVLHistoryDto[];
     if (uaws) {
       return uaws;
     }
 
-    const uawHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
-        'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
-    );
     const latest: TVLHistory = await this.tvlHistoryRepository.findOne({
       // can't miss where
       where: {},
@@ -100,6 +101,13 @@ export class BlockController {
         id: "desc",
       },
     });
+    if (!latest){
+      return [];
+    }
+
+    const uawHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
+        'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
+    );
 
     let history = uawHistorys.map((tvlHistory) => {
       return {
