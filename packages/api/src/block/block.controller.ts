@@ -67,7 +67,7 @@ export class BlockController {
     }
 
     const tvlHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
-      'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
+      'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp) desc'
     );
 
     let history = tvlHistorys.map((tvlHistory) => {
@@ -77,12 +77,11 @@ export class BlockController {
         timestamp: tvlHistory.timestamp,
       };
     });
-    history.push({
+    history.unshift({
       id: latest.id,
       tvl: latest.tvl.toString(),
       timestamp: latest.timestamp,
     });
-    history.reverse();
     cache.set(HISTORY_TVL_CACHE_KEY, history);
     return history;
   }
@@ -106,7 +105,7 @@ export class BlockController {
     }
     
     const uawHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
-        'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
+        'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp) desc'
     );
 
 
@@ -118,7 +117,7 @@ export class BlockController {
         uaw: tvlHistory.uaw.toString(),
       };
     });
-    history.push({
+    history.unshift({
       id: latest.id,
       tvl: latest.tvl.toString(),
       timestamp: latest.timestamp,
