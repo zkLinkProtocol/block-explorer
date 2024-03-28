@@ -49,6 +49,6 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "bignumber.js": "^9.1.2"
+    "echarts": "^5.5.0"
   }
 }
