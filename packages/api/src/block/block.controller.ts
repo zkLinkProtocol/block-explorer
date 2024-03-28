@@ -33,7 +33,7 @@ const options = {
 
 const cache = new LRUCache(options);
 const HISTORY_TVL_CACHE_KEY = "history-tvl-cache";
-const HISTORY_UAW_CACHE_KEY = "history-uaw-cache"
+const HISTORY_UAW_CACHE_KEY = "history-uaw-cache";
 
 const entityName = "blocks";
 
@@ -124,8 +124,7 @@ export class BlockController {
       timestamp: latest.timestamp,
       uaw: latest.uaw.toString(),
     });
-    history.reverse();
-    cache.set(HISTORY_TVL_CACHE_KEY, history);
+    cache.set(HISTORY_UAW_CACHE_KEY, history);
     return history;
   }
 
