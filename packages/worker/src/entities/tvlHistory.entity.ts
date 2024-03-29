@@ -17,6 +17,6 @@ export class TVLHistory extends BaseEntity {
   @Column({ type: "timestamp" })
   public readonly timestamp: Date;
 
-  @Column({ type: "int", default: '0'})
+  @Column({ type: "int", default: "0" })
   public readonly uaw: number;
 }

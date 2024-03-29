@@ -117,7 +117,7 @@ export default async () => {
       },
       updateTotalLockedValueInterval: parseInt(UPDATE_TOTAL_LOCKED_VALUE_INTERVAL, 10) || 30000,
       updateTotalLockedValueDelay: parseInt(UPDATE_TOTAL_LOCKED_VALUE_DELAY, 10) || 500,
-      updateTvlHistoryInterval: parseInt(UPDATE_TVL_HISTORY_INTERVAL, 10) || 3600000,// 1 hour = 3600000
+      updateTvlHistoryInterval: parseInt(UPDATE_TVL_HISTORY_INTERVAL, 10) || 3600000, // 1 hour = 3600000
       enableTotalLockedValueUpdater: ENABLE_TOTAL_LOCKED_VALUE_UPDATER === "true",
     },
     metrics: {
