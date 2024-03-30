@@ -79,7 +79,13 @@ watch(
           formatter: function (params:any) {
             const timer = format(params[0].data.date, 'tooltip',params[0].data.type||false)
             var yValue = params[0].data.value;
-            return timer + '<br />'+ type +': $ ' + yValue.toLocaleString();
+            var char = '';
+            if (type === "TVL"){
+              char = '$';
+            }else if (type === "UAW"){
+              char = '';
+            }
+            return timer + '<br />'+ type +': ' + char + ' ' + yValue.toLocaleString();
           }
       },
       grid: {
