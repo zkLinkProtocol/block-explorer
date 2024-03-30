@@ -22,6 +22,8 @@ import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { TVLHistoryDto } from "./TVLHistory.dto";
 import { LRUCache } from "lru-cache";
+import {PriceHistory} from "./priceHistory.entity";
+import {PriceHistoryService} from "./priceHistory.service";
 
 const options = {
   // how long to live in ms
@@ -43,8 +45,9 @@ const entityName = "blocks";
 export class BlockController {
   constructor(
     private readonly blockService: BlockService,
+    private readonly priceHistoryService:PriceHistoryService,
     @InjectRepository(TVLHistory)
-    private readonly tvlHistoryRepository: Repository<TVLHistory>
+    private readonly tvlHistoryRepository: Repository<TVLHistory>,
   ) {}
 
   @Get("/total/tvl")
@@ -124,43 +127,11 @@ export class BlockController {
     cache.set(HISTORY_TVL_CACHE_KEY, history);
     return history;
   }
-  @Get("/total/uaw")
-  @ApiOperation({ summary: "Get total usw" })
-  public async getTotalUsw(): Promise<TVLHistoryDto[]> {
-    const uaws = cache.get(HISTORY_USW_CACHE_KEY) as TVLHistoryDto[];
-    if (uaws) {
-      return uaws;
-    }
-
-    const uawHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
-        'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp),id asc'
-    );
-    const latest: TVLHistory = await this.tvlHistoryRepository.findOne({
-      // can't miss where
-      where: {},
-      order: {
-        id: "desc",
-      },
-    });
-
-    let history = uawHistorys.map((tvlHistory) => {
-      return {
-        id: tvlHistory.id,
-        tvl: tvlHistory.tvl.toString(),
-        timestamp: tvlHistory.timestamp,
-        uaw: tvlHistory.uaw.toString(),
-      };
-    });
-    history.push({
-      id: latest.id,
-      tvl: latest.tvl.toString(),
-      timestamp: latest.timestamp,
-      uaw: latest.uaw.toString(),
-    });
-    history.reverse();
-    cache.set(HISTORY_TVL_CACHE_KEY, history);
-    return history;
-  }
+  // @Get("/various/prices")
+  // @ApiOperation({ summary: "Get various prices" })
+  // public async getVariousPrices(): Promise<PriceHistory[]> {
+  //   this.priceHistoryService
+  // }
 
   @Get("")
   @ApiListPageOkResponse(BlockDto, { description: "Successfully returned blocks list" })

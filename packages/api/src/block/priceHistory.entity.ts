@@ -1,20 +1,20 @@
 import { Entity, Column, PrimaryGeneratedColumn, Index } from "typeorm";
-import { BaseEntity } from "../common/entities/base.entity";
-import { hexTransformer } from "../transfer/hex.transformer";
+import { BaseEntity } from "src/common/entities/base.entity";
+import { hexTransformer } from "src/common/transformers/hex.transformer";
 
 @Entity({ name: "priceHistory" })
 export class PriceHistory extends BaseEntity {
-    @PrimaryGeneratedColumn({ type: "bigint" })
-    public readonly id: number;
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  public readonly id: number;
 
-    @Index()
-    @Column({ type: "bytea", transformer: hexTransformer })
-    public readonly l2Address: string;
+  @Index()
+  @Column({ type: "bytea", transformer: hexTransformer })
+  public readonly l2Address: string;
 
-    @Column({ type: "double precision", nullable: true })
-    public readonly usdPrice?: number;
+  @Column({ type: "double precision", nullable: true })
+  public readonly usdPrice?: number;
 
-    @Index()
-    @Column({ type: "timestamp" })
-    public readonly timestamp: Date;
+  @Index()
+  @Column({ type: "timestamp" })
+  public readonly timestamp: Date;
 }
