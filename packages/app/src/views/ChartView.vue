@@ -100,12 +100,18 @@ watch(
           type: 'value',
           axisLabel: {
               formatter: function (value:any, index:number) {
+                var char = ' ';
+                if (type === "TVL"){
+                  char = '$ ';
+                }else if (type === "UAW"){
+                  char = ' ';
+                }
                   if (value < 1000) {
-                      return '$ '+value;
+                      return char+value;
                   } else if (value < 1000000) {
-                      return '$ '+(value / 1000).toFixed(0) + 'K';
+                      return char+(value / 1000).toFixed(0) + 'K';
                   } else {
-                      return '$ '+(value / 1000000).toFixed(0) + 'M';
+                      return char+(value / 1000000).toFixed(0) + 'M';
                   }
               }
           }
