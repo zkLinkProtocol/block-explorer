@@ -52,7 +52,7 @@ export class TokenRepository extends BaseRepository<Token> {
     return token?.offChainDataUpdatedAt;
   }
 
-  public async getBridgedTokens(fields: FindOptionsSelect<Token> = { l1Address: true }): Promise<Token[]> {
+  public async getBridgedTokens(fields: FindOptionsSelect<Token> = { l1Address: true ,l2Address: true}): Promise<Token[]> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const tokens = await transactionManager.find(this.entityTarget, {
       where: {

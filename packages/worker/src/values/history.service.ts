@@ -2,7 +2,12 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import waitFor from "../utils/waitFor";
 import { Worker } from "../common/worker";
-import { BlockRepository, TVLHistoryRepository, TokenRepository, AddressTransferRepository } from "../repositories";
+import {
+  BlockRepository,
+  TVLHistoryRepository,
+  TokenRepository,
+  AddressTransferRepository,
+} from "../repositories";
 import { Block } from "../entities";
 import { BigNumber } from "ethers";
 

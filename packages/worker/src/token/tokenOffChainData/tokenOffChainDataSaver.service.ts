@@ -44,23 +44,24 @@ export class TokenOffChainDataSaverService extends Worker {
 
         let updateTokensTasks = [];
         for (let i = 0; i < tokensToUpdate.length; i++) {
+          console.log("offDatatokens :",tokensToUpdate[i].l1Address,tokensToUpdate[i].l2Address,tokensToUpdate[i].usdPrice,bridgedTokens);
           updateTokensTasks.push(
-            this.tokenRepository.updateTokenOffChainData({
-              l1Address: tokensToUpdate[i].l1Address,
-              l2Address: tokensToUpdate[i].l2Address,
-              liquidity: tokensToUpdate[i].liquidity,
-              usdPrice: tokensToUpdate[i].usdPrice,
-              updatedAt,
-              iconURL: tokensToUpdate[i].iconURL,
-            })
-          );
-          updateTokensTasks.push(
-              this.priceHistoryRepository.add({
+              this.tokenRepository.updateTokenOffChainData({
+                l1Address: tokensToUpdate[i].l1Address,
                 l2Address: tokensToUpdate[i].l2Address,
-                timestamp:updatedAt,
-                usdPrice:tokensToUpdate[i].usdPrice,
+                liquidity: tokensToUpdate[i].liquidity,
+                usdPrice: tokensToUpdate[i].usdPrice,
+                updatedAt,
+                iconURL: tokensToUpdate[i].iconURL,
               })
           );
+          await this.priceHistoryRepository.recordPriceHistory({
+            l2Address: tokensToUpdate[i].l2Address,
+            price: tokensToUpdate[i].usdPrice,
+            dateTime: updatedAt,
+            l1Address: tokensToUpdate[i].l1Address,
+            bridgedTokens: bridgedTokens,
+          });
           if (updateTokensTasks.length === UPDATE_TOKENS_BATCH_SIZE || i === tokensToUpdate.length - 1) {
             await Promise.all(updateTokensTasks);
             updateTokensTasks = [];
