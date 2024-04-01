@@ -46,5 +46,29 @@
     "address": "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
     "image": "https://assets.coingecko.com/coins/images/9956/large/Badge_Dai.png?1696509996",
     "market_cap": 1
+  },
+  {
+    "name": "wBTC-nova",
+    "address": "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
+    "image": "https://assets.coingecko.com/coins/images/7598/large/wrapped_bitcoin_wbtc.png?1696507857",
+    "market_cap": 1
+  },
+  {
+    "name": "USDT-nova",
+    "address": "0x2F8A25ac62179B31D62D7F80884AE57464699059",
+    "image": "https://assets.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+    "market_cap": 1
+  },
+  {
+    "name": "USDC-nova",
+    "address": "0x1a1A3b2ff016332e866787B311fcB63928464509",
+    "image": "https://assets.coingecko.com/coins/images/6319/large/usdc.png?1696506694",
+    "market_cap": 1
+  },
+  {
+    "name": "DAI-nova",
+    "address": "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab",
+    "image": "https://assets.coingecko.com/coins/images/9956/large/Badge_Dai.png?1696509996",
+    "market_cap": 1
   }
 ]
