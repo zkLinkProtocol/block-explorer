@@ -604,6 +604,7 @@
       "price": "Price",
       "tokenAddress": "Token Address",
       "fromChain": "From Chain",
+      "totalQty": "Total qty",
       "tvl": "Tvl",
       "novaAddress": "Nova ADDRESS",
       "originAddress": "Origin Address"

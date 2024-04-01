@@ -79,7 +79,13 @@ watch(
           formatter: function (params:any) {
             const timer = format(params[0].data.date, 'tooltip',params[0].data.type||false)
             var yValue = params[0].data.value;
-            return timer + '<br />'+ type +': $ ' + yValue.toLocaleString();
+            var char = '';
+            if (type === "TVL"){
+              char = '$';
+            }else if (type === "UAW"){
+              char = '';
+            }
+            return timer + '<br />'+ type +': ' + char + ' ' + yValue.toLocaleString();
           }
       },
       grid: {
@@ -94,12 +100,18 @@ watch(
           type: 'value',
           axisLabel: {
               formatter: function (value:any, index:number) {
+                var char = ' ';
+                if (type === "TVL"){
+                  char = '$ ';
+                }else if (type === "UAW"){
+                  char = ' ';
+                }
                   if (value < 1000) {
-                      return '$ '+value;
+                      return char+value;
                   } else if (value < 1000000) {
-                      return '$ '+(value / 1000).toFixed(0) + 'K';
+                      return char+(value / 1000).toFixed(0) + 'K';
                   } else {
-                      return '$ '+(value / 1000000).toFixed(0) + 'M';
+                      return char+(value / 1000000).toFixed(0) + 'M';
                   }
               }
           }

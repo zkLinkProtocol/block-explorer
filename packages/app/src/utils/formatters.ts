@@ -90,3 +90,11 @@ export function formatPricePretty(amount: BigNumberish, decimals: number, usdPri
     return `${formatMoney(price, priceDecimals)}`;
   }
 }
+export function formatNumberPretty(value: number | string): string {
+  const numericValue = typeof value === "string" ? parseFloat(value) : value;
+  if (numericValue < 0.01) {
+    return "<0.01";
+  } else {
+    return numericValue.toFixed(2).replace(/\.00$/g, "");
+  }
+}

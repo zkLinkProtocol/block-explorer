@@ -55,6 +55,7 @@ import { DbMetricsService } from "./dbMetrics.service";
 import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
 import { ValuesService } from "./values/values.service";
+import { HistoryService } from "./values/history.service";
 
 @Module({
   imports: [
@@ -136,6 +137,7 @@ import { ValuesService } from "./values/values.service";
     RetryDelayProvider,
     DbMetricsService,
     ValuesService,
+    HistoryService,
   ],
 })
 export class AppModule {}
