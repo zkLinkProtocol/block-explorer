@@ -225,7 +225,6 @@ import type { NetworkOrigin } from "@/types";
 import { ETH_TOKEN_L2_ADDRESS } from "@/utils/constants";
 import { utcStringFromISOString } from "@/utils/helpers";
 import useAddress, { type Account, type Contract } from "@/composables/useAddress";
-const { item, getByAddress } = useAddress();
 
 const { t, te } = useI18n();
 
@@ -265,7 +264,6 @@ const isLoading = computed(() => pending.value || isLoadingEthTokenInfo.value);
 
 const activePage = ref(props.useQueryPagination ? parseInt(route.query.page as string) || 1 : 1);
 const toDate = new Date();
-let obj: { [key: string]: any } = {};
 watch(
   [activePage, searchParams],
   ([page]) => {
@@ -273,7 +271,6 @@ watch(
   },
   { immediate: true }
 );
-
 const getTransactionMethod = (transaction: TransactionListItem) => {
   if (transaction.data === "0x") {
     return t("transactions.table.transferMethodName");
@@ -289,28 +286,21 @@ const getTransactionMethod = (transaction: TransactionListItem) => {
         props.contractAbi
       )?.name ?? sighash
     );
-  } else if (!Object.keys(obj).includes(transaction.to)) {
-    getByAddress(transaction.to)
-  }
-  if (!Object.keys(obj).includes(transaction.to) && item.value?.verificationInfo?.artifacts?.abi) {
-    const arr = item.value?.verificationInfo.artifacts.abi
-    const str = decodeDataWithABI(
+  } else if (transaction.abi) {
+    return (
+      decodeDataWithABI(
         {
           calldata: transaction.data,
           value: transaction.value,
         },
-        arr
-      )?.name
-      obj[transaction.to] = str
-    return str || sighash;
+        transaction.abi
+      )?.name ?? sighash
+    );
   }
-  if (obj[transaction.to]) {
-    return obj[transaction.to];
-  }
-  const methodIndex = sighash as keyof typeof contractsMethodNames;
-  if (contractsMethodNames[methodIndex]) {
-    return contractsMethodNames[methodIndex];
-  }
+  // const methodIndex = sighash as keyof typeof contractsMethodNames;
+  // if (contractsMethodNames[methodIndex]) {
+  //   return contractsMethodNames[methodIndex];
+  // }
   return sighash;
 };
 

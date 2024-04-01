@@ -80,6 +80,7 @@ declare namespace Api {
     };
 
     type Transaction = {
+      abi: any;
       hash: string;
       to: string;
       from: string;
