@@ -1,5 +1,5 @@
 <template>
-  <Table :data-testid="$testId.tokensTable" :loading="loading" :items="displayTokenList" ref="table">
+  <Table :data-testid="$testId.tokensTable" :loading="loading" :items="displayedData" ref="table">
     <template #table-head>
       <table-head-column @click="sortBy('name')">
         <div class="th-box min-w-16">
@@ -128,6 +128,29 @@
         <div v-else class="min-h-[20px]"></div>
       </TableBodyColumn>
     </template>
+    <template v-if="total && total > pageSize && displayTokenList?.length" #footer>
+      <div class="pagination">
+        <Pagination
+          v-model:active-page="activePage"
+          :use-query="false"
+          :total-items="total!"
+          :page-size="pageSize"
+          :disabled="loading"
+        />
+      </div>
+    </template>
+    <template #empty>
+      <tr>
+        <TableBodyColumn class="empty-state-container" colspan="7">
+          <EmptyState class="empty-state">
+            <template #title>
+             Can’t find anything on your search result.
+            </template>
+            <template #description><span></span></template>
+          </EmptyState>
+        </TableBodyColumn>
+      </tr>
+    </template>
     <template #loading>
       <tr class="loading-row" v-for="row in 5" :key="row">
         <TableBodyColumn>
@@ -192,6 +215,8 @@ import Ranking from "./TableRanking.vue";
 import TableFilterModel from "./TableFilterModal.vue";
 import { FilterIcon } from "@heroicons/vue/outline";
 import Tooltip from "@/components/common/Tooltip.vue";
+import Pagination from "@/components/common/Pagination.vue";
+import EmptyState from "@/components/common/EmptyState.vue";
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 
 import { formatBigNumberish, formatPricePretty } from "@/utils/formatters";
@@ -220,6 +245,9 @@ const { width } = useElementSize(table);
 watch(width, () => {
   width.value <= 500 ? (subtraction.value = 10) : (subtraction.value = 5);
 });
+const total = ref<number>(0);
+const pageSize = ref<number>(10);
+const activePage = ref<number>(1);
 const handleChildClick = (e: MouseEvent) => {
   e.stopPropagation();
 };
@@ -255,6 +283,7 @@ const filterChain = (mergeData: Token[]) => {
   if (selectedTokenList.value.length === 0) {
     return props.tokens;
   }
+  activePage.value=1
   return mergeData.filter((item) => {
     const networkName = item.networkKey
       ? chainNameList[item.networkKey]
@@ -271,6 +300,7 @@ const filterName = (mergeData: Token[]) => {
   if (selectedNameList.value.length === 0) {
     return props.tokens;
   }
+  activePage.value=1
   return mergeData.filter((item) => {
     const optionMatch = selectedNameList.value.includes(item.symbol!);
     return optionMatch;
@@ -390,7 +420,14 @@ const displayTokenList = computed(() => {
       return 0;
     });
   }
+  total.value=mergeData.length;
   return mergeData;
+});
+// 分页数据
+const displayedData = computed(() => {
+  const start = (activePage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return displayTokenList.value.slice(start, end);
 });
 const getSortOrder = (column: string) => {
   const index = sortRules.findIndex((r) => r.key === column);
@@ -463,6 +500,17 @@ const getSortOrder = (column: string) => {
 }
 .tool-wrap {
   @apply flex items-center;
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding: 0.75rem;
+}
+.empty-state-container {
+  @apply table-cell;
+  .empty-state {
+    @apply items-center justify-center whitespace-normal py-10;
+  }
 }
 
 @media (max-width: 760px) {
