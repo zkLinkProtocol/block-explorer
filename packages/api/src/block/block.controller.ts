@@ -1,29 +1,29 @@
-import { Controller, Get, Param, NotFoundException, Query } from "@nestjs/common";
+import {Controller, Get, NotFoundException, Param, Query} from "@nestjs/common";
 import {
-  ApiTags,
-  ApiParam,
-  ApiOkResponse,
   ApiBadRequestResponse,
-  ApiNotFoundResponse,
   ApiExcludeController,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
+  ApiParam,
+  ApiTags,
 } from "@nestjs/swagger";
-import { Pagination } from "nestjs-typeorm-paginate";
-import { buildDateFilter } from "../common/utils";
-import { ParseLimitedIntPipe } from "../common/pipes/parseLimitedInt.pipe";
-import { PagingOptionsDto, ListFiltersDto } from "../common/dtos";
-import { ApiListPageOkResponse } from "../common/decorators/apiListPageOkResponse";
-import { BlockService } from "./block.service";
-import { BlockDto } from "./block.dto";
-import { BlockDetailsDto } from "./blockDetails.dto";
-import { swagger } from "../config/featureFlags";
-import { TVLHistory } from "./tvlHistory.entity";
-import { Repository } from "typeorm";
-import { InjectRepository } from "@nestjs/typeorm";
-import { TVLHistoryDto } from "./TVLHistory.dto";
-import { LRUCache } from "lru-cache";
+import {Pagination} from "nestjs-typeorm-paginate";
+import {buildDateFilter} from "../common/utils";
+import {ParseLimitedIntPipe} from "../common/pipes/parseLimitedInt.pipe";
+import {ListFiltersDto, PagingOptionsDto} from "../common/dtos";
+import {ApiListPageOkResponse} from "../common/decorators/apiListPageOkResponse";
+import {BlockService} from "./block.service";
+import {BlockDto} from "./block.dto";
+import {BlockDetailsDto} from "./blockDetails.dto";
+import {swagger} from "../config/featureFlags";
+import {TVLHistory} from "./tvlHistory.entity";
+import {Repository} from "typeorm";
+import {InjectRepository} from "@nestjs/typeorm";
+import {TVLHistoryDto} from "./TVLHistory.dto";
+import {LRUCache} from "lru-cache";
 import {PriceHistory} from "./priceHistory.entity";
-import {PriceHistoryService} from "./priceHistory.service";
+import {ExceptionResponse, NOT_FOUND_EXCEPTION, PriceHistoryService} from "./priceHistory.service";
 
 const options = {
   // how long to live in ms
@@ -127,11 +127,34 @@ export class BlockController {
     cache.set(HISTORY_TVL_CACHE_KEY, history);
     return history;
   }
-  // @Get("/various/prices")
-  // @ApiOperation({ summary: "Get various prices" })
-  // public async getVariousPrices(): Promise<PriceHistory[]> {
-  //   this.priceHistoryService
-  // }
+  @Get("/various/prices")
+  @ApiOperation({ summary: "Get various prices" })
+  public async getVariousPrices(
+      @Query('curTime') curTime : string,
+      @Query('l2Address') l2Address : string,
+  ): Promise<PriceHistory | ExceptionResponse> {
+    const curDate = new Date(curTime);
+    const priceHistory = await this.priceHistoryService.foundCurTimePriceHistory({
+      l2Address,
+      dateTime: curDate,
+    });
+    if( priceHistory === undefined || priceHistory === null){
+      return NOT_FOUND_EXCEPTION;
+    }
+    return priceHistory;
+  }
+
+  @Get("/various/range-prices")
+  @ApiOperation({ summary: "Get various range prices" })
+  public async getVariousRangePrices(
+      @Query('startTime') startTime: string,
+      @Query('endTime') endTime: string,
+      @Query('l2Address') l2Address: string,
+  ): Promise<PriceHistory[]> {
+    const dateStartTime = new Date(startTime);
+    const dateEndTime = new Date(endTime);
+    return this.priceHistoryService.foundRangePriceHistory({l2Address, dateStartTime, dateEndTime});
+  }
 
   @Get("")
   @ApiListPageOkResponse(BlockDto, { description: "Successfully returned blocks list" })

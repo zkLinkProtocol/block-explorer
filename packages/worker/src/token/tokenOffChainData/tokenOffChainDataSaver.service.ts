@@ -44,8 +44,7 @@ export class TokenOffChainDataSaverService extends Worker {
 
         let updateTokensTasks = [];
         for (let i = 0; i < tokensToUpdate.length; i++) {
-          console.log("offDatatokens :",tokensToUpdate[i].l1Address,tokensToUpdate[i].l2Address,tokensToUpdate[i].usdPrice,bridgedTokens);
-          updateTokensTasks.push(
+            updateTokensTasks.push(
               this.tokenRepository.updateTokenOffChainData({
                 l1Address: tokensToUpdate[i].l1Address,
                 l2Address: tokensToUpdate[i].l2Address,
