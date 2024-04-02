@@ -219,12 +219,13 @@ import useTransactions, { type TransactionListItem, type TransactionSearchParams
 import contractsMethodNames from "@/configs/contractsMethodNames.json";
 
 import type { Direction } from "@/components/transactions/TransactionDirectionTableCell.vue";
-import type { AbiFragment } from "@/composables/useAddress";
+import type { AbiFragment,Contract } from "@/composables/useAddress";
 import type { NetworkOrigin } from "@/types";
 
 import { ETH_TOKEN_L2_ADDRESS } from "@/utils/constants";
 import { utcStringFromISOString } from "@/utils/helpers";
-import useAddress, { type Account, type Contract } from "@/composables/useAddress";
+import useAddress from "@/composables/useAddress";
+const { item, getByAddress, getContractVerificationInfo } = useAddress();
 
 const { t, te } = useI18n();
 
@@ -246,6 +247,11 @@ const props = defineProps({
   useQueryPagination: {
     type: Boolean,
     default: false,
+  },
+  contract: {
+    type: Object as PropType<Contract>,
+    default: () => ({}),
+    required: true,
   },
 });
 
@@ -277,25 +283,43 @@ const getTransactionMethod = (transaction: TransactionListItem) => {
   }
   const sighash = transaction.data.slice(0, 10);
   if (props.contractAbi) {
-    return (
-      decodeDataWithABI(
-        {
-          calldata: transaction.data,
-          value: transaction.value,
-        },
-        props.contractAbi
-      )?.name ?? sighash
-    );
+    const name = decodeDataWithABI(
+      {
+        calldata: transaction.data,
+        value: transaction.value,
+      },
+      props.contractAbi
+    )?.name
+    if (name) {
+      return name;
+    } else {
+      return (
+        props.contract.proxyInfo?.implementation.verificationInfo?decodeDataWithABI(
+            {
+              calldata: transaction.data,
+              value: transaction.value,
+            },
+            props.contract.proxyInfo?.implementation.verificationInfo.artifacts.abi
+          )?.name ?? sighash: sighash
+        );
+    }
   } else if (transaction.abi) {
-    return (
-      decodeDataWithABI(
+    const name = decodeDataWithABI(
         {
           calldata: transaction.data,
           value: transaction.value,
         },
         transaction.abi
-      )?.name ?? sighash
-    );
+      )?.name || (
+        transaction.contractAbi? (decodeDataWithABI(
+        {
+          calldata: transaction.data,
+          value: transaction.value,
+        },
+        transaction.contractAbi
+      )?.name): ''
+      )
+    return (name || sighash);
   }
   // const methodIndex = sighash as keyof typeof contractsMethodNames;
   // if (contractsMethodNames[methodIndex]) {

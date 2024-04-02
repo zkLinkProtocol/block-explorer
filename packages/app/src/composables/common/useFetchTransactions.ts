@@ -52,8 +52,13 @@ export function useFetchTransactions<T, TApiResponse = T>(
 
       const mappedArray = await Promise.all(
         response.items?.map(async(i:any) => {
-          await getContractVerificationInfo(i.to).then((res: { artifacts: { abi: any; }; })=>{
+          await getContractVerificationInfo(i.to).then((res)=>{
             i.abi = res?.artifacts.abi;
+          })
+          await getByAddress(i.to);
+          let obj = JSON.parse(JSON.stringify(item.value))
+          await obj.proxyInfo?.implementation.address && getContractVerificationInfo(obj.proxyInfo?.implementation.address).then((res)=>{
+            i.contractAbi = res?.artifacts.abi;
           })
         }),
       );

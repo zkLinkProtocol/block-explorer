@@ -82,6 +82,7 @@ declare namespace Api {
     };
 
     type Transaction = {
+      contractAbi: any;
       abi: any;
       hash: string;
       to: string;
