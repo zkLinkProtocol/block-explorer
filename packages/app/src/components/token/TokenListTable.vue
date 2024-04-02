@@ -1,5 +1,5 @@
 <template>
-  <Table :data-testid="$testId.tokensTable" :loading="loading" :items="displayedData" ref="table">
+  <Table :data-testid="$testId.tokensTable" :loading="isLoading" :items="displayTokenList" ref="table">
     <template #table-head>
       <table-head-column @click="sortBy('name')">
         <div class="th-box min-w-16">
@@ -20,7 +20,7 @@
         <div class="th-box">
           <span>{{ t("tokensView.table.price") }}</span>
           <ranking :sort-order="getSortOrder('price')" />
-          <span class="px-1">
+          <!-- <span class="px-1">
             <Tooltip class="batches-tooltip">
               <FilterIcon
                 @click="toggleShowPrice"
@@ -32,7 +32,7 @@
                 <span v-else>Hide Assets Without Price</span>
               </template>
             </Tooltip>
-          </span>
+          </span> -->
         </div>
       </table-head-column>
       <table-head-column @click="sortBy('totalQty')">
@@ -135,7 +135,7 @@
           :use-query="false"
           :total-items="total!"
           :page-size="pageSize"
-          :disabled="loading"
+          :disabled="isLoading"
         />
       </div>
     </template>
@@ -227,17 +227,19 @@ const { chainNameList } = useEnvironmentConfig();
 
 import type { Token } from "@/composables/useToken";
 
+import useTokenLibrary from "@/composables/useTokenLibrary";
+const {
+  getTokensByPagination,
+} = useTokenLibrary();
+
+const { data, load, total, pending, pageSize } = getTokensByPagination();
+
 const props = defineProps({
   tokens: {
     type: Array as PropType<Token[]>,
     default: () => [],
   },
-  loading: {
-    type: Boolean,
-    default: true,
-  },
 });
-
 const { t } = useI18n();
 const table = ref(null);
 const subtraction = ref(6);
@@ -245,9 +247,16 @@ const { width } = useElementSize(table);
 watch(width, () => {
   width.value <= 500 ? (subtraction.value = 10) : (subtraction.value = 5);
 });
-const total = ref<number>(0);
-const pageSize = ref<number>(10);
+const isLoading = computed(() => pending.value);
 const activePage = ref<number>(1);
+watch(
+  [activePage],
+  ([page]) => {
+    
+    load(page);
+  },
+  { immediate: true }
+);
 const handleChildClick = (e: MouseEvent) => {
   e.stopPropagation();
 };
@@ -281,9 +290,9 @@ const selectedTokenList: Ref<string[]> = ref([]);
 const selectedNameList: Ref<string[]> = ref([]);
 const filterChain = (mergeData: Token[]) => {
   if (selectedTokenList.value.length === 0) {
-    return props.tokens;
+    return data.value ||[];
   }
-  activePage.value=1
+  // activePage.value=1
   return mergeData.filter((item) => {
     const networkName = item.networkKey
       ? chainNameList[item.networkKey]
@@ -298,9 +307,9 @@ const filterChain = (mergeData: Token[]) => {
 // filter symbol
 const filterName = (mergeData: Token[]) => {
   if (selectedNameList.value.length === 0) {
-    return props.tokens;
+    return data.value||[];
   }
-  activePage.value=1
+  // activePage.value=1
   return mergeData.filter((item) => {
     const optionMatch = selectedNameList.value.includes(item.symbol!);
     return optionMatch;
@@ -314,7 +323,7 @@ const toggleShowPrice = (e: MouseEvent) => {
 const sortKey = ref<string>("");
 interface SortRule {
   key: string;
-  sortOrder: string; // 可以使用枚举类型来限制排序规则
+  sortOrder: string;
 }
 const sortRules = reactive<SortRule[]>([
   { key: "name", sortOrder: "" },
@@ -357,19 +366,23 @@ const compareValues = (valueA: number, valueB: number, sortOrder: string): numbe
     return 0;
   }
 };
+const tokens=computed(()=>{
+  return data.value ||[]
+  
+})
 const displayTokenList = computed(() => {
-  let mergeData: Token[] = [...props.tokens];
+  let mergeData: Token[] = [...tokens.value];
   // Hide Assets Without Price
-  if (isZeroPrice.value) {
-    mergeData = [...props.tokens].filter((item) => {
-      if (!item.usdPrice) {
-        return false;
-      }
-      const price = +item.usdPrice! * +formatBigNumberish("1".padEnd(item.decimals + 1, "0"), item.decimals);
+  // if (isZeroPrice.value) {
+  //   mergeData = [...tokens.value].filter((item) => {
+  //     if (!item.usdPrice) {
+  //       return false;
+  //     }
+  //     const price = +item.usdPrice! * +formatBigNumberish("1".padEnd(item.decimals + 1, "0"), item.decimals);
 
-      return price > 0;
-    });
-  }
+  //     return price > 0;
+  //   });
+  // }
   // filtering
   if (selectedTokenList.value.length === 0 && selectedNameList.value.length === 0) {
     // mergeData = mergeData;
@@ -420,14 +433,7 @@ const displayTokenList = computed(() => {
       return 0;
     });
   }
-  total.value=mergeData.length;
   return mergeData;
-});
-// 分页数据
-const displayedData = computed(() => {
-  const start = (activePage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-  return displayTokenList.value.slice(start, end);
 });
 const getSortOrder = (column: string) => {
   const index = sortRules.findIndex((r) => r.key === column);
