@@ -1,4 +1,4 @@
-import useFetchTransactions from "@/composables/common/useFetchTransactions";
+import useFetchCollection from "@/composables/common/useFetchCollection";
 import useContext from "@/composables/useContext";
 
 import type { ComputedRef } from "vue";
@@ -13,7 +13,7 @@ export type TransactionSearchParams = {
 };
 
 export default (searchParams: ComputedRef<TransactionSearchParams>, context = useContext()) => {
-  return useFetchTransactions<TransactionListItem>(() => {
+  return useFetchCollection<TransactionListItem>(() => {
     const requestParams = Object.fromEntries(
       Object.entries(searchParams.value)
         .filter(([, value]) => !!value || value === 0)
