@@ -20,19 +20,6 @@
         <div class="th-box">
           <span>{{ t("tokensView.table.price") }}</span>
           <ranking :sort-order="getSortOrder('price')" />
-          <!-- <span class="px-1">
-            <Tooltip class="batches-tooltip">
-              <FilterIcon
-                @click="toggleShowPrice"
-                class="w-4 h-4 text-black cursor-pointer"
-                :class="{ 'text-design-200': isZeroPrice }"
-              />
-              <template #content>
-                <span v-if="isZeroPrice">Show Assets Without Price</span>
-                <span v-else>Hide Assets Without Price</span>
-              </template>
-            </Tooltip>
-          </span> -->
         </div>
       </table-head-column>
       <table-head-column @click="sortBy('totalQty')">
@@ -372,17 +359,6 @@ const tokens=computed(()=>{
 })
 const displayTokenList = computed(() => {
   let mergeData: Token[] = [...tokens.value];
-  // Hide Assets Without Price
-  // if (isZeroPrice.value) {
-  //   mergeData = [...tokens.value].filter((item) => {
-  //     if (!item.usdPrice) {
-  //       return false;
-  //     }
-  //     const price = +item.usdPrice! * +formatBigNumberish("1".padEnd(item.decimals + 1, "0"), item.decimals);
-
-  //     return price > 0;
-  //   });
-  // }
   // filtering
   if (selectedTokenList.value.length === 0 && selectedNameList.value.length === 0) {
     // mergeData = mergeData;
