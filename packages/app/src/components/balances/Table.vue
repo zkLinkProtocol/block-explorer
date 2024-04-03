@@ -78,7 +78,7 @@ const props = defineProps({
 });
 const handleNetworkKey = (networkKey:string) => {
   let str = (networkKey?(networkKey === 'primary'? 'Linea': networkKey): '')
-  return '.'+str.charAt(0).toUpperCase() + str.slice(1);
+  return str?('.'+str.charAt(0).toUpperCase() + str.slice(1)):'';
 }
 const {
   getToken: getLibraryToken,
