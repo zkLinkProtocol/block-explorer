@@ -588,11 +588,16 @@ export default [
         l1Address: "0xF1376bceF0f78459C0Ed0ba5ddce976F1ddF51F4",
         l2Address: "0x011E385631488F3318F0C5541A343306626200D7",
       },
+      {
+        chain: "Manta",
+        l1Address: "0x34c7ad65e4163306f8745996688b476914201ce0",
+        l2Address: "0xb8FF1eD3CEC08533F32E85Bd44a37e8822DDd368",
+      },
     ],
     symbol: "uniETH",
     decimals: 18,
     cgPriceId: "ethereum",
-    type: "LST",
+    type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Bedrock Diamonds"],
     multipliers: [
       {
