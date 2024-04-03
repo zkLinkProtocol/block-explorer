@@ -59,6 +59,21 @@ export default [
         l1Address: "0x68f180fcce6836688e9084f035309e29bf0a2095",
         l2Address: "0xA011145882C392e17C468CF0A85d2b385eAeDdd9",
       },
+    ],
+    symbol: "wBTC",
+    decimals: 8,
+    cgPriceId: "bitcoin",
+    type: "Native",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
       {
         chain: "Nova",
         l1Address: "",
@@ -72,7 +87,7 @@ export default [
     yieldType: ["NOVA Points"],
     multipliers: [
       {
-        multiplier: 2,
+        multiplier: 3,
         timestamp: 0,
       },
     ],
@@ -134,6 +149,21 @@ export default [
         l1Address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
         l2Address: "0x6aFb043b4955505fc9B2B965FCF6972Fa561291d",
       },
+    ],
+    symbol: "USDT",
+    decimals: 6,
+    cgPriceId: "tether",
+    type: "Stablecoin",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
       {
         chain: "Nova",
         l1Address: "",
@@ -147,7 +177,7 @@ export default [
     yieldType: ["NOVA Points"],
     multipliers: [
       {
-        multiplier: 2,
+        multiplier: 4,
         timestamp: 0,
       },
     ],
@@ -194,6 +224,21 @@ export default [
         l1Address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         l2Address: "0x70064389730D2BDBcF85D8565A855716Cda0Bfca",
       },
+    ],
+    decimals: 6,
+    symbol: "USDC",
+    cgPriceId: "usd-coin",
+    type: "Stablecoin",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
       {
         chain: "Nova",
         l1Address: "",
@@ -207,7 +252,7 @@ export default [
     yieldType: ["NOVA Points"],
     multipliers: [
       {
-        multiplier: 2,
+        multiplier: 4,
         timestamp: 0,
       },
     ],
@@ -574,6 +619,10 @@ export default [
         multiplier: 1.5,
         timestamp: 0,
       },
+      {
+        multiplier: 1,
+        timestamp: 1712138400,
+      },
     ],
   },
   {
@@ -593,6 +642,10 @@ export default [
       {
         multiplier: 1.5,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1712138400,
       },
     ],
   },
@@ -614,6 +667,10 @@ export default [
         multiplier: 1.5,
         timestamp: 0,
       },
+      {
+        multiplier: 1,
+        timestamp: 1712138400,
+      },
     ],
   },
   {
@@ -633,6 +690,10 @@ export default [
       {
         multiplier: 1.5,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1712138400,
       },
     ],
   },
@@ -867,6 +928,21 @@ export default [
         l1Address: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
         l2Address: "0x845D40825baE9bBE13819E639615b0152d84C4fE",
       },
+    ],
+    decimals: 18,
+    symbol: "DAI",
+    cgPriceId: "dai",
+    type: "Stablecoin",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
       {
         chain: "Nova",
         l1Address: "",
@@ -880,7 +956,7 @@ export default [
     yieldType: ["NOVA Points"],
     multipliers: [
       {
-        multiplier: 2,
+        multiplier: 4,
         timestamp: 0,
       },
     ],
