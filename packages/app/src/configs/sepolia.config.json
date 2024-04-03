@@ -1,24 +1,26 @@
 {
   "networks": [
     {
-      "apiUrl": "https://sepolia.explorer-api.zklink.network",
-      "verificationApiUrl": "https://sepolia.verification.zklink.network",
-      "bridgeUrl": "https://sepolia.portal.zklink.network",
+      "apiUrl": "https://sepolia.explorer-api.zklink.io",
+      "verificationApiUrl": "https://sepolia.explorer.zklink.io",
+      "bridgeUrl": "https://sepolia.portal.zklink.io",
       "hostnames": [],
       "icon": "/images/icons/cion.png",
-      "l1ExplorerUrl": "https://sepolia.arbiscan.io",
+      "l1ExplorerUrl": "https://sepolia.lineascan.build",
       "l2ChainId": 810181,
       "l2NetworkName": "zkLink Nova Sepolia Testnet",
       "maintenance": false,
       "name": "sepolia",
       "published": true,
-      "rpcUrl": "https://sepolia.rpc.zklink.network"
+      "rpcUrl": "https://sepolia.rpc.zklink.io"
     }
   ],
-  "iconsList":{
+  "iconsList": {
     "sepolia": "/img/ethereum.svg",
-    "primary":"/img/arbitrum-arb-logo.svg",
-    "zksyncsepolia":"/img/era.svg",
-    "scrollsepolia":"/img/sepolia.jpg"
+    "primary": "/img/linea.svg"
+  },
+  "chainNameList": {
+    "sepolia": "Sepolia",
+    "primary": "Linea Sepolia Testnet"
   }
 }
