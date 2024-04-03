@@ -56,7 +56,6 @@
           class="transactions-table"
           :search-params="transactionsSearchParams"
           :contract-abi="contractABI"
-          :contract="contract"
         >
           <template #not-found>
             <TransactionEmptyState />
