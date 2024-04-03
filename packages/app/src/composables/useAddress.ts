@@ -193,6 +193,7 @@ export default (context = useContext()) => {
   return {
     getByAddress,
     getContractProxyInfo,
+    getContractVerificationInfo,
     item,
     isRequestPending,
     isRequestFailed,
