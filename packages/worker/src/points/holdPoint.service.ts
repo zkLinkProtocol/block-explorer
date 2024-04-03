@@ -16,6 +16,7 @@ import { BlockAddressPoint, Point } from "../entities";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
 import { getETHPrice, getTokenPrice, REFERRER_BONUS, STABLE_COIN_TYPE } from "./depositPoint.service";
+import addressMultipliers from "../addressMultipliers";
 
 type BlockAddressTvl = {
   tvl: BigNumber;
@@ -146,6 +147,20 @@ export class HoldPointService extends Worker {
     return addressTvlMap;
   }
 
+  public getAddressMultiplier(address: string, blockTs: number): number {
+    const multipliers = addressMultipliers.find((m) => m.address.toLowerCase() === address.toLowerCase())?.multipliers;
+    if (!multipliers || multipliers.length == 0) {
+      return 1;
+    }
+    multipliers.sort((a, b) => b.timestamp - a.timestamp);
+    for (const m of multipliers) {
+      if (blockTs >= m.timestamp * 1000) {
+        return m.multiplier;
+      }
+    }
+    return multipliers[multipliers.length - 1].multiplier;
+  }
+
   async calculateAddressTvl(
     address: string,
     blockNumber: number,
@@ -154,6 +169,7 @@ export class HoldPointService extends Worker {
   ): Promise<BlockAddressTvl> {
     const addressBuffer: Buffer = hexTransformer.to(address);
     const addressBalances = await this.balanceRepository.getAccountBalancesByBlock(addressBuffer, blockNumber);
+    const addressMultiplier = this.getAddressMultiplier(address, blockTs);
     let tvl: BigNumber = new BigNumber(0);
     let holdBasePoint: BigNumber = new BigNumber(0);
     for (const addressBalance of addressBalances) {
@@ -167,9 +183,11 @@ export class HoldPointService extends Worker {
       const ethPrice = getETHPrice(tokenPrices);
       const tokenAmount = new BigNumber(addressBalance.balance).dividedBy(new BigNumber(10).pow(tokenInfo.decimals));
       const tokenTvl = tokenAmount.multipliedBy(tokenPrice).dividedBy(ethPrice);
-      // base point = Token Multiplier * Token Amount * Token Price / ETH_Price
+      // base point = Token Multiplier * Address Multiplier * Token Amount * Token Price / ETH_Price
       const tokenMultiplier = this.tokenService.getTokenMultiplier(tokenInfo, blockTs);
-      const tokenHoldBasePoint = tokenTvl.multipliedBy(new BigNumber(tokenMultiplier));
+      const tokenHoldBasePoint = tokenTvl
+        .multipliedBy(new BigNumber(tokenMultiplier))
+        .multipliedBy(new BigNumber(addressMultiplier));
       tvl = tvl.plus(tokenTvl);
       holdBasePoint = holdBasePoint.plus(tokenHoldBasePoint);
     }
