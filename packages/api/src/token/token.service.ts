@@ -48,18 +48,10 @@ export class TokenService {
   }
 
   public async checkExistDeposit(address: string): Promise<boolean> {
-    const l2AddressList = tokens
-      .map((token) => {
-        return token.address.map((address) => {
-          return address.l2Address;
-        });
-      })
-      .flat();
     const exist = await this.transferRepository.exist({
       where: {
         type: TransferType.Deposit,
         from: address,
-        tokenAddress: In(l2AddressList),
       },
     });
 
