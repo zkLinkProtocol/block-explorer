@@ -986,4 +986,24 @@ export default [
       },
     ],
   },
+  {
+    address: [
+      {
+        chain: "Arbitrum",
+        l1Address: "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+        l2Address: "0x861b14025D234c348320572a839dc202aE0E5550",
+      },
+    ],
+    decimals: 6,
+    symbol: "USDC",
+    cgPriceId: "usd-coin",
+    type: "Stablecoin",
+    yieldType: ["NOVA Points", "Native Yield"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
+  },
 ];
