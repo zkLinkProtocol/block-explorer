@@ -129,7 +129,9 @@ export class TokenService {
         .mul(Math.floor((token.usdPrice ?? 0) * 10 ** 3))
         .div(10 ** 3)
         .div(BigNumber.from(10).pow(token.decimals));
-      totalTvl = totalTvl.add(tvl);
+      if (token.l1Address !== null){
+        totalTvl = totalTvl.add(tvl);
+      }
       return {
         ...token,
         tvl: tvl.toString(),
