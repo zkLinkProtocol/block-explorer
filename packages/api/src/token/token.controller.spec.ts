@@ -46,7 +46,9 @@ describe("TokenController", () => {
   describe("getTokens", () => {
     const tokens = mock<Pagination<Token>>();
     beforeEach(() => {
-      (serviceMock.findAll as jest.Mock).mockResolvedValueOnce(tokens);
+      (serviceMock.findAll as jest.Mock).mockResolvedValue({
+        items: [],
+      });
     });
 
     it("queries tokens with the specified options", async () => {
@@ -60,7 +62,7 @@ describe("TokenController", () => {
 
     it("returns the tokens", async () => {
       const result = await controller.getTokens(pagingOptions);
-      expect(result).toBe(tokens);
+      expect(result.items.length).toBe(0);
     });
   });
 

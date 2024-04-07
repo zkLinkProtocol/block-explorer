@@ -8,6 +8,7 @@ import { Batch } from "./batch.entity";
 import { BatchDetails } from "./batchDetails.entity";
 import { PagingOptionsDto } from "../common/dtos";
 import { buildDateFilter } from "../common/utils";
+import {TransferService} from "../transfer/transfer.service";
 
 jest.mock("../common/utils", () => ({
   buildDateFilter: jest.fn().mockReturnValue({ timestamp: "timestamp" }),
@@ -20,9 +21,11 @@ describe("BatchController", () => {
 
   let controller: BatchController;
   let serviceMock: BatchService;
+  let transferService:TransferService;
 
   beforeEach(async () => {
     serviceMock = mock<BatchService>();
+    transferService = mock<TransferService>();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BatchController],
@@ -30,6 +33,10 @@ describe("BatchController", () => {
         {
           provide: BatchService,
           useValue: serviceMock,
+        },
+        {
+          provide: TransferService,
+          useValue: transferService,
         },
       ],
     }).compile();

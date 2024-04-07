@@ -7,6 +7,7 @@ import * as utils from "../common/utils";
 import { BatchService } from "./batch.service";
 import { Batch } from "./batch.entity";
 import { BatchDetails } from "./batchDetails.entity";
+import {BatchRootEventLogs} from "./batchRootEventLogs.entity";
 
 jest.mock("../common/utils");
 
@@ -18,10 +19,12 @@ describe("BatchService", () => {
   let service: BatchService;
   let repositoryMock: Repository<Batch>;
   let batchDetailRepositoryMock: Repository<BatchDetails>;
+  let batchRootRepositoryMock: Repository<BatchRootEventLogs>;
 
   beforeEach(async () => {
     repositoryMock = mock<Repository<Batch>>();
     batchDetailRepositoryMock = mock<Repository<BatchDetails>>();
+    batchRootRepositoryMock = mock<Repository<BatchRootEventLogs>>();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -34,6 +37,10 @@ describe("BatchService", () => {
           provide: getRepositoryToken(BatchDetails),
           useValue: batchDetailRepositoryMock,
         },
+        {
+          provide: getRepositoryToken(BatchRootEventLogs),
+          useValue: batchRootRepositoryMock,
+        }
       ],
     }).compile();
 

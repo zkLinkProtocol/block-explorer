@@ -8,8 +8,8 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import { Pagination } from "nestjs-typeorm-paginate";
-import { ADDRESS_REGEX_PATTERN, ParseAddressPipe } from "src/common/pipes/parseAddress.pipe";
-import { TransferService } from "src/transfer/transfer.service";
+import { ADDRESS_REGEX_PATTERN, ParseAddressPipe } from "../common/pipes/parseAddress.pipe";
+import { TransferService } from "../transfer/transfer.service";
 import { ApiListPageOkResponse } from "../common/decorators/apiListPageOkResponse";
 import { ListFiltersDto, PagingOptionsDto } from "../common/dtos";
 import { ParseLimitedIntPipe } from "../common/pipes/parseLimitedInt.pipe";

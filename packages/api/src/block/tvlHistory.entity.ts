@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
-import { BaseEntity } from "src/common/entities/base.entity";
-import { bigNumberTransformer } from "src/common/transformers/bigNumber.transformer";
+import { BaseEntity } from "../common/entities/base.entity";
+import { bigNumberTransformer } from "../common/transformers/bigNumber.transformer";
 import { Entity, Column, PrimaryColumn, Index, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "tvlHistory" })

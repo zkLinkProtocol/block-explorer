@@ -151,8 +151,8 @@ describe("TokenService", () => {
 
     it("adds liquidity filter when minLiquidity is provided", async () => {
       await service.findAll({ minLiquidity: 1000 }, pagingOptions);
-      expect(queryBuilderMock.where).toBeCalledTimes(1);
-      expect(queryBuilderMock.where).toHaveBeenCalledWith({
+      expect(queryBuilderMock.andWhere).toBeCalledTimes(1);
+      expect(queryBuilderMock.andWhere).toHaveBeenCalledWith({
         liquidity: MoreThanOrEqual(1000),
       });
     });

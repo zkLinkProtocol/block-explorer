@@ -7,6 +7,10 @@ import { BlockService } from "./block.service";
 import { Block } from "./block.entity";
 import { PagingOptionsDto } from "../common/dtos";
 import { buildDateFilter } from "../common/utils";
+import {Repository} from "typeorm";
+import {TVLHistory} from "./tvlHistory.entity";
+import {getRepositoryToken} from "@nestjs/typeorm";
+import {BlockDetails} from "./blockDetails.entity";
 
 jest.mock("../common/utils", () => ({
   buildDateFilter: jest.fn().mockReturnValue({ timestamp: "timestamp" }),
@@ -15,12 +19,13 @@ jest.mock("../common/utils", () => ({
 describe("BlockController", () => {
   let controller: BlockController;
   let serviceMock: BlockService;
+  let tvlHistoryRepositoryMock:Repository<TVLHistory>;
   let block;
   const blockNumber = 10;
 
   beforeEach(async () => {
     serviceMock = mock<BlockService>();
-
+    tvlHistoryRepositoryMock = mock<Repository<TVLHistory>>();
     block = {
       number: blockNumber,
     };
@@ -31,6 +36,10 @@ describe("BlockController", () => {
         {
           provide: BlockService,
           useValue: serviceMock,
+        },
+        {
+          provide: getRepositoryToken(TVLHistory),
+          useValue: tvlHistoryRepositoryMock,
         },
       ],
     }).compile();
