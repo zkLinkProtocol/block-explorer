@@ -28,7 +28,6 @@
     "base": "/img/base.svg"
   },
   "chainNameList": {
-    "goerli": "Goerli",
     "primary": "Linea",
     "ethereum": "Ethereum",
     "zksync": "zkSync",

@@ -225,7 +225,7 @@ import type { NetworkOrigin } from "@/types";
 import { ETH_TOKEN_L2_ADDRESS } from "@/utils/constants";
 import { utcStringFromISOString } from "@/utils/helpers";
 import useAddress from "@/composables/useAddress";
-const { item, getByAddress, getContractVerificationInfo } = useAddress();
+// const { item, getByAddress, getContractVerificationInfo } = useAddress();
 
 const { t, te } = useI18n();
 
@@ -248,11 +248,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  contract: {
-    type: Object as PropType<Contract>,
-    default: () => ({}),
-    required: true,
-  },
+  // contract: {
+  //   type: Object as PropType<Contract>,
+  //   default: () => ({}),
+  //   required: true,
+  // },
 });
 
 const route = useRoute();
@@ -283,48 +283,58 @@ const getTransactionMethod = (transaction: TransactionListItem) => {
   }
   const sighash = transaction.data.slice(0, 10);
   if (props.contractAbi) {
-    const name = decodeDataWithABI(
-      {
-        calldata: transaction.data,
-        value: transaction.value,
-      },
-      props.contractAbi
-    )?.name
-    if (name) {
-      return name;
-    } else {
-      return (
-        props.contract.proxyInfo?.implementation.verificationInfo?decodeDataWithABI(
-            {
-              calldata: transaction.data,
-              value: transaction.value,
-            },
-            props.contract.proxyInfo?.implementation.verificationInfo.artifacts.abi
-          )?.name ?? sighash: sighash
-        );
-    }
-  } else if (transaction.abi) {
-    const name = decodeDataWithABI(
+    return (
+      decodeDataWithABI(
         {
           calldata: transaction.data,
           value: transaction.value,
         },
-        transaction.abi
-      )?.name || (
-        transaction.contractAbi? (decodeDataWithABI(
-        {
-          calldata: transaction.data,
-          value: transaction.value,
-        },
-        transaction.contractAbi
-      )?.name): ''
-      )
-    return (name || sighash);
-  }
-  // const methodIndex = sighash as keyof typeof contractsMethodNames;
-  // if (contractsMethodNames[methodIndex]) {
-  //   return contractsMethodNames[methodIndex];
+        props.contractAbi
+      )?.name ?? sighash
+    );
+    // const name = decodeDataWithABI(
+    //   {
+    //     calldata: transaction.data,
+    //     value: transaction.value,
+    //   },
+    //   props.contractAbi
+    // )?.name
+    // if (name) {
+    //   return name;
+    // } else {
+    //   return (
+    //     props.contract.proxyInfo?.implementation.verificationInfo?decodeDataWithABI(
+    //         {
+    //           calldata: transaction.data,
+    //           value: transaction.value,
+    //         },
+    //         props.contract.proxyInfo?.implementation.verificationInfo.artifacts.abi
+    //       )?.name ?? sighash: sighash
+    //     );
+    // }
+  } 
+  // else if (transaction.abi) {
+  //   const name = decodeDataWithABI(
+  //       {
+  //         calldata: transaction.data,
+  //         value: transaction.value,
+  //       },
+  //       transaction.abi
+  //     )?.name || (
+  //       transaction.contractAbi? (decodeDataWithABI(
+  //       {
+  //         calldata: transaction.data,
+  //         value: transaction.value,
+  //       },
+  //       transaction.contractAbif
+  //     )?.name): ''
+  //     )
+  //   return (name || sighash);
   // }
+  const methodIndex = sighash as keyof typeof contractsMethodNames;
+  if (contractsMethodNames[methodIndex]) {
+    return contractsMethodNames[methodIndex];
+  }
   return sighash;
 };
 
