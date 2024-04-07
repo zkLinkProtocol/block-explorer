@@ -1,43 +1,48 @@
 <template>
   <Table :data-testid="$testId.tokensTable" :loading="isLoading" :items="displayTokenList" ref="table">
     <template #table-head>
-      <table-head-column @click="sortBy('name')">
+      <table-head-column>
         <div class="th-box min-w-16">
           <span>{{ t("tokensView.table.tokenName") }}</span>
-          <div class="tool-wrap">
-            <ranking :sort-order="getSortOrder('name')" />
-            <TableFilterModel
-              @click="handleChildClick"
-              v-model="searchVal"
-              @filter="filter('name')"
-              v-model:selected="selectedNameList"
-              :filterOptions="symbolOptions"
-            />
-          </div>
+          <TableFilterModel
+            @click="handleChildClick"
+            v-model="searchVal"
+            @filter="filter('name')"
+            v-model:selected="selectedNameList"
+            :filterOptions="symbolOptions"
+          />
         </div>
       </table-head-column>
-      <table-head-column @click="sortBy('price')">
+      <table-head-column>
         <div class="th-box">
           <span>{{ t("tokensView.table.price") }}</span>
-          <ranking :sort-order="getSortOrder('price')" />
+           <span class="px-1">
+            <Tooltip class="batches-tooltip">
+              <FilterIcon
+                @click="toggleShowPrice"
+                class="w-4 h-4 text-black cursor-pointer"
+                :class="{ 'text-design-200': isZeroPrice }"
+              />
+              <template #content>
+                <span v-if="isZeroPrice">Show Assets Without Price</span>
+                <span v-else>Hide Assets Without Price</span>
+              </template>
+            </Tooltip>
+          </span>
         </div>
       </table-head-column>
-      <table-head-column @click="sortBy('totalQty')">
-        <div class="th-box">
-          <span>{{ t("tokensView.table.totalQty") }}</span>
-          <ranking :sort-order="getSortOrder('totalQty')" />
-        </div>
+      <table-head-column >
+        <span>{{ t("tokensView.table.totalQty") }}</span>
       </table-head-column>
       <table-head-column @click="sortBy('tvl')">
         <div class="th-box">
           Tvl
-          <ranking :sort-order="getSortOrder('tvl')" />
+          <ranking :sort-order="sortOrder" />
         </div>
       </table-head-column>
-      <table-head-column class="text-center" @click="sortBy('fromChain')">
+      <table-head-column class="text-center">
         <div class="th-box">
           <span>{{ t("tokensView.table.fromChain") }}</span>
-          <ranking :sort-order="getSortOrder('fromChain')" />
           <TableFilterModel
             @click="handleChildClick"
             v-model:selected="selectedTokenList"
@@ -256,9 +261,9 @@ const symbolOptions = computed(() => {
   props.tokens.map((item) => {
     arr.push(item.symbol!);
   });
-  if (searchVal.value) {
+    if (searchVal.value) {
     const newArr = arr.filter((item) => {
-      return item.includes(searchVal.value);
+      return item.toLowerCase().includes(searchVal.value.toLowerCase());
     });
     return [...new Set(newArr)];
   } else {
@@ -279,7 +284,6 @@ const filterChain = (mergeData: Token[]) => {
   if (selectedTokenList.value.length === 0) {
     return data.value ||[];
   }
-  // activePage.value=1
   return mergeData.filter((item) => {
     const networkName = item.networkKey
       ? chainNameList[item.networkKey]
@@ -296,7 +300,6 @@ const filterName = (mergeData: Token[]) => {
   if (selectedNameList.value.length === 0) {
     return data.value||[];
   }
-  // activePage.value=1
   return mergeData.filter((item) => {
     const optionMatch = selectedNameList.value.includes(item.symbol!);
     return optionMatch;
@@ -307,41 +310,15 @@ const toggleShowPrice = (e: MouseEvent) => {
   e.stopPropagation();
   isZeroPrice.value = !isZeroPrice.value;
 };
-const sortKey = ref<string>("");
-interface SortRule {
-  key: string;
-  sortOrder: string;
-}
-const sortRules = reactive<SortRule[]>([
-  { key: "name", sortOrder: "" },
-  { key: "price", sortOrder: "" },
-  { key: "totalQty", sortOrder: "" },
-  { key: "fromChain", sortOrder: "" },
-  { key: "tvl", sortOrder: "" },
-]);
+const sortKey = ref<string>("tvl");
+const sortOrder=ref<string>('asc')
 const sortBy = (column: string) => {
-  // Clear other column sort
-  sortRules.forEach((r) => {
-    if (r.key !== column) {
-      r.sortOrder = "";
-    }
-  });
-  const index = sortRules.findIndex((rule) => rule.key === column);
-  if (sortKey.value === column && index !== -1) {
-    sortRules[index].sortOrder =
-      sortRules[index].sortOrder === "asc" ? "desc" : sortRules[index].sortOrder === "desc" ? "" : "asc";
+  if (sortKey.value === column) {
+    sortOrder.value =
+      sortOrder.value === "asc" ? "desc" : sortOrder.value === "desc" ? "" : "asc";
   } else {
     sortKey.value = column;
-    sortRules[index].sortOrder = "asc";
-  }
-};
-const compareCharacter = (valueA: string, valueB: string, sortOrder: string): number => {
-  if (sortOrder === "asc") {
-    return valueA.localeCompare(valueB);
-  } else if (sortOrder === "desc") {
-    return valueB.localeCompare(valueA);
-  } else {
-    return 0;
+    sortOrder.value = "asc";
   }
 };
 const compareValues = (valueA: number, valueB: number, sortOrder: string): number => {
@@ -359,6 +336,16 @@ const tokens=computed(()=>{
 })
 const displayTokenList = computed(() => {
   let mergeData: Token[] = [...tokens.value];
+  // Hide Assets Without Price
+  if (isZeroPrice.value) {
+    mergeData = [...tokens.value].filter((item) => {
+      if (!item.usdPrice) {
+        return false;
+      }
+      const price = +item.usdPrice! * +formatBigNumberish("1".padEnd(item.decimals + 1, "0"), item.decimals);
+      return price > 0;
+    });
+  }
   // filtering
   if (selectedTokenList.value.length === 0 && selectedNameList.value.length === 0) {
     // mergeData = mergeData;
@@ -369,56 +356,16 @@ const displayTokenList = computed(() => {
   }
   // ranking
   if (sortKey.value) {
-    // different type
-    const targetRule = sortRules.find((rule) => rule.key === sortKey.value);
-    const sortOrder = targetRule?.sortOrder ?? "";
+    if (!sortOrder.value) return mergeData;
     mergeData = [...mergeData].sort((a, b) => {
-      let valueA = "";
-      let valueB = "";
-      if (sortKey.value === "name") {
-        valueA = a.symbol!;
-        valueB = b.symbol!;
-        return compareCharacter(valueA, valueB, sortOrder);
-      }
-      if (sortKey.value === "price") {
-        const valueA = +a.usdPrice! * +formatBigNumberish("1".padEnd(a.decimals + 1, "0"), a.decimals);
-        const valueB = +b.usdPrice! * +formatBigNumberish("1".padEnd(b.decimals + 1, "0"), b.decimals);
-        return compareValues(valueA, valueB, sortOrder);
-      }
-      if (sortKey.value === "totalQty") {
-        const aVal = parseFloat(formatBigNumberish(a.totalSupply!.hex, a.decimals));
-        const bval = parseFloat(formatBigNumberish(b.totalSupply!.hex, b.decimals));
-        return compareValues(aVal, bval, sortOrder);
-      }
       if (sortKey.value === "tvl") {
-        return compareValues(parseFloat(a.tvl), parseFloat(b.tvl), sortOrder);
-      }
-      if (sortKey.value === "fromChain") {
-        valueA = a.networkKey
-          ? chainNameList[a.networkKey]
-          : ETH_TOKEN_L1_ADDRESS.includes(a.l1Address!)
-          ? NOVA_MERGED_TOKEN
-          : NOVA_NATIVE_TOKEN;
-        valueB = b.networkKey
-          ? chainNameList[b.networkKey]
-          : ETH_TOKEN_L1_ADDRESS.includes(b.l1Address!)
-          ? NOVA_MERGED_TOKEN
-          : NOVA_NATIVE_TOKEN;
-        return compareCharacter(valueA, valueB, sortOrder);
+        return compareValues(parseFloat(a.tvl), parseFloat(b.tvl), sortOrder.value);
       }
       return 0;
     });
   }
   return mergeData;
 });
-const getSortOrder = (column: string) => {
-  const index = sortRules.findIndex((r) => r.key === column);
-  if (index != -1) {
-    return sortRules[index].sortOrder;
-  } else {
-    return "";
-  }
-};
 </script>
 
 <style scoped lang="scss">
