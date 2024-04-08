@@ -156,18 +156,18 @@ export class HoldPointService extends Worker {
     return addressTvlMap;
   }
 
-  public getAddressMultiplier(address: string, blockTs: number): number {
+  public getAddressMultiplier(address: string, blockTs: number): BigNumber {
     const multipliers = this.addressMultipliersCache.get(address.toLowerCase());
     if (!multipliers || multipliers.length == 0) {
-      return 1;
+      return new BigNumber(1);
     }
     multipliers.sort((a, b) => b.timestamp - a.timestamp);
     for (const m of multipliers) {
       if (blockTs >= m.timestamp * 1000) {
-        return m.multiplier;
+        return new BigNumber(m.multiplier);
       }
     }
-    return multipliers[multipliers.length - 1].multiplier;
+    return new BigNumber(multipliers[multipliers.length - 1].multiplier);
   }
 
   async calculateAddressTvl(
