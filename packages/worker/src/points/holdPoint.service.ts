@@ -298,7 +298,6 @@ export class HoldPointService extends Worker {
     endDate = new Date(endDate.setMonth(endDate.getMonth() + 1));
     const diffInMilliseconds = blockTs.getTime() - startDate.getTime();
     const diffInWeeks = Math.floor(diffInMilliseconds / millisecondsPerWeek);
-    console.log(`${blockTs} ${startDate} ${diffInWeeks}`);
     if (diffInWeeks < 1) {
       return new BigNumber(2);
     } else if (diffInWeeks < 2) {
