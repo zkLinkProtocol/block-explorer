@@ -10,12 +10,13 @@ import {
   InviteRepository,
   ReferrerRepository,
 } from "../repositories";
-import { TokenService } from "../token/token.service";
+import { TokenMultiplier, TokenService } from "../token/token.service";
 import BigNumber from "bignumber.js";
 import { BlockAddressPoint, Point } from "../entities";
 import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
 import { getETHPrice, getTokenPrice, REFERRER_BONUS, STABLE_COIN_TYPE } from "./depositPoint.service";
+import addressMultipliers from "../addressMultipliers";
 
 type BlockAddressTvl = {
   tvl: BigNumber;
@@ -27,6 +28,7 @@ export class HoldPointService extends Worker {
   private readonly logger: Logger;
   private readonly pointsStatisticalPeriodSecs: number;
   private readonly pointsPhase1StartTime: Date;
+  private readonly addressMultipliersCache: Map<string, TokenMultiplier[]>;
 
   public constructor(
     private readonly tokenService: TokenService,
@@ -43,6 +45,10 @@ export class HoldPointService extends Worker {
     this.logger = new Logger(HoldPointService.name);
     this.pointsStatisticalPeriodSecs = this.configService.get<number>("points.pointsStatisticalPeriodSecs");
     this.pointsPhase1StartTime = new Date(this.configService.get<string>("points.pointsPhase1StartTime"));
+    this.addressMultipliersCache = new Map<string, TokenMultiplier[]>();
+    for (const m of addressMultipliers) {
+      this.addressMultipliersCache.set(m.address.toLowerCase(), m.multipliers);
+    }
   }
 
   protected async runProcess(): Promise<void> {
@@ -105,6 +111,7 @@ export class HoldPointService extends Worker {
       }
       const addressTvl = addressTvlMap.get(address);
       let groupBooster = new BigNumber(1);
+      const addressMultiplier = this.getAddressMultiplier(address, blockTs);
       const invite = await this.inviteRepository.getInvite(address);
       if (!!invite) {
         const groupTvl = groupTvlMap.get(invite.groupId);
@@ -112,8 +119,11 @@ export class HoldPointService extends Worker {
           groupBooster = groupBooster.plus(this.getGroupBooster(groupTvl));
         }
       }
-      // NOVA Point = sum_all tokens in activity list (Early_Bird_Multiplier * Token Multiplier * Token Amount * Token Price * (1 + Group Booster + Growth Booster) / ETH_Price )
-      const newHoldPoint = addressTvl.holdBasePoint.multipliedBy(earlyBirdMultiplier).multipliedBy(groupBooster);
+      // NOVA Point = sum_all tokens in activity list (Early_Bird_Multiplier * Token Multiplier * Address Multiplier * Token Amount * Token Price * (1 + Group Booster + Growth Booster) / ETH_Price )
+      const newHoldPoint = addressTvl.holdBasePoint
+        .multipliedBy(earlyBirdMultiplier)
+        .multipliedBy(groupBooster)
+        .multipliedBy(addressMultiplier);
       await this.updateHoldPoint(currentStatisticalBlock.number, address, newHoldPoint);
     }
     await this.pointsRepository.setHoldPointStatisticalBlockNumber(currentStatisticalBlock.number);
@@ -144,6 +154,20 @@ export class HoldPointService extends Worker {
       addressTvlMap.set(address, addressTvl);
     }
     return addressTvlMap;
+  }
+
+  public getAddressMultiplier(address: string, blockTs: number): number {
+    const multipliers = this.addressMultipliersCache.get(address.toLowerCase());
+    if (!multipliers || multipliers.length == 0) {
+      return 1;
+    }
+    multipliers.sort((a, b) => b.timestamp - a.timestamp);
+    for (const m of multipliers) {
+      if (blockTs >= m.timestamp * 1000) {
+        return m.multiplier;
+      }
+    }
+    return multipliers[multipliers.length - 1].multiplier;
   }
 
   async calculateAddressTvl(

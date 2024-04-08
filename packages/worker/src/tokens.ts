@@ -809,6 +809,10 @@ export default [
         multiplier: 1,
         timestamp: 0,
       },
+      {
+        multiplier: 1.15,
+        timestamp: 1712559600,
+      },
     ],
   },
   {
