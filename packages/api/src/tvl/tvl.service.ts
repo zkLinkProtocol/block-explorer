@@ -157,8 +157,8 @@ export class TVLService {
         novaPoint: rank.stakePoint,
         referPoint: rank.refPoint,
         rank: firstRank + i,
-        inviteBy: referer,
-        address,
+        inviteBy: referer?.replace(/^(\w{8})\w*(\w{8})$/, "$1******$2"),
+        address: address.replace(/^(\w{8})\w*(\w{8})$/, "$1******$2"),
       });
     }
     return result;
