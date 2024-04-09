@@ -87,7 +87,7 @@ export default [
     yieldType: ["NOVA Points"],
     multipliers: [
       {
-        multiplier: 3,
+        multiplier: 2.5,
         timestamp: 0,
       },
     ],
@@ -177,7 +177,7 @@ export default [
     yieldType: ["NOVA Points"],
     multipliers: [
       {
-        multiplier: 4,
+        multiplier: 3,
         timestamp: 0,
       },
     ],
@@ -252,7 +252,7 @@ export default [
     yieldType: ["NOVA Points"],
     multipliers: [
       {
-        multiplier: 4,
+        multiplier: 3,
         timestamp: 0,
       },
     ],
@@ -965,7 +965,7 @@ export default [
     yieldType: ["NOVA Points"],
     multipliers: [
       {
-        multiplier: 4,
+        multiplier: 3,
         timestamp: 0,
       },
     ],
