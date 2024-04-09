@@ -226,6 +226,7 @@ import type { NetworkOrigin } from "@/types";
 import { ETH_TOKEN_L2_ADDRESS } from "@/utils/constants";
 import { utcStringFromISOString } from "@/utils/helpers";
 import useAddress from "@/composables/useAddress";
+import { NOVA } from '@/utils/constants'
 // const { item, getByAddress, getContractVerificationInfo } = useAddress();
 
 const { chainNameList } = useEnvironmentConfig();
@@ -354,18 +355,19 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
     let fromNetwork=''
     if(transaction.isL1Originated){
       if(transaction.networkkey && transaction.networkkey !== "error"){
-        fromNetwork=chainNameList[transaction.networkkey!]
+        const key=transaction.networkkey==='linea'?'primary':transaction.networkkey
+        fromNetwork=chainNameList[key]
       }else{
         fromNetwork="Linea"
       }
     }else{
-      fromNetwork="Nova"
+      fromNetwork=NOVA
     }
     return {
     ...transaction,
     methodName: getTransactionMethod(transaction),
     fromNetwork: fromNetwork,
-    toNetwork: "Nova", // even withdrawals go through L2 addresses (800A or bridge addresses)
+    toNetwork: NOVA, // even withdrawals go through L2 addresses (800A or bridge addresses)
     statusColor: transaction.status === "failed" ? "danger" : "dark-success",
     statusIcon: ["failed", "included"].includes(transaction.status) ? ZkSyncIcon : EthereumIcon,
   }
