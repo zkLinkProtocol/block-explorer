@@ -1,26 +1,22 @@
 <template>
-  <Table :data-testid="$testId.tokensTable" :loading="loading" :items="displayTokenList" ref="table">
+  <Table :data-testid="$testId.tokensTable" :loading="isLoading" :items="displayTokenList" ref="table">
     <template #table-head>
-      <table-head-column @click="sortBy('name')">
+      <table-head-column>
         <div class="th-box min-w-16">
           <span>{{ t("tokensView.table.tokenName") }}</span>
-          <div class="tool-wrap">
-            <ranking :sort-order="getSortOrder('name')" />
-            <TableFilterModel
-              @click="handleChildClick"
-              v-model="searchVal"
-              @filter="filter('name')"
-              v-model:selected="selectedNameList"
-              :filterOptions="symbolOptions"
-            />
-          </div>
+          <TableFilterModel
+            @click="handleChildClick"
+            v-model="searchVal"
+            @filter="filter('name')"
+            v-model:selected="selectedNameList"
+            :filterOptions="symbolOptions"
+          />
         </div>
       </table-head-column>
-      <table-head-column @click="sortBy('price')">
+      <table-head-column>
         <div class="th-box">
           <span>{{ t("tokensView.table.price") }}</span>
-          <ranking :sort-order="getSortOrder('price')" />
-          <span class="px-1">
+           <span class="px-1">
             <Tooltip class="batches-tooltip">
               <FilterIcon
                 @click="toggleShowPrice"
@@ -35,22 +31,18 @@
           </span>
         </div>
       </table-head-column>
-      <table-head-column @click="sortBy('totalQty')">
-        <div class="th-box">
-          <span>{{ t("tokensView.table.totalQty") }}</span>
-          <ranking :sort-order="getSortOrder('totalQty')" />
-        </div>
+      <table-head-column >
+        <span>{{ t("tokensView.table.totalQty") }}</span>
       </table-head-column>
       <table-head-column @click="sortBy('tvl')">
         <div class="th-box">
           Tvl
-          <ranking :sort-order="getSortOrder('tvl')" />
+          <ranking :sort-order="sortOrder" />
         </div>
       </table-head-column>
-      <table-head-column class="text-center" @click="sortBy('fromChain')">
+      <table-head-column class="text-center">
         <div class="th-box">
           <span>{{ t("tokensView.table.fromChain") }}</span>
-          <ranking :sort-order="getSortOrder('fromChain')" />
           <TableFilterModel
             @click="handleChildClick"
             v-model:selected="selectedTokenList"
@@ -128,6 +120,29 @@
         <div v-else class="min-h-[20px]"></div>
       </TableBodyColumn>
     </template>
+    <template v-if="total && total > pageSize && displayTokenList?.length" #footer>
+      <div class="pagination">
+        <Pagination
+          v-model:active-page="activePage"
+          :use-query="false"
+          :total-items="total!"
+          :page-size="pageSize"
+          :disabled="isLoading"
+        />
+      </div>
+    </template>
+    <template #empty>
+      <tr>
+        <TableBodyColumn class="empty-state-container" colspan="7">
+          <EmptyState class="empty-state">
+            <template #title>
+             Can’t find anything on your search result.
+            </template>
+            <template #description><span></span></template>
+          </EmptyState>
+        </TableBodyColumn>
+      </tr>
+    </template>
     <template #loading>
       <tr class="loading-row" v-for="row in 5" :key="row">
         <TableBodyColumn>
@@ -192,6 +207,8 @@ import Ranking from "./TableRanking.vue";
 import TableFilterModel from "./TableFilterModal.vue";
 import { FilterIcon } from "@heroicons/vue/outline";
 import Tooltip from "@/components/common/Tooltip.vue";
+import Pagination from "@/components/common/Pagination.vue";
+import EmptyState from "@/components/common/EmptyState.vue";
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 
 import { formatBigNumberish, formatPricePretty } from "@/utils/formatters";
@@ -202,17 +219,19 @@ const { chainNameList } = useEnvironmentConfig();
 
 import type { Token } from "@/composables/useToken";
 
+import useTokenLibrary from "@/composables/useTokenLibrary";
+const {
+  getTokensByPagination,
+} = useTokenLibrary();
+
+const { data, load, total, pending, pageSize } = getTokensByPagination();
+
 const props = defineProps({
   tokens: {
     type: Array as PropType<Token[]>,
     default: () => [],
   },
-  loading: {
-    type: Boolean,
-    default: true,
-  },
 });
-
 const { t } = useI18n();
 const table = ref(null);
 const subtraction = ref(6);
@@ -220,6 +239,16 @@ const { width } = useElementSize(table);
 watch(width, () => {
   width.value <= 500 ? (subtraction.value = 10) : (subtraction.value = 5);
 });
+const isLoading = computed(() => pending.value);
+const activePage = ref<number>(1);
+watch(
+  [activePage],
+  ([page]) => {
+    
+    load(page);
+  },
+  { immediate: true }
+);
 const handleChildClick = (e: MouseEvent) => {
   e.stopPropagation();
 };
@@ -232,9 +261,9 @@ const symbolOptions = computed(() => {
   props.tokens.map((item) => {
     arr.push(item.symbol!);
   });
-  if (searchVal.value) {
+    if (searchVal.value) {
     const newArr = arr.filter((item) => {
-      return item.includes(searchVal.value);
+      return item.toLowerCase().includes(searchVal.value.toLowerCase());
     });
     return [...new Set(newArr)];
   } else {
@@ -253,7 +282,7 @@ const selectedTokenList: Ref<string[]> = ref([]);
 const selectedNameList: Ref<string[]> = ref([]);
 const filterChain = (mergeData: Token[]) => {
   if (selectedTokenList.value.length === 0) {
-    return props.tokens;
+    return data.value ||[];
   }
   return mergeData.filter((item) => {
     const networkName = item.networkKey
@@ -269,7 +298,7 @@ const filterChain = (mergeData: Token[]) => {
 // filter symbol
 const filterName = (mergeData: Token[]) => {
   if (selectedNameList.value.length === 0) {
-    return props.tokens;
+    return data.value||[];
   }
   return mergeData.filter((item) => {
     const optionMatch = selectedNameList.value.includes(item.symbol!);
@@ -281,41 +310,15 @@ const toggleShowPrice = (e: MouseEvent) => {
   e.stopPropagation();
   isZeroPrice.value = !isZeroPrice.value;
 };
-const sortKey = ref<string>("");
-interface SortRule {
-  key: string;
-  sortOrder: string; // 可以使用枚举类型来限制排序规则
-}
-const sortRules = reactive<SortRule[]>([
-  { key: "name", sortOrder: "" },
-  { key: "price", sortOrder: "" },
-  { key: "totalQty", sortOrder: "" },
-  { key: "fromChain", sortOrder: "" },
-  { key: "tvl", sortOrder: "" },
-]);
+const sortKey = ref<string>("tvl");
+const sortOrder=ref<string>('asc')
 const sortBy = (column: string) => {
-  // Clear other column sort
-  sortRules.forEach((r) => {
-    if (r.key !== column) {
-      r.sortOrder = "";
-    }
-  });
-  const index = sortRules.findIndex((rule) => rule.key === column);
-  if (sortKey.value === column && index !== -1) {
-    sortRules[index].sortOrder =
-      sortRules[index].sortOrder === "asc" ? "desc" : sortRules[index].sortOrder === "desc" ? "" : "asc";
+  if (sortKey.value === column) {
+    sortOrder.value =
+      sortOrder.value === "asc" ? "desc" : sortOrder.value === "desc" ? "" : "asc";
   } else {
     sortKey.value = column;
-    sortRules[index].sortOrder = "asc";
-  }
-};
-const compareCharacter = (valueA: string, valueB: string, sortOrder: string): number => {
-  if (sortOrder === "asc") {
-    return valueA.localeCompare(valueB);
-  } else if (sortOrder === "desc") {
-    return valueB.localeCompare(valueA);
-  } else {
-    return 0;
+    sortOrder.value = "asc";
   }
 };
 const compareValues = (valueA: number, valueB: number, sortOrder: string): number => {
@@ -327,16 +330,19 @@ const compareValues = (valueA: number, valueB: number, sortOrder: string): numbe
     return 0;
   }
 };
+const tokens=computed(()=>{
+  return data.value ||[]
+  
+})
 const displayTokenList = computed(() => {
-  let mergeData: Token[] = [...props.tokens];
+  let mergeData: Token[] = [...tokens.value];
   // Hide Assets Without Price
   if (isZeroPrice.value) {
-    mergeData = [...props.tokens].filter((item) => {
+    mergeData = [...tokens.value].filter((item) => {
       if (!item.usdPrice) {
         return false;
       }
       const price = +item.usdPrice! * +formatBigNumberish("1".padEnd(item.decimals + 1, "0"), item.decimals);
-
       return price > 0;
     });
   }
@@ -350,56 +356,16 @@ const displayTokenList = computed(() => {
   }
   // ranking
   if (sortKey.value) {
-    // different type
-    const targetRule = sortRules.find((rule) => rule.key === sortKey.value);
-    const sortOrder = targetRule?.sortOrder ?? "";
+    if (!sortOrder.value) return mergeData;
     mergeData = [...mergeData].sort((a, b) => {
-      let valueA = "";
-      let valueB = "";
-      if (sortKey.value === "name") {
-        valueA = a.symbol!;
-        valueB = b.symbol!;
-        return compareCharacter(valueA, valueB, sortOrder);
-      }
-      if (sortKey.value === "price") {
-        const valueA = +a.usdPrice! * +formatBigNumberish("1".padEnd(a.decimals + 1, "0"), a.decimals);
-        const valueB = +b.usdPrice! * +formatBigNumberish("1".padEnd(b.decimals + 1, "0"), b.decimals);
-        return compareValues(valueA, valueB, sortOrder);
-      }
-      if (sortKey.value === "totalQty") {
-        const aVal = parseFloat(formatBigNumberish(a.totalSupply!.hex, a.decimals));
-        const bval = parseFloat(formatBigNumberish(b.totalSupply!.hex, b.decimals));
-        return compareValues(aVal, bval, sortOrder);
-      }
       if (sortKey.value === "tvl") {
-        return compareValues(parseFloat(a.tvl), parseFloat(b.tvl), sortOrder);
-      }
-      if (sortKey.value === "fromChain") {
-        valueA = a.networkKey
-          ? chainNameList[a.networkKey]
-          : ETH_TOKEN_L1_ADDRESS.includes(a.l1Address!)
-          ? NOVA_MERGED_TOKEN
-          : NOVA_NATIVE_TOKEN;
-        valueB = b.networkKey
-          ? chainNameList[b.networkKey]
-          : ETH_TOKEN_L1_ADDRESS.includes(b.l1Address!)
-          ? NOVA_MERGED_TOKEN
-          : NOVA_NATIVE_TOKEN;
-        return compareCharacter(valueA, valueB, sortOrder);
+        return compareValues(parseFloat(a.tvl), parseFloat(b.tvl), sortOrder.value);
       }
       return 0;
     });
   }
   return mergeData;
 });
-const getSortOrder = (column: string) => {
-  const index = sortRules.findIndex((r) => r.key === column);
-  if (index != -1) {
-    return sortRules[index].sortOrder;
-  } else {
-    return "";
-  }
-};
 </script>
 
 <style scoped lang="scss">
@@ -463,6 +429,17 @@ const getSortOrder = (column: string) => {
 }
 .tool-wrap {
   @apply flex items-center;
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding: 0.75rem;
+}
+.empty-state-container {
+  @apply table-cell;
+  .empty-state {
+    @apply items-center justify-center whitespace-normal py-10;
+  }
 }
 
 @media (max-width: 760px) {
