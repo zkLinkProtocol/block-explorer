@@ -291,16 +291,18 @@ export class HoldPointService extends Worker {
   }
 
   getEarlyBirdMultiplier(blockTs: Date): BigNumber {
-    // 1st week: 2,second week:1.5,third,forth week:1.2,
+    // 1st week: 2,second week:1.5,third,forth week ~ within 1 month :1.2,1 month later: 1,
     const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
     const startDate = this.pointsPhase1StartTime;
+    let endDate = new Date(startDate);
+    endDate = new Date(endDate.setMonth(endDate.getMonth() + 1));
     const diffInMilliseconds = blockTs.getTime() - startDate.getTime();
     const diffInWeeks = Math.floor(diffInMilliseconds / millisecondsPerWeek);
     if (diffInWeeks < 1) {
       return new BigNumber(2);
     } else if (diffInWeeks < 2) {
       return new BigNumber(1.5);
-    } else if (diffInWeeks < 4) {
+    } else if (blockTs.getTime() < endDate.getTime()) {
       return new BigNumber(1.2);
     } else {
       return new BigNumber(1);
