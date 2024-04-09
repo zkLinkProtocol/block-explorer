@@ -11,6 +11,7 @@ import {
 } from "../repositories";
 import { TRANSACTION_PROCESSING_DURATION_METRIC_NAME } from "../metrics";
 import { TransactionData } from "../dataFetcher/types";
+import { GateWayConfig } from "../utils/gatewayConfig";
 
 @Injectable()
 export class TransactionProcessor {
@@ -38,6 +39,14 @@ export class TransactionProcessor {
       transactionHash: transactionData.transaction.hash,
     });
 
+    if (transactionData.transaction.isL1Originated){
+      const resTransfer =transactionData.transfers.find((transfer) => transfer.transactionHash === transactionData.transaction.hash);
+      if (resTransfer.gateway !== null && resTransfer.gateway !== undefined){
+        transactionData.transaction.networkkey = this.findGatewayByAddress(resTransfer.gateway);
+      }else {
+        transactionData.transaction.networkkey = 'Linea';
+      }
+    }
     await this.transactionRepository.add(transactionData.transaction);
 
     this.logger.debug({
@@ -96,5 +105,13 @@ export class TransactionProcessor {
     );
 
     stopTransactionProcessingMeasuring();
+  }
+  private  findGatewayByAddress(value: string): string {
+    for (let key in GateWayConfig) {
+      if (GateWayConfig[key] === value) {
+        return key;
+      }
+    }
+    return "";
   }
 }
