@@ -211,6 +211,7 @@ import ZkSyncIcon from "@/components/icons/ZkSync.vue";
 import TokenAmountPriceTableCell from "@/components/transactions/TokenAmountPriceTableCell.vue";
 import TransactionDirectionTableCell from "@/components/transactions/TransactionDirectionTableCell.vue";
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
+import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 
 import useToken, { type Token } from "@/composables/useToken";
 import { decodeDataWithABI } from "@/composables/useTransactionData";
@@ -226,6 +227,8 @@ import { ETH_TOKEN_L2_ADDRESS } from "@/utils/constants";
 import { utcStringFromISOString } from "@/utils/helpers";
 import useAddress from "@/composables/useAddress";
 // const { item, getByAddress, getContractVerificationInfo } = useAddress();
+
+const { chainNameList } = useEnvironmentConfig();
 
 const { t, te } = useI18n();
 
@@ -347,14 +350,26 @@ type TransactionListItemMapped = TransactionListItem & {
 };
 
 const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
-  return data.value?.map((transaction) => ({
+  return data.value?.map((transaction) => {
+    let fromNetwork=''
+    if(transaction.isL1Originated){
+      if(transaction.networkkey && transaction.networkkey !== "error"){
+        fromNetwork=chainNameList[transaction.networkkey!]
+      }else{
+        fromNetwork="Linea"
+      }
+    }else{
+      fromNetwork="Nova"
+    }
+    return {
     ...transaction,
     methodName: getTransactionMethod(transaction),
-    fromNetwork: transaction.isL1Originated ? "L1" : "L2",
-    toNetwork: "L2", // even withdrawals go through L2 addresses (800A or bridge addresses)
+    fromNetwork: fromNetwork,
+    toNetwork: "Nova", // even withdrawals go through L2 addresses (800A or bridge addresses)
     statusColor: transaction.status === "failed" ? "danger" : "dark-success",
     statusIcon: ["failed", "included"].includes(transaction.status) ? ZkSyncIcon : EthereumIcon,
-  }));
+  }
+  });
 });
 
 const isHighRowsSize = computed(() => props.columns.includes("fee"));

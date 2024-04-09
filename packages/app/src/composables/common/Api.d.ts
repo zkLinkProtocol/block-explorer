@@ -110,6 +110,7 @@ declare namespace Api {
       status: "included" | "committed" | "proved" | "verified" | "failed";
       error: string | null;
       revertReason: string | null;
+      networkkey?:string |null;
     };
 
     type Transfer = {
