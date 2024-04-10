@@ -15,7 +15,7 @@
       <span v-if="isTokensFailed" class="error-message">
         {{ t("failedRequest") }}
       </span>
-      <TokenTable :tokens="tokens"></TokenTable>
+      <TokenTable :tokens="tokens" :loading="isTokensPending"></TokenTable>
     </div>
   </div>
 </template>
@@ -32,6 +32,7 @@ import useTokenLibrary from "@/composables/useTokenLibrary";
 
 const {
   tokens,
+  sortTokens,
   isRequestPending: isTokensPending,
   isRequestFailed: isTokensFailed,
   getTokens,
