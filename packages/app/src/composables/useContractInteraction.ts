@@ -53,9 +53,11 @@ export default (context = useContext()) => {
           }
           return inputValue;
         });
+      const gasEstimate= await contract.estimateGas[abiFragment.name](...methodArguments);
+      const gasWithBuffer = gasEstimate.mul(ethers.BigNumber.from("120")).div(ethers.BigNumber.from("100"));
       const methodOptions = {
         value: ethers.utils.parseEther((params.value as string) ?? "0"),
-        gasLimit: "10000000",
+        gasLimit: gasWithBuffer.toString(),
       };
       const res = await method(
         ...[

@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ResponseBaseDto } from "../common/responseBase.dto";
+import { UserBalances } from "src/balance/balance.service";
 
 export class AccountEtherBalanceResponseDto extends ResponseBaseDto {
   @ApiProperty({
@@ -24,4 +25,16 @@ export class AccountsEtherBalancesResponseDto extends ResponseBaseDto {
     ],
   })
   public readonly result: { account: string; balance: string }[] | string;
+}
+
+export class UserBalancesResponseDto extends ResponseBaseDto {
+  @ApiProperty({
+    description: "The user balances",
+    example: [{
+      address: "0xFb7E0856e44Eff812A44A9f47733d7d55c39Aa28",
+      balance: "5200000000000000000",
+      blockNumber: 123456,
+    }],
+  })
+  public readonly result: UserBalances[] | string;
 }

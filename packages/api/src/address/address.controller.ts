@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from "@nestjs/common";
+import { Controller, Get, NotFoundException, Param, Query } from "@nestjs/common";
 import {
   ApiTags,
   ApiParam,
@@ -7,6 +7,8 @@ import {
   ApiExtraModels,
   refs,
   ApiExcludeController,
+  ApiQuery,
+  ApiNotFoundResponse,
 } from "@nestjs/swagger";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { utils } from "ethers";
@@ -25,9 +27,22 @@ import { TransferService } from "../transfer/transfer.service";
 import { TransferDto } from "../transfer/transfer.dto";
 import { swagger } from "../config/featureFlags";
 import { constants } from "../config/docs";
+import { TransferType } from "src/transfer/transfer.entity";
 
 const entityName = "address";
-
+type SingleTransfer = Omit<TransferDto, "token">;
+class SingleTransferDto implements SingleTransfer{
+  public type: TransferType;
+  public blockNumber: number;
+  public from: string;
+  public to: string;
+  public transactionHash?: string;
+  public amount?: string;
+  public tokenAddress: string;
+  public gateway?: string;
+  public timestamp: Date;
+  public fields?: Record<string, string>;
+}
 @ApiTags("Address BFF")
 @ApiExcludeController(!swagger.bffEnabled)
 @Controller(entityName)
@@ -157,5 +172,33 @@ export class AddressController {
         route: `${entityName}/${address}/transfers`,
       }
     );
+  }
+  @Get(":address/firstdeposit")
+  @ApiParam({
+    name: "address",
+    schema: { pattern: ADDRESS_REGEX_PATTERN },
+    example: constants.address,
+    description: "Valid hex address",
+  })
+  @ApiQuery({
+    name: "token",
+    schema: { pattern: ADDRESS_REGEX_PATTERN },
+    example: constants.tokenAddress,
+    description: "Valid hex address",
+  })
+  @ApiOkResponse({ description: "Batch amount was returned successfully", type: SingleTransferDto })
+  @ApiBadRequestResponse({
+    description: "Specified address is invalid or token address is invalid",
+  })
+  @ApiNotFoundResponse({ description: "Token with the specified address does not exist" })
+  public async getAddressFirstDeposit(
+    @Param("address", new ParseAddressPipe()) address: string,
+    @Query("token", new ParseAddressPipe()) tokenAddress: string
+  ): Promise<SingleTransferDto> {
+    const transfer = await this.transferService.findFirstDeposit(address, tokenAddress);
+    if (!transfer) {
+      throw new NotFoundException();
+    }
+    return transfer
   }
 }

@@ -63,6 +63,24 @@ export class TokenRepository extends BaseRepository<Token> {
     return tokens;
   }
 
+  public async getTotalTVL(): Promise<BigNumber> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const allTokens = await transactionManager.find(this.entityTarget);
+    let totalTVL = BigNumber.from(0);
+    for (const token of allTokens) {
+      if (token.l1Address === null){
+        continue;
+      }
+      let tvl = BigNumber.from(token.totalSupply)
+        .mul(((token.usdPrice ?? 0) * 1000) | 0)
+        .div(1000)
+        .div(BigNumber.from(10).pow(token.decimals));
+
+      totalTVL = totalTVL.add(tvl);
+    }
+    return totalTVL;
+  }
+
   public async updateTokenOffChainData({
     l1Address,
     l2Address,
@@ -103,7 +121,7 @@ export class TokenRepository extends BaseRepository<Token> {
     totalSupply,
   }: {
     l2Address?: string;
-    totalSupply: BigNumber
+    totalSupply: BigNumber;
   }): Promise<void> {
     if (!l2Address) {
       throw new Error("l2Address must be provided");
@@ -112,10 +130,10 @@ export class TokenRepository extends BaseRepository<Token> {
     await transactionManager.update(
       this.entityTarget,
       {
-        l2Address
+        l2Address,
       },
       {
-        totalSupply
+        totalSupply,
       }
     );
   }

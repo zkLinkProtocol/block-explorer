@@ -10,6 +10,12 @@ export interface TokenBalance {
   token: Token;
 }
 
+export interface UserBalances {
+  address: string;
+  balance: string;
+  blockNumber: number;
+}
+
 @Injectable()
 export class BalanceService {
   constructor(
@@ -69,6 +75,26 @@ export class BalanceService {
       },
     });
     return balance?.balance || "0";
+  }
+
+  public async getBalancesByToken(tokenAddress: string): Promise<UserBalances[]> {
+    const a = await this.balanceRepository.query(
+      `
+    SELECT address, "blockNumber", balance
+    FROM (
+        SELECT address, "blockNumber", balance,
+              ROW_NUMBER() OVER(PARTITION BY address, "tokenAddress" ORDER BY "blockNumber" DESC) as rn
+        FROM balances
+        WHERE "tokenAddress" = $1
+    ) as subquery
+    WHERE rn = 1;
+    `,
+      [hexTransformer.to(tokenAddress)]
+    );
+    return a.map((balance) => ({
+      ...balance,
+      address: hexTransformer.from(balance.address),
+    }));
   }
 
   public async getBalancesByAddresses(addresses: string[], tokenAddress: string): Promise<Balance[]> {

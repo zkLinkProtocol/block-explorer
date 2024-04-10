@@ -17,6 +17,7 @@ import InfoTableSection from "@/components/batches/InfoTableSection.vue";
 import CopyContent from "@/components/common/table/fields/CopyContent.vue";
 import TimeField from "@/components/common/table/fields/TimeField.vue";
 import ExcuteTxHashChain from "../common/table/fields/ExcuteTxHashChain.vue";
+import PromptContent from "../common/table/fields/PromptContent.vue";
 
 import useContext from "@/composables/useContext";
 import { ETH_BLOCKEXPLORER_URL } from "@/utils/constants";
@@ -115,20 +116,40 @@ const tableInfoItems = computed(() => {
             component: TimeField,
           }
         );
-        if (mainBatch.value.executedAt) {
+        
+        if (mainBatch && mainBatch.value?.executedAt) {
           tableItems.push(
             {
               label: t(`batches.finalizeTxHash`),
+              tooltip: t(`batches.finalizeTxHashTooltip`),
               value: { value: mainBatch.value?.transactionHash, isShowIcon: true },
               component: CopyContent,
               url: `${ETH_BLOCKEXPLORER_URL}/tx/${mainBatch.value?.transactionHash}`,
             },
             {
               label: t(`batches.finalizeAt`),
+              tooltip: t(`batches.finalizeAtTooltip`),
               value: { value: mainBatch.value?.executedAt },
               component: TimeField,
             }
           );
+        }else{
+          tableItems.push(
+            {
+              label: t(`batches.finalizeTxHash`),
+              tooltip: t(`batches.finalizeTxHashTooltip`),
+              value: { value: '', isShowIcon: true },
+              component: CopyContent,
+              url: '',
+            },
+            {
+              label: t(`batches.finalizeStatus`),
+              component: PromptContent,
+              value: {value:t(`batches.finalizePending`)},
+            }
+          );
+          
+
         }
       } else {
         tableItems.push(

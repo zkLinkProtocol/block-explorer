@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useMemoize } from "@vueuse/core";
 import { $fetch } from "ohmyfetch";
 
+import useFetchCollection from "@/composables/common/useFetchCollection";
 import useContext, { type Context } from "@/composables/useContext";
 import { ETH_TOKEN_L1_ADDRESS } from "@/utils/constants";
 
@@ -13,7 +14,7 @@ const retrieveTokens = useMemoize(
       ...(context.currentNetwork.value.tokensMinLiquidity != null && {
         minLiquidity: context.currentNetwork.value.tokensMinLiquidity.toString(),
       }),
-      limit: "100",
+      limit: "200",
     };
     let page = 1;
     let hasMore = true;
@@ -61,6 +62,12 @@ export default (context = useContext()) => {
     }
     return false;
   };
+  const getTokensByPagination = ()=>{
+     return useFetchCollection<Api.Response.Token>(
+       new URL(`/tokens?`, context.currentNetwork.value.apiUrl)
+     );
+
+  }
 
   return {
     isRequestPending,
@@ -69,5 +76,6 @@ export default (context = useContext()) => {
     sortTokens,
     getToken,
     getTokens,
+    getTokensByPagination,
   };
 };

@@ -6,6 +6,7 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiExcludeController,
+  ApiOperation,
 } from "@nestjs/swagger";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { buildDateFilter } from "../common/utils";
@@ -16,6 +17,23 @@ import { BlockService } from "./block.service";
 import { BlockDto } from "./block.dto";
 import { BlockDetailsDto } from "./blockDetails.dto";
 import { swagger } from "../config/featureFlags";
+import { TVLHistory } from "./tvlHistory.entity";
+import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+import { TVLHistoryDto } from "./TVLHistory.dto";
+import { LRUCache } from "lru-cache";
+
+const options = {
+  // how long to live in ms
+  ttl: 1000 * 10,
+  // return stale items before removing from cache?
+  allowStale: false,
+  ttlAutopurge: true,
+};
+
+const cache = new LRUCache(options);
+const HISTORY_TVL_CACHE_KEY = "history-tvl-cache";
+const HISTORY_UAW_CACHE_KEY = "history-uaw-cache";
 
 const entityName = "blocks";
 
@@ -23,7 +41,91 @@ const entityName = "blocks";
 @ApiExcludeController(!swagger.bffEnabled)
 @Controller(entityName)
 export class BlockController {
-  constructor(private readonly blockService: BlockService) {}
+  constructor(
+    private readonly blockService: BlockService,
+    @InjectRepository(TVLHistory)
+    private readonly tvlHistoryRepository: Repository<TVLHistory>
+  ) {}
+
+  @Get("/total/tvl")
+  @ApiOperation({ summary: "Get total tvl" })
+  public async getTotalTvl(): Promise<TVLHistoryDto[]> {
+    const tvls = cache.get(HISTORY_TVL_CACHE_KEY) as TVLHistoryDto[];
+    if (tvls) {
+      return tvls;
+    }
+
+    const latest: TVLHistory = await this.tvlHistoryRepository.findOne({
+      // can't miss where
+      where: {},
+      order: {
+        id: "desc",
+      },
+    });
+    if (!latest){
+      return [];
+    }
+
+    const tvlHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
+      'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp) desc'
+    );
+
+    let history = tvlHistorys.map((tvlHistory) => {
+      return {
+        id: tvlHistory.id,
+        tvl: tvlHistory.tvl.toString(),
+        timestamp: tvlHistory.timestamp,
+      };
+    });
+    history.unshift({
+      id: latest.id,
+      tvl: latest.tvl.toString(),
+      timestamp: latest.timestamp,
+    });
+    cache.set(HISTORY_TVL_CACHE_KEY, history);
+    return history;
+  }
+  @Get("/total/uaw")
+  @ApiOperation({ summary: "Get total uaw" })
+  public async getTotalUaw(): Promise<TVLHistoryDto[]> {
+    const uaws = cache.get(HISTORY_UAW_CACHE_KEY) as TVLHistoryDto[];
+    if (uaws) {
+      return uaws;
+    }
+
+    const latest: TVLHistory = await this.tvlHistoryRepository.findOne({
+      // can't miss where
+      where: {},
+      order: {
+        id: "desc",
+      },
+    });
+    if (!latest){
+      return [];
+    }
+    
+    const uawHistorys: TVLHistory[] = await this.tvlHistoryRepository.query(
+        'select DISTINCT on (date(timestamp))  u.*  from "tvlHistory" u order by date(timestamp) desc'
+    );
+
+
+    let history = uawHistorys.map((tvlHistory) => {
+      return {
+        id: tvlHistory.id,
+        tvl: tvlHistory.tvl.toString(),
+        timestamp: tvlHistory.timestamp,
+        uaw: tvlHistory.uaw.toString(),
+      };
+    });
+    history.unshift({
+      id: latest.id,
+      tvl: latest.tvl.toString(),
+      timestamp: latest.timestamp,
+      uaw: latest.uaw.toString(),
+    });
+    cache.set(HISTORY_UAW_CACHE_KEY, history);
+    return history;
+  }
 
   @Get("")
   @ApiListPageOkResponse(BlockDto, { description: "Successfully returned blocks list" })

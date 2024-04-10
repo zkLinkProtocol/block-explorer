@@ -219,11 +219,13 @@ import useTransactions, { type TransactionListItem, type TransactionSearchParams
 import contractsMethodNames from "@/configs/contractsMethodNames.json";
 
 import type { Direction } from "@/components/transactions/TransactionDirectionTableCell.vue";
-import type { AbiFragment } from "@/composables/useAddress";
+import type { AbiFragment,Contract } from "@/composables/useAddress";
 import type { NetworkOrigin } from "@/types";
 
 import { ETH_TOKEN_L2_ADDRESS } from "@/utils/constants";
 import { utcStringFromISOString } from "@/utils/helpers";
+import useAddress from "@/composables/useAddress";
+// const { item, getByAddress, getContractVerificationInfo } = useAddress();
 
 const { t, te } = useI18n();
 
@@ -246,6 +248,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // contract: {
+  //   type: Object as PropType<Contract>,
+  //   default: () => ({}),
+  //   required: true,
+  // },
 });
 
 const route = useRoute();
@@ -263,7 +270,6 @@ const isLoading = computed(() => pending.value || isLoadingEthTokenInfo.value);
 
 const activePage = ref(props.useQueryPagination ? parseInt(route.query.page as string) || 1 : 1);
 const toDate = new Date();
-
 watch(
   [activePage, searchParams],
   ([page]) => {
@@ -271,7 +277,6 @@ watch(
   },
   { immediate: true }
 );
-
 const getTransactionMethod = (transaction: TransactionListItem) => {
   if (transaction.data === "0x") {
     return t("transactions.table.transferMethodName");
@@ -287,7 +292,45 @@ const getTransactionMethod = (transaction: TransactionListItem) => {
         props.contractAbi
       )?.name ?? sighash
     );
-  }
+    // const name = decodeDataWithABI(
+    //   {
+    //     calldata: transaction.data,
+    //     value: transaction.value,
+    //   },
+    //   props.contractAbi
+    // )?.name
+    // if (name) {
+    //   return name;
+    // } else {
+    //   return (
+    //     props.contract.proxyInfo?.implementation.verificationInfo?decodeDataWithABI(
+    //         {
+    //           calldata: transaction.data,
+    //           value: transaction.value,
+    //         },
+    //         props.contract.proxyInfo?.implementation.verificationInfo.artifacts.abi
+    //       )?.name ?? sighash: sighash
+    //     );
+    // }
+  } 
+  // else if (transaction.abi) {
+  //   const name = decodeDataWithABI(
+  //       {
+  //         calldata: transaction.data,
+  //         value: transaction.value,
+  //       },
+  //       transaction.abi
+  //     )?.name || (
+  //       transaction.contractAbi? (decodeDataWithABI(
+  //       {
+  //         calldata: transaction.data,
+  //         value: transaction.value,
+  //       },
+  //       transaction.contractAbif
+  //     )?.name): ''
+  //     )
+  //   return (name || sighash);
+  // }
   const methodIndex = sighash as keyof typeof contractsMethodNames;
   if (contractsMethodNames[methodIndex]) {
     return contractsMethodNames[methodIndex];

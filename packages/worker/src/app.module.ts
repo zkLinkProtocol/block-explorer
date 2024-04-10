@@ -31,6 +31,7 @@ import {
   AddressTransferRepository,
   LogRepository,
   BalanceRepository,
+  TVLHistoryRepository,
 } from "./repositories";
 import {
   Batch,
@@ -44,6 +45,7 @@ import {
   Transfer,
   AddressTransfer,
   Balance,
+  TVLHistory,
 } from "./entities";
 import { typeOrmModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -53,6 +55,7 @@ import { DbMetricsService } from "./dbMetrics.service";
 import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
 import { ValuesService } from "./values/values.service";
+import { HistoryService } from "./values/history.service";
 
 @Module({
   imports: [
@@ -80,6 +83,7 @@ import { ValuesService } from "./values/values.service";
       Address,
       AddressTransfer,
       Transfer,
+      TVLHistory,
       Balance,
     ]),
     EventEmitterModule.forRoot(),
@@ -119,6 +123,7 @@ import { ValuesService } from "./values/values.service";
     TokenRepository,
     AddressRepository,
     TransferRepository,
+    TVLHistoryRepository,
     AddressTransferRepository,
     BalanceRepository,
     LogRepository,
@@ -132,6 +137,7 @@ import { ValuesService } from "./values/values.service";
     RetryDelayProvider,
     DbMetricsService,
     ValuesService,
+    HistoryService,
   ],
 })
 export class AppModule {}

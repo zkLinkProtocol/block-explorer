@@ -90,3 +90,22 @@ npm run migration:create -name=UpdateTxsFee
 ```
 
 this command will simply create an empty migration where the custom migration logic can be added.
+
+### extraCoinsList
+If a token (Token A) retrieved from the Coingecko API lacks a price, follow these steps:
+- Find another token (Token B) which have price in Coingecko API and share a similar price with Token A.
+- Use token B's Coingecko API ID in the `id` field.
+- In the `platforms` field, use "extra" as the key and input Token A's address.
+
+If a token (Token A) on a specific blockchain lacks a price on the Coingecko API but has a price on another blockchain, follow these steps:
+- Utilize Token A's Coingecko API ID in the `id` field.
+- In the `platforms` field, use the name of the blockchain where Token A lacks a price and input Token A's address.
+
+Also, in the `chain` field, make reference to the Coingecko platform API: https://docs.coingecko.com/v3.0.1/reference/asset-platforms-list
+
+### extraTokenAttribute
+If a token (Token A) is not listed on Coingecko and displays an incorrect logo in the explorer, modify the extraTokenAttribute.json file params:
+- **name**：Utilize the token symbol along with the chain name.
+- **address**: Provide the L1 or L2 token contract address.
+- **image**: Enter the correct token logo URL.
+- **market_ap**: Avoid using 0; instead, use any other number such as 1, to prevent displaying the market cap of a particular Coingecko token used for price reference.
