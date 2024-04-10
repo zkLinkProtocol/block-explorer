@@ -16,7 +16,7 @@ import { GateWayConfig } from "../utils/gatewayConfig";
 @Injectable()
 export class TransactionProcessor {
   private readonly logger: Logger;
-
+  private readonly GATEWAYNULLVALUE = 'linea';
   public constructor(
     private readonly transactionRepository: TransactionRepository,
     private readonly transactionReceiptRepository: TransactionReceiptRepository,
@@ -40,11 +40,11 @@ export class TransactionProcessor {
     });
 
     if (transactionData.transaction.isL1Originated){
-      const resTransfer =transactionData.transfers.find((transfer) => transfer.transactionHash === transactionData.transaction.hash);
-      if (resTransfer.gateway !== null && resTransfer.gateway !== undefined){
+      const resTransfer =transactionData.transfers.find((transfer) => transfer.transactionHash === transactionData.transaction.hash && transfer.gateway !== undefined && transfer.gateway !== null);
+      if (resTransfer !== undefined && resTransfer !== null && resTransfer.gateway !== null && resTransfer.gateway !== undefined){
         transactionData.transaction.networkkey = this.findGatewayByAddress(resTransfer.gateway);
       }else {
-        transactionData.transaction.networkkey = 'Linea';
+        transactionData.transaction.networkkey = this.GATEWAYNULLVALUE;
       }
     }
     await this.transactionRepository.add(transactionData.transaction);
@@ -112,6 +112,6 @@ export class TransactionProcessor {
         return key;
       }
     }
-    return "";
+    return "error";
   }
 }
