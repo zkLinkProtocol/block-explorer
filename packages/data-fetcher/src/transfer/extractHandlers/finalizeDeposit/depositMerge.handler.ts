@@ -30,8 +30,6 @@ export const defaultFinalizeDepositMergeHandler: ExtractTransferHandler = {
       );
     }
     const parsedLog = parseLog(CONTRACT_INTERFACES.L2_BRIDGE, log);
-    const tokenAddress =
-      parsedLog.args.l2Token === utils.ETH_ADDRESS ? utils.L2_ETH_TOKEN_ADDRESS : parsedLog.args.l2Token.toLowerCase();
     let gateway;
     try {
       gateway = (await getterContract.getSecondaryChainOp(log.transactionHash))["gateway"];
@@ -39,7 +37,7 @@ export const defaultFinalizeDepositMergeHandler: ExtractTransferHandler = {
         gateway = null;
       }
     } catch {
-      gateway = ERROR_GATEWAY; //TODO Regularly maintain the transfers data table. When there are too many ERROR_GATEWAYs in the table, check the getSecondaryChainOp method.
+      gateway = ERROR_GATEWAY;
     }
     return {
       from: parsedLog.args.l1Sender.toLowerCase(),
@@ -48,9 +46,9 @@ export const defaultFinalizeDepositMergeHandler: ExtractTransferHandler = {
       blockNumber: log.blockNumber,
       gateway: gateway,
       amount: parsedLog.args.amount,
-      tokenAddress,
+      tokenAddress: parsedLog.args.mergeToken,
       type: TransferType.Deposit,
-      tokenType: TokenType.MergeToken,
+      tokenType: TokenType.ERC20,
       isFeeOrRefund: false,
       logIndex: log.logIndex,
       transactionIndex: log.transactionIndex,
