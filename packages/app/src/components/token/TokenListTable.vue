@@ -1,5 +1,5 @@
 <template>
-  <Table :data-testid="$testId.tokensTable" :loading="isLoading" :items="displayTokenList" ref="table">
+  <Table :data-testid="$testId.tokensTable" :loading="loading" :items="displayTokenList" ref="table">
     <template #table-head>
       <table-head-column>
         <div class="th-box min-w-16">
@@ -8,6 +8,7 @@
             @click="handleChildClick"
             v-model="searchVal"
             @filter="filter('name')"
+            @reset="resetFilter"
             v-model:selected="selectedNameList"
             :filterOptions="symbolOptions"
           />
@@ -120,7 +121,7 @@
         <div v-else class="min-h-[20px]"></div>
       </TableBodyColumn>
     </template>
-    <template v-if="total && total > pageSize && displayTokenList?.length" #footer>
+    <!-- <template v-if="total && total > pageSize && displayTokenList?.length" #footer>
       <div class="pagination">
         <Pagination
           v-model:active-page="activePage"
@@ -142,7 +143,7 @@
           </EmptyState>
         </TableBodyColumn>
       </tr>
-    </template>
+    </template> -->
     <template #loading>
       <tr class="loading-row" v-for="row in 5" :key="row">
         <TableBodyColumn>
@@ -219,18 +220,23 @@ const { chainNameList } = useEnvironmentConfig();
 
 import type { Token } from "@/composables/useToken";
 
-import useTokenLibrary from "@/composables/useTokenLibrary";
-const {
-  getTokensByPagination,
-} = useTokenLibrary();
+// import useTokenLibrary from "@/composables/useTokenLibrary";
+// const {
+//   getTokensByPagination,
+// } = useTokenLibrary();
 
-const { data, load, total, pending, pageSize } = getTokensByPagination();
+// const { data, load, total, pending, pageSize } = getTokensByPagination();
 
 const props = defineProps({
   tokens: {
     type: Array as PropType<Token[]>,
     default: () => [],
   },
+  loading: {
+    type: Boolean,
+    default: true,
+  },
+
 });
 const { t } = useI18n();
 const table = ref(null);
@@ -239,16 +245,16 @@ const { width } = useElementSize(table);
 watch(width, () => {
   width.value <= 500 ? (subtraction.value = 10) : (subtraction.value = 5);
 });
-const isLoading = computed(() => pending.value);
-const activePage = ref<number>(1);
-watch(
-  [activePage],
-  ([page]) => {
+// const isLoading = computed(() => pending.value);
+// const activePage = ref<number>(1);
+// watch(
+//   [activePage],
+//   ([page]) => {
     
-    load(page);
-  },
-  { immediate: true }
-);
+//     load(page);
+//   },
+//   { immediate: true }
+// );
 const handleChildClick = (e: MouseEvent) => {
   e.stopPropagation();
 };
@@ -277,12 +283,15 @@ const filter = (flag: string) => {
     selectedNameList.value = [];
   }
 };
+const resetFilter = ()=>{
+  searchVal.value=''
+}
 // filter FROM CHAIN
 const selectedTokenList: Ref<string[]> = ref([]);
 const selectedNameList: Ref<string[]> = ref([]);
 const filterChain = (mergeData: Token[]) => {
   if (selectedTokenList.value.length === 0) {
-    return data.value ||[];
+    return props.tokens;
   }
   return mergeData.filter((item) => {
     const networkName = item.networkKey
@@ -298,7 +307,7 @@ const filterChain = (mergeData: Token[]) => {
 // filter symbol
 const filterName = (mergeData: Token[]) => {
   if (selectedNameList.value.length === 0) {
-    return data.value||[];
+    return props.tokens;
   }
   return mergeData.filter((item) => {
     const optionMatch = selectedNameList.value.includes(item.symbol!);
@@ -330,15 +339,11 @@ const compareValues = (valueA: number, valueB: number, sortOrder: string): numbe
     return 0;
   }
 };
-const tokens=computed(()=>{
-  return data.value ||[]
-  
-})
 const displayTokenList = computed(() => {
-  let mergeData: Token[] = [...tokens.value];
+  let mergeData: Token[] = [...props.tokens];
   // Hide Assets Without Price
   if (isZeroPrice.value) {
-    mergeData = [...tokens.value].filter((item) => {
+    mergeData = [...props.tokens].filter((item) => {
       if (!item.usdPrice) {
         return false;
       }
