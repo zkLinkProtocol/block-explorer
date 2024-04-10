@@ -53,7 +53,6 @@ export class TransactionRepository extends BaseRepository<Transaction> {
       networkkey = this.findGatewayByAddress(gateway);
     }
     const transactionManager = this.unitOfWork.getTransactionManager();
-    console.log("updata transaction in gateway is error",hash,networkkey);
     await transactionManager.update(
         this.entityTarget,
         {

@@ -24,8 +24,8 @@ export class GatewayService extends Worker {
         super();
         this.updateGateWayInterval = 24 * 60 * 60 * 1000;
         this.logger = new Logger(GatewayService.name);
-        this.primaryChainMainContract = '0x5Cb18b6e4e6F3b46Ce646b0f4704D53724C5Df05';
-        this.primaryChainRpcUrl = 'https://rpc.linea.build';
+        this.primaryChainMainContract = configService.get<string>("primaryChainMainContract");//'0x5Cb18b6e4e6F3b46Ce646b0f4704D53724C5Df05';
+        this.primaryChainRpcUrl = configService.get<string>("primaryChainRpcUrl");//'https://rpc.linea.build';
     }
 
     protected async runProcess(): Promise<void> {
