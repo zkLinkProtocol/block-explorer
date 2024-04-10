@@ -24,7 +24,6 @@ export enum TransferType {
   Fee = "fee",
   Mint = "mint",
   Refund = "refund",
-  DepositMerge = 'depositMerge',
 }
 
 const extractTransfersHandlers: Record<string, ExtractTransferHandler[]> = {

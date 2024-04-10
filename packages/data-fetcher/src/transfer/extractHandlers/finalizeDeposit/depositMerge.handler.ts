@@ -49,7 +49,7 @@ export const defaultFinalizeDepositMergeHandler: ExtractTransferHandler = {
       gateway: gateway,
       amount: parsedLog.args.amount,
       tokenAddress,
-      type: TransferType.DepositMerge,
+      type: TransferType.Deposit,
       tokenType: TokenType.MergeToken,
       isFeeOrRefund: false,
       logIndex: log.logIndex,
