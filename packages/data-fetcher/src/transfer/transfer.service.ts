@@ -6,6 +6,7 @@ import { ExtractTransferHandler } from "./interfaces/extractTransferHandler.inte
 import { Transfer } from "./interfaces/transfer.interface";
 import {
   defaultFinalizeDepositHandler,
+  defaultFinalizeDepositMergeHandler,
   defaultWithdrawalInitiatedHandler,
   erc721TransferHandler,
   contractDeployerTransferHandler,
@@ -23,6 +24,7 @@ export enum TransferType {
   Fee = "fee",
   Mint = "mint",
   Refund = "refund",
+  DepositMerge = 'depositMerge',
 }
 
 const extractTransfersHandlers: Record<string, ExtractTransferHandler[]> = {
@@ -32,6 +34,7 @@ const extractTransfersHandlers: Record<string, ExtractTransferHandler[]> = {
   [LogType.Mint]: [ethMintFromL1Handler],
   [LogType.Withdrawal]: [ethWithdrawalToL1Handler],
   [LogType.WithdrawalWithMessage]: [ethWithdrawalWithMessageToL1Handler],
+  [LogType.FinalizeDepositToMerge]:[defaultFinalizeDepositMergeHandler],
 };
 
 @Injectable()
