@@ -1,43 +1,23 @@
-FROM node:18.17.1-alpine AS base-stage
-ENV NODE_ENV=production
+FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.11.1-slim as build
 
-WORKDIR /usr/src/app
+WORKDIR /block-explorer
 
-RUN apk add --update python3 make g++ && rm -rf /var/cache/apk/*
+RUN apt update -y
 
-COPY --chown=node:node .npmrc .npmrc
-COPY --chown=node:node lerna.json ./
-COPY --chown=node:node package*.json ./
-COPY --chown=node:node ./packages/worker/package*.json ./packages/worker/
-RUN npm ci --ignore-scripts --only=production && npm cache clean --force
-COPY --chown=node:node ./packages/worker/. ./packages/worker
-RUN rm -f .npmrc
+RUN apt install -y python-is-python3
 
-FROM base-stage AS development-stage
-ENV NODE_ENV=development
-COPY --chown=node:node .npmrc .npmrc
-RUN npm ci
-RUN rm -f .npmrc
+ADD . /block-explorer
 
-FROM development-stage AS build-stage
-RUN npm run build
+RUN npm install
 
-FROM base-stage AS production-stage
+RUN cd packages/worker && npm run build:nova && cd -
 
-# HEALTHCHECK --interval=30s --timeout=3s --retries=5 \
-#   CMD curl -f http://localhost:${PORT}/health || exit 1
+FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.11.1-slim
 
-COPY --chown=node:node --from=build-stage /usr/src/app/packages/worker/dist ./packages/worker/dist
+RUN mkdir /block-explorer
 
-ARG NODE_ENV=production
-ENV NODE_ENV $NODE_ENV
+COPY --from=build /block-explorer /block-explorer
 
-ARG PORT=3001
-ENV PORT $PORT
+WORKDIR /block-explorer/packages/worker/
 
-EXPOSE $PORT 9229 9230
-
-USER node
-WORKDIR /usr/src/app/packages/worker
-
-CMD [ "node", "dist/main.js" ]
+CMD ["/bin/sh", "-c", "npm run start"]
