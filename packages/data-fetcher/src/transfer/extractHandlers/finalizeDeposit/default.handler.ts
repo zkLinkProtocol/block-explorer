@@ -8,6 +8,7 @@ import parseLog from "../../../utils/parseLog";
 import { CONTRACT_INTERFACES } from "../../../constants";
 import { Contract, ethers, providers } from "ethers";
 import { ConfigService } from "@nestjs/config";
+import {timeout} from "../../../utils/timeout";
 
 let getterContract: Contract = null;
 const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -35,10 +36,13 @@ export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
 
     let gateway;
     try {
-      gateway = (await getterContract.getSecondaryChainOp(log.transactionHash))["gateway"];
-      if (gateway === EMPTY_ADDRESS) {
-        gateway = null;
-      }
+      await timeout(3000, new Promise<void>(async (resolve, reject) => {
+        gateway = (await getterContract.getSecondaryChainOp(log.transactionHash))["gateway"];
+        if (gateway === EMPTY_ADDRESS) {
+          gateway = null;
+        }
+        resolve();
+      }));
     } catch {
       gateway = ERROR_GATEWAY; //TODO Regularly maintain the transfers data table. When there are too many ERROR_GATEWAYs in the table, check the getSecondaryChainOp method.
     }

@@ -9,6 +9,7 @@ import {ConfigService} from "@nestjs/config";
 import {Contract, ethers, providers} from "ethers";
 import {CONTRACT_INTERFACES} from "../constants";
 import {In} from "typeorm";
+import {timeout} from "../utils/timeout";
 @Injectable()
 export class GatewayService extends Worker {
     private readonly updateGateWayInterval: number;
@@ -67,10 +68,13 @@ export class GatewayService extends Worker {
                 }
                 let gateway: string;
                 try {
-                    gateway = (await getterContract.getSecondaryChainOp(transfer.transactionHash))["gateway"];
-                    if (gateway === EMPTY_ADDRESS) {
-                        gateway = null;
-                    }
+                    await timeout(3000, new Promise<void>(async (resolve, reject) => {
+                        gateway = (await getterContract.getSecondaryChainOp(transfer.transactionHash))["gateway"];
+                        if (gateway === EMPTY_ADDRESS) {
+                            gateway = null;
+                        }
+                        resolve();
+                    }));
                 } catch {
                     gateway = ERROR_GATEWAY;
                 }
