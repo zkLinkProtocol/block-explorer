@@ -17,6 +17,7 @@ import { GateWayConfig } from "../utils/gatewayConfig";
 export class TransactionProcessor {
   private readonly logger: Logger;
   private readonly GATEWAYNULLVALUE = 'linea';
+  private readonly GATEWAYERROR = 'error';
   public constructor(
     private readonly transactionRepository: TransactionRepository,
     private readonly transactionReceiptRepository: TransactionReceiptRepository,
@@ -40,9 +41,12 @@ export class TransactionProcessor {
     });
 
     if (transactionData.transaction.isL1Originated){
-      const resTransfer =transactionData.transfers.find((transfer) => transfer.transactionHash === transactionData.transaction.hash && transfer.gateway !== undefined && transfer.gateway !== null);
+      const resTransferList =transactionData.transfers.filter((transfer) => transfer.transactionHash === transactionData.transaction.hash && transfer.gateway !== undefined && transfer.gateway !== null);
+      const resTransfer = resTransferList.find((transfer) => transfer.gateway !== '0x' && transfer.gateway !== 'error' );
       if (resTransfer !== undefined && resTransfer !== null && resTransfer.gateway !== null && resTransfer.gateway !== undefined){
         transactionData.transaction.networkkey = this.findGatewayByAddress(resTransfer.gateway);
+      }else if (resTransferList !== undefined && resTransferList !== null && resTransferList.length > 0) {
+        transactionData.transaction.networkkey = this.GATEWAYERROR;
       }else {
         transactionData.transaction.networkkey = this.GATEWAYNULLVALUE;
       }
