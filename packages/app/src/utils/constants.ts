@@ -21,3 +21,5 @@ export const ETH_BLOCKEXPLORER_URL = "https://etherscan.io";
 export const NOVA_NATIVE_TOKEN = "Nova Native Token";
 
 export const NOVA_MERGED_TOKEN = "Merged Token";
+export const NOVA = "Nova";
+

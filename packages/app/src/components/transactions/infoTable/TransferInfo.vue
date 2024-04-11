@@ -3,9 +3,11 @@
     <span>{{ label }}</span>
     <PaymasterLabel v-if="isPaymaster" />
     <TransactionNetworkSquareBlock :network="network" />
-    <AddressLink v-if="network !== 'L1'" :address="address" class="address">
+    <!--  -->
+    <AddressLink v-if="network === NOVA" :address="address" class="address">
       <span>{{ shortenFitText(address, "left") }}</span>
     </AddressLink>
+    <!-- L1 -->
     <template v-else>
       <a
         v-if="currentNetwork.l1ExplorerUrl"
@@ -29,6 +31,8 @@ import PaymasterLabel from "@/components/transactions/PaymasterLabel.vue";
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
 
 import useContext from "@/composables/useContext";
+import { NOVA } from "@/utils/constants";
+
 
 import type { Hash, NetworkOrigin } from "@/types";
 import type { PropType } from "vue";
@@ -44,7 +48,7 @@ defineProps({
   network: {
     type: String as PropType<NetworkOrigin>,
     required: true,
-    default: "L1",
+    default: "Linea",
   },
   isPaymaster: {
     type: Boolean,
