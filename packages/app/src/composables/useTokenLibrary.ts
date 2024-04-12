@@ -41,6 +41,7 @@ export default (context = useContext()) => {
   const isRequestPending = ref(false);
   const isRequestFailed = ref(false);
   const tokens = ref<Api.Response.Token[]>([]);
+  const tokensWithTag = ref<Api.Response.Token[]>([]);
   const sortTokens = ref<Api.Response.Token[]>([]);
   const getToken = (tokenAddress: string) => tokens.value.find((token) => token.l2Address === tokenAddress);
 
@@ -55,6 +56,34 @@ export default (context = useContext()) => {
         .sort((a, b) => parseFloat(b.tvl) - parseFloat(a.tvl));
 
       sortTokens.value = [...ethToken, ...noEthToken];
+      
+      tokensWithTag.value=tokens.value.map((item)=>{
+        const novaAddresses = [
+          "0x2F8A25ac62179B31D62D7F80884AE57464699059",
+          "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
+          "0x1a1A3b2ff016332e866787B311fcB63928464509",
+          "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab"
+          ];
+        let tags:string[]=[]
+        if(item.networkKey){
+          tags.push('Bridged');
+        }else{
+          //Eth
+          if((item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address))){
+            tags=['Merged','Bridged']
+          }else if((item.l2Address && novaAddresses.includes(item.l2Address))){
+            tags=['Merged']
+          }else{
+            tags=['Native']
+          }
+        }
+        return {
+          ...item,
+          tags,
+        };
+      })
+      
+
     } catch {
       isRequestFailed.value = true;
     } finally {
@@ -74,6 +103,7 @@ export default (context = useContext()) => {
     isRequestFailed,
     tokens,
     sortTokens,
+    tokensWithTag,
     getToken,
     getTokens,
     getTokensByPagination,

@@ -22,7 +22,11 @@
         {{ symbol }}
       </div>
       <div class="token-name">
-        {{ name }}
+        <span>{{ name }}</span>
+        <div class="tags flex" v-if="tags.length">
+          <span class="token-tag" v-for="(tag,i) in tags" :key="i">{{ tag }}</span>
+        </div>
+        
       </div>
     </div>
   </div>
@@ -66,6 +70,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  tags:{
+    type: Array,
+    default: [],
+  }
 });
 
 const imgSource = computed(() => {
@@ -120,8 +128,17 @@ const { isReady: isImageLoaded } = useImage({ src: imgSource.value });
       @apply text-neutral-600;
     }
     .token-name {
-      @apply text-xs text-neutral-400;
+      @apply flex items-center text-xs text-neutral-400;
     }
   }
+  .token-tag{
+    @apply flex items-center justify-center gap-8 ml-1;
+  
+    padding: 2px 4px;
+    border-radius: 4px;
+    background: #E4E5FE;
+    color: #4A5568;
 }
+}
+
 </style>

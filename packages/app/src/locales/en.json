@@ -603,11 +603,14 @@
       "tokenName": "Token Name",
       "price": "Price",
       "tokenAddress": "Token Address",
-      "fromChain": "From Chain",
+      "sourceChain": "Source Chain",
       "totalQty": "Total qty",
-      "tvl": "Tvl",
+      "tvl": "On-chain market cap",
       "novaAddress": "Nova ADDRESS",
       "originAddress": "Origin Address"
+    },
+    "search":{
+      "placeholder":"Token name or symbol"
     }
   },
   "pageError": {

@@ -1,56 +1,61 @@
 <template>
-  <Table :data-testid="$testId.tokensTable" :loading="loading" :items="displayTokenList" ref="table">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center text-sm">
+      <FilterModal v-model:selected="selectedFilterList">
+      </FilterModal>
+      <form class="search-form" autocomplete="off" @submit.prevent="handleSearch">
+        <search-field v-model:value="searchValue" :placeholder="t('tokensView.search.placeholder')"
+          :pending="isRequestPending">
+          <template #submit>
+            <button class="submit-icon" type="submit">
+              <SearchIcon aria-hidden="true" />
+            </button>
+          </template>
+        </search-field>
+      </form>
+    </div>
+    <TabGroup :selectedIndex="selectedTab" @change="changeTab">
+      <TabList class="inline-flex space-x-1 p-1">
+        <Tab v-for="tab in tabs" as="template" :key="tab.id" v-slot="{ selected }">
+          <button :class="[
+              'w-auto rounded-md px-4 py-1 text-sm font-medium leading-5',
+              'ring-white/60 ring-offset-2 ring-offset-blue-400 ',
+              selected
+                ? 'bg-design-900 text-white shadow'
+                : 'bg-design-800 text-design-700  text-blue-100 hover:bg-design-900 hover:text-white',
+            ]">
+            {{ tab.name }}
+          </button>
+        </Tab>
+      </TabList>
+    </TabGroup>
+  </div>
+  <Table :data-testid="$testId.tokensTable" :loading="isNowLoading" :items="displayTokenList" ref="table">
     <template #table-head>
       <table-head-column>
         <div class="th-box min-w-16">
           <span>{{ t("tokensView.table.tokenName") }}</span>
-          <TableFilterModel
-            @click="handleChildClick"
-            v-model="searchVal"
-            @filter="filter('name')"
-            @reset="resetFilter"
-            v-model:selected="selectedNameList"
-            :filterOptions="symbolOptions"
-          />
         </div>
       </table-head-column>
       <table-head-column>
         <div class="th-box">
           <span>{{ t("tokensView.table.price") }}</span>
-           <span class="px-1">
-            <Tooltip class="batches-tooltip">
-              <FilterIcon
-                @click="toggleShowPrice"
-                class="w-4 h-4 text-black cursor-pointer"
-                :class="{ 'text-design-200': isZeroPrice }"
-              />
-              <template #content>
-                <span v-if="isZeroPrice">Show Assets Without Price</span>
-                <span v-else>Hide Assets Without Price</span>
-              </template>
-            </Tooltip>
-          </span>
         </div>
       </table-head-column>
-      <table-head-column >
+      <table-head-column>
         <span>{{ t("tokensView.table.totalQty") }}</span>
       </table-head-column>
       <table-head-column @click="sortBy('tvl')">
         <div class="th-box">
-          Tvl
+          {{ t("tokensView.table.tvl") }}
           <ranking :sort-order="sortOrder" />
         </div>
       </table-head-column>
       <table-head-column class="text-center">
         <div class="th-box">
-          <span>{{ t("tokensView.table.fromChain") }}</span>
-          <TableFilterModel
-            @click="handleChildClick"
-            v-model:selected="selectedTokenList"
-            @filter="filter('chain')"
-            :filterOptions="fromChainOptions"
-            :isSearch="false"
-          />
+          <span>{{ t("tokensView.table.sourceChain") }}</span>
+          <TableFilterModel @click="handleChildClick" v-model:selected="selectedTokenList" @filter="filter('chain')"
+            :filterOptions="fromChainOptions" :isSearch="false" />
         </div>
       </table-head-column>
       <table-head-column>{{ t("tokensView.table.novaAddress") }}</table-head-column>
@@ -58,13 +63,8 @@
     </template>
     <template #table-row="{ item }: { item: any }">
       <TableBodyColumn :data-heading="t('tokensView.table.tokenName')">
-        <TokenIconLabel
-          :symbol="item.symbol"
-          icon-size="xl"
-          :address="item.l2Address"
-          :name="item.name"
-          :icon-url="item.iconURL"
-        />
+        <TokenIconLabel :symbol="item.symbol" icon-size="xl" :address="item.l2Address" :name="item.name"
+          :icon-url="item.iconURL" :tags="item.tags" />
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
         <TokenPrice :address="item.l2Address" />
@@ -75,7 +75,7 @@
       <TableBodyColumn :data-heading="t('tokensView.table.tvl')">
         <TokenTVL :tvl="item.tvl" />
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.fromChain')">
+      <TableBodyColumn :data-heading="t('tokensView.table.sourceChain')">
         <div v-if="chainNameList[item.networkKey]" class="from-chain-text">
           {{ chainNameList[item.networkKey] }}
         </div>
@@ -121,29 +121,18 @@
         <div v-else class="min-h-[20px]"></div>
       </TableBodyColumn>
     </template>
-    <!-- <template v-if="total && total > pageSize && displayTokenList?.length" #footer>
-      <div class="pagination">
-        <Pagination
-          v-model:active-page="activePage"
-          :use-query="false"
-          :total-items="total!"
-          :page-size="pageSize"
-          :disabled="isLoading"
-        />
-      </div>
-    </template>
     <template #empty>
       <tr>
         <TableBodyColumn class="empty-state-container" colspan="7">
           <EmptyState class="empty-state">
             <template #title>
-             Can’t find anything on your search result.
+             Can’t find anything on your Filter result.
             </template>
             <template #description><span></span></template>
           </EmptyState>
         </TableBodyColumn>
       </tr>
-    </template> -->
+    </template>
     <template #loading>
       <tr class="loading-row" v-for="row in 5" :key="row">
         <TableBodyColumn>
@@ -186,7 +175,7 @@
   </Table>
 </template>
 <script lang="ts" setup>
-import { type PropType, ref, reactive, watch, computed, type Ref } from "vue";
+import { type PropType, ref, reactive, watch, computed,defineExpose , type Ref } from "vue";
 
 import { useI18n } from "vue-i18n";
 
@@ -206,11 +195,15 @@ import TotalQTY from "@/components/common/table/fields/TotalQTY.vue";
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
 import Ranking from "./TableRanking.vue";
 import TableFilterModel from "./TableFilterModal.vue";
-import { FilterIcon } from "@heroicons/vue/outline";
-import Tooltip from "@/components/common/Tooltip.vue";
-import Pagination from "@/components/common/Pagination.vue";
-import EmptyState from "@/components/common/EmptyState.vue";
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
+import { TabGroup, TabList, Tab,} from '@headlessui/vue'
+import SearchField from "@/components/common/SearchField.vue";
+import Button from "@/components/common/Button.vue";
+import FilterModal from './FilterModal.vue'
+import EmptyState from "@/components/common/EmptyState.vue";
+
+import { SearchIcon } from "@heroicons/vue/outline";
+
 
 import { formatBigNumberish, formatPricePretty } from "@/utils/formatters";
 
@@ -219,13 +212,6 @@ import { NOVA_NATIVE_TOKEN, ETH_TOKEN_L1_ADDRESS, NOVA_MERGED_TOKEN } from "@/ut
 const { chainNameList } = useEnvironmentConfig();
 
 import type { Token } from "@/composables/useToken";
-
-// import useTokenLibrary from "@/composables/useTokenLibrary";
-// const {
-//   getTokensByPagination,
-// } = useTokenLibrary();
-
-// const { data, load, total, pending, pageSize } = getTokensByPagination();
 
 const props = defineProps({
   tokens: {
@@ -245,50 +231,45 @@ const { width } = useElementSize(table);
 watch(width, () => {
   width.value <= 500 ? (subtraction.value = 10) : (subtraction.value = 5);
 });
-// const isLoading = computed(() => pending.value);
-// const activePage = ref<number>(1);
-// watch(
-//   [activePage],
-//   ([page]) => {
-    
-//     load(page);
-//   },
-//   { immediate: true }
-// );
+
 const handleChildClick = (e: MouseEvent) => {
   e.stopPropagation();
+};
+
+const isRequestPending = ref(false);
+const selectedTab = ref(0);
+function changeTab(index:number) {
+  selectedTab.value = index;
+}
+const searchValue = ref("");
+const isSearchVal=ref("")
+const handleSearch = async () => {
+  isSearchVal.value=searchValue.value
+ 
 };
 const fromChainOptions = computed((): string[] | [] => {
   return [NOVA_MERGED_TOKEN, NOVA_NATIVE_TOKEN, ...Object.values(chainNameList)];
 });
-const searchVal = ref<string>("");
-const symbolOptions = computed(() => {
-  let arr: string[] = [];
-  props.tokens.map((item) => {
-    arr.push(item.symbol!);
-  });
-    if (searchVal.value) {
-    const newArr = arr.filter((item) => {
-      return item.toLowerCase().includes(searchVal.value.toLowerCase());
-    });
-    return [...new Set(newArr)];
-  } else {
-    return [...new Set(arr)];
-  }
-});
-const filter = (flag: string) => {
-  if (flag === "name") {
-    selectedTokenList.value = [];
-  } else if (flag === "chain") {
-    selectedNameList.value = [];
-  }
-};
-const resetFilter = ()=>{
-  searchVal.value=''
+interface Tab {
+  id: string;
+  name: string;
 }
+const tabs: Tab[] = [
+  { id: 'all', name: 'All' },
+  { id: 'merged', name: 'Merged Tokens' },
+  { id: 'native', name: 'Native Tokens' },
+  { id: 'bridged', name: 'Bridged Tokens' },
+];
+const filter = (flag: string) => {
+  // if (flag === "name") {
+  //   selectedTokenList.value = [];
+  // } else if (flag === "chain") {
+  //   selectedNameList.value = [];
+  // }
+};
 // filter FROM CHAIN
 const selectedTokenList: Ref<string[]> = ref([]);
-const selectedNameList: Ref<string[]> = ref([]);
+const selectedFilterList: Ref<string[]> = ref([]);
 const filterChain = (mergeData: Token[]) => {
   if (selectedTokenList.value.length === 0) {
     return props.tokens;
@@ -304,21 +285,7 @@ const filterChain = (mergeData: Token[]) => {
     return optionMatch;
   });
 };
-// filter symbol
-const filterName = (mergeData: Token[]) => {
-  if (selectedNameList.value.length === 0) {
-    return props.tokens;
-  }
-  return mergeData.filter((item) => {
-    const optionMatch = selectedNameList.value.includes(item.symbol!);
-    return optionMatch;
-  });
-};
-const isZeroPrice = ref<Boolean>(true);
-const toggleShowPrice = (e: MouseEvent) => {
-  e.stopPropagation();
-  isZeroPrice.value = !isZeroPrice.value;
-};
+
 const sortKey = ref<string>("tvl");
 const sortOrder=ref<string>('asc')
 const sortBy = (column: string) => {
@@ -339,10 +306,22 @@ const compareValues = (valueA: number, valueB: number, sortOrder: string): numbe
     return 0;
   }
 };
+const isNowLoading=ref(props.loading);
 const displayTokenList = computed(() => {
+  
+  isNowLoading.value=true
   let mergeData: Token[] = [...props.tokens];
+  //search by TokenName or symbol
+  if(isSearchVal.value){
+    mergeData = mergeData.filter((item) =>{
+      return item.name!.toLowerCase().includes(isSearchVal.value.toLowerCase()) ||
+      item.symbol!.toLowerCase().includes(isSearchVal.value.toLowerCase()) ;
+    } );
+    
+
+  }
   // Hide Assets Without Price
-  if (isZeroPrice.value) {
+  if (selectedFilterList.value.length>0) {
     mergeData = [...props.tokens].filter((item) => {
       if (!item.usdPrice) {
         return false;
@@ -351,13 +330,40 @@ const displayTokenList = computed(() => {
       return price > 0;
     });
   }
-  // filtering
-  if (selectedTokenList.value.length === 0 && selectedNameList.value.length === 0) {
-    // mergeData = mergeData;
-  } else if (selectedTokenList.value.length > 0) {
+  // toggle tab 
+  if(selectedTab.value){
+    // all
+    if(selectedTab.value===0){
+      mergeData=[...props.tokens]
+    }else if (selectedTab.value===1){
+      // merged Token
+    const novaAddresses = [
+      "0x2F8A25ac62179B31D62D7F80884AE57464699059",
+      "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
+      "0x1a1A3b2ff016332e866787B311fcB63928464509",
+      "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab"
+      ];
+      mergeData = mergeData.filter((item) => {
+        return !item.networkKey &&
+          ((item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)) ||
+            (item.l2Address && novaAddresses.includes(item.l2Address)));
+      });
+
+    }else if(selectedTab.value==2){
+      // Native Token
+      mergeData=mergeData.filter((item) =>{
+        return !item.networkKey && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address!)
+      });
+
+    }else{
+      // Bridge Token
+      mergeData=mergeData.filter((item) =>item.networkKey);
+
+    }
+  }
+  // filtering by chain Name
+ if (selectedTokenList.value.length > 0) {
     mergeData = filterChain(mergeData);
-  } else if (selectedNameList.value.length > 0) {
-    mergeData = filterName(mergeData);
   }
   // ranking
   if (sortKey.value) {
@@ -369,8 +375,15 @@ const displayTokenList = computed(() => {
       return 0;
     });
   }
+  setTimeout(() => {
+    isNowLoading.value=false
+  }, 10);
   return mergeData;
 });
+const showingCount=computed(()=>displayTokenList.value.length)
+defineExpose({ showingCount })
+
+
 </script>
 
 <style scoped lang="scss">
@@ -411,10 +424,6 @@ const displayTokenList = computed(() => {
   }
 }
 
-.text-center {
-  // min-width: 240px;
-  // @apply flex items-center justify-center;
-}
 .filter-wrap {
   display: inline-flex;
   flex-direction: column;
@@ -446,6 +455,45 @@ const displayTokenList = computed(() => {
     @apply items-center justify-center whitespace-normal py-10;
   }
 }
+.search-form {
+  max-width: 26rem;
+  min-width: 18rem;
+  .submit-icon-container {
+    &:hover:not(:active) {
+      .submit-icon {
+        @apply bg-primary-300;
+      }
+    }
+    &:active {
+      .submit-icon {
+        @apply transition-none;
+      }
+    }
+
+    .submit-icon {
+      @apply w-[2.875rem] rounded-r-md bg-primary-500 p-3 text-white;
+    }
+  }
+  :deep(.search-input-container .search-input){
+    @apply py-2 border-design-900 text-white;
+    background-color: transparent;
+
+  }
+   :deep( .submit-icon-container .submit-icon){
+    @apply py-2;
+
+  }
+}
+.btn-filter{
+  @apply flex items-center border rounded-md border border-design-900 p-2 text-design-900;
+  .filter-count{
+    height: 14px;
+    width: 14px;
+    line-height: 1;
+    @apply flex ml-2 items-center justify-center text-[10px] bg-white rounded-lg text-design-900;
+  }
+}
+
 
 @media (max-width: 760px) {
   .token-icon-label {
