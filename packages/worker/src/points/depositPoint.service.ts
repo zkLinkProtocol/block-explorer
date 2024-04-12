@@ -116,14 +116,15 @@ export class DepositPointService extends Worker {
     this.logger.log(`Block ${currentRunBlock.number} deposit num: ${transfers.length}`);
     const newDepositMap: Map<string, AddressFirstDeposit> = new Map();
     for (const transfer of transfers) {
-      if (!newDepositMap.get(transfer.from)) {
-        const isNewDeposit = await this.transferRepository.isNewDeposit(transfer.from, transfer.blockNumber);
+      const depositReceiver = hexTransformer.from(transfer.from);
+      if (!newDepositMap.get(depositReceiver)) {
+        const isNewDeposit = await this.transferRepository.isNewDeposit(depositReceiver, transfer.blockNumber);
         if (isNewDeposit) {
-          const addressFirstDeposit = {
-            address: transfer.from,
+          const addressFirstDeposit: AddressFirstDeposit = {
+            address: depositReceiver,
             firstDepositTime: new Date(transfer.timestamp),
           };
-          newDepositMap.set(transfer.from, addressFirstDeposit);
+          newDepositMap.set(depositReceiver, addressFirstDeposit);
         }
       }
       await this.recordDepositPoint(transfer, tokenPriceMap);

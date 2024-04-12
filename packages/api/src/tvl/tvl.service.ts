@@ -19,6 +19,9 @@ import { PagingOptionsDto } from "src/common/dtos";
 import { AccountPointsDto } from "src/api/dtos/tvl/accountPoints.dto";
 import { AccountReferTVLDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
 import { Invite } from "./entities/invite.entity";
+import {AccountLoyaltyBoosterDto, AccountLoyaltyBoosterResponseDto} from "../api/dtos/tvl/accountLoyaltyBooster.dto";
+import {AddressFirstDeposit} from "worker/dist/entities/addressFirstDeposit.entity";
+import BigNumber from "bignumber.js";
 
 const L2_ETH_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
 const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -43,7 +46,9 @@ export class TVLService {
     @InjectRepository(Invite, "refer")
     private readonly inviteRepository: Repository<Invite>,
     @InjectRepository(GroupTvl)
-    private readonly groupTVLRepository: Repository<GroupTvl>
+    private readonly groupTVLRepository: Repository<GroupTvl>,
+    @InjectRepository(AddressFirstDeposit)
+    private readonly addressFirstDepositRepository: Repository<AddressFirstDeposit>
   ) {}
 
   public async getAccountTokensTVL(address: string): Promise<AccountTVLDto[]> {
@@ -302,5 +307,29 @@ export class TVLService {
       return account;
     });
     return result;
+  }
+
+  public async getAccountLoyaltyBooster(address: string,pointsStartTime:Date): Promise<AccountLoyaltyBoosterDto> {
+    const firstDeposit = await this.addressFirstDepositRepository.findOne({
+      where: { address },
+    });
+
+    const currentTs = new Date().getTime();
+    const endDate = new Date(pointsStartTime);
+    const withdrawStartDate = new Date(endDate.setMonth(endDate.getMonth() + 1));
+    let booster = new BigNumber(1);
+    if (firstDeposit && currentTs > withdrawStartDate.getTime()) {
+      const millisecondsPerDay = 24 * 60 * 60 * 1000;
+      const firstDepositTime = firstDeposit.firstDepositTime.getTime();
+      const diffInMilliseconds = currentTs - firstDepositTime;
+      const loyaltyDays = Math.floor(diffInMilliseconds / millisecondsPerDay);
+      const loyaltyBooster = (loyaltyDays * 5.0) / 1000.0;
+      booster = new BigNumber(loyaltyBooster).plus(1);
+    }
+
+    return {
+      loyaltyBooster: booster.toNumber(),
+      address,
+    };
   }
 }
