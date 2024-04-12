@@ -19,7 +19,7 @@ import { PagingOptionsDto } from "src/common/dtos";
 import { AccountPointsDto } from "src/api/dtos/tvl/accountPoints.dto";
 import { AccountReferTVLDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
 import { Invite } from "./entities/invite.entity";
-import {AccountLoyaltyBoosterDto, AccountLoyaltyBoosterResponseDto} from "../api/dtos/tvl/accountLoyaltyBooster.dto";
+import {AccountLoyaltyBoosterDto} from "../api/dtos/tvl/accountLoyaltyBooster.dto";
 import {AddressFirstDeposit} from "worker/dist/entities/addressFirstDeposit.entity";
 import BigNumber from "bignumber.js";
 

@@ -18,7 +18,7 @@ import { PagingOptionsDto } from "src/common/dtos";
 import { AccountReferTVLResponseDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
 import { ConfigService } from "@nestjs/config";
 import { DepositThresholdDto } from "../api/dtos/stats/depositThreshold.dto";
-import {AccountLoyaltyBoosterResponseDto} from "../api/dtos/tvl/accountLoyaltyBooster.dto";
+import { AccountLoyaltyBoosterResponseDto } from "../api/dtos/tvl/accountLoyaltyBooster.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -176,7 +176,7 @@ export class TVLController {
   }
 
   @ApiOperation({ summary: "Get account loyalty booster" })
-  @Get("/getAccountPoint")
+  @Get("/getAccountLoyaltyBooster")
   public async getAccountLoyaltyBooster(
       @Query("address", new ParseAddressPipe()) address: string
   ): Promise<AccountLoyaltyBoosterResponseDto> {
