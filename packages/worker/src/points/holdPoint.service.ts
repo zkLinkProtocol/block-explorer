@@ -9,6 +9,8 @@ import {
   BlockAddressPointRepository,
   InviteRepository,
   ReferrerRepository,
+  AddressFirstDepositRepository,
+  TransferRepository,
 } from "../repositories";
 import { TokenMultiplier, TokenService } from "../token/token.service";
 import BigNumber from "bignumber.js";
@@ -17,6 +19,7 @@ import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
 import { getETHPrice, getTokenPrice, REFERRER_BONUS, STABLE_COIN_TYPE } from "./depositPoint.service";
 import addressMultipliers from "../addressMultipliers";
+import { AddressFirstDeposit } from "../entities/addressFirstDeposit.entity";
 
 type BlockAddressTvl = {
   tvl: BigNumber;
@@ -29,6 +32,8 @@ export class HoldPointService extends Worker {
   private readonly pointsStatisticalPeriodSecs: number;
   private readonly pointsPhase1StartTime: Date;
   private readonly addressMultipliersCache: Map<string, TokenMultiplier[]>;
+  private readonly withdrawStartTime: Date;
+  private addressFirstDepositTimeCache: Map<string, Date>;
 
   public constructor(
     private readonly tokenService: TokenService,
@@ -39,6 +44,8 @@ export class HoldPointService extends Worker {
     private readonly balanceRepository: BalanceRepository,
     private readonly inviteRepository: InviteRepository,
     private readonly referrerRepository: ReferrerRepository,
+    private readonly addressFirstDepositRepository: AddressFirstDepositRepository,
+    private readonly transferRepository: TransferRepository,
     private readonly configService: ConfigService
   ) {
     super();
@@ -49,6 +56,9 @@ export class HoldPointService extends Worker {
     for (const m of addressMultipliers) {
       this.addressMultipliersCache.set(m.address.toLowerCase(), m.multipliers);
     }
+    const endDate = new Date(this.pointsPhase1StartTime);
+    this.withdrawStartTime = new Date(endDate.setMonth(endDate.getMonth() + 1));
+    this.addressFirstDepositTimeCache = new Map();
   }
 
   protected async runProcess(): Promise<void> {
@@ -100,6 +110,31 @@ export class HoldPointService extends Worker {
     const blockTs = currentStatisticalBlock.timestamp.getTime();
     const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, blockTs, tokenPriceMap);
     const groupTvlMap = await this.getGroupTvlMap(currentStatisticalBlock.number, addressTvlMap);
+    let updateFirstDepositDb = false;
+    const updateFirstDeposits: Array<AddressFirstDeposit> = [];
+    if (this.isWithdrawStartPhase(blockTs) && this.addressFirstDepositTimeCache.size == 0) {
+      this.addressFirstDepositTimeCache = await this.getAddressFirstDepositMap();
+      if (this.addressFirstDepositTimeCache.size < addressTvlMap.size) {
+        const leftFirstDepositAddresses: Array<string> = [];
+        addressTvlMap.forEach((tvl, address) => {
+          if (!this.addressFirstDepositTimeCache.has(address)) {
+            leftFirstDepositAddresses.push(address);
+          }
+        });
+        this.logger.log(`Get first deposits from transfers table ${leftFirstDepositAddresses.length}`);
+        const leftFirstDepositMap = await this.getFirstDepositMapFromTransfer(leftFirstDepositAddresses);
+        for (const [address, firstDepositTime] of leftFirstDepositMap) {
+          this.addressFirstDepositTimeCache.set(address, firstDepositTime);
+          updateFirstDeposits.push({
+            address,
+            firstDepositTime,
+          });
+        }
+        if (updateFirstDeposits.length > 0) {
+          updateFirstDepositDb = true;
+        }
+      }
+    }
     for (const address of addressTvlMap.keys()) {
       const fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(
         currentStatisticalBlock.number,
@@ -119,15 +154,27 @@ export class HoldPointService extends Worker {
           groupBooster = groupBooster.plus(this.getGroupBooster(groupTvl));
         }
       }
-      // NOVA Point = sum_all tokens in activity list (Early_Bird_Multiplier * Token Multiplier * Address Multiplier * Token Amount * Token Price * (1 + Group Booster + Growth Booster) / ETH_Price )
+      let firstDepositTime = this.addressFirstDepositTimeCache.get(address);
+      if (!!firstDepositTime) {
+        const addressFirstDeposit = await this.addressFirstDepositRepository.getAddressFirstDeposit(address);
+        firstDepositTime = addressFirstDeposit?.firstDepositTime;
+        if (firstDepositTime) {
+          this.addressFirstDepositTimeCache.set(address, firstDepositTime);
+        }
+      }
+      const loyaltyBooster = this.getLoyaltyBooster(blockTs, firstDepositTime?.getTime());
+      // NOVA Point = sum_all tokens in activity list (Early_Bird_Multiplier * Token Multiplier * Address Multiplier * Token Amount * Token Price * (1 + Group Booster + Growth Booster) * Loyalty Booster / ETH_Price )
       const newHoldPoint = addressTvl.holdBasePoint
         .multipliedBy(earlyBirdMultiplier)
         .multipliedBy(groupBooster)
-        .multipliedBy(addressMultiplier);
+        .multipliedBy(addressMultiplier)
+        .multipliedBy(loyaltyBooster);
       await this.updateHoldPoint(currentStatisticalBlock.number, address, newHoldPoint);
     }
     await this.pointsRepository.setHoldPointStatisticalBlockNumber(currentStatisticalBlock.number);
-
+    if (updateFirstDepositDb) {
+      await this.addressFirstDepositRepository.addMany(updateFirstDeposits);
+    }
     const statisticEndTime = new Date();
     const statisticElapsedTime = statisticEndTime.getTime() - statisticStartTime.getTime();
     this.logger.log(
@@ -135,6 +182,31 @@ export class HoldPointService extends Worker {
         statisticElapsedTime / 1000
       } seconds`
     );
+  }
+
+  async getAddressFirstDepositMap(): Promise<Map<string, Date>> {
+    const addressFirstDepositMap: Map<string, Date> = new Map();
+    const addressFirstDeposits = await this.addressFirstDepositRepository.getAllAddressFirstDeposits();
+    for (const deposit of addressFirstDeposits) {
+      addressFirstDepositMap.set(deposit.address, deposit.firstDepositTime);
+    }
+    return addressFirstDepositMap;
+  }
+
+  async getFirstDepositMapFromTransfer(addresses: string[]): Promise<Map<string, Date>> {
+    const addressFirstDepositMap: Map<string, Date> = new Map();
+    for (const address of addresses) {
+      const firstDeposit = await this.transferRepository.getAddressFirstDeposit(address);
+      if (firstDeposit) {
+        let firstDepositTs = new Date(firstDeposit.timestamp);
+        const pointsStartTs = this.pointsPhase1StartTime;
+        if (firstDepositTs.getTime() < pointsStartTs.getTime()) {
+          firstDepositTs = new Date(pointsStartTs);
+        }
+        addressFirstDepositMap.set(address, new Date(firstDeposit.timestamp));
+      }
+    }
+    return addressFirstDepositMap;
   }
 
   async getAddressTvlMap(
@@ -290,19 +362,37 @@ export class HoldPointService extends Worker {
     );
   }
 
+  isWithdrawStartPhase(blockTs: number): boolean {
+    return blockTs >= this.withdrawStartTime.getTime();
+  }
+
+  getLoyaltyBooster(blockTs: number, firstDepositTs: number | null): BigNumber {
+    if (!this.isWithdrawStartPhase(blockTs)) {
+      return new BigNumber(1);
+    }
+
+    if (!firstDepositTs) {
+      return new BigNumber(1);
+    }
+
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const diffInMilliseconds = blockTs - firstDepositTs;
+    const loyaltyDays = Math.floor(diffInMilliseconds / millisecondsPerDay);
+    const loyaltyBooster = (loyaltyDays * 5.0) / 1000.0;
+    return new BigNumber(loyaltyBooster).plus(1);
+  }
+
   getEarlyBirdMultiplier(blockTs: Date): BigNumber {
     // 1st week: 2,second week:1.5,third,forth week ~ within 1 month :1.2,1 month later: 1,
     const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
     const startDate = this.pointsPhase1StartTime;
-    let endDate = new Date(startDate);
-    endDate = new Date(endDate.setMonth(endDate.getMonth() + 1));
     const diffInMilliseconds = blockTs.getTime() - startDate.getTime();
     const diffInWeeks = Math.floor(diffInMilliseconds / millisecondsPerWeek);
     if (diffInWeeks < 1) {
       return new BigNumber(2);
     } else if (diffInWeeks < 2) {
       return new BigNumber(1.5);
-    } else if (blockTs.getTime() < endDate.getTime()) {
+    } else if (!this.isWithdrawStartPhase(blockTs.getTime())) {
       return new BigNumber(1.2);
     } else {
       return new BigNumber(1);
