@@ -1,6 +1,6 @@
 <template>
-  <div class="flex items-center justify-between mb-4">
-    <div class="flex items-center text-sm">
+  <div class="flex flex-col md:flex-row items-center justify-between mb-4">
+    <div class="flex items-center text-sm mb-4 md:mb-0">
       <FilterModal v-model:selected="selectedFilterList">
       </FilterModal>
       <form class="search-form" autocomplete="off" @submit.prevent="handleSearch">
@@ -18,7 +18,7 @@
       <TabList class="inline-flex space-x-1 p-1">
         <Tab v-for="tab in tabs" as="template" :key="tab.id" v-slot="{ selected }">
           <button :class="[
-              'w-auto rounded-md px-4 py-1 text-sm font-medium leading-5',
+              'w-auto rounded-md px-2 md:px-4 py-1 text-sm font-medium leading-5',
               'ring-white/60 ring-offset-2 ring-offset-blue-400 ',
               selected
                 ? 'bg-design-900 text-white shadow'
@@ -30,7 +30,7 @@
       </TabList>
     </TabGroup>
   </div>
-  <Table :data-testid="$testId.tokensTable" :loading="isNowLoading" :items="displayTokenList" ref="table">
+  <Table class="table-wrap" :data-testid="$testId.tokensTable" :loading="localLoading" :items="displayTokenList" ref="table">
     <template #table-head>
       <table-head-column>
         <div class="th-box min-w-16">
@@ -54,7 +54,7 @@
       <table-head-column class="text-center">
         <div class="th-box">
           <span>{{ t("tokensView.table.sourceChain") }}</span>
-          <TableFilterModel @click="handleChildClick" v-model:selected="selectedTokenList" @filter="filter('chain')"
+          <TableFilterModel @click="handleChildClick" v-model:selected="selectedTokenList"
             :filterOptions="fromChainOptions" :isSearch="false" />
         </div>
       </table-head-column>
@@ -63,7 +63,7 @@
     </template>
     <template #table-row="{ item }: { item: any }">
       <TableBodyColumn :data-heading="t('tokensView.table.tokenName')">
-        <TokenIconLabel :symbol="item.symbol" icon-size="xl" :address="item.l2Address" :name="item.name"
+        <TokenIconLabel class="token-name-box" :symbol="item.symbol" icon-size="xl" :address="item.l2Address" :name="item.name"
           :icon-url="item.iconURL" :tags="item.tags" />
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
@@ -175,7 +175,7 @@
   </Table>
 </template>
 <script lang="ts" setup>
-import { type PropType, ref, reactive, watch, computed,defineExpose , type Ref } from "vue";
+import { type PropType, ref, watch, computed,defineExpose,onBeforeUnmount, type Ref } from "vue";
 
 import { useI18n } from "vue-i18n";
 
@@ -260,13 +260,7 @@ const tabs: Tab[] = [
   { id: 'native', name: 'Native Tokens' },
   { id: 'bridged', name: 'Bridged Tokens' },
 ];
-const filter = (flag: string) => {
-  // if (flag === "name") {
-  //   selectedTokenList.value = [];
-  // } else if (flag === "chain") {
-  //   selectedNameList.value = [];
-  // }
-};
+
 // filter FROM CHAIN
 const selectedTokenList: Ref<string[]> = ref([]);
 const selectedFilterList: Ref<string[]> = ref([]);
@@ -306,10 +300,21 @@ const compareValues = (valueA: number, valueB: number, sortOrder: string): numbe
     return 0;
   }
 };
-const isNowLoading=ref(props.loading);
+
+let timerId: ReturnType<typeof setTimeout> | undefined = undefined;
+const localLoading = ref(props.loading);
+watch(() => props.loading, (newLoading) => {
+    localLoading.value = newLoading;
+});
+watch(localLoading, (newLocalLoading) => {
+    if (newLocalLoading) {
+      timerId=setTimeout(() => {
+        localLoading.value = false;
+      }, 200);
+    }
+    });
 const displayTokenList = computed(() => {
-  
-  isNowLoading.value=true
+  localLoading.value=true;
   let mergeData: Token[] = [...props.tokens];
   //search by TokenName or symbol
   if(isSearchVal.value){
@@ -375,14 +380,15 @@ const displayTokenList = computed(() => {
       return 0;
     });
   }
-  setTimeout(() => {
-    isNowLoading.value=false
-  }, 10);
   return mergeData;
 });
 const showingCount=computed(()=>displayTokenList.value.length)
 defineExpose({ showingCount })
-
+onBeforeUnmount(() => {
+  if (timerId) {
+    clearTimeout(timerId);
+  }
+});
 
 </script>
 
@@ -493,6 +499,16 @@ defineExpose({ showingCount })
     @apply flex ml-2 items-center justify-center text-[10px] bg-white rounded-lg text-design-900;
   }
 }
+.table-wrap{
+  :deep(.table-body){
+  overflow: unset;
+  }
+}
+.token-name-box{
+  :deep(.token-info .token-name){
+    @apply flex-row-reverse md:flex-row;
+  }
+}
 
 
 @media (max-width: 760px) {
@@ -500,10 +516,9 @@ defineExpose({ showingCount })
     display: flex;
     flex-direction: row-reverse;
   }
-}
-</style>
-<style lang="scss">
-.table-container .table-body {
-  overflow: unset;
+  .search-form{
+    max-width: auto;
+    min-width: auto;
+  }
 }
 </style>

@@ -2,7 +2,7 @@
     <div class="max-w-sm px-1">
         <Popover v-slot="{ open, close }" class="relative">
             <PopoverButton>
-                <button class="btn-filter mr-4 ">
+                <button class="btn-filter md:mr-4 ">
                     <IconFilter class="mr-1" />
                     <span>Filter</span>
                     <span class="filter-count" v-if="isActive">1</span>

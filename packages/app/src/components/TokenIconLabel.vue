@@ -23,7 +23,7 @@
       </div>
       <div class="token-name">
         <span>{{ name }}</span>
-        <div class="tags flex" v-if="tags.length">
+        <div class="tags flex ml-1 mr-1 md:mr-0 " v-if="tags.length">
           <span class="token-tag" v-for="(tag,i) in tags" :key="i">{{ tag }}</span>
         </div>
         
