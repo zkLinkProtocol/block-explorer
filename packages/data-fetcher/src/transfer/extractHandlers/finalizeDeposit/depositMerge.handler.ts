@@ -1,4 +1,4 @@
-import {types, utils} from "zksync-web3";
+import {types} from "zksync-web3";
 import {Transfer} from "../../interfaces/transfer.interface";
 import {ExtractTransferHandler} from "../../interfaces/extractTransferHandler.interface";
 import {TransferType} from "../../transfer.service";
@@ -46,7 +46,7 @@ export const defaultFinalizeDepositMergeHandler: ExtractTransferHandler = {
       blockNumber: log.blockNumber,
       gateway: gateway,
       amount: parsedLog.args.amount,
-      tokenAddress: parsedLog.args.mergeToken,
+      tokenAddress: parsedLog.args.mergeToken.toLowerCase(),
       type: TransferType.Deposit,
       tokenType: TokenType.ERC20,
       isFeeOrRefund: false,
