@@ -46,11 +46,11 @@ export class TransactionRepository extends BaseRepository<Transaction> {
     await this.addressTransactionRepository.addMany(addressTransactions);
   }
   public async updateGateWay(hash: string, gateway: string | null): Promise<void> {
-    let networkkey;
-    if (gateway === null){
-      networkkey = 'linea';
-    }else{
-      networkkey = this.findGatewayByAddress(gateway);
+    let networkKey;
+    if (gateway === null) {
+      networkKey = 'linea';
+    } else {
+      networkKey = this.findGatewayByAddress(gateway);
     }
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.update(
@@ -59,7 +59,7 @@ export class TransactionRepository extends BaseRepository<Transaction> {
           hash,
         },
         {
-          networkkey,
+          networkKey,
         }
     );
   }

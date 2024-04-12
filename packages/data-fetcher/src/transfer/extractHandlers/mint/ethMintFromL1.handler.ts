@@ -11,7 +11,7 @@ import { Contract, ethers, providers } from "ethers";
 import {timeout} from '../../../utils/timeout';
 let getterContract: Contract = null;
 const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000";
-const ERROR_GATEWAY = "error";
+const ERROR_GATEWAY = "0x11";
 export const ethMintFromL1Handler: ExtractTransferHandler = {
   matches: (log: types.Log): boolean => log.address.toLowerCase() === utils.L2_ETH_TOKEN_ADDRESS,
   extract: async (

@@ -97,5 +97,5 @@ export class Transaction extends CountableEntity {
   public readonly revertReason?: string;
 
   @Column({ type: "varchar", default: ""})
-  public readonly networkkey?: string;
+  public readonly networkKey?: string;
 }

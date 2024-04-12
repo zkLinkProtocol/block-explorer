@@ -108,7 +108,7 @@ export class Transaction extends BaseEntity {
   public readonly revertReason?: string;
 
   @Column({ type: "varchar", default: ""})
-  public readonly networkkey?: string;
+  public readonly networkKey?: string;
 
   public get status(): TransactionStatus {
     if (this.receiptStatus === 0) {

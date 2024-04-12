@@ -44,11 +44,11 @@ export class TransactionProcessor {
       const resTransferList =transactionData.transfers.filter((transfer) => transfer.transactionHash === transactionData.transaction.hash && transfer.gateway !== undefined && transfer.gateway !== null);
       const resTransfer = resTransferList.find((transfer) => transfer.gateway !== '0x' && transfer.gateway !== 'error' );
       if (resTransfer !== undefined && resTransfer !== null && resTransfer.gateway !== null && resTransfer.gateway !== undefined){
-        transactionData.transaction.networkkey = this.findGatewayByAddress(resTransfer.gateway);
+        transactionData.transaction.networkKey = this.findGatewayByAddress(resTransfer.gateway);
       }else if (resTransferList !== undefined && resTransferList !== null && resTransferList.length > 0) {
-        transactionData.transaction.networkkey = this.GATEWAYERROR;
+        transactionData.transaction.networkKey = this.GATEWAYERROR;
       }else {
-        transactionData.transaction.networkkey = this.GATEWAYNULLVALUE;
+        transactionData.transaction.networkKey = this.GATEWAYNULLVALUE;
       }
     }
     await this.transactionRepository.add(transactionData.transaction);
