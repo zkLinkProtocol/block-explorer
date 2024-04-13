@@ -19,7 +19,6 @@ import { hexTransformer } from "../transformers/hex.transformer";
 import { ConfigService } from "@nestjs/config";
 import { getETHPrice, getTokenPrice, REFERRER_BONUS, STABLE_COIN_TYPE } from "./depositPoint.service";
 import addressMultipliers from "../addressMultipliers";
-import { AddressFirstDeposit } from "../entities/addressFirstDeposit.entity";
 
 type BlockAddressTvl = {
   tvl: BigNumber;
@@ -110,30 +109,8 @@ export class HoldPointService extends Worker {
     const blockTs = currentStatisticalBlock.timestamp.getTime();
     const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, blockTs, tokenPriceMap);
     const groupTvlMap = await this.getGroupTvlMap(currentStatisticalBlock.number, addressTvlMap);
-    let updateFirstDepositDb = false;
-    const updateFirstDeposits: Array<AddressFirstDeposit> = [];
     if (this.isWithdrawStartPhase(blockTs) && this.addressFirstDepositTimeCache.size == 0) {
       this.addressFirstDepositTimeCache = await this.getAddressFirstDepositMap();
-      if (this.addressFirstDepositTimeCache.size < addressTvlMap.size) {
-        const leftFirstDepositAddresses: Array<string> = [];
-        addressTvlMap.forEach((tvl, address) => {
-          if (!this.addressFirstDepositTimeCache.has(address)) {
-            leftFirstDepositAddresses.push(address);
-          }
-        });
-        this.logger.log(`Get first deposits from transfers table ${leftFirstDepositAddresses.length}`);
-        const leftFirstDepositMap = await this.getFirstDepositMapFromTransfer(leftFirstDepositAddresses);
-        for (const [address, firstDepositTime] of leftFirstDepositMap) {
-          this.addressFirstDepositTimeCache.set(address, firstDepositTime);
-          updateFirstDeposits.push({
-            address,
-            firstDepositTime,
-          });
-        }
-        if (updateFirstDeposits.length > 0) {
-          updateFirstDepositDb = true;
-        }
-      }
     }
     for (const address of addressTvlMap.keys()) {
       const fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(
@@ -172,9 +149,6 @@ export class HoldPointService extends Worker {
       await this.updateHoldPoint(currentStatisticalBlock.number, address, newHoldPoint);
     }
     await this.pointsRepository.setHoldPointStatisticalBlockNumber(currentStatisticalBlock.number);
-    if (updateFirstDepositDb) {
-      await this.addressFirstDepositRepository.addMany(updateFirstDeposits);
-    }
     const statisticEndTime = new Date();
     const statisticElapsedTime = statisticEndTime.getTime() - statisticStartTime.getTime();
     this.logger.log(
