@@ -110,9 +110,6 @@ export class HoldPointService extends Worker {
     const blockTs = currentStatisticalBlock.timestamp.getTime();
     const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, blockTs, tokenPriceMap);
     const groupTvlMap = await this.getGroupTvlMap(currentStatisticalBlock.number, addressTvlMap);
-    if (this.isWithdrawStartPhase(blockTs) && this.addressFirstDepositTimeCache.size == 0) {
-      this.addressFirstDepositTimeCache = await this.getAddressFirstDepositMap();
-    }
     for (const address of addressTvlMap.keys()) {
       const fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(
         currentStatisticalBlock.number,
@@ -133,7 +130,7 @@ export class HoldPointService extends Worker {
         }
       }
       let firstDepositTime = this.addressFirstDepositTimeCache.get(address);
-      if (!!firstDepositTime) {
+      if (!firstDepositTime) {
         const addressFirstDeposit = await this.addressFirstDepositRepository.getAddressFirstDeposit(address);
         firstDepositTime = addressFirstDeposit?.firstDepositTime;
         if (firstDepositTime) {
@@ -158,15 +155,6 @@ export class HoldPointService extends Worker {
         statisticElapsedTime / 1000
       } seconds`
     );
-  }
-
-  async getAddressFirstDepositMap(): Promise<Map<string, Date>> {
-    const addressFirstDepositMap: Map<string, Date> = new Map();
-    const addressFirstDeposits = await this.addressFirstDepositRepository.getAllAddressFirstDeposits();
-    for (const deposit of addressFirstDeposits) {
-      addressFirstDepositMap.set(deposit.address, deposit.firstDepositTime);
-    }
-    return addressFirstDepositMap;
   }
 
   async getAddressTvlMap(

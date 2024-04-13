@@ -54,6 +54,7 @@ export class DepositPointService extends Worker {
   private readonly logger: Logger;
   private readonly tokenPriceCache: Map<string, ITokenMarketChartProviderResponse>;
   private readonly pointsPhase1StartTime: Date;
+  private addressFirstDepositTimeCache: Map<string, Date>;
 
   public constructor(
     private readonly tokenService: TokenService,
@@ -71,6 +72,7 @@ export class DepositPointService extends Worker {
     this.logger = new Logger(DepositPointService.name);
     this.tokenPriceCache = new Map<string, ITokenMarketChartProviderResponse>();
     this.pointsPhase1StartTime = new Date(this.configService.get<string>("points.pointsPhase1StartTime"));
+    this.addressFirstDepositTimeCache = new Map();
   }
 
   protected async runProcess(): Promise<void> {
@@ -114,22 +116,25 @@ export class DepositPointService extends Worker {
     // handle transfer where type is deposit
     const transfers = await this.transferRepository.getBlockDeposits(currentRunBlock.number);
     this.logger.log(`Block ${currentRunBlock.number} deposit num: ${transfers.length}`);
-    const newDepositMap: Map<string, AddressFirstDeposit> = new Map();
+    let newFirstDeposits: Array<AddressFirstDeposit> = [];
     for (const transfer of transfers) {
       const depositReceiver = hexTransformer.from(transfer.from);
-      if (!newDepositMap.get(depositReceiver)) {
-        const isNewDeposit = await this.transferRepository.isNewDeposit(depositReceiver, transfer.blockNumber);
-        if (isNewDeposit) {
-          const addressFirstDeposit: AddressFirstDeposit = {
-            address: depositReceiver,
-            firstDepositTime: new Date(transfer.timestamp),
-          };
-          newDepositMap.set(depositReceiver, addressFirstDeposit);
+      if (!this.addressFirstDepositTimeCache.get(depositReceiver)) {
+        const addressFirstDeposit = await this.addressFirstDepositRepository.getAddressFirstDeposit(depositReceiver);
+        let firstDepositTime = addressFirstDeposit?.firstDepositTime;
+        if (!firstDepositTime) {
+            firstDepositTime = new Date(transfer.timestamp);
+            const addressFirstDeposit: AddressFirstDeposit = {
+              address: depositReceiver,
+              firstDepositTime,
+            };
+            newFirstDeposits.push(addressFirstDeposit);
         }
+        this.addressFirstDepositTimeCache.set(depositReceiver, firstDepositTime);
       }
       await this.recordDepositPoint(transfer, tokenPriceMap);
     }
-    await this.addressFirstDepositRepository.addMany(Array.from(newDepositMap.values()));
+    await this.addressFirstDepositRepository.addMany(newFirstDeposits);
     await this.pointsRepository.setStatisticalBlockNumber(currentRunBlockNumber);
     this.logger.log(`Finish deposit point statistic for block: ${currentRunBlockNumber}`);
     return currentRunBlockNumber;
@@ -296,5 +301,14 @@ export class DepositPointService extends Worker {
       `Deposit ethAmount = ${depositETHAmount}, point = ${point}, [deposit multiplier = ${depositMultipiler}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`
     );
     return point;
+  }
+
+  async getAddressFirstDepositMap(): Promise<Map<string, Date>> {
+    const addressFirstDepositMap: Map<string, Date> = new Map();
+    const addressFirstDeposits = await this.addressFirstDepositRepository.getAllAddressFirstDeposits();
+    for (const deposit of addressFirstDeposits) {
+      addressFirstDepositMap.set(deposit.address, deposit.firstDepositTime);
+    }
+    return addressFirstDepositMap;
   }
 }
