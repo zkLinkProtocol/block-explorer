@@ -274,7 +274,7 @@ export class DepositPointService extends Worker {
     if (depositTs >= endDate.getTime()) {
       return new BigNumber(1);
     } else {
-      return new BigNumber(10);
+      return DEPOSIT_MULTIPLIER;
     }
   }
 
@@ -293,7 +293,7 @@ export class DepositPointService extends Worker {
     const depositMultipiler = this.getDepositMultiplier(depositTs);
     const point = depositMultipiler.multipliedBy(tokenMultiplier).multipliedBy(depositETHAmount);
     this.logger.log(
-      `Deposit ethAmount = ${depositETHAmount}, point = ${point}, [deposit multiplier = ${DEPOSIT_MULTIPLIER}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`
+      `Deposit ethAmount = ${depositETHAmount}, point = ${point}, [deposit multiplier = ${depositMultipiler}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`
     );
     return point;
   }

@@ -20,6 +20,7 @@ import { ConfigService } from "@nestjs/config";
 import { getETHPrice, getTokenPrice, REFERRER_BONUS, STABLE_COIN_TYPE } from "./depositPoint.service";
 import addressMultipliers from "../addressMultipliers";
 
+export const LOYALTY_BOOSTER_FACTOR: BigNumber = new BigNumber(0.005);
 type BlockAddressTvl = {
   tvl: BigNumber;
   holdBasePoint: BigNumber;
@@ -136,7 +137,8 @@ export class HoldPointService extends Worker {
         const addressFirstDeposit = await this.addressFirstDepositRepository.getAddressFirstDeposit(address);
         firstDepositTime = addressFirstDeposit?.firstDepositTime;
         if (firstDepositTime) {
-          this.addressFirstDepositTimeCache.set(address, firstDepositTime);
+          const depositTime = new Date(Math.max(firstDepositTime.getTime(), this.pointsPhase1StartTime.getTime()));
+          this.addressFirstDepositTimeCache.set(address, depositTime);
         }
       }
       const loyaltyBooster = this.getLoyaltyBooster(blockTs, firstDepositTime?.getTime());
@@ -163,22 +165,6 @@ export class HoldPointService extends Worker {
     const addressFirstDeposits = await this.addressFirstDepositRepository.getAllAddressFirstDeposits();
     for (const deposit of addressFirstDeposits) {
       addressFirstDepositMap.set(deposit.address, deposit.firstDepositTime);
-    }
-    return addressFirstDepositMap;
-  }
-
-  async getFirstDepositMapFromTransfer(addresses: string[]): Promise<Map<string, Date>> {
-    const addressFirstDepositMap: Map<string, Date> = new Map();
-    for (const address of addresses) {
-      const firstDeposit = await this.transferRepository.getAddressFirstDeposit(address);
-      if (firstDeposit) {
-        let firstDepositTs = new Date(firstDeposit.timestamp);
-        const pointsStartTs = this.pointsPhase1StartTime;
-        if (firstDepositTs.getTime() < pointsStartTs.getTime()) {
-          firstDepositTs = new Date(pointsStartTs);
-        }
-        addressFirstDepositMap.set(address, new Date(firstDeposit.timestamp));
-      }
     }
     return addressFirstDepositMap;
   }
@@ -351,9 +337,9 @@ export class HoldPointService extends Worker {
 
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const diffInMilliseconds = blockTs - firstDepositTs;
-    const loyaltyDays = Math.floor(diffInMilliseconds / millisecondsPerDay);
-    const loyaltyBooster = (loyaltyDays * 5.0) / 1000.0;
-    return new BigNumber(loyaltyBooster).plus(1);
+    const loyaltyDays = new BigNumber(Math.floor(diffInMilliseconds / millisecondsPerDay));
+    const loyaltyBooster = loyaltyDays.multipliedBy(LOYALTY_BOOSTER_FACTOR);
+    return loyaltyBooster.plus(1);
   }
 
   getEarlyBirdMultiplier(blockTs: Date): BigNumber {
