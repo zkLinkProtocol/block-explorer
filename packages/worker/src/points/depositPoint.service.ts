@@ -302,13 +302,4 @@ export class DepositPointService extends Worker {
     );
     return point;
   }
-
-  async getAddressFirstDepositMap(): Promise<Map<string, Date>> {
-    const addressFirstDepositMap: Map<string, Date> = new Map();
-    const addressFirstDeposits = await this.addressFirstDepositRepository.getAllAddressFirstDeposits();
-    for (const deposit of addressFirstDeposits) {
-      addressFirstDepositMap.set(deposit.address, deposit.firstDepositTime);
-    }
-    return addressFirstDepositMap;
-  }
 }
