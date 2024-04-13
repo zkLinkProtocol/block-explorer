@@ -34,6 +34,7 @@ import {
   PointsRepository,
   PointsHistoryRepository,
   AddressTokenTvlRepository,
+  AddressFirstDepositRepository,
 } from "./repositories";
 import {
   Batch,
@@ -74,6 +75,7 @@ import { GroupTvlRepository } from "./repositories";
 import { AddressTvlRepository } from "./repositories";
 import { HoldPointService } from "./points/holdPoint.service";
 import { TvlStatisticalService } from "./points/tvlStatistical.service";
+import { AddressFirstDeposit } from "./entities/addressFirstDeposit.entity";
 
 @Module({
   imports: [
@@ -109,6 +111,7 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
       BlockGroupTvl,
       AddressTvl,
       AddressTokenTvl,
+      AddressFirstDeposit,
       GroupTvl,
     ]),
     TypeOrmModule.forRootAsync({
@@ -185,6 +188,7 @@ import { TvlStatisticalService } from "./points/tvlStatistical.service";
     GroupTvlRepository,
     AddressTvlRepository,
     AddressTokenTvlRepository,
+    AddressFirstDepositRepository,
   ],
 })
 export class AppModule {}

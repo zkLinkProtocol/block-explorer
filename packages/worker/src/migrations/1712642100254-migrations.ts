@@ -7,5 +7,7 @@ export class Migrations1712642100254 implements MigrationInterface {
     await queryRunner.query(`CREATE INDEX "IDX_5f7876e4a74cc2e145f591aece" ON "transfers" ("from", "type") `);
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP INDEX "public"."IDX_5f7876e4a74cc2e145f591aece"`);
+  }
 }

@@ -21,3 +21,4 @@ export * from "./referrer.repository";
 export * from "./groupTvl.repository";
 export * from "./addressTvl.repository";
 export * from "./addressTokenTvl.repository";
+export * from "./addressFirstDeposit.repository";

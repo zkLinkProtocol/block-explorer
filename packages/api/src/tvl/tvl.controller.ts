@@ -18,6 +18,7 @@ import { PagingOptionsDto } from "src/common/dtos";
 import { AccountReferTVLResponseDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
 import { ConfigService } from "@nestjs/config";
 import { DepositThresholdDto } from "../api/dtos/stats/depositThreshold.dto";
+import { AccountLoyaltyBoosterResponseDto } from "../api/dtos/tvl/accountLoyaltyBooster.dto";
 
 const entityName = "addressTokenTvl";
 
@@ -167,6 +168,20 @@ export class TVLController {
     @Query() pagingOptions: PagingOptionsDto
   ): Promise<AccountReferTVLResponseDto> {
     const result = await this.tvlService.getAccountRefferalsTVL(address, pagingOptions);
+    return {
+      status: ResponseStatus.OK,
+      message: ResponseMessage.OK,
+      result,
+    };
+  }
+
+  @ApiOperation({ summary: "Get account loyalty booster" })
+  @Get("/getAccountLoyaltyBooster")
+  public async getAccountLoyaltyBooster(
+      @Query("address", new ParseAddressPipe()) address: string
+  ): Promise<AccountLoyaltyBoosterResponseDto> {
+    const pointsStartDate = new Date(this.pointsPhase1StartTime);
+    const result = await this.tvlService.getAccountLoyaltyBooster(address,pointsStartDate);
     return {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,

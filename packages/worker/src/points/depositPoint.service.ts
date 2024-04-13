@@ -8,6 +8,7 @@ import {
   BlockTokenPriceRepository,
   BlockAddressPointRepository,
   ReferrerRepository,
+  AddressFirstDepositRepository,
 } from "../repositories";
 import {
   ITokenMarketChartProviderResponse,
@@ -17,6 +18,8 @@ import { Token, TokenService } from "../token/token.service";
 import BigNumber from "bignumber.js";
 import { Block, BlockAddressPoint, Point, Transfer } from "../entities";
 import { hexTransformer } from "../transformers/hex.transformer";
+import { ConfigService } from "@nestjs/config";
+import { AddressFirstDeposit } from "../entities/addressFirstDeposit.entity";
 
 export const STABLE_COIN_TYPE = "Stablecoin";
 export const ETHEREUM_CG_PRICE_ID = "ethereum";
@@ -50,6 +53,8 @@ const PRICE_EXPIRATION_TIME = 300000; // 5 minutes
 export class DepositPointService extends Worker {
   private readonly logger: Logger;
   private readonly tokenPriceCache: Map<string, ITokenMarketChartProviderResponse>;
+  private readonly pointsPhase1StartTime: Date;
+  private addressFirstDepositTimeCache: Map<string, Date>;
 
   public constructor(
     private readonly tokenService: TokenService,
@@ -59,11 +64,15 @@ export class DepositPointService extends Worker {
     private readonly blockAddressPointRepository: BlockAddressPointRepository,
     private readonly transferRepository: TransferRepository,
     private readonly referrerRepository: ReferrerRepository,
-    private readonly tokenOffChainDataProvider: TokenOffChainDataProvider
+    private readonly addressFirstDepositRepository: AddressFirstDepositRepository,
+    private readonly tokenOffChainDataProvider: TokenOffChainDataProvider,
+    private readonly configService: ConfigService
   ) {
     super();
     this.logger = new Logger(DepositPointService.name);
     this.tokenPriceCache = new Map<string, ITokenMarketChartProviderResponse>();
+    this.pointsPhase1StartTime = new Date(this.configService.get<string>("points.pointsPhase1StartTime"));
+    this.addressFirstDepositTimeCache = new Map();
   }
 
   protected async runProcess(): Promise<void> {
@@ -107,9 +116,25 @@ export class DepositPointService extends Worker {
     // handle transfer where type is deposit
     const transfers = await this.transferRepository.getBlockDeposits(currentRunBlock.number);
     this.logger.log(`Block ${currentRunBlock.number} deposit num: ${transfers.length}`);
+    let newFirstDeposits: Array<AddressFirstDeposit> = [];
     for (const transfer of transfers) {
+      const depositReceiver = hexTransformer.from(transfer.from);
+      if (!this.addressFirstDepositTimeCache.get(depositReceiver)) {
+        const addressFirstDeposit = await this.addressFirstDepositRepository.getAddressFirstDeposit(depositReceiver);
+        let firstDepositTime = addressFirstDeposit?.firstDepositTime;
+        if (!firstDepositTime) {
+            firstDepositTime = new Date(transfer.timestamp);
+            const addressFirstDeposit: AddressFirstDeposit = {
+              address: depositReceiver,
+              firstDepositTime,
+            };
+            newFirstDeposits.push(addressFirstDeposit);
+        }
+        this.addressFirstDepositTimeCache.set(depositReceiver, firstDepositTime);
+      }
       await this.recordDepositPoint(transfer, tokenPriceMap);
     }
+    await this.addressFirstDepositRepository.addMany(newFirstDeposits);
     await this.pointsRepository.setStatisticalBlockNumber(currentRunBlockNumber);
     this.logger.log(`Finish deposit point statistic for block: ${currentRunBlockNumber}`);
     return currentRunBlockNumber;
@@ -247,6 +272,17 @@ export class DepositPointService extends Worker {
     );
   }
 
+  getDepositMultiplier(depositTs: number): BigNumber {
+    const startDate = this.pointsPhase1StartTime;
+    let endDate = new Date(startDate);
+    endDate = new Date(endDate.setMonth(endDate.getMonth() + 1));
+    if (depositTs >= endDate.getTime()) {
+      return new BigNumber(1);
+    } else {
+      return DEPOSIT_MULTIPLIER;
+    }
+  }
+
   async calculateDepositPoint(
     tokenAmount: BigNumber,
     token: Token,
@@ -259,9 +295,10 @@ export class DepositPointService extends Worker {
     const depositAmount = tokenAmount.dividedBy(new BigNumber(10).pow(token.decimals));
     const depositETHAmount = depositAmount.multipliedBy(price).dividedBy(ethPrice);
     const tokenMultiplier = new BigNumber(this.tokenService.getTokenMultiplier(token, depositTs));
-    const point = DEPOSIT_MULTIPLIER.multipliedBy(tokenMultiplier).multipliedBy(depositETHAmount);
+    const depositMultipiler = this.getDepositMultiplier(depositTs);
+    const point = depositMultipiler.multipliedBy(tokenMultiplier).multipliedBy(depositETHAmount);
     this.logger.log(
-      `Deposit ethAmount = ${depositETHAmount}, point = ${point}, [deposit multiplier = ${DEPOSIT_MULTIPLIER}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`
+      `Deposit ethAmount = ${depositETHAmount}, point = ${point}, [deposit multiplier = ${depositMultipiler}, token multiplier = ${tokenMultiplier}, deposit amount = ${depositAmount}, token price = ${price}, eth price = ${ethPrice}]`
     );
     return point;
   }
