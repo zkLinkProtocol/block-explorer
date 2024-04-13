@@ -13,6 +13,7 @@ import {
   ethMintFromL1Handler,
   ethWithdrawalToL1Handler,
   ethWithdrawalWithMessageToL1Handler,
+  defaultFinalizeDepositMergeHandler,
 } from "./extractHandlers";
 import { ConfigService } from "@nestjs/config";
 
@@ -32,6 +33,7 @@ const extractTransfersHandlers: Record<string, ExtractTransferHandler[]> = {
   [LogType.Mint]: [ethMintFromL1Handler],
   [LogType.Withdrawal]: [ethWithdrawalToL1Handler],
   [LogType.WithdrawalWithMessage]: [ethWithdrawalWithMessageToL1Handler],
+  [LogType.FinalizeDepositToMerge]: [defaultFinalizeDepositMergeHandler],
 };
 
 @Injectable()
