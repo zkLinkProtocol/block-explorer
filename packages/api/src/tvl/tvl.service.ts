@@ -20,8 +20,8 @@ import { AccountPointsDto } from "src/api/dtos/tvl/accountPoints.dto";
 import { AccountReferTVLDto } from "src/api/dtos/tvl/accountReferalTVL.dto";
 import { Invite } from "./entities/invite.entity";
 import {AccountLoyaltyBoosterDto} from "../api/dtos/tvl/accountLoyaltyBooster.dto";
-import {AddressFirstDeposit} from "worker/dist/entities/addressFirstDeposit.entity";
 import BigNumber from "bignumber.js";
+import {AddressFirstDeposit} from "./entities/addressFirstDeposit.entity";
 
 const L2_ETH_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
 const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
