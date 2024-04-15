@@ -10,7 +10,6 @@ import type { Hash, NetworkOrigin } from "@/types";
 import type { types } from "zksync-web3";
 import useEnvironmentConfig from "./useEnvironmentConfig";
 import { NOVA } from '@/utils/constants'
-const {chainNameList}=useEnvironmentConfig();
 
 export type TransactionStatus = "included" | "committed" | "proved" | "verified" | "failed" | "indexing";
 type TokenInfo = {
@@ -85,6 +84,7 @@ export type TransactionItem = {
 };
 
 export function getTransferNetworkOrigin(transfer: Api.Response.Transfer, sender: "from" | "to") {
+  const {chainNameList}=useEnvironmentConfig();
   let chainName = "";
   if (transfer.transaction && transfer.transaction?.networkkey !== "error") {
     const key = transfer.transaction?.networkkey === "linea" ? "primay" : transfer.transaction?.networkkey;
