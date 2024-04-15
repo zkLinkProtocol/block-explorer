@@ -54,6 +54,7 @@ export class DepositPointService extends Worker {
   private readonly logger: Logger;
   private readonly tokenPriceCache: Map<string, ITokenMarketChartProviderResponse>;
   private readonly pointsPhase1StartTime: Date;
+  private readonly pointsCancelDepositStartTime: Date;
   private addressFirstDepositTimeCache: Map<string, Date>;
 
   public constructor(
@@ -72,6 +73,7 @@ export class DepositPointService extends Worker {
     this.logger = new Logger(DepositPointService.name);
     this.tokenPriceCache = new Map<string, ITokenMarketChartProviderResponse>();
     this.pointsPhase1StartTime = new Date(this.configService.get<string>("points.pointsPhase1StartTime"));
+    this.pointsCancelDepositStartTime = new Date(this.configService.get<string>("points.pointsCancelDepositStartTime"));
     this.addressFirstDepositTimeCache = new Map();
   }
 
@@ -198,6 +200,10 @@ export class DepositPointService extends Worker {
   }
 
   async recordDepositPoint(transfer: Transfer, tokenPrices: Map<string, BigNumber>) {
+    const depositTs = Number(transfer.timestamp);
+    if (depositTs >= this.pointsCancelDepositStartTime.getTime()) {
+      return;
+    }
     const blockNumber: number = transfer.blockNumber;
     const depositReceiver: string = hexTransformer.from(transfer.from);
     const tokenAddress: string = hexTransformer.from(transfer.tokenAddress);
@@ -216,7 +222,6 @@ export class DepositPointService extends Worker {
       await this.blockAddressPointRepository.setParsedTransferId(transferId);
       return;
     }
-    const depositTs = Number(transfer.timestamp);
     const newDepositPoint = await this.calculateDepositPoint(tokenAmount, tokenInfo, tokenPrices, depositTs);
     // update deposit point for user and refer point for referrer
     await this.updateDepositPoint(blockNumber, depositReceiver, newDepositPoint, transferId);
