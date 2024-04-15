@@ -86,8 +86,8 @@ export type TransactionItem = {
 export function getTransferNetworkOrigin(transfer: Api.Response.Transfer, sender: "from" | "to") {
   const {chainNameList}=useEnvironmentConfig();
   let chainName = "";
-  if (transfer.transaction && transfer.transaction?.networkkey !== "error") {
-    const key = transfer.transaction?.networkkey === "linea" ? "primay" : transfer.transaction?.networkkey;
+  if (transfer.transaction && transfer.transaction?.networkKey !== "error") {
+    const key = transfer.transaction?.networkKey === "linea" ? "primay" : transfer.transaction?.networkKey;
     chainName = chainNameList[key];
   } else {
     chainName = "Linea";
