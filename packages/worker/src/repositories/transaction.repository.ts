@@ -4,6 +4,7 @@ import { Transaction } from "../entities";
 import { UnitOfWork } from "../unitOfWork";
 import { BaseRepository } from "./base.repository";
 import { AddressTransactionRepository } from "./addressTransaction.repository";
+import {GateWayConfig} from "../utils/gatewayConfig";
 
 export interface TransactionDto extends types.TransactionResponse {
   fee: string;
@@ -43,5 +44,32 @@ export class TransactionRepository extends BaseRepository<Transaction> {
       });
     }
     await this.addressTransactionRepository.addMany(addressTransactions);
+  }
+  public async updateGateWay(hash: string, gateway: string | null): Promise<void> {
+    let networkKey;
+    if (gateway === null) {
+      networkKey = 'linea';
+    } else {
+      networkKey = this.findGatewayByAddress(gateway);
+    }
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update(
+        this.entityTarget,
+        {
+          hash,
+        },
+        {
+          networkKey,
+        }
+    );
+  }
+
+  private  findGatewayByAddress(value: string): string {
+    for (let key in GateWayConfig) {
+      if (GateWayConfig[key] === value) {
+        return key;
+      }
+    }
+    return "error";
   }
 }

@@ -56,6 +56,7 @@ import { UnitOfWorkModule } from "./unitOfWork";
 import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
 import { ValuesService } from "./values/values.service";
 import { HistoryService } from "./values/history.service";
+import { GatewayService } from "./values/gateway.service";
 
 @Module({
   imports: [
@@ -138,6 +139,7 @@ import { HistoryService } from "./values/history.service";
     DbMetricsService,
     ValuesService,
     HistoryService,
+    GatewayService,
   ],
 })
 export class AppModule {}

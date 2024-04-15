@@ -12,6 +12,7 @@ import { TokenOffChainDataSaverService } from "./token/tokenOffChainData/tokenOf
 import { ValuesService } from "./values/values.service";
 import runMigrations from "./utils/runMigrations";
 import { HistoryService } from "./values/history.service";
+import { GatewayService } from "./values/gateway.service";
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {
@@ -27,7 +28,8 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     private readonly valuesService: ValuesService,
     private readonly dataSource: DataSource,
     private readonly configService: ConfigService,
-    private readonly historyService: HistoryService
+    private readonly historyService: HistoryService,
+    private readonly gatewayService: GatewayService,
   ) {
     this.logger = new Logger(AppService.name);
   }
@@ -76,6 +78,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     if (enableTotalLockedValueUpdater) {
       tasks.push(this.valuesService.start());
       tasks.push(this.historyService.start());
+      tasks.push(this.gatewayService.start());
     }
     return Promise.all(tasks);
   }
@@ -89,6 +92,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       this.tokenOffChainDataSaverService.stop(),
       this.valuesService.stop(),
       this.historyService.stop(),
+      this.gatewayService.stop(),
     ]);
   }
 }
