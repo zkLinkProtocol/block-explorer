@@ -67,6 +67,8 @@ export class TransferService {
       };
     } else {
       const queryBuilder = this.transferRepository.createQueryBuilder("transfer");
+      queryBuilder.leftJoin("transfer.transaction", "transaction");
+      queryBuilder.addSelect("transaction.networkkey");
       queryBuilder.where(filterOptions);
       queryBuilder.leftJoinAndSelect("transfer.token", "token");
       queryBuilder.orderBy("transfer.timestamp", "DESC");

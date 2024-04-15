@@ -1,19 +1,18 @@
-import { utils, types } from "zksync-web3";
-import { Transfer } from "../../interfaces/transfer.interface";
-import { ExtractTransferHandler } from "../../interfaces/extractTransferHandler.interface";
-import { TransferType } from "../../transfer.service";
-import { TokenType } from "../../../token/token.service";
-import { unixTimeToDate } from "../../../utils/date";
+import {types} from "zksync-web3";
+import {Transfer} from "../../interfaces/transfer.interface";
+import {ExtractTransferHandler} from "../../interfaces/extractTransferHandler.interface";
+import {TransferType} from "../../transfer.service";
+import {TokenType} from "../../../token/token.service";
+import {unixTimeToDate} from "../../../utils/date";
 import parseLog from "../../../utils/parseLog";
-import { CONTRACT_INTERFACES } from "../../../constants";
-import { Contract, ethers, providers } from "ethers";
-import { ConfigService } from "@nestjs/config";
-import {timeout} from "../../../utils/timeout";
+import {CONTRACT_INTERFACES} from "../../../constants";
+import {Contract, ethers, providers} from "ethers";
+import {ConfigService} from "@nestjs/config";
 
 let getterContract: Contract = null;
 const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000";
-const ERROR_GATEWAY = "error"
-export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
+const ERROR_GATEWAY = "error";
+export const defaultFinalizeDepositMergeHandler: ExtractTransferHandler = {
   matches: (): boolean => true,
   extract: async (
     log: types.Log,
@@ -31,20 +30,14 @@ export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
       );
     }
     const parsedLog = parseLog(CONTRACT_INTERFACES.L2_BRIDGE, log);
-    const tokenAddress =
-      parsedLog.args.l2Token === utils.ETH_ADDRESS ? utils.L2_ETH_TOKEN_ADDRESS : parsedLog.args.l2Token.toLowerCase();
-
     let gateway;
     try {
-      await timeout(3000, new Promise<void>(async (resolve, reject) => {
-        gateway = (await getterContract.getSecondaryChainOp(log.transactionHash))["gateway"];
-        if (gateway === EMPTY_ADDRESS) {
-          gateway = null;
-        }
-        resolve();
-      }));
+      gateway = (await getterContract.getSecondaryChainOp(log.transactionHash))["gateway"];
+      if (gateway === EMPTY_ADDRESS) {
+        gateway = null;
+      }
     } catch {
-      gateway = ERROR_GATEWAY; //TODO Regularly maintain the transfers data table. When there are too many ERROR_GATEWAYs in the table, check the getSecondaryChainOp method.
+      gateway = ERROR_GATEWAY;
     }
     return {
       from: parsedLog.args.l1Sender.toLowerCase(),
@@ -53,9 +46,9 @@ export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
       blockNumber: log.blockNumber,
       gateway: gateway,
       amount: parsedLog.args.amount,
-      tokenAddress,
+      tokenAddress: parsedLog.args.mergeToken.toLowerCase(),
       type: TransferType.Deposit,
-      tokenType: tokenAddress === utils.L2_ETH_TOKEN_ADDRESS ? TokenType.ETH : TokenType.ERC20,
+      tokenType: TokenType.ERC20,
       isFeeOrRefund: false,
       logIndex: log.logIndex,
       transactionIndex: log.transactionIndex,

@@ -1,5 +1,6 @@
 import { utils } from "ethers";
 import * as l2StandardERC20Abi from "./abis/l2StandardERC20.json";
+import * as gettersFacetAbi from "./abis/GettersFacet.json";
 
 export const ZERO_HASH_64 = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -9,5 +10,9 @@ export const CONTRACT_INTERFACES = {
   L2_STANDARD_ERC20: {
     interface: new utils.Interface(l2StandardERC20Abi),
     abi: l2StandardERC20Abi,
+  },
+  GETTERS_FACET: {
+    interface: new utils.Interface(gettersFacetAbi),
+    abi: gettersFacetAbi,
   },
 };

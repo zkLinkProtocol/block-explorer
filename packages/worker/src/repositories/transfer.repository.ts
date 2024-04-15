@@ -36,4 +36,16 @@ export class TransferRepository extends BaseRepository<Transfer> {
 
     return this.addressTransferRepository.addMany(addressTransfers);
   }
+  public async updateTransfer(number: Number, gateway: string): Promise<void> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update(
+        this.entityTarget,
+        {
+          number,
+        },
+        {
+          gateway,
+        }
+    );
+  }
 }
