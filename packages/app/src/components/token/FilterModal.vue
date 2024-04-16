@@ -2,8 +2,8 @@
     <div class="max-w-sm px-1">
         <Popover v-slot="{ open, close }" class="relative">
             <PopoverButton>
-                <button class="btn-filter md:mr-4 ">
-                    <IconFilter class="mr-1" />
+                <button class="btn-filter md:mr-4" :class="{ 'active': isActive }">
+                    <IconFilter class="icon mr-1" />
                     <span>Filter</span>
                     <span class="filter-count" v-if="isActive">1</span>
                 </button>
@@ -138,13 +138,23 @@ watch(
 
 
 }
-.btn-filter{
-  @apply flex items-center border rounded-md border border-design-900 p-2 text-design-900;
-  .filter-count{
-    height: 14px;
-    width: 14px;
-    line-height: 1;
-    @apply flex ml-2 items-center justify-center text-[10px] bg-white rounded-lg text-design-900;
-  }
+
+.btn-filter {
+    @apply flex items-center border rounded-md border border-design-900 p-2 text-design-900;
+
+    &.active {
+        @apply bg-design-900 text-white;
+
+        .icon {
+            @apply text-white;
+        }
+    }
+
+    .filter-count {
+        height: 14px;
+        width: 14px;
+        line-height: 1;
+        @apply flex ml-2 items-center justify-center text-[10px] bg-white rounded-lg text-design-900;
+    }
 }
 </style>

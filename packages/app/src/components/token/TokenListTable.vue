@@ -3,7 +3,7 @@
     <div class="flex items-center text-sm mb-4 md:mb-0">
       <FilterModal v-model:selected="selectedFilterList">
       </FilterModal>
-      <form class="search-form" autocomplete="off" @submit.prevent="handleSearch">
+      <form v-show="!showClearButton " class="search-form" autocomplete="off" @submit.prevent="handleSearch">
         <search-field v-model:value="searchValue" :placeholder="t('tokensView.search.placeholder')"
           :pending="isRequestPending">
           <template #submit>
@@ -13,6 +13,15 @@
           </template>
         </search-field>
       </form>
+      <div v-show="showClearButton" class="search-result">
+        <div class="flex">
+        <span>Filter by Token </span>
+        <span class="search-key">{{ searchValue }}</span>
+        </div>
+        <button @click="handleClear" class="btn-close">
+            <XIcon />
+        </button>
+      </div>
     </div>
     <TabGroup :selectedIndex="selectedTab" @change="changeTab">
       <TabList class="inline-flex space-x-1 p-1">
@@ -201,6 +210,7 @@ import SearchField from "@/components/common/SearchField.vue";
 import Button from "@/components/common/Button.vue";
 import FilterModal from './FilterModal.vue'
 import EmptyState from "@/components/common/EmptyState.vue";
+import { XIcon } from "@heroicons/vue/outline";
 
 import { SearchIcon } from "@heroicons/vue/outline";
 
@@ -212,6 +222,7 @@ import { NOVA_NATIVE_TOKEN, ETH_TOKEN_L1_ADDRESS, NOVA_MERGED_TOKEN } from "@/ut
 const { chainNameList } = useEnvironmentConfig();
 
 import type { Token } from "@/composables/useToken";
+import { log } from "console";
 
 const props = defineProps({
   tokens: {
@@ -242,11 +253,19 @@ function changeTab(index:number) {
   selectedTab.value = index;
 }
 const searchValue = ref("");
+const showClearButton = ref(false);
 const isSearchVal=ref("")
 const handleSearch = async () => {
+  if(!searchValue.value) return
   isSearchVal.value=searchValue.value
- 
+  showClearButton.value = true;
 };
+const handleClear=()=>{
+  showClearButton.value = false;
+  searchValue.value='';
+  isSearchVal.value='';
+
+}
 const fromChainOptions = computed((): string[] | [] => {
   return [NOVA_MERGED_TOKEN, NOVA_NATIVE_TOKEN, ...Object.values(chainNameList)];
 });
@@ -322,12 +341,11 @@ const displayTokenList = computed(() => {
       return item.name!.toLowerCase().includes(isSearchVal.value.toLowerCase()) ||
       item.symbol!.toLowerCase().includes(isSearchVal.value.toLowerCase()) ;
     } );
-    
-
   }
+  
   // Hide Assets Without Price
-  if (selectedFilterList.value.length>0) {
-    mergeData = [...props.tokens].filter((item) => {
+  if (selectedFilterList.value.length<1) {
+    mergeData = mergeData.filter((item) => {
       if (!item.usdPrice) {
         return false;
       }
@@ -380,6 +398,7 @@ const displayTokenList = computed(() => {
       return 0;
     });
   }
+  
   return mergeData;
 });
 const showingCount=computed(()=>displayTokenList.value.length)
@@ -488,6 +507,15 @@ onBeforeUnmount(() => {
    :deep( .submit-icon-container .submit-icon){
     @apply py-2;
 
+  }
+}
+.search-result{
+  @apply flex items-center justify-between md:min-w-[18rem] bg-design-900 text-[#AAAAAA] px-[11px] py-2 rounded-md;
+  .search-key{
+    @apply text-white ml-2;
+  }
+  .btn-close{
+    @apply w-5 h-5 text-white;
   }
 }
 .btn-filter{

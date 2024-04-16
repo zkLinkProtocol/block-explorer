@@ -137,7 +137,7 @@ const { isReady: isImageLoaded } = useImage({ src: imgSource.value });
     padding: 2px 4px;
     border-radius: 4px;
     background: #E4E5FE;
-    color: #4A5568;
+    color: #7e798d;
 }
 }
 

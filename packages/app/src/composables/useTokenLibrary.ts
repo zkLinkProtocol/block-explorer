@@ -72,7 +72,7 @@ export default (context = useContext()) => {
           if((item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address))){
             tags=['Merged','Bridged']
           }else if((item.l2Address && novaAddresses.includes(item.l2Address))){
-            tags=['Merged']
+            tags=['Merged','Native']
           }else{
             tags=['Native']
           }
