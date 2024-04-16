@@ -354,8 +354,8 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
   return data.value?.map((transaction) => {
     let fromNetwork=''
     if(transaction.isL1Originated){
-      if(transaction.networkkey && transaction.networkkey !== "error"){
-        const key=transaction.networkkey==='linea'?'primary':transaction.networkkey
+      if(transaction.networkKey && transaction.networkKey !== "error"){
+        const key=transaction.networkKey==='linea'?'primary':transaction.networkKey
         fromNetwork=chainNameList[key]
       }else{
         fromNetwork="Linea"
