@@ -43,6 +43,8 @@ export default async () => {
     UPDATE_TVL_HISTORY_INTERVAL,
     COINGECKO_PROXY_URL,
     COINGECKO_ENABLE_PROXY,
+    PRIMARY_CHAIN_MAIN_CONTRACT,
+    PRIMARY_CHAIN_RPC_URL
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -133,6 +135,8 @@ export default async () => {
       getNetworkKeyByL2Erc20Bridge: (bridgeAddress: string): NetworkKey | undefined =>
         L22Key[bridgeAddress.toLowerCase()],
     },
+    primaryChainMainContract: PRIMARY_CHAIN_MAIN_CONTRACT,
+    primaryChainRpcUrl: PRIMARY_CHAIN_RPC_URL,
   };
 };
 async function getExtraCoinsList() {

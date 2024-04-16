@@ -8,6 +8,8 @@ import useContext from "./useContext";
 import type { TransactionLogEntry } from "./useEventLog";
 import type { Hash, NetworkOrigin } from "@/types";
 import type { types } from "zksync-web3";
+import useEnvironmentConfig from "./useEnvironmentConfig";
+import { NOVA } from '@/utils/constants'
 
 export type TransactionStatus = "included" | "committed" | "proved" | "verified" | "failed" | "indexing";
 type TokenInfo = {
@@ -82,10 +84,18 @@ export type TransactionItem = {
 };
 
 export function getTransferNetworkOrigin(transfer: Api.Response.Transfer, sender: "from" | "to") {
-  if (sender === "from") {
-    return transfer.type === "deposit" ? "L1" : "L2";
+  const {chainNameList}=useEnvironmentConfig();
+  let chainName = "";
+  if (transfer.transaction && transfer.transaction?.networkKey !== "error") {
+    const key = transfer.transaction?.networkKey === "linea" ? "primay" : transfer.transaction?.networkKey;
+    chainName = chainNameList[key];
   } else {
-    return transfer.type === "withdrawal" ? "L1" : "L2";
+    chainName = "Linea";
+  }
+  if (sender === "from") {
+    return transfer.type === "deposit" ? chainName : NOVA;
+  } else {
+    return transfer.type === "withdrawal" ? chainName : NOVA;
   }
 }
 
