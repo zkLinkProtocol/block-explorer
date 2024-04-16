@@ -191,12 +191,9 @@ export class TransactionService {
     if(total) {
       return total as number;
     }
-    const queryBuilder = this.addressTransactionRepository.createQueryBuilder("addressTransaction");
-    // queryBuilder.select(" count(*) from (select address from \"addressTransactions\" group by 1) adddresses");
-    queryBuilder.select("addressTransaction.address");
-    queryBuilder.groupBy("addressTransaction.address");
-    const addresses = await queryBuilder.getRawMany();
-    const count = addresses.length;
+    const res = await this.addressTransactionRepository
+        .query("select count(*) from (select address from \"addressTransactions\" group by 1) adddresses");
+    const count = res[0].count;
     cache.set("totalAccountNumber", count);
     return count;
   }
