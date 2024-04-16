@@ -135,7 +135,8 @@
         <TableBodyColumn class="empty-state-container" colspan="7">
           <EmptyState class="empty-state">
             <template #title>
-             Can’t find anything on your Filter result.
+            <span class="font-normal">There are no matching entries for:</span>
+            <span v-if="searchValue" class="font-bold">'{{ searchValue }}'</span>
             </template>
             <template #description><span></span></template>
           </EmptyState>
@@ -184,7 +185,7 @@
   </Table>
 </template>
 <script lang="ts" setup>
-import { type PropType, ref, watch, computed,defineExpose,onBeforeUnmount, type Ref } from "vue";
+import { type PropType, ref, watch, computed,onBeforeUnmount, type Ref } from "vue";
 
 import { useI18n } from "vue-i18n";
 
