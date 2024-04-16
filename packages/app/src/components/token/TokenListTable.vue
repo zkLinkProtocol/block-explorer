@@ -222,7 +222,6 @@ import { NOVA_NATIVE_TOKEN, ETH_TOKEN_L1_ADDRESS, NOVA_MERGED_TOKEN } from "@/ut
 const { chainNameList } = useEnvironmentConfig();
 
 import type { Token } from "@/composables/useToken";
-import { log } from "console";
 
 const props = defineProps({
   tokens: {

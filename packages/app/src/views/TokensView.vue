@@ -50,7 +50,7 @@ const breadcrumbItems = computed((): BreadcrumbItem[] => [
     text: `${t("tokensView.title")}`,
   },
 ]);
-const tokensCount=computed(()=>tokens.value.length)
+const tokensCount=computed(()=>tokensWithTag.value.length)
 
 const childRef = ref<InstanceType<typeof TokenListTable>>();
 const showingCount=ref(0);
