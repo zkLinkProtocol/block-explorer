@@ -32,6 +32,7 @@ export type TokenTransfer = {
   fromNetwork: NetworkOrigin;
   toNetwork: NetworkOrigin;
   tokenInfo?: TokenInfo;
+  transactionTo?: string
 };
 
 export type TransactionDetails = types.TransactionDetails & {
@@ -83,13 +84,20 @@ export type TransactionItem = {
   transfers: TokenTransfer[];
 };
 
-export function getTransferNetworkOrigin(transfer: Api.Response.Transfer, sender: "from" | "to") {
-  const {chainNameList}=useEnvironmentConfig();
+export function getTransferNetworkOrigin(transfer: Api.Response.Transfer, sender: "from" | "to",transactionTo?:string) {
+  const { chainNameList , ERC20Bridges }=useEnvironmentConfig();
   let chainName = "";
-  if (transfer.transaction && transfer.transaction?.networkKey !== "error") {
+  console.log('transactionTo',transactionTo);
+  
+  const foundKey = Object.entries(ERC20Bridges).find(([key, value]) => value === transactionTo )
+  // is the value in ERC20Bridges
+  if(foundKey){
+    chainName=chainNameList[foundKey[0]]
+  }else if (transfer.transaction && transfer.transaction?.networkKey !== "error") {
     const key = transfer.transaction?.networkKey === "linea" ? "primay" : transfer.transaction?.networkKey;
     chainName = chainNameList[key];
   } else {
+
     chainName = "Linea";
   }
   if (sender === "from") {
@@ -265,7 +273,7 @@ export function mapTransaction(
       transactionIndex: item.transactionIndex.toString(16),
     })),
 
-    transfers: mapTransfers(filterTransfers(transfers)),
+    transfers: mapTransfers(filterTransfers(transfers),transaction.to),
 
     gasPrice: transaction.gasPrice,
     gasLimit: transaction.gasLimit,
@@ -276,13 +284,13 @@ export function mapTransaction(
   };
 }
 
-function mapTransfers(transfers: Api.Response.Transfer[]): TokenTransfer[] {
+function mapTransfers(transfers: Api.Response.Transfer[],transactionTo?:string): TokenTransfer[] { 
   return transfers.map((item) => ({
     amount: item.amount,
     from: item.from,
     to: item.to,
-    fromNetwork: getTransferNetworkOrigin(item, "from"),
-    toNetwork: getTransferNetworkOrigin(item, "to"),
+    fromNetwork: getTransferNetworkOrigin(item, "from",transactionTo),
+    toNetwork: getTransferNetworkOrigin(item, "to",transactionTo),
     type: item.type,
     tokenInfo: {
       address: item.tokenAddress,
@@ -295,6 +303,7 @@ function mapTransfers(transfers: Api.Response.Transfer[]): TokenTransfer[] {
       liquidity: item.token?.liquidity,
       iconURL: item.token?.iconURL,
     } as TokenInfo,
+  
   }));
 }
 

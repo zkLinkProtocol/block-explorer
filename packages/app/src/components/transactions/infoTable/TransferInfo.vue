@@ -3,8 +3,10 @@
     <span>{{ label }}</span>
     <PaymasterLabel v-if="isPaymaster" />
     <TransactionNetworkSquareBlock :network="network" />
-    <!--  -->
     <AddressLink v-if="network === NOVA" :address="address" class="address">
+      <span>{{ shortenFitText(address, "left") }}</span>
+    </AddressLink>
+    <AddressLink v-else-if="Object.values(chainNameList).includes(network)" :network="network" :address="address" class="address">
       <span>{{ shortenFitText(address, "left") }}</span>
     </AddressLink>
     <!-- L1 -->
@@ -36,6 +38,8 @@ import { NOVA } from "@/utils/constants";
 
 import type { Hash, NetworkOrigin } from "@/types";
 import type { PropType } from "vue";
+import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
+
 defineProps({
   label: {
     type: String,
@@ -55,6 +59,8 @@ defineProps({
   },
 });
 const { currentNetwork } = useContext();
+const { chainNameList }=useEnvironmentConfig();
+
 </script>
 
 <style lang="scss" scoped>
