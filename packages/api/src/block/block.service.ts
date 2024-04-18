@@ -37,15 +37,17 @@ export class BlockService {
   }
 
   public async getLastVerifiedBlockNumber(): Promise<number> {
-    const queryBuilder = this.blocksRepository.createQueryBuilder("block");
-    queryBuilder.select("block.number");
-    queryBuilder.innerJoin("block.batch", "batches");
-    queryBuilder.where("batches.executedAt IS NOT NULL");
-    queryBuilder.orderBy("block.number", "DESC");
-    queryBuilder.limit(1);
-
-    const lastBlock = await queryBuilder.getOne();
-    return lastBlock?.number || 0;
+    const sql = "WITH max_batch_number AS (" +
+        "    SELECT MAX(number) AS max_number" +
+        "    FROM batches" +
+        "    WHERE \"executedAt\" IS NOT NULL" +
+        ") " +
+        "SELECT MAX(blocks.number) AS max_block_number " +
+        "FROM blocks \n" +
+        "JOIN max_batch_number ON blocks.\"l1BatchNumber\" = max_batch_number.max_number;"
+    const queryBuilder =await this.blocksRepository.query(sql);
+    const ans = Number(queryBuilder[0].max_block_number);
+    return ans || 0;
   }
 
   public async findOne(
