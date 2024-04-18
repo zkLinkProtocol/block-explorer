@@ -125,4 +125,31 @@ export default [
       },
     ],
   },
+  {
+    address: "0x5Aa48B2DFD3Fd7cF1a3374AE1b0CCe54329E4bCf",
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: "0x245FB442F811f02D27BdebDEf23eD30810570aAE",
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: "0xE00c509c4a54b8b775Ea5643F48de366a074b114",
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+    ],
+  },
 ];
