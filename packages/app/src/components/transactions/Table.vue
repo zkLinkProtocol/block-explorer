@@ -356,7 +356,6 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
       const foundKey = Object.entries(ERC20Bridges).find(([key, value]) => value === transaction.from)
       // is the value in ERC20Bridges
       if(foundKey){
-        console.log(foundKey[0]);
         fromNetwork=chainNameList[foundKey[0]]
         
       }else if(transaction.networkKey && transaction.networkKey !== "error"){
