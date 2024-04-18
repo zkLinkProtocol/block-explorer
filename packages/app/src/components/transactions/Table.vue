@@ -229,7 +229,7 @@ import useAddress from "@/composables/useAddress";
 import { NOVA } from '@/utils/constants'
 // const { item, getByAddress, getContractVerificationInfo } = useAddress();
 
-const { chainNameList } = useEnvironmentConfig();
+const { chainNameList,ERC20Bridges } = useEnvironmentConfig();
 
 const { t, te } = useI18n();
 
@@ -349,12 +349,16 @@ type TransactionListItemMapped = TransactionListItem & {
   statusIcon: unknown;
   statusColor: "danger" | "dark-success";
 };
-
 const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
   return data.value?.map((transaction) => {
     let fromNetwork=''
     if(transaction.isL1Originated){
-      if(transaction.networkKey && transaction.networkKey !== "error"){
+      const foundKey = Object.entries(ERC20Bridges).find(([key, value]) => value === transaction.from)
+      // is the value in ERC20Bridges
+      if(foundKey){
+        fromNetwork=chainNameList[foundKey[0]]
+        
+      }else if(transaction.networkKey && transaction.networkKey !== "error"){
         const key=transaction.networkKey==='linea'?'primary':transaction.networkKey
         fromNetwork=chainNameList[key]
       }else{

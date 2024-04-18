@@ -11,6 +11,11 @@
       {{ formattedAddress }}
     </slot>
   </a>
+  <a v-else-if="isErc20Bridge" target="_blank" :href="`${getExplorerUrlPrefix(erc20Key)}/address/${formattedAddress}`">
+    <slot>
+      {{ formattedAddress }}
+    </slot>
+  </a>
   <span v-else-if="network === 'L1' && !currentNetwork.l1ExplorerUrl">
     <slot>
       {{ formattedAddress }}
@@ -33,6 +38,9 @@ import type { NetworkOrigin } from "@/types";
 
 import { getExplorerUrlPrefix } from "@/configs/networkKey";
 import { checksumAddress } from "@/utils/formatters";
+import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
+
+const { chainNameList } = useEnvironmentConfig();
 
 const props = defineProps({
   address: {
@@ -52,4 +60,8 @@ const props = defineProps({
 
 const { currentNetwork } = useContext();
 const formattedAddress = computed(() => checksumAddress(props.address));
+const isErc20Bridge = computed(() => Object.values(chainNameList).includes(props.network));
+const erc20Key = computed(() => Object.keys(chainNameList).find(key => chainNameList[key] === props.network))
+
+
 </script>
