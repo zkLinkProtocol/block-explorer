@@ -1,17 +1,18 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectMetric } from "@willsoto/nestjs-prometheus";
-import { Histogram } from "prom-client";
+import {Injectable, Logger} from "@nestjs/common";
+import {InjectMetric} from "@willsoto/nestjs-prometheus";
+import {Histogram} from "prom-client";
 import {
-  TransactionRepository,
-  TransactionReceiptRepository,
-  TransferRepository,
   AddressRepository,
-  TokenRepository,
   LogRepository,
+  TokenRepository,
+  TransactionReceiptRepository,
+  TransactionRepository,
+  TransferRepository,
 } from "../repositories";
-import { TRANSACTION_PROCESSING_DURATION_METRIC_NAME } from "../metrics";
-import { TransactionData } from "../dataFetcher/types";
-import { GateWayConfig } from "../utils/gatewayConfig";
+import {TRANSACTION_PROCESSING_DURATION_METRIC_NAME} from "../metrics";
+import {TransactionData} from "../dataFetcher/types";
+import {BridgeConfig, GateWayConfig} from "../utils/gatewayConfig";
+import {TokenType, TransferType} from "../entities";
 
 @Injectable()
 export class TransactionProcessor {
@@ -42,13 +43,33 @@ export class TransactionProcessor {
 
     if (transactionData.transaction.isL1Originated){
       const resTransferList =transactionData.transfers.filter((transfer) => transfer.transactionHash === transactionData.transaction.hash && transfer.gateway !== undefined && transfer.gateway !== null);
-      const resTransfer = resTransferList.find((transfer) => transfer.gateway !== '0x' && transfer.gateway !== 'error' );
+      const resTransfer = resTransferList.find((transfer) => transfer.gateway !== '0x' && transfer.gateway !== '0x11' );
       if (resTransfer !== undefined && resTransfer !== null && resTransfer.gateway !== null && resTransfer.gateway !== undefined){
         transactionData.transaction.networkKey = this.findGatewayByAddress(resTransfer.gateway);
       }else if (resTransferList !== undefined && resTransferList !== null && resTransferList.length > 0) {
         transactionData.transaction.networkKey = this.GATEWAYERROR;
       }else {
         transactionData.transaction.networkKey = this.GATEWAYNULLVALUE;
+      }
+    }
+    else {
+      const transfer = transactionData.transfers.find((t) => t.type === TransferType.Withdrawal);
+      if (transfer !== undefined && transfer !== null && transfer.tokenType === TokenType.ERC20){
+        const gateway = this.findGatewayByTo(transactionData.transaction.to);
+        if (gateway !== 'error'){
+          transactionData.transaction.networkKey = gateway;
+        }
+      }else if(transfer !== undefined && transfer !== null && transfer.tokenType === TokenType.ETH && transactionData.transaction.to === '0x000000000000000000000000000000000000800a'){
+        const callData = transactionData.transaction.data.replace("0x","");
+        if (callData.slice(0,8) === '84bc3eb0'){
+          const gateway = this.findGatewayByAddress(transfer.gateway);
+          if (gateway !== 'error'){
+            transactionData.transaction.networkKey = gateway;
+          }
+        }
+        else if (callData.slice(0,8) === '51cff8'){
+          transactionData.transaction.networkKey = this.GATEWAYNULLVALUE;
+        }
       }
     }
     await this.transactionRepository.add(transactionData.transaction);
@@ -113,6 +134,15 @@ export class TransactionProcessor {
   private  findGatewayByAddress(value: string): string {
     for (let key in GateWayConfig) {
       if (GateWayConfig[key] === value) {
+        return key;
+      }
+    }
+    return "error";
+  }
+
+  private  findGatewayByTo(value: string): string {
+    for (let key in BridgeConfig) {
+      if (BridgeConfig[key] === value) {
         return key;
       }
     }
