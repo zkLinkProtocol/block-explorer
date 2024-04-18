@@ -9,7 +9,7 @@ import type { TransactionLogEntry } from "./useEventLog";
 import type { Hash, NetworkOrigin } from "@/types";
 import type { types } from "zksync-web3";
 import useEnvironmentConfig from "./useEnvironmentConfig";
-import { NOVA } from '@/utils/constants'
+import { NOVA } from "@/utils/constants";
 
 export type TransactionStatus = "included" | "committed" | "proved" | "verified" | "failed" | "indexing";
 type TokenInfo = {
@@ -32,7 +32,7 @@ export type TokenTransfer = {
   fromNetwork: NetworkOrigin;
   toNetwork: NetworkOrigin;
   tokenInfo?: TokenInfo;
-  transactionTo?: string
+  transactionTo?: string;
 };
 
 export type TransactionDetails = types.TransactionDetails & {
@@ -84,20 +84,21 @@ export type TransactionItem = {
   transfers: TokenTransfer[];
 };
 
-export function getTransferNetworkOrigin(transfer: Api.Response.Transfer, sender: "from" | "to",transactionTo?:string) {
-  const { chainNameList , ERC20Bridges }=useEnvironmentConfig();
+export function getTransferNetworkOrigin(
+  transfer: Api.Response.Transfer,
+  sender: "from" | "to",
+  transactionTo?: string
+) {
+  const { chainNameList, ERC20Bridges } = useEnvironmentConfig();
   let chainName = "";
-  console.log('transactionTo',transactionTo);
-  
-  const foundKey = Object.entries(ERC20Bridges).find(([key, value]) => value === transactionTo )
+  const foundKey = Object.entries(ERC20Bridges).find(([key, value]) => value === transactionTo);
   // is the value in ERC20Bridges
-  if(foundKey){
-    chainName=chainNameList[foundKey[0]]
-  }else if (transfer.transaction && transfer.transaction?.networkKey !== "error") {
+  if (foundKey) {
+    chainName = chainNameList[foundKey[0]];
+  } else if (transfer.transaction && transfer.transaction?.networkKey !== "error") {
     const key = transfer.transaction?.networkKey === "linea" ? "primay" : transfer.transaction?.networkKey;
     chainName = chainNameList[key];
   } else {
-
     chainName = "Linea";
   }
   if (sender === "from") {
@@ -273,7 +274,7 @@ export function mapTransaction(
       transactionIndex: item.transactionIndex.toString(16),
     })),
 
-    transfers: mapTransfers(filterTransfers(transfers),transaction.to),
+    transfers: mapTransfers(filterTransfers(transfers), transaction.to),
 
     gasPrice: transaction.gasPrice,
     gasLimit: transaction.gasLimit,
@@ -284,13 +285,13 @@ export function mapTransaction(
   };
 }
 
-function mapTransfers(transfers: Api.Response.Transfer[],transactionTo?:string): TokenTransfer[] { 
+function mapTransfers(transfers: Api.Response.Transfer[], transactionTo?: string): TokenTransfer[] {
   return transfers.map((item) => ({
     amount: item.amount,
     from: item.from,
     to: item.to,
-    fromNetwork: getTransferNetworkOrigin(item, "from",transactionTo),
-    toNetwork: getTransferNetworkOrigin(item, "to",transactionTo),
+    fromNetwork: getTransferNetworkOrigin(item, "from", transactionTo),
+    toNetwork: getTransferNetworkOrigin(item, "to", transactionTo),
     type: item.type,
     tokenInfo: {
       address: item.tokenAddress,
@@ -303,7 +304,6 @@ function mapTransfers(transfers: Api.Response.Transfer[],transactionTo?:string):
       liquidity: item.token?.liquidity,
       iconURL: item.token?.iconURL,
     } as TokenInfo,
-  
   }));
 }
 

@@ -11,8 +11,7 @@
       {{ formattedAddress }}
     </slot>
   </a>
-  <a v-else-if="isErc20Bridge" target="_blank"
-    :href="`${getExplorerUrlPrefix(erc20Key)}/address/${formattedAddress}`">
+  <a v-else-if="isErc20Bridge" target="_blank" :href="`${getExplorerUrlPrefix(erc20Key)}/address/${formattedAddress}`">
     <slot>
       {{ formattedAddress }}
     </slot>
@@ -41,7 +40,7 @@ import { getExplorerUrlPrefix } from "@/configs/networkKey";
 import { checksumAddress } from "@/utils/formatters";
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 
-const { chainNameList }=useEnvironmentConfig();
+const { chainNameList } = useEnvironmentConfig();
 
 const props = defineProps({
   address: {
@@ -61,12 +60,8 @@ const props = defineProps({
 
 const { currentNetwork } = useContext();
 const formattedAddress = computed(() => checksumAddress(props.address));
-const isErc20Bridge=computed(() => {
-  return Object.values(chainNameList).includes(props.network)
-})
-const erc20Key=computed(() => {
-  return Object.keys(chainNameList).find(key => chainNameList[key] === props.network);
-})
+const isErc20Bridge = computed(() => Object.values(chainNameList).includes(props.network));
+const erc20Key = computed(() => Object.keys(chainNameList).find(key => chainNameList[key] === props.network))
 
 
 </script>
