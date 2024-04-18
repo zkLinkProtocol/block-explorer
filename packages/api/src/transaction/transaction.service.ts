@@ -10,6 +10,7 @@ import { AddressTransaction } from "./entities/addressTransaction.entity";
 import { Batch } from "../batch/batch.entity";
 import { CounterService } from "../counter/counter.service";
 import { LRUCache } from "lru-cache";
+import {FilterTransfersOptions} from "../transfer/transfer.service";
 // const options: LRU. = { max: 500 };
 const options = {
   // how long to live in ms
@@ -148,6 +149,28 @@ export class TransactionService {
     queryBuilder.limit(offset);
     const addressTransactions = await queryBuilder.getMany();
     return addressTransactions;
+  }
+
+  public async findFailedByAddress(
+      filterOptions: FilterTransfersOptions = {},
+      paginationOptions: IPaginationOptions
+  ): Promise<Pagination<Transaction>> {
+    const queryBuilder = this.addressTransactionRepository.createQueryBuilder("addressTransaction");
+    queryBuilder.select("addressTransaction.number");
+    queryBuilder.leftJoinAndSelect("addressTransaction.transaction", "transaction");
+    queryBuilder.leftJoinAndSelect("transaction.transfers","transfer");
+    queryBuilder.leftJoinAndSelect("transfer.token", "token");
+    queryBuilder.where(filterOptions);
+    queryBuilder.andWhere("transaction.receiptStatus = :status", { status: 0 });
+    const order = 'DESC';
+    queryBuilder.orderBy("addressTransaction.blockNumber", order);
+    queryBuilder.addOrderBy("addressTransaction.receivedAt", order);
+    queryBuilder.addOrderBy("addressTransaction.transactionIndex", order);
+    const addressTransactions = await paginate<AddressTransaction>(queryBuilder, paginationOptions);
+    return {
+      ...addressTransactions,
+      items: addressTransactions.items.map((item) => item.transaction),
+    };
   }
 
   private getAccountNonceQueryBuilder(accountAddress: string, isVerified: boolean): SelectQueryBuilder<Transaction> {
