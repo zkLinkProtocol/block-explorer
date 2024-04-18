@@ -31,6 +31,7 @@ export type EnvironmentConfig = {
   iconsList: IconsList;
   chainNameList: IconsList;
   excuteBatchList: ExcuteBatchItem[];
+  ERC20Bridges: IconsList;
 };
 
 export type RuntimeConfig = {
