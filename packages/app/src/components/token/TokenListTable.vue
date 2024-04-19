@@ -15,7 +15,7 @@
         </Tab>
       </TabList>
     </TabGroup>
-    <div class="flex items-center text-sm mb-4 md:mb-0">
+    <div class="flex items-center text-sm my-4 md:my-0">
       <FilterModal v-model:selected="selectedFilterList">
       </FilterModal>
       <form v-show="!showClearButton" class="search-form" autocomplete="off" @submit.prevent="handleSearch">
@@ -74,7 +74,7 @@
     <template #table-row="{ item }: { item: any }">
       <TableBodyColumn :data-heading="t('tokensView.table.tokenName')">
         <TokenIconLabel class="token-name-box" :symbol="item.symbol" icon-size="xl" :address="item.l2Address"
-          :name="item.name" :icon-url="item.iconURL" :tags="item.tags" />
+          :name="item.name" :icon-url="item.iconURL" :decimals="item.decimals" :showMask="true" />
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
         <TokenPrice :address="item.l2Address" />
@@ -122,14 +122,14 @@
     </template>
     <template #expand-button="{ item, index, active }">
       <button :class="{ 'btn-open': true, active }">
-        Source Tokens (8)
+        Source Tokens ({{ item.matchingTokens.length }})
         <ChevronDownIcon class="dropdown-icon" aria-hidden="true" />
       </button>
 
     </template>
     <template #table-row-expanded="{ item }: { item: any }">
       <td colspan="6">
-        <SourceToken :items="mergedToken" />
+        <SourceToken :items="item.matchingTokens" />
       </td>
 
     </template>
@@ -178,10 +178,10 @@
         <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
-        <TableBodyColumn>
+        <TableBodyColumn v-if="selectedTab===TAB_TYPE.Bridged">
           <ContentLoader />
         </TableBodyColumn>
-        <TableBodyColumn>
+        <TableBodyColumn v-if="selectedTab===TAB_TYPE.Bridged">
           <ContentLoader />
         </TableBodyColumn>
       </tr>
@@ -249,13 +249,16 @@ watch(width, () => {
   width.value <= 500 ? (subtraction.value = 10) : (subtraction.value = 5);
 });
 
-const { getSourceTokenList } = useSourceTokens()
+const { sourceTokenList, getSourceTokenList } = useSourceTokens()
+
 getSourceTokenList()
+
 const handleChildClick = (e: MouseEvent) => {
   e.stopPropagation();
 };
 
 const isRequestPending = ref(false);
+
 enum TAB_TYPE {
   Merged,
   Native,
@@ -371,18 +374,23 @@ const mergedToken = computed(() => {
     "0x1a1A3b2ff016332e866787B311fcB63928464509",
     "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab"
   ];
-  console.log([...props.tokens].filter((item) => {
+  const mergedArr = [...props.tokens].filter((item) => {
     return !item.networkKey &&
       ((item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)) ||
         (item.l2Address && novaAddresses.includes(item.l2Address)));
-  }))
+  }).map(item => {
+    const matchingTokens = sourceTokenList.value?.filter(token => token.symbol === item.symbol) ?? [];
+    const newMatchingTokens = matchingTokens.map((token) => {
+      const obj = {
+        ...token,
+        tvl: (token.availableToRedeem && item.usdPrice !== 0) !== 0 ? Number(token.availableToRedeem) * item.usdPrice! : 0,
+      };
 
-  return [...props.tokens].filter((item) => {
-    return !item.networkKey &&
-      ((item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)) ||
-        (item.l2Address && novaAddresses.includes(item.l2Address)));
+      return obj;
+    }).sort((a, b) => b.tvl - a.tvl);
+    return { ...item, matchingTokens: newMatchingTokens };
   });
-
+  return mergedArr;
 })
 const nativeToken = computed(() => {
   return [...props.tokens].filter((item) => {
@@ -439,7 +447,6 @@ const displayTokenList = computed(() => {
   return mergeData;
 });
 
-
 const showingCount = computed(() => displayTokenList.value.length)
 defineExpose({ showingCount })
 onBeforeUnmount(() => {
@@ -447,6 +454,7 @@ onBeforeUnmount(() => {
     clearTimeout(timerId);
   }
 });
+
 
 </script>
 

@@ -1,16 +1,16 @@
-import daiIcon from "@/assets/images/tokens/dai.webp";
-import usdcIcon from "@/assets/images/tokens/usdc.webp";
-import usdtIcon from "@/assets/images/tokens/usdt.webp";
-import wbtcIcon from "@/assets/images/tokens/wbtc.webp";
+import daiIcon from "/images/tokens/dai.webp";
+import usdcIcon from "/images/tokens/usdc.webp";
+import usdtIcon from "/images/tokens/usdt.webp";
+import wbtcIcon from "/images/tokens/wbtc.webp";
 
-import arbitrumIcon from "@/assets/images/chains/arbitrum.svg";
-import zksyncIcon from "@/assets/images/chains/zksync.svg";
-import lineaIcon from "@/assets/images/chains/linea.svg";
-import mantleIcon from "@/assets/images/chains/mantle.svg";
-import mantaIcon from "@/assets/images/chains/manta.svg";
-import optimismIcon from "@/assets/images/chains/optimism.svg";
-import ethereumIcon from "@/assets/images/chains/ethereum.svg";
-import baseIcon from "@/assets/images/chains/base.svg";
+import arbitrumIcon from "/img/arbitrum-arb-logo.svg";
+import zksyncIcon from "/img/zksync.svg";
+import lineaIcon from "/img/linea.svg";
+import mantleIcon from "/img/mantle.svg";
+import mantaIcon from "/img/manta.jpg";
+import optimismIcon from "/img/optimism.svg";
+import ethereumIcon from "/img/ethereum.svg";
+import baseIcon from "/img/base.svg";
 
 export interface SourceTokenStatic {
   symbol: string;
@@ -21,14 +21,6 @@ export interface SourceTokenStatic {
   chainIcon: string;
 }
 
-export interface MergeTokenStatic {
-  name: string;
-  symbol: string;
-  tokenAddress: string;
-  iconURL: string;
-  createAt: string;
-  lastUpgradedAt: string;
-}
 export interface SourceTokenBalanceItem {
   tokenAddress: string;
   symbol: string;
@@ -36,41 +28,20 @@ export interface SourceTokenBalanceItem {
   chainId: number;
   balance: bigint;
 }
-
-export const mergeTokens: MergeTokenStatic[] = [
-  {
-    name: "Nova Tether USD",
-    symbol: "USDT",
-    tokenAddress: "0x2F8A25ac62179B31D62D7F80884AE57464699059",
-    iconURL: usdtIcon,
-    createAt: "2024-03-30 13:07",
-    lastUpgradedAt: "2024-03-30 13:07",
-  },
-  {
-    name: "Nova Wrapped BTC",
-    symbol: "WBTC",
-    iconURL: wbtcIcon,
-    tokenAddress: "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
-    createAt: "2024-03-30 13:07",
-    lastUpgradedAt: "2024-03-30 13:07",
-  },
-  {
-    name: "Nova USD Coin",
-    symbol: "USDC",
-    iconURL: usdcIcon,
-    tokenAddress: "0x1a1A3b2ff016332e866787B311fcB63928464509",
-    createAt: "2024-03-30 13:07",
-    lastUpgradedAt: "2024-03-30 13:07",
-  },
-  {
-    name: "Nova Dai Stablecoin",
-    symbol: "DAI",
-    iconURL: daiIcon,
-    tokenAddress: "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab",
-    createAt: "2024-03-30 13:07",
-    lastUpgradedAt: "2024-03-30 13:07",
-  },
-];
+export interface SourceToken {
+  symbol: string;
+  tokenAddress: string;
+  chainName: string;
+  chainId: number;
+  decimals: number;
+  balance: number;
+  availableToRedeem: number;
+  chainIcon: string;
+  iconURL: string;
+  l1Address?: string;
+  name?: string;
+  networkKey?: string;
+}
 
 export const sourceTokens: SourceTokenStatic[] = [
   {

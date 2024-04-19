@@ -13,7 +13,7 @@
             <template v-for="(item, index) in items" :key="index">
               <tr>
                 <slot name="table-row" :item="item" :index="index"></slot>
-                <td class="table-body-col" v-if="expandable">
+                <td class="table-body-col mobile-col" v-if="expandable">
                   <div @click="toggleExpand(index, item)">
                     <slot name="expand-button" :item="item" :index="index" :active="expandedRows.includes(index)">
                     </slot>
@@ -132,6 +132,10 @@ const toggleExpand = (index: number, item: any) => {
   .table-footer {
     @apply w-full rounded-b-lg;
   }
+}
+.mobile-col{
+  @apply relative flex flex-col items-end justify-end text-right md:table-cell md:w-1/3 md:text-left;
+
 }
 
 @media (max-width: 760px) {

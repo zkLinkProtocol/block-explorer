@@ -9,24 +9,17 @@
       </span>
       <div class="token-icon-container" :class="iconSize">
         <div class="token-img-loader"></div>
-        <img
-          class="token-img"
-          :class="{ loaded: isImageLoaded }"
-          :src="imgSource"
-          :alt="symbol || t('balances.table.unknownSymbol')"
-        />
+        <img class="token-img" :class="{ loaded: isImageLoaded }" :src="imgSource"
+          :alt="symbol || t('balances.table.unknownSymbol')" />
       </div>
     </AddressLink>
     <div class="token-info" v-if="name && symbol">
       <div class="token-symbol">
         {{ symbol }}
+        <img v-if="showMask" src="/images/icon-metamask.svg" class="metamask-image" @click="addToken" />
       </div>
       <div class="token-name">
         <span>{{ name }}</span>
-        <div class="tags flex ml-1 mr-1 md:mr-0 " v-if="tags.length">
-          <span class="token-tag" v-for="(tag,i) in tags" :key="i">{{ tag }}</span>
-        </div>
-        
       </div>
     </div>
   </div>
@@ -38,6 +31,7 @@ import { useI18n } from "vue-i18n";
 import { useImage } from "@vueuse/core";
 
 import AddressLink from "@/components/AddressLink.vue";
+import { addTokenToWeb3Wallet } from '@/utils/wallet';
 
 import type { Hash } from "@/types";
 
@@ -70,9 +64,13 @@ const props = defineProps({
     type: String,
     default: "",
   },
-  tags:{
-    type: Array,
-    default: [],
+  showMask: {
+    type: Boolean,
+    default: false,
+  },
+  decimals: {
+    type: Number,
+    default: 0,
   }
 });
 
@@ -80,6 +78,14 @@ const imgSource = computed(() => {
   return props.iconUrl || "/images/currencies/customToken.svg";
 });
 const { isReady: isImageLoaded } = useImage({ src: imgSource.value });
+const addToken = () => {
+  addTokenToWeb3Wallet({
+    address: props.address,
+    symbol: props.symbol!,
+    decimals: props.decimals,
+    image: props.iconUrl!,
+  })
+}
 </script>
 
 <style lang="scss">
@@ -125,20 +131,30 @@ const { isReady: isImageLoaded } = useImage({ src: imgSource.value });
   }
   .token-info {
     .token-symbol {
-      @apply text-neutral-600;
+      @apply flex text-neutral-600;
     }
     .token-name {
       @apply flex items-center text-xs text-neutral-400;
     }
   }
-  .token-tag{
+.token-tag{
     @apply flex items-center justify-center gap-8 ml-1;
-  
+
     padding: 2px 4px;
     border-radius: 4px;
     background: #E4E5FE;
     color: #7e798d;
-}
-}
+  }
 
+  &:hover {
+    .metamask-image {
+      display: block;
+    }
+  }
+
+  .metamask-image {
+    @apply w-5 ml-2 hover:cursor-pointer hidden transition duration-300;
+
+  }
+}
 </style>

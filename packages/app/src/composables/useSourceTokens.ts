@@ -1,49 +1,49 @@
-import { sourceTokens, type SourceTokenBalanceItem } from "@/configs/tokens";
+import { ref } from "vue";
+import { sourceTokens, type SourceTokenBalanceItem, type SourceToken } from "@/configs/tokens";
 import { MERGE_TOKEN_PORTAL } from "@/utils/constants";
 import useAddress, { type Account, type Contract } from "@/composables/useAddress";
+import { formatBigNumberish, formatValue } from "@/utils/formatters";
+import useTokenLibrary from "@/composables/useTokenLibrary";
+import useContext from "./useContext";
 
-const { item, isRequestPending: pending, isRequestFailed: failed, getByAddress } = useAddress();
-
-export default () => {
+const { item: mergeTokenBalances, isRequestPending: pending, isRequestFailed: failed, getAddress } = useAddress();
+const { tokens, getTokens } = useTokenLibrary();
+export default (context = useContext()) => {
+  const sourceTokenList = ref<SourceToken[] | null>(null);
   const getSourceTokenList = async () => {
-    //通过接口拿到数据
-    await getByAddress(MERGE_TOKEN_PORTAL);
-    console.log("1", item);
+    try {
+      await getAddress(MERGE_TOKEN_PORTAL);
+      await getTokens();
+      sourceTokenList.value = sourceTokens.map((token) => {
+        const sourceToken: SourceToken = {
+          ...token,
+          decimals: 0,
+          balance: 0,
+          availableToRedeem: 0,
+        };
 
-    // const { balances: mergeTokenBalances } = await getMergeTokenBalanceFromExplorer();
+        const findSourceToken = tokens.value.find(
+          (item) => item.l2Address.toLowerCase() === token.tokenAddress.toLowerCase()
+        );
+        if (findSourceToken) {
+          sourceToken.decimals = Number(findSourceToken.decimals) || 0;
+          sourceToken.name = findSourceToken.name || "";
+          sourceToken.l1Address = findSourceToken.l1Address || "";
+          sourceToken.networkKey = findSourceToken.networkKey || "";
+        }
+        const availableToRedeem = mergeTokenBalances.value?.balances[sourceToken?.tokenAddress];
+        if (availableToRedeem) {
+          sourceToken.availableToRedeem = Number(formatValue(availableToRedeem.balance, sourceToken.decimals)) || 0;
+        }
 
-    // const tokens = sourceTokens.map((token) => {
-    //   const sourceToken: SourceToken = {
-    //     ...token,
-    //     decimals: 0,
-    //     balance: 0,
-    //     availableToRedeem: 0,
-    //   };
-
-    //   const findSourceToken = explorerTokenItems.find(
-    //     (item) => item.l2Address.toLowerCase() === token.tokenAddress.toLowerCase()
-    //   );
-    //   if (findSourceToken) {
-    //     sourceToken.decimals = Number(findSourceToken.decimals) || 0;
-    //   }
-
-    //   if (findSourceToken?.decimals) {
-    //     const findBalance = balanceList.find((item) => item.tokenAddress === token.tokenAddress)?.balance;
-    //     if (findBalance) {
-    //       sourceToken.balance = Number(formatUnits(findBalance, sourceToken.decimals)) || 0;
-    //     }
-
-    //     const availableToRedeem = mergeTokenBalances[sourceToken?.tokenAddress];
-    //     if (availableToRedeem) {
-    //       sourceToken.availableToRedeem =
-    //         Number(formatUnits(BigInt(availableToRedeem.balance), sourceToken.decimals)) || 0;
-    //     }
-    //   }
-
-    //   return sourceToken;
-    // });
+        return sourceToken;
+      });
+    } catch (error) {
+      console.error("Error fetching source token list:", error);
+    }
   };
   return {
+    sourceTokenList,
     getSourceTokenList,
   };
 };

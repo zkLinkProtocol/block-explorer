@@ -6,32 +6,32 @@
       </table-head-column>
     </template>
     <template #table-row="{ item }: { item: any }">
-      <TableBodyColumn :data-heading="t('tokensView.sourceToken.tokenName')">
-        <TokenIconLabel class="token-name-box" :symbol="item.symbol" icon-size="xl" :address="item.l2Address"
-          :name="item.name" :icon-url="item.iconURL" :tags="item.tags" />
+      <TableBodyColumn :data-heading="t('tokensView.sourceToken.title')">
+        <TokenIconLabel class="token-name-box" :symbol="item.symbol" icon-size="xl" :address="item.tokenAddress"
+          :name="item.name" :icon-url="item.iconURL" />
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.sourceToken.totalQty')">
-        <TotalQTY :totalSupply="item.totalSupply" :decimals="item.decimals" />
+      <TableBodyColumn :data-heading="t('tokensView.sourceToken.sourceChain')">
+        {{ item.chainName }}
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.sourceToken.tvl')">
-        <TokenTVL :tvl="item.tvl" />
+      <TableBodyColumn :data-heading="t('tokensView.sourceToken.mergedQty')">
+        {{ formatNumberPretty(Number(item.availableToRedeem)) }}
+      </TableBodyColumn>
+      <TableBodyColumn  :data-heading="t('tokensView.sourceToken.mergedTVL')">
+        <div >{{ formatMoney(Number(Number(item.tvl).toFixed(0)), 0) }}</div>
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.sourceToken.novaAddress')">
         <div class="token-address-container max-w-sm">
-          <AddressLink :data-testid="$testId.tokenAddress" :address="item.l2Address"
+          <AddressLink :data-testid="$testId.tokenAddress" :address="item.tokenAddress"
             class="token-address block max-w-sm">
-            {{ shortenFitText(item.l2Address, "left", 100, subtraction) }}
+            {{ shortenFitText(item.tokenAddress, "left", 100, subtraction) }}
           </AddressLink>
-          <CopyButton :value="item.l2Address" />
+          <CopyButton :value="item.tokenAddress" />
         </div>
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.sourceToken.originAddress')">
-        <div v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)"
+      <TableBodyColumn :data-heading="t('tokensView.sourceToken.originAddress')"> 
+        <div v-if="item.l1Address"
           class="token-address-container max-w-sm">
-          <div v-if="!item.networkKey">
-            {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
-          </div>
-          <AddressLink v-else :data-testid="$testId.tokenAddress" :address="item.l1Address" network="origin"
+          <AddressLink  :data-testid="$testId.tokenAddress" :address="item.l1Address" network="origin"
             :networkKey="item.networkKey" class="token-address block max-w-sm">
             {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
           </AddressLink>
@@ -54,20 +54,11 @@ import { shortenFitText } from "@/components/common/HashLabel.vue";
 import Table from "@/components/common/table/Table.vue";
 import TableBodyColumn from "@/components/common/table/TableBodyColumn.vue";
 import TableHeadColumn from "@/components/common/table/TableHeadColumn.vue";
-import TokenPrice from "@/components/common/table/fields/TokenPrice.vue";
-import TokenTVL from "@/components/common/table/fields/TokenTVL.vue";
-import TotalQTY from "@/components/common/table/fields/TotalQTY.vue";
-import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
-import EmptyState from "@/components/common/EmptyState.vue";
-import { NOVA_NATIVE_TOKEN, ETH_TOKEN_L1_ADDRESS, NOVA_MERGED_TOKEN } from "@/utils/constants";
 
-import { formatBigNumberish, formatPricePretty } from "@/utils/formatters";
+import { formatMoney, formatNumberPretty } from "@/utils/formatters";
 
 import type { Token } from "@/composables/useToken";
-
-const { chainNameList } = useEnvironmentConfig();
-
-const props = defineProps({
+defineProps({
   tokens: {
     type: Array as PropType<Token[]>,
     default: () => [],
@@ -93,8 +84,28 @@ const myCols = ref([
 </script>
 
 <style scoped lang="scss">
+.table-body-col {
+  @apply relative flex flex-col items-end justify-end text-right md:table-cell md:w-1/3 md:text-left;
+
+  &:before {
+    @apply absolute left-4 top-3 whitespace-nowrap pr-5 text-left text-xs uppercase text-neutral-400 content-[attr(data-heading)] md:content-none;
+  }
+}
+
+.token-address-container {
+  @apply flex gap-x-2;
+
+  .token-address {
+    @apply block cursor-pointer font-mono text-sm font-medium;
+  }
+}
+
 .table-wrap {
-  :deep(table thead tr th) {
+  :deep(table thead tr th, ) {
+    background-color: transparent;
+  }
+
+  :deep(table tbody tr:nth-child(even)) {
     background-color: transparent;
   }
 }
@@ -119,4 +130,5 @@ const myCols = ref([
   }
 
 }
+
 </style>

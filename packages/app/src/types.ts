@@ -2,7 +2,7 @@ export type Hash = `0x${string}` | string;
 
 export type Address = Hash;
 
-export type NetworkOrigin = "L1" | "L2" | "origin" | "nova" | "Nova"| string ;
+export type NetworkOrigin = "L1" | "L2" | "origin" | "nova" | "Nova" | string;
 
 export enum ContractVerificationCodeFormatEnum {
   soliditySingleFile = "solidity-single-file",
@@ -57,5 +57,9 @@ export type ContractVerificationData = {
   compilerVersion: string;
   constructorArguments: string;
 };
-
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
 export type ContractVerificationStatus = "successful" | "failed" | "in_progress" | "queued";
