@@ -43,6 +43,16 @@ export class TransactionRepository extends BaseRepository<Transaction> {
         transactionHash: record.hash,
       });
     }
+    // if (record.receiptStatus === 0 && record.isL1Originated === true && record.revertReason === "Error function_selector = 0x, data = 0x"){
+    //   // const value = record.data
+    //   const value = record.data.slice(record.data.indexOf("67bf062")+8,70);
+    //   const addressResend = value.slice(value.length-40,value.length);
+    //   addressTransactions.push({
+    //     ...addressTransaction,
+    //     address: addressResend,
+    //     transactionHash: record.hash,
+    //   });
+    // }
     await this.addressTransactionRepository.addMany(addressTransactions);
   }
   public async updateGateWay(hash: string, gateway: string | null): Promise<void> {
