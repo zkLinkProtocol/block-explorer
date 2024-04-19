@@ -1,17 +1,18 @@
-import {Injectable, Logger} from "@nestjs/common";
-import {InjectMetric} from "@willsoto/nestjs-prometheus";
-import {Histogram} from "prom-client";
+import { Injectable, Logger } from "@nestjs/common";
+import { InjectMetric } from "@willsoto/nestjs-prometheus";
+import { Histogram } from "prom-client";
 import {
-  AddressRepository,
-  LogRepository,
-  TokenRepository,
-  TransactionReceiptRepository,
   TransactionRepository,
+  TransactionReceiptRepository,
   TransferRepository,
+  AddressRepository,
+  TokenRepository,
+  LogRepository,
 } from "../repositories";
-import {TRANSACTION_PROCESSING_DURATION_METRIC_NAME} from "../metrics";
-import {TransactionData} from "../dataFetcher/types";
-import {BridgeConfig, GateWayConfig} from "../utils/gatewayConfig";
+import { TRANSACTION_PROCESSING_DURATION_METRIC_NAME } from "../metrics";
+import { TransactionData } from "../dataFetcher/types";
+import { GateWayConfig , GateWayConfigTestNet, BridgeConfig , BridgeConfigTestNet} from "../utils/gatewayConfig";
+import {ConfigService} from "@nestjs/config";
 import {TokenType, TransferType} from "../entities";
 
 @Injectable()
@@ -19,6 +20,8 @@ export class TransactionProcessor {
   private readonly logger: Logger;
   private readonly GATEWAYNULLVALUE = 'linea';
   private readonly GATEWAYERROR = 'error';
+  private readonly isTestNet :number;
+  configService: ConfigService;
   public constructor(
     private readonly transactionRepository: TransactionRepository,
     private readonly transactionReceiptRepository: TransactionReceiptRepository,
@@ -27,9 +30,11 @@ export class TransactionProcessor {
     private readonly addressRepository: AddressRepository,
     private readonly tokenRepository: TokenRepository,
     @InjectMetric(TRANSACTION_PROCESSING_DURATION_METRIC_NAME)
-    private readonly transactionProcessingDurationMetric: Histogram
+    private readonly transactionProcessingDurationMetric: Histogram,
+    configService: ConfigService
   ) {
     this.logger = new Logger(TransactionProcessor.name);
+    this.isTestNet = configService.get<number>("isTestNet");
   }
 
   public async add(blockNumber: number, transactionData: TransactionData): Promise<void> {
@@ -132,8 +137,9 @@ export class TransactionProcessor {
     stopTransactionProcessingMeasuring();
   }
   private  findGatewayByAddress(value: string): string {
-    for (let key in GateWayConfig) {
-      if (GateWayConfig[key] === value) {
+    const gateWayConfig = this.isTestNet === 0?GateWayConfig:GateWayConfigTestNet;
+    for (let key in gateWayConfig) {
+      if (gateWayConfig[key] === value) {
         return key;
       }
     }
@@ -141,8 +147,9 @@ export class TransactionProcessor {
   }
 
   private  findGatewayByTo(value: string): string {
-    for (let key in BridgeConfig) {
-      if (BridgeConfig[key] === value) {
+    const bridgeConfig = this.isTestNet === 0?BridgeConfig:BridgeConfigTestNet;
+    for (let key in bridgeConfig) {
+      if (bridgeConfig[key] === value) {
         return key;
       }
     }

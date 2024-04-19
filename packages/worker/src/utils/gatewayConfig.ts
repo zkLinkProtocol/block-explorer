@@ -9,6 +9,18 @@ export const  GateWayConfig = {
     optimism : '0x668e8F67adB8219e1816C2E5bBEa055A78AF3026',
     base : '0x4eEA93966AA5cd658225E0D43b665A5a491d2b7E',
 }
+
+export const GateWayConfigTestNet = {
+    ethereum : '0xc6EbbD78E8f81626Bc62570f3C5949221F87b3Ee',
+    linea  : '0x521Bcd03D0B6Fe91Cf432CBcf3d8121cdB0035ad',
+    zksync  : '0x67ba43eD3860D155D16f82D12cA93A7B2e77bF2F',
+    arbitrum  : '0xd75F08D0E513a072799C510d04D9AddC3a28Bd9A',
+    optimism  : '0x2f24331ddFB2D582079C200d1c233F168901a4e1',
+    manta  : '0xC8a31aA097c8D1dCF588C425415E4e5A0E250e67',
+    base  : '0x4E2d5bAaF470028fE48a23bd5b680f4EC7A06f85',
+    blast :'0x83d3f5Db3eea3dD7a30aAF71A32D244386d00C53',
+}
+
 export const BridgeConfig = {
     linea : '0x01c3f51294494e350AD69B999Db6B382b3B510b9',
     ethereum : '0x36CaABbAbfB9C09B722d9C3697C3Cb4A93650ea7',
