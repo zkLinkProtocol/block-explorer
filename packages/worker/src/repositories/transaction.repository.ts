@@ -4,7 +4,8 @@ import { Transaction } from "../entities";
 import { UnitOfWork } from "../unitOfWork";
 import { BaseRepository } from "./base.repository";
 import { AddressTransactionRepository } from "./addressTransaction.repository";
-import {GateWayConfig} from "../utils/gatewayConfig";
+import {GateWayConfig,GateWayConfigTestNet} from "../utils/gatewayConfig";
+import {ConfigService} from "@nestjs/config";
 import { abi as l2BridgeAbi} from "../abis/L2ERC20Bridge.json";
 import { ethers } from "ethers";
 
@@ -19,11 +20,15 @@ export interface TransactionDto extends types.TransactionResponse {
 
 @Injectable()
 export class TransactionRepository extends BaseRepository<Transaction> {
+  private readonly isTestNet :number;
+  configService: ConfigService;
   public constructor(
     unitOfWork: UnitOfWork,
-    private readonly addressTransactionRepository: AddressTransactionRepository
+    private readonly addressTransactionRepository: AddressTransactionRepository,
+    configService: ConfigService
   ) {
     super(Transaction, unitOfWork);
+    this.isTestNet = configService.get<number>("isTestNet");
   }
 
   public override async add(record: Partial<Transaction>): Promise<void> {
@@ -93,8 +98,9 @@ export class TransactionRepository extends BaseRepository<Transaction> {
   }
 
   private  findGatewayByAddress(value: string): string {
-    for (let key in GateWayConfig) {
-      if (GateWayConfig[key] === value) {
+    const gateWayConfig = this.isTestNet === 0?GateWayConfig:GateWayConfigTestNet;
+    for (let key in gateWayConfig) {
+      if (gateWayConfig[key] === value) {
         return key;
       }
     }
