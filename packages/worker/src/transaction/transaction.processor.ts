@@ -11,13 +11,16 @@ import {
 } from "../repositories";
 import { TRANSACTION_PROCESSING_DURATION_METRIC_NAME } from "../metrics";
 import { TransactionData } from "../dataFetcher/types";
-import { GateWayConfig } from "../utils/gatewayConfig";
+import {ConfigService} from "@nestjs/config";
+import { GateWayConfig,GateWayConfigTestNet } from "../utils/gatewayConfig";
 
 @Injectable()
 export class TransactionProcessor {
   private readonly logger: Logger;
   private readonly GATEWAYNULLVALUE = 'linea';
   private readonly GATEWAYERROR = 'error';
+  private readonly isTestNet:number;
+  configService: ConfigService;
   public constructor(
     private readonly transactionRepository: TransactionRepository,
     private readonly transactionReceiptRepository: TransactionReceiptRepository,
@@ -26,9 +29,11 @@ export class TransactionProcessor {
     private readonly addressRepository: AddressRepository,
     private readonly tokenRepository: TokenRepository,
     @InjectMetric(TRANSACTION_PROCESSING_DURATION_METRIC_NAME)
-    private readonly transactionProcessingDurationMetric: Histogram
+    private readonly transactionProcessingDurationMetric: Histogram,
+    configService: ConfigService
   ) {
     this.logger = new Logger(TransactionProcessor.name);
+    this.isTestNet = configService.get<number>("isTestNet");
   }
 
   public async add(blockNumber: number, transactionData: TransactionData): Promise<void> {
@@ -39,7 +44,6 @@ export class TransactionProcessor {
       blockNumber: blockNumber,
       transactionHash: transactionData.transaction.hash,
     });
-
     if (transactionData.transaction.isL1Originated){
       const resTransferList =transactionData.transfers.filter((transfer) => transfer.transactionHash === transactionData.transaction.hash && transfer.gateway !== undefined && transfer.gateway !== null);
       const resTransfer = resTransferList.find((transfer) => transfer.gateway !== '0x' && transfer.gateway !== 'error' );
@@ -111,8 +115,9 @@ export class TransactionProcessor {
     stopTransactionProcessingMeasuring();
   }
   private  findGatewayByAddress(value: string): string {
-    for (let key in GateWayConfig) {
-      if (GateWayConfig[key] === value) {
+    const gateWayConfig = this.isTestNet === 0?GateWayConfig:GateWayConfigTestNet;
+    for (let key in gateWayConfig) {
+      if (gateWayConfig[key] === value) {
         return key;
       }
     }
