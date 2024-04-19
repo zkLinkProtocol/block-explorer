@@ -64,7 +64,7 @@ export class TransactionProcessor {
         if (gateway !== 'error'){
           transactionData.transaction.networkKey = gateway;
         }
-      }else if(transfer !== undefined && transfer !== null && transfer.tokenType === TokenType.ETH && transactionData.transaction.to === '0x000000000000000000000000000000000000800a'){
+      }else if(transfer !== undefined && transfer !== null && transfer.tokenType === TokenType.ETH && transactionData.transaction.to === '0x000000000000000000000000000000000000800A'){
         const callData = transactionData.transaction.data.replace("0x","");
         if (callData.slice(0,8) === '84bc3eb0'){
           const gateway = this.findGatewayByAddress(transfer.gateway);
@@ -139,7 +139,7 @@ export class TransactionProcessor {
   private  findGatewayByAddress(value: string): string {
     const gateWayConfig = this.isTestNet === 0?GateWayConfig:GateWayConfigTestNet;
     for (let key in gateWayConfig) {
-      if (gateWayConfig[key] === value) {
+      if (gateWayConfig[key].toLowerCase() === value.toLowerCase()) {
         return key;
       }
     }
@@ -149,7 +149,7 @@ export class TransactionProcessor {
   private  findGatewayByTo(value: string): string {
     const bridgeConfig = this.isTestNet === 0?BridgeConfig:BridgeConfigTestNet;
     for (let key in bridgeConfig) {
-      if (bridgeConfig[key] === value) {
+      if (bridgeConfig[key].toLowerCase() === value.toLowerCase()) {
         return key;
       }
     }
