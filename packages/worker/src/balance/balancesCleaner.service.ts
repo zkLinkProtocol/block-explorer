@@ -4,6 +4,7 @@ import { Worker } from "../common/worker";
 import waitFor from "../utils/waitFor";
 import { BalanceService } from "./balance.service";
 import { BlockRepository } from "../repositories/block.repository";
+import { PointsRepository } from "../repositories";
 
 @Injectable()
 export class BalancesCleanerService extends Worker {
@@ -12,6 +13,7 @@ export class BalancesCleanerService extends Worker {
   public constructor(
     private readonly balanceService: BalanceService,
     private readonly blockRepository: BlockRepository,
+    private readonly pointsRepository: PointsRepository,
     configService: ConfigService
   ) {
     super();
@@ -19,13 +21,12 @@ export class BalancesCleanerService extends Worker {
   }
 
   protected async runProcess(): Promise<void> {
-    const lastVerifiedBlockNumber = await this.blockRepository.getLastExecutedBlockNumber();
+    const lastStatisticalBlockNumber = await this.pointsRepository.getLastHoldPointStatisticalBlockNumber();
     const lastRunBlockNumber = await this.balanceService.getDeleteBalancesFromBlockNumber();
 
-    if (lastVerifiedBlockNumber > lastRunBlockNumber) {
-      await this.balanceService.deleteOldBalances(lastRunBlockNumber, lastVerifiedBlockNumber);
-      await this.balanceService.deleteZeroBalances(lastRunBlockNumber, lastVerifiedBlockNumber);
-      await this.balanceService.setDeleteBalancesFromBlockNumber(lastVerifiedBlockNumber);
+    if (lastStatisticalBlockNumber > lastRunBlockNumber) {
+      await this.balanceService.deleteOldBalances(lastRunBlockNumber, lastStatisticalBlockNumber);
+      await this.balanceService.setDeleteBalancesFromBlockNumber(lastStatisticalBlockNumber);
     }
 
     await waitFor(() => !this.currentProcessPromise, this.deleteBalancesInterval);
