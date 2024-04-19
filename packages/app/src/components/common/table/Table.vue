@@ -10,9 +10,20 @@
         <tbody v-if="!loading">
           <slot />
           <template v-if="items?.length">
-            <tr v-for="(item, index) in items" :key="index">
-              <slot name="table-row" :item="item" :index="index"></slot>
-            </tr>
+            <template v-for="(item, index) in items" :key="index">
+              <tr>
+                <slot name="table-row" :item="item" :index="index"></slot>
+                <td class="table-body-col" v-if="expandable">
+                  <div @click="toggleExpand(index, item)">
+                    <slot name="expand-button" :item="item" :index="index" :active="expandedRows.includes(index)">
+                    </slot>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="expandedRows.includes(index) && expandable">
+                <slot name="table-row-expanded" :item="item" :index="index"></slot>
+              </tr>
+            </template>
           </template>
           <template v-else-if="$slots.empty && !failed">
             <slot name="empty"></slot>
@@ -33,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PropType } from "vue";
+import { ref, type PropType } from "vue";
 
 defineProps({
   items: {
@@ -49,7 +60,21 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  expandable: {
+    type: Boolean,
+    default: false,
+
+  }
 });
+const expandedRows = ref([] as number[]);
+
+const toggleExpand = (index: number, item: any) => {
+  if (expandedRows.value.includes(index)) {
+    expandedRows.value = expandedRows.value.filter(row => row !== index);
+  } else {
+    expandedRows.value.push(index);
+  }
+};
 </script>
 
 <style lang="scss">
@@ -59,20 +84,23 @@ defineProps({
   .table-body {
     @apply w-full overflow-auto;
 
-    & > table > thead tr {
+    &>table>thead tr {
       @apply absolute left-[-9999px] top-[-9999px] md:relative md:left-0 md:top-0;
     }
   }
+
   &.has-head {
     table thead tr th {
       @apply first:rounded-tl-lg last:rounded-tr-lg;
     }
   }
+
   &:not(.has-head) {
     table tbody tr:first-child td {
       @apply first:rounded-tl-lg last:rounded-tr-lg;
     }
   }
+
   &:not(.has-footer) {
     .table-body {
       @apply rounded-b-lg;
@@ -93,22 +121,26 @@ defineProps({
         @apply bg-gray-100;
       }
     }
+
     tbody {
       tr {
         @apply transition last:border-b-0 odd:bg-white even:bg-gray-50 md:border-b;
       }
     }
   }
+
   .table-footer {
     @apply w-full rounded-b-lg;
   }
 }
+
 @media (max-width: 760px) {
   .table-container table {
     tbody {
       tr {
         border-bottom-width: 1px;
       }
+
       tr:nth-child(even) {
         background-color: rgba(245, 247, 250, 0.02);
       }

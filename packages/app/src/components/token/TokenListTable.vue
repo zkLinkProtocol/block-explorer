@@ -1,9 +1,24 @@
 <template>
   <div class="flex flex-col md:flex-row items-center justify-between mb-4">
+    <TabGroup :selectedIndex="selectedTab" @change="changeTab">
+      <TabList class="inline-flex space-x-1 p-1">
+        <Tab v-for="tab in tabs" as="template" :key="tab.id" v-slot="{ selected }">
+          <button :class="[
+      'w-auto rounded-md px-2 md:px-4 py-1 text-sm font-medium leading-5',
+      'ring-white/60 ring-offset-2 ring-offset-blue-400 ',
+      selected
+        ? 'bg-design-900 text-white shadow'
+        : 'bg-design-800 text-design-700  text-blue-100 hover:bg-design-900 hover:text-white',
+    ]">
+            {{ tab.name }}
+          </button>
+        </Tab>
+      </TabList>
+    </TabGroup>
     <div class="flex items-center text-sm mb-4 md:mb-0">
       <FilterModal v-model:selected="selectedFilterList">
       </FilterModal>
-      <form v-show="!showClearButton " class="search-form" autocomplete="off" @submit.prevent="handleSearch">
+      <form v-show="!showClearButton" class="search-form" autocomplete="off" @submit.prevent="handleSearch">
         <search-field v-model:value="searchValue" :placeholder="t('tokensView.search.placeholder')"
           :pending="isRequestPending">
           <template #submit>
@@ -15,41 +30,24 @@
       </form>
       <div v-show="showClearButton" class="search-result">
         <div class="flex">
-        <span>Filter by Token </span>
-        <span class="search-key">{{ searchValue }}</span>
+          <span>Filter by Token </span>
+          <span class="search-key">{{ searchValue }}</span>
         </div>
         <button @click="handleClear" class="btn-close">
-            <XIcon />
+          <XIcon />
         </button>
       </div>
     </div>
-    <TabGroup :selectedIndex="selectedTab" @change="changeTab">
-      <TabList class="inline-flex space-x-1 p-1">
-        <Tab v-for="tab in tabs" as="template" :key="tab.id" v-slot="{ selected }">
-          <button :class="[
-              'w-auto rounded-md px-2 md:px-4 py-1 text-sm font-medium leading-5',
-              'ring-white/60 ring-offset-2 ring-offset-blue-400 ',
-              selected
-                ? 'bg-design-900 text-white shadow'
-                : 'bg-design-800 text-design-700  text-blue-100 hover:bg-design-900 hover:text-white',
-            ]">
-            {{ tab.name }}
-          </button>
-        </Tab>
-      </TabList>
-    </TabGroup>
+
   </div>
-  <Table class="table-wrap" :data-testid="$testId.tokensTable" :loading="localLoading" :items="displayTokenList" ref="table">
+  <Table class="table-wrap" :data-testid="$testId.tokensTable" :loading="localLoading" :items="displayTokenList"
+    ref="table" :expandable="expandable">
     <template #table-head>
       <table-head-column>
-        <div class="th-box min-w-16">
-          <span>{{ t("tokensView.table.tokenName") }}</span>
-        </div>
+        <span>{{ t("tokensView.table.tokenName") }}</span>
       </table-head-column>
       <table-head-column>
-        <div class="th-box">
-          <span>{{ t("tokensView.table.price") }}</span>
-        </div>
+        <span>{{ t("tokensView.table.price") }}</span>
       </table-head-column>
       <table-head-column>
         <span>{{ t("tokensView.table.totalQty") }}</span>
@@ -60,7 +58,7 @@
           <ranking :sort-order="sortOrder" />
         </div>
       </table-head-column>
-      <table-head-column class="text-center">
+      <table-head-column v-if="selectedTab === TAB_TYPE.Bridged">
         <div class="th-box">
           <span>{{ t("tokensView.table.sourceChain") }}</span>
           <TableFilterModel @click="handleChildClick" v-model:selected="selectedTokenList"
@@ -68,12 +66,15 @@
         </div>
       </table-head-column>
       <table-head-column>{{ t("tokensView.table.novaAddress") }}</table-head-column>
-      <table-head-column>{{ t("tokensView.table.originAddress") }}</table-head-column>
+      <table-head-column v-if="selectedTab !== TAB_TYPE.Native">
+        <span v-if="selectedTab !== TAB_TYPE.Merged">{{ t("tokensView.table.originAddress") }}</span>
+        <div v-else class="min-h-[20px]"></div>
+      </table-head-column>
     </template>
     <template #table-row="{ item }: { item: any }">
       <TableBodyColumn :data-heading="t('tokensView.table.tokenName')">
-        <TokenIconLabel class="token-name-box" :symbol="item.symbol" icon-size="xl" :address="item.l2Address" :name="item.name"
-          :icon-url="item.iconURL" :tags="item.tags" />
+        <TokenIconLabel class="token-name-box" :symbol="item.symbol" icon-size="xl" :address="item.l2Address"
+          :name="item.name" :icon-url="item.iconURL" :tags="item.tags" />
       </TableBodyColumn>
       <TableBodyColumn :data-heading="t('tokensView.table.price')">
         <TokenPrice :address="item.l2Address" />
@@ -84,7 +85,7 @@
       <TableBodyColumn :data-heading="t('tokensView.table.tvl')">
         <TokenTVL :tvl="item.tvl" />
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.sourceChain')">
+      <TableBodyColumn v-if="selectedTab === TAB_TYPE.Bridged" :data-heading="t('tokensView.table.sourceChain')">
         <div v-if="chainNameList[item.networkKey]" class="from-chain-text">
           {{ chainNameList[item.networkKey] }}
         </div>
@@ -96,33 +97,22 @@
       <TableBodyColumn :data-heading="t('tokensView.table.novaAddress')">
         <div class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="Nova" />-->
-          <AddressLink
-            :data-testid="$testId.tokenAddress"
-            :address="item.l2Address"
-            class="token-address block max-w-sm"
-          >
+          <AddressLink :data-testid="$testId.tokenAddress" :address="item.l2Address"
+            class="token-address block max-w-sm">
             {{ shortenFitText(item.l2Address, "left", 100, subtraction) }}
           </AddressLink>
           <CopyButton :value="item.l2Address" />
         </div>
       </TableBodyColumn>
-      <TableBodyColumn :data-heading="t('tokensView.table.originAddress')">
-        <div
-          v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)"
-          class="token-address-container max-w-sm"
-        >
+      <TableBodyColumn v-if="selectedTab === TAB_TYPE.Bridged" :data-heading="t('tokensView.table.originAddress')">
+        <div v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)"
+          class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="ORIGIN" />-->
           <div v-if="!item.networkKey">
             {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
           </div>
-          <AddressLink
-            v-else
-            :data-testid="$testId.tokenAddress"
-            :address="item.l1Address"
-            network="origin"
-            :networkKey="item.networkKey"
-            class="token-address block max-w-sm"
-          >
+          <AddressLink v-else :data-testid="$testId.tokenAddress" :address="item.l1Address" network="origin"
+            :networkKey="item.networkKey" class="token-address block max-w-sm">
             {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
           </AddressLink>
           <CopyButton :value="item.l1Address" />
@@ -130,13 +120,27 @@
         <div v-else class="min-h-[20px]"></div>
       </TableBodyColumn>
     </template>
+    <template #expand-button="{ item, index, active }">
+      <button :class="{ 'btn-open': true, active }">
+        Source Tokens (8)
+        <ChevronDownIcon class="dropdown-icon" aria-hidden="true" />
+      </button>
+
+    </template>
+    <template #table-row-expanded="{ item }: { item: any }">
+      <td colspan="6">
+        <SourceToken :items="mergedToken" />
+      </td>
+
+    </template>
+
     <template #empty>
       <tr>
         <TableBodyColumn class="empty-state-container" colspan="7">
           <EmptyState class="empty-state">
             <template #title>
-            <span class="font-normal">There are no matching entries for:</span>
-            <span v-if="searchValue" class="font-bold">'{{ searchValue }}'</span>
+              <span class="font-normal">There are no matching entries for:</span>
+              <span v-if="searchValue" class="font-bold">'{{ searchValue }}'</span>
             </template>
             <template #description><span></span></template>
           </EmptyState>
@@ -185,7 +189,7 @@
   </Table>
 </template>
 <script lang="ts" setup>
-import { type PropType, ref, watch, computed,onBeforeUnmount, type Ref } from "vue";
+import { type PropType, ref, watch, computed, onBeforeUnmount, type Ref } from "vue";
 
 import { useI18n } from "vue-i18n";
 
@@ -206,14 +210,16 @@ import TransactionNetworkSquareBlock from "@/components/transactions/Transaction
 import Ranking from "./TableRanking.vue";
 import TableFilterModel from "./TableFilterModal.vue";
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
-import { TabGroup, TabList, Tab,} from '@headlessui/vue'
+import { TabGroup, TabList, Tab, } from '@headlessui/vue'
 import SearchField from "@/components/common/SearchField.vue";
 import Button from "@/components/common/Button.vue";
 import FilterModal from './FilterModal.vue'
 import EmptyState from "@/components/common/EmptyState.vue";
-import { XIcon } from "@heroicons/vue/outline";
-
+import SourceToken from "./SourceToken.vue"
+import { XIcon, ChevronDownIcon } from "@heroicons/vue/outline";
+import useSourceTokens from '@/composables/useSourceTokens'
 import { SearchIcon } from "@heroicons/vue/outline";
+
 
 
 import { formatBigNumberish, formatPricePretty } from "@/utils/formatters";
@@ -243,38 +249,48 @@ watch(width, () => {
   width.value <= 500 ? (subtraction.value = 10) : (subtraction.value = 5);
 });
 
+const { getSourceTokenList } = useSourceTokens()
+getSourceTokenList()
 const handleChildClick = (e: MouseEvent) => {
   e.stopPropagation();
 };
 
 const isRequestPending = ref(false);
-const selectedTab = ref(0);
-function changeTab(index:number) {
+enum TAB_TYPE {
+  Merged,
+  Native,
+  Bridged
+};
+const selectedTab = ref(TAB_TYPE.Merged);
+const expandable = computed(() => {
+  return selectedTab.value === TAB_TYPE.Merged
+})
+function changeTab(index: number) {
   selectedTab.value = index;
 }
 const searchValue = ref("");
 const showClearButton = ref(false);
-const isSearchVal=ref("")
+const isSearchVal = ref("")
 const handleSearch = async () => {
-  if(!searchValue.value) return
-  isSearchVal.value=searchValue.value
+  if (!searchValue.value) return
+  isSearchVal.value = searchValue.value
   showClearButton.value = true;
 };
-const handleClear=()=>{
+const handleClear = () => {
   showClearButton.value = false;
-  searchValue.value='';
-  isSearchVal.value='';
+  searchValue.value = '';
+  isSearchVal.value = '';
 
 }
 const fromChainOptions = computed((): string[] | [] => {
-  return [NOVA_MERGED_TOKEN, NOVA_NATIVE_TOKEN, ...Object.values(chainNameList)];
+  return [NOVA_MERGED_TOKEN, ...Object.values(chainNameList)];
 });
 interface Tab {
   id: string;
   name: string;
 }
+
 const tabs: Tab[] = [
-  { id: 'all', name: 'All' },
   { id: 'merged', name: 'Merged Tokens' },
   { id: 'native', name: 'Native Tokens' },
   { id: 'bridged', name: 'Bridged Tokens' },
@@ -285,22 +301,38 @@ const selectedTokenList: Ref<string[]> = ref([]);
 const selectedFilterList: Ref<string[]> = ref([]);
 const filterChain = (mergeData: Token[]) => {
   if (selectedTokenList.value.length === 0) {
-    return props.tokens;
+    if (selectedTab.value)
+      return props.tokens;
   }
   return mergeData.filter((item) => {
     const networkName = item.networkKey
       ? chainNameList[item.networkKey]
       : ETH_TOKEN_L1_ADDRESS.includes(item.l1Address!)
-      ? NOVA_MERGED_TOKEN
-      : NOVA_NATIVE_TOKEN;
+        ? NOVA_MERGED_TOKEN
+        : NOVA_NATIVE_TOKEN;
 
     const optionMatch = selectedTokenList.value.includes(networkName);
     return optionMatch;
   });
 };
+const filterByTab = () => {
+  if (selectedTab.value === TAB_TYPE.Merged) {
+    // merged Token
+    return [...mergedToken.value]
+
+  } else if (selectedTab.value == TAB_TYPE.Native) {
+    // Native Token
+    return [...nativeToken.value]
+
+  } else {
+    // Bridge Token
+    return [...bridgedToken.value];
+
+  }
+}
 
 const sortKey = ref<string>("tvl");
-const sortOrder=ref<string>('asc')
+const sortOrder = ref<string>('asc')
 const sortBy = (column: string) => {
   if (sortKey.value === column) {
     sortOrder.value =
@@ -323,28 +355,63 @@ const compareValues = (valueA: number, valueB: number, sortOrder: string): numbe
 let timerId: ReturnType<typeof setTimeout> | undefined = undefined;
 const localLoading = ref(props.loading);
 watch(() => props.loading, (newLoading) => {
-    localLoading.value = newLoading;
+  localLoading.value = newLoading;
 });
 watch(localLoading, (newLocalLoading) => {
-    if (newLocalLoading) {
-      timerId=setTimeout(() => {
-        localLoading.value = false;
-      }, 200);
-    }
-    });
-const displayTokenList = computed(() => {
-  localLoading.value=true;
-  let mergeData: Token[] = [...props.tokens];
-  //search by TokenName or symbol
-  if(isSearchVal.value){
-    mergeData = mergeData.filter((item) =>{
-      return item.name!.toLowerCase().includes(isSearchVal.value.toLowerCase()) ||
-      item.symbol!.toLowerCase().includes(isSearchVal.value.toLowerCase()) ;
-    } );
+  if (newLocalLoading) {
+    timerId = setTimeout(() => {
+      localLoading.value = false;
+    }, 200);
   }
-  
+});
+const mergedToken = computed(() => {
+  const novaAddresses = [
+    "0x2F8A25ac62179B31D62D7F80884AE57464699059",
+    "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
+    "0x1a1A3b2ff016332e866787B311fcB63928464509",
+    "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab"
+  ];
+  console.log([...props.tokens].filter((item) => {
+    return !item.networkKey &&
+      ((item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)) ||
+        (item.l2Address && novaAddresses.includes(item.l2Address)));
+  }))
+
+  return [...props.tokens].filter((item) => {
+    return !item.networkKey &&
+      ((item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)) ||
+        (item.l2Address && novaAddresses.includes(item.l2Address)));
+  });
+
+})
+const nativeToken = computed(() => {
+  return [...props.tokens].filter((item) => {
+    return !item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address!)
+  });
+
+})
+const bridgedToken = computed(() => {
+  return [...props.tokens].filter((item) => {
+    return (item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)) || item.networkKey
+  })
+})
+const displayTokenList = computed(() => {
+  localLoading.value = true;
+  let mergeData: Token[] = [...mergedToken.value];
+  // toggle tab 
+  if (selectedTab.value) {
+    mergeData = filterByTab()
+  }
+  //search by TokenName or symbol
+  if (isSearchVal.value) {
+    mergeData = mergeData.filter((item) => {
+      return item.name!.toLowerCase().includes(isSearchVal.value.toLowerCase()) ||
+        item.symbol!.toLowerCase().includes(isSearchVal.value.toLowerCase());
+    });
+  }
+
   // Hide Assets Without Price
-  if (selectedFilterList.value.length<1) {
+  if (selectedFilterList.value.length < 1) {
     mergeData = mergeData.filter((item) => {
       if (!item.usdPrice) {
         return false;
@@ -353,39 +420,9 @@ const displayTokenList = computed(() => {
       return price > 0;
     });
   }
-  // toggle tab 
-  if(selectedTab.value){
-    // all
-    if(selectedTab.value===0){
-      mergeData=[...props.tokens]
-    }else if (selectedTab.value===1){
-      // merged Token
-    const novaAddresses = [
-      "0x2F8A25ac62179B31D62D7F80884AE57464699059",
-      "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
-      "0x1a1A3b2ff016332e866787B311fcB63928464509",
-      "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab"
-      ];
-      mergeData = mergeData.filter((item) => {
-        return !item.networkKey &&
-          ((item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)) ||
-            (item.l2Address && novaAddresses.includes(item.l2Address)));
-      });
 
-    }else if(selectedTab.value==2){
-      // Native Token
-      mergeData=mergeData.filter((item) =>{
-        return !item.networkKey && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address!)
-      });
-
-    }else{
-      // Bridge Token
-      mergeData=mergeData.filter((item) =>item.networkKey);
-
-    }
-  }
   // filtering by chain Name
- if (selectedTokenList.value.length > 0) {
+  if (selectedTokenList.value.length > 0) {
     mergeData = filterChain(mergeData);
   }
   // ranking
@@ -398,10 +435,12 @@ const displayTokenList = computed(() => {
       return 0;
     });
   }
-  
+
   return mergeData;
 });
-const showingCount=computed(()=>displayTokenList.value.length)
+
+
+const showingCount = computed(() => displayTokenList.value.length)
 defineExpose({ showingCount })
 onBeforeUnmount(() => {
   if (timerId) {
@@ -414,6 +453,7 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .table-body-col {
   @apply relative flex flex-col items-end justify-end text-right md:table-cell md:w-1/3 md:text-left;
+
   &:before {
     @apply absolute left-4 top-3 whitespace-nowrap pr-5 text-left text-xs uppercase text-neutral-400 content-[attr(data-heading)] md:content-none;
   }
@@ -456,39 +496,48 @@ onBeforeUnmount(() => {
   justify-content: center;
   margin-left: 6px;
   cursor: pointer;
+
   .active {
     @apply text-design-200;
   }
 }
+
 .th-box {
   display: flex;
   flex: auto;
   align-items: center;
   justify-content: left;
 }
+
 .tool-wrap {
   @apply flex items-center;
 }
+
 .pagination {
-    display: flex;
-    justify-content: center;
-    padding: 0.75rem;
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem;
 }
+
 .empty-state-container {
   @apply table-cell;
+
   .empty-state {
     @apply items-center justify-center whitespace-normal py-10;
   }
 }
+
 .search-form {
   max-width: 26rem;
   min-width: 18rem;
+
   .submit-icon-container {
     &:hover:not(:active) {
       .submit-icon {
         @apply bg-primary-300;
       }
     }
+
     &:active {
       .submit-icon {
         @apply transition-none;
@@ -499,43 +548,67 @@ onBeforeUnmount(() => {
       @apply w-[2.875rem] rounded-r-md bg-primary-500 p-3 text-white;
     }
   }
-  :deep(.search-input-container .search-input){
+
+  :deep(.search-input-container .search-input) {
     @apply py-2 border-design-900 text-white;
     background-color: transparent;
 
   }
-   :deep( .submit-icon-container .submit-icon){
+
+  :deep(.submit-icon-container .submit-icon) {
     @apply py-2;
 
   }
 }
-.search-result{
+
+.search-result {
   @apply flex items-center justify-between md:min-w-[18rem] bg-design-900 text-[#AAAAAA] px-[11px] py-2 rounded-md;
-  .search-key{
+
+  .search-key {
     @apply text-white ml-2;
   }
-  .btn-close{
+
+  .btn-close {
     @apply w-5 h-5 text-white;
   }
 }
-.btn-filter{
+
+.btn-filter {
   @apply flex items-center border rounded-md border border-design-900 p-2 text-design-900;
-  .filter-count{
+
+  .filter-count {
     height: 14px;
     width: 14px;
     line-height: 1;
     @apply flex ml-2 items-center justify-center text-[10px] bg-white rounded-lg text-design-900;
   }
 }
-.table-wrap{
-  :deep(.table-body){
-  overflow: unset;
+
+.table-wrap {
+  :deep(.table-body) {
+    overflow: unset;
   }
 }
-.token-name-box{
-  :deep(.token-info .token-name){
+
+.token-name-box {
+  :deep(.token-info .token-name) {
     @apply flex-row-reverse md:flex-row;
   }
+}
+
+.btn-open {
+  @apply flex bg-design-600 text-white rounded px-2 py-1 pr-2.5 text-xs;
+
+  .dropdown-icon {
+    @apply w-4 h-4 ml-1;
+  }
+
+  &.active {
+    .dropdown-icon {
+      @apply -rotate-180;
+    }
+  }
+
 }
 
 
@@ -544,7 +617,8 @@ onBeforeUnmount(() => {
     display: flex;
     flex-direction: row-reverse;
   }
-  .search-form{
+
+  .search-form {
     max-width: auto;
     min-width: auto;
   }

@@ -605,12 +605,20 @@
       "tokenAddress": "Token Address",
       "sourceChain": "Source Chain",
       "totalQty": "Total qty",
-      "tvl": "On-chain market cap",
+      "tvl": "Tvl",
       "novaAddress": "Nova ADDRESS",
       "originAddress": "Origin Address"
     },
-    "search":{
-      "placeholder":"Token name or symbol"
+    "sourceToken": {
+      "title": "Source Token",
+      "sourceChain": "Source Chain",
+      "mergedQty": "Merged Qty",
+      "mergedTVL": "Merged TVL",
+      "novaAddress": "Nova ADDRESS",
+      "originAddress": "Origin Address"
+    },
+    "search": {
+      "placeholder": "Token name or symbol"
     }
   },
   "pageError": {

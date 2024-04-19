@@ -16,7 +16,7 @@
       <span v-if="isTokensFailed" class="error-message">
         {{ t("failedRequest") }}
       </span>
-      <TokenTable ref="childRef"  :tokens="tokensWithTag" :loading="isTokensPending"></TokenTable>
+      <TokenTable ref="childRef"  :tokens="tokens" :loading="isTokensPending"></TokenTable>
     </div>
   </div>
 </template>
@@ -50,7 +50,7 @@ const breadcrumbItems = computed((): BreadcrumbItem[] => [
     text: `${t("tokensView.title")}`,
   },
 ]);
-const tokensCount=computed(()=>tokensWithTag.value.length)
+const tokensCount=computed(()=>tokens.value.length)
 
 const childRef = ref<InstanceType<typeof TokenListTable>>();
 const showingCount=ref(0);
