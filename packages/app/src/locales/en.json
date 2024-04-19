@@ -258,9 +258,9 @@
     "notYetExecuted": "Not yet executed",
     "notYetSealed": "This batch is not sealed yet",
     "finalizeTxHash": "Finalize tx hash",
-    "finalizeTxHashTooltip":"Hash of the transaction on which this Batch was finalized on Ethereum",
+    "finalizeTxHashTooltip": "Hash of the transaction on which this Batch was finalized on Ethereum",
     "finalizeAt": "Finalized",
-    "finalizeAtTooltip":"The date and time at which the Batch is finalized on Ethereum",
+    "finalizeAtTooltip": "The date and time at which the Batch is finalized on Ethereum",
     "finalizeStatus": "Status",
     "finalizePending": "Pending to be finalized on Ethereum",
     "transactionTable": {
@@ -603,7 +603,11 @@
       "tokenName": "Token Name",
       "price": "Price",
       "tokenAddress": "Token Address",
-      "fromChain": "From Chain"
+      "fromChain": "From Chain",
+      "totalQty": "Total qty",
+      "tvl": "Tvl",
+      "novaAddress": "Nova ADDRESS",
+      "originAddress": "Origin Address"
     }
   },
   "pageError": {

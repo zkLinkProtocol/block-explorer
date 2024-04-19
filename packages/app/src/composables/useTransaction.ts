@@ -8,6 +8,8 @@ import useContext from "./useContext";
 import type { TransactionLogEntry } from "./useEventLog";
 import type { Hash, NetworkOrigin } from "@/types";
 import type { types } from "zksync-web3";
+import useEnvironmentConfig from "./useEnvironmentConfig";
+import { NOVA } from "@/utils/constants";
 
 export type TransactionStatus = "included" | "committed" | "proved" | "verified" | "failed" | "indexing" | "validated" | "finalized";
 type TokenInfo = {
@@ -30,6 +32,7 @@ export type TokenTransfer = {
   fromNetwork: NetworkOrigin;
   toNetwork: NetworkOrigin;
   tokenInfo?: TokenInfo;
+  transactionTo?: string;
 };
 
 export type TransactionDetails = types.TransactionDetails & {
@@ -81,11 +84,27 @@ export type TransactionItem = {
   transfers: TokenTransfer[];
 };
 
-export function getTransferNetworkOrigin(transfer: Api.Response.Transfer, sender: "from" | "to") {
-  if (sender === "from") {
-    return transfer.type === "deposit" ? "L1" : "L2";
+export function getTransferNetworkOrigin(
+  transfer: Api.Response.Transfer,
+  sender: "from" | "to",
+  transactionTo?: string
+) {
+  const { chainNameList, ERC20Bridges } = useEnvironmentConfig();
+  let chainName = "";
+  const foundKey = Object.entries(ERC20Bridges).find(([key, value]) => value === transactionTo);
+  // is the value in ERC20Bridges
+  if (foundKey) {
+    chainName = chainNameList[foundKey[0]];
+  } else if (transfer.transaction && transfer.transaction?.networkKey !== "error") {
+    const key = transfer.transaction?.networkKey === "linea" ? "primay" : transfer.transaction?.networkKey;
+    chainName = chainNameList[key];
   } else {
-    return transfer.type === "withdrawal" ? "L1" : "L2";
+    chainName = "Linea";
+  }
+  if (sender === "from") {
+    return transfer.type === "deposit" ? chainName : NOVA;
+  } else {
+    return transfer.type === "withdrawal" ? chainName : NOVA;
   }
 }
 
@@ -190,6 +209,7 @@ export default (context = useContext()) => {
       isRequestPending.value = false;
     }
   };
+
   const getInfo = async (hash: string) => {
     return await $fetch<Api.Response.Transaction>(`${context.currentNetwork.value.apiUrl}/transactions/${hash}`)
   };
@@ -198,7 +218,7 @@ export default (context = useContext()) => {
     isRequestPending,
     isRequestFailed,
     getByHash,
-    getInfo
+    getInfo,
   };
 };
 
@@ -258,7 +278,7 @@ export function mapTransaction(
       transactionIndex: item.transactionIndex.toString(16),
     })),
 
-    transfers: mapTransfers(filterTransfers(transfers)),
+    transfers: mapTransfers(filterTransfers(transfers), transaction.to),
 
     gasPrice: transaction.gasPrice,
     gasLimit: transaction.gasLimit,
@@ -269,13 +289,13 @@ export function mapTransaction(
   };
 }
 
-function mapTransfers(transfers: Api.Response.Transfer[]): TokenTransfer[] {
+function mapTransfers(transfers: Api.Response.Transfer[], transactionTo?: string): TokenTransfer[] {
   return transfers.map((item) => ({
     amount: item.amount,
     from: item.from,
     to: item.to,
-    fromNetwork: getTransferNetworkOrigin(item, "from"),
-    toNetwork: getTransferNetworkOrigin(item, "to"),
+    fromNetwork: getTransferNetworkOrigin(item, "from", transactionTo),
+    toNetwork: getTransferNetworkOrigin(item, "to", transactionTo),
     type: item.type,
     tokenInfo: {
       address: item.tokenAddress,

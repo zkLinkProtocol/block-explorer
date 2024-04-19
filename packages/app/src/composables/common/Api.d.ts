@@ -16,7 +16,7 @@ declare namespace Api {
         previous: string;
       };
     };
-
+    type TotalSupply = { type: string; hex: string };
     type Token = {
       l2Address: string;
       l1Address: string | null;
@@ -27,6 +27,8 @@ declare namespace Api {
       liquidity: number | null;
       iconURL: string | null;
       tvl: string;
+      networkKey?: string;
+      totalSupply?: TotalSupply;
     };
 
     type BatchListItem = {
@@ -80,6 +82,8 @@ declare namespace Api {
     };
 
     type Transaction = {
+      contractAbi: any;
+      abi: any;
       hash: string;
       to: string;
       from: string;
@@ -106,6 +110,7 @@ declare namespace Api {
       status: "included" | "committed" | "proved" | "verified" | "failed" | "validated" | "finalized";
       error: string | null;
       revertReason: string | null;
+      networkKey?:string |null;
     };
 
     type Transfer = {
@@ -118,6 +123,9 @@ declare namespace Api {
       tokenAddress: string;
       type: "deposit" | "transfer" | "withdrawal" | "fee" | "mint" | "refund";
       timestamp: string;
+      transaction?: {
+        networkKey:string;
+      };
     };
 
     type TokenAddress = {

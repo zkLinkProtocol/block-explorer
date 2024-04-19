@@ -211,6 +211,7 @@ import ZkSyncIcon from "@/components/icons/ZkSync.vue";
 import TokenAmountPriceTableCell from "@/components/transactions/TokenAmountPriceTableCell.vue";
 import TransactionDirectionTableCell from "@/components/transactions/TransactionDirectionTableCell.vue";
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
+import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 import useTransaction, { type TransactionItem } from "@/composables/useTransaction";
 
 import useToken, { type Token } from "@/composables/useToken";
@@ -220,16 +221,22 @@ import useTransactions, { type TransactionListItem, type TransactionSearchParams
 import contractsMethodNames from "@/configs/contractsMethodNames.json";
 
 import type { Direction } from "@/components/transactions/TransactionDirectionTableCell.vue";
-import type { AbiFragment } from "@/composables/useAddress";
+import type { AbiFragment,Contract } from "@/composables/useAddress";
 import type { NetworkOrigin } from "@/types";
 
 import { ETH_TOKEN_L2_ADDRESS } from "@/utils/constants";
 import { utcStringFromISOString } from "@/utils/helpers";
+import useAddress from "@/composables/useAddress";
+import { NOVA } from '@/utils/constants'
 import { $fetch, FetchError } from "ohmyfetch";
 import useBatchRoot from "@/composables/useBatchRoot";
 const { getById, mainBatch, batchRoot } = useBatchRoot();
 
 const { getInfo } = useTransaction();
+// const { item, getByAddress, getContractVerificationInfo } = useAddress();
+
+const { chainNameList,ERC20Bridges } = useEnvironmentConfig();
+
 const { t, te } = useI18n();
 
 const props = defineProps({
@@ -251,6 +258,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // contract: {
+  //   type: Object as PropType<Contract>,
+  //   default: () => ({}),
+  //   required: true,
+  // },
 });
 
 const route = useRoute();
@@ -268,7 +280,6 @@ const isLoading = computed(() => pending.value || isLoadingEthTokenInfo.value);
 
 const activePage = ref(props.useQueryPagination ? parseInt(route.query.page as string) || 1 : 1);
 const toDate = new Date();
-
 watch(
   [activePage, searchParams],
   ([page]) => {
@@ -276,7 +287,6 @@ watch(
   },
   { immediate: true }
 );
-
 const getTransactionMethod = (transaction: TransactionListItem) => {
   if (transaction.data === "0x") {
     return t("transactions.table.transferMethodName");
@@ -292,13 +302,52 @@ const getTransactionMethod = (transaction: TransactionListItem) => {
         props.contractAbi
       )?.name ?? sighash
     );
-  }
+    // const name = decodeDataWithABI(
+    //   {
+    //     calldata: transaction.data,
+    //     value: transaction.value,
+    //   },
+    //   props.contractAbi
+    // )?.name
+    // if (name) {
+    //   return name;
+    // } else {
+    //   return (
+    //     props.contract.proxyInfo?.implementation.verificationInfo?decodeDataWithABI(
+    //         {
+    //           calldata: transaction.data,
+    //           value: transaction.value,
+    //         },
+    //         props.contract.proxyInfo?.implementation.verificationInfo.artifacts.abi
+    //       )?.name ?? sighash: sighash
+    //     );
+    // }
+  } 
+  // else if (transaction.abi) {
+  //   const name = decodeDataWithABI(
+  //       {
+  //         calldata: transaction.data,
+  //         value: transaction.value,
+  //       },
+  //       transaction.abi
+  //     )?.name || (
+  //       transaction.contractAbi? (decodeDataWithABI(
+  //       {
+  //         calldata: transaction.data,
+  //         value: transaction.value,
+  //       },
+  //       transaction.contractAbif
+  //     )?.name): ''
+  //     )
+  //   return (name || sighash);
+  // }
   const methodIndex = sighash as keyof typeof contractsMethodNames;
   if (contractsMethodNames[methodIndex]) {
     return contractsMethodNames[methodIndex];
   }
   return sighash;
 };
+
 type TransactionListItemMapped = TransactionListItem & {
   methodName: string;
   fromNetwork: NetworkOrigin;
@@ -306,7 +355,6 @@ type TransactionListItemMapped = TransactionListItem & {
   statusIcon: unknown;
   statusColor: "danger" | "dark-success";
 };
-
 const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
   data.value?.map(async (transactions) => {
     if (["failed", "included"].includes(transactions.status)) {
@@ -321,14 +369,32 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
       }
     }
   })
-  return data.value?.map((transaction) => ({
+  return data.value?.map((transaction) => {
+    let fromNetwork=''
+    if(transaction.isL1Originated){
+      const foundKey = Object.entries(ERC20Bridges).find(([key, value]) => value === transaction.from)
+      // is the value in ERC20Bridges
+      if(foundKey){
+        fromNetwork=chainNameList[foundKey[0]]
+        
+      }else if(transaction.networkKey && transaction.networkKey !== "error"){
+        const key=transaction.networkKey==='linea'?'primary':transaction.networkKey
+        fromNetwork=chainNameList[key]
+      }else{
+        fromNetwork="Linea"
+      }
+    }else{
+      fromNetwork=NOVA
+    }
+    return {
     ...transaction,
     methodName: getTransactionMethod(transaction),
-    fromNetwork: transaction.isL1Originated ? "L1" : "L2",
-    toNetwork: "L2", // even withdrawals go through L2 addresses (800A or bridge addresses)
+    fromNetwork: fromNetwork,
+    toNetwork: NOVA, // even withdrawals go through L2 addresses (800A or bridge addresses)
     statusColor: transaction.status === "failed" ? "danger" : "dark-success",
     statusIcon: ["failed", "included"].includes(transaction.status) ? ZkSyncIcon : EthereumIcon,
-  }));
+  }
+  });
 });
 
 const isHighRowsSize = computed(() => props.columns.includes("fee"));
