@@ -45,6 +45,12 @@ export class TransactionRepository extends BaseRepository<Transaction> {
     }
     await this.addressTransactionRepository.addMany(addressTransactions);
   }
+
+  public async countTransactions(): Promise<number> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    return await transactionManager.count(this.entityTarget);
+  }
+
   public async updateGateWay(hash: string, gateway: string | null): Promise<void> {
     let networkKey;
     if (gateway === null) {
