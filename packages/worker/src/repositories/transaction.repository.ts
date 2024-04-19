@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { types } from "zksync-web3";
 import { Transaction } from "../entities";
 import { UnitOfWork } from "../unitOfWork";
@@ -50,32 +50,6 @@ export class TransactionRepository extends BaseRepository<Transaction> {
         transactionHash: record.hash,
       });
     }
-    // if (record.receiptStatus === 0 && record.isL1Originated === true && record.revertReason === "Error function_selector = 0x, data = 0x") {
-      // try {
-      //   const value = record.data;
-      //   const interfaceObj = new ethers.utils.Interface(l2BridgeAbi);
-      //   const finalizeDepositToMergeName = "finalizeDepositToMerge";
-      //   const finalizeDepositToMergeSignature = interfaceObj.getSighash(finalizeDepositToMergeName);
-      //   const finalizeDepositName = "finalizeDeposit";
-      //   const finalizeDepositSignature = interfaceObj.getSighash(finalizeDepositName);
-      //   if (value.startsWith(functionSignature)) {
-      //
-      //     const encodedParams = value.slice(10);
-      //     const decodedParams = interfaceObj.decodeFunctionData(functionName, encodedParams);
-      //
-      //     console.log('Decoded Parameters:', decodedParams);
-      //   } else {
-      //     console.error('Function selector does not match.');
-      //   }
-      //   addressTransactions.push({
-      //     ...addressTransaction,
-      //     address: addressResend,
-      //     transactionHash: record.hash,
-      //   });
-      // }catch (error) {
-      //
-      // }
-    // }
     await this.addressTransactionRepository.addMany(addressTransactions);
   }
   public async updateGateWay(hash: string, gateway: string | null): Promise<void> {
