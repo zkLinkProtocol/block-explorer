@@ -48,14 +48,14 @@ export class GatewayService extends Worker {
     }
 
     private async recordGateWayAndNetworkkey(): Promise<void> {
-        const resTransfers = await this.transferRepository.find({ where:{ gateway: In(["error","0x"])} });
+        const resTransfers = await this.transferRepository.find({ where:{ gateway: In(["0x","0x11"])} });
 
         if (resTransfers!== null && resTransfers.length > 0){
             for (let i = 0; i < resTransfers.length; i++){
                 const transfer = resTransfers[i];
                 let getterContract: Contract = null;
                 const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000";
-                const ERROR_GATEWAY = "error";
+                const ERROR_GATEWAY = "0x11";
 
                 const primaryChainMainContract = this.primaryChainMainContract;
                 const primaryChainRpcUrl = this.primaryChainRpcUrl;

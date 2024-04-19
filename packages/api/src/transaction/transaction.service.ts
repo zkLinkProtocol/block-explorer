@@ -10,10 +10,11 @@ import { AddressTransaction } from "./entities/addressTransaction.entity";
 import { Batch } from "../batch/batch.entity";
 import { CounterService } from "../counter/counter.service";
 import { LRUCache } from "lru-cache";
+import {FilterTransfersOptions} from "../transfer/transfer.service";
 // const options: LRU. = { max: 500 };
 const options = {
   // how long to live in ms
-  ttl: 1000 * 10,
+  ttl: 1000 * 60,
   // return stale items before removing from cache?
   allowStale: false,
   ttlAutopurge: true,
@@ -150,6 +151,28 @@ export class TransactionService {
     return addressTransactions;
   }
 
+  public async findFailedByAddress(
+      filterOptions: FilterTransfersOptions = {},
+      paginationOptions: IPaginationOptions
+  ): Promise<Pagination<Transaction>> {
+    const queryBuilder = this.addressTransactionRepository.createQueryBuilder("addressTransaction");
+    queryBuilder.select("addressTransaction.number");
+    queryBuilder.leftJoinAndSelect("addressTransaction.transaction", "transaction");
+    queryBuilder.leftJoinAndSelect("transaction.transfers","transfer");
+    queryBuilder.leftJoinAndSelect("transfer.token", "token");
+    queryBuilder.where(filterOptions);
+    queryBuilder.andWhere("transaction.receiptStatus = :status", { status: 0 });
+    const order = 'DESC';
+    queryBuilder.orderBy("addressTransaction.blockNumber", order);
+    queryBuilder.addOrderBy("addressTransaction.receivedAt", order);
+    queryBuilder.addOrderBy("addressTransaction.transactionIndex", order);
+    const addressTransactions = await paginate<AddressTransaction>(queryBuilder, paginationOptions);
+    return {
+      ...addressTransactions,
+      items: addressTransactions.items.map((item) => item.transaction),
+    };
+  }
+
   private getAccountNonceQueryBuilder(accountAddress: string, isVerified: boolean): SelectQueryBuilder<Transaction> {
     const queryBuilder = this.transactionRepository.createQueryBuilder("transaction");
     queryBuilder.select("nonce");
@@ -191,10 +214,10 @@ export class TransactionService {
     if(total) {
       return total as number;
     }
-    const queryBuilder = this.addressTransactionRepository.createQueryBuilder("addressTransaction");
-    queryBuilder.select("COUNT(DISTINCT address)", "count");
-    const ntotal = (await queryBuilder.getRawOne()).count;
-    cache.set("totalAccountNumber", ntotal);
-    return ntotal;
+    const res = await this.addressTransactionRepository
+        .query("select count(*) from (select address from \"addressTransactions\" group by 1) adddresses");
+    const count = res[0].count;
+    cache.set("totalAccountNumber", count);
+    return count;
   }
 }

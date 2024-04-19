@@ -57,6 +57,8 @@ export class TransferService {
       queryBuilder.select("addressTransfer.number");
       queryBuilder.leftJoinAndSelect("addressTransfer.transfer", "transfer");
       queryBuilder.leftJoinAndSelect("transfer.token", "token");
+      queryBuilder.leftJoin("transfer.transaction", "transaction");
+      queryBuilder.addSelect("transaction.networkKey");
       queryBuilder.where(filterOptions);
       queryBuilder.orderBy("addressTransfer.timestamp", "DESC");
       queryBuilder.addOrderBy("addressTransfer.logIndex", "ASC");
@@ -68,7 +70,7 @@ export class TransferService {
     } else {
       const queryBuilder = this.transferRepository.createQueryBuilder("transfer");
       queryBuilder.leftJoin("transfer.transaction", "transaction");
-      queryBuilder.addSelect("transaction.networkkey");
+      queryBuilder.addSelect("transaction.networkKey");
       queryBuilder.where(filterOptions);
       queryBuilder.leftJoinAndSelect("transfer.token", "token");
       queryBuilder.orderBy("transfer.timestamp", "DESC");

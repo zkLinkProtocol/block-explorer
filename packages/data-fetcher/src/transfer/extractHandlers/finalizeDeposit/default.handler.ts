@@ -12,7 +12,7 @@ import {timeout} from "../../../utils/timeout";
 
 let getterContract: Contract = null;
 const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000";
-const ERROR_GATEWAY = "error"
+const ERROR_GATEWAY = "0x11";
 export const defaultFinalizeDepositHandler: ExtractTransferHandler = {
   matches: (): boolean => true,
   extract: async (

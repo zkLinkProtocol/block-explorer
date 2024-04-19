@@ -110,7 +110,7 @@ declare namespace Api {
       status: "included" | "committed" | "proved" | "verified" | "failed";
       error: string | null;
       revertReason: string | null;
-      networkkey?:string |null;
+      networkKey?:string |null;
     };
 
     type Transfer = {
@@ -124,7 +124,7 @@ declare namespace Api {
       type: "deposit" | "transfer" | "withdrawal" | "fee" | "mint" | "refund";
       timestamp: string;
       transaction?: {
-        networkkey:string;
+        networkKey:string;
       };
     };
 

@@ -38,5 +38,6 @@ export default () => {
     iconsList: config.value?.iconsList as IconsList,
     excuteBatchList: (config.value?.excuteBatchList as BatchRootItem[]) ?? [],
     chainNameList: config.value?.chainNameList as IconsList,
+    ERC20Bridges: config.value?.ERC20Bridges as IconsList,
   };
 };

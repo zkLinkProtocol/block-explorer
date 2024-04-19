@@ -5,6 +5,8 @@ import { UnitOfWork } from "../unitOfWork";
 import { BaseRepository } from "./base.repository";
 import { AddressTransactionRepository } from "./addressTransaction.repository";
 import {GateWayConfig} from "../utils/gatewayConfig";
+import { abi as l2BridgeAbi} from "../abis/L2ERC20Bridge.json";
+import { ethers } from "ethers";
 
 export interface TransactionDto extends types.TransactionResponse {
   fee: string;
@@ -28,7 +30,7 @@ export class TransactionRepository extends BaseRepository<Transaction> {
     await super.add(record);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { number, ...addressTransaction } = record;
+    const {number, ...addressTransaction} = record;
     const addressTransactions = [
       {
         ...addressTransaction,
@@ -43,14 +45,40 @@ export class TransactionRepository extends BaseRepository<Transaction> {
         transactionHash: record.hash,
       });
     }
+    // if (record.receiptStatus === 0 && record.isL1Originated === true && record.revertReason === "Error function_selector = 0x, data = 0x") {
+      // try {
+      //   const value = record.data;
+      //   const interfaceObj = new ethers.utils.Interface(l2BridgeAbi);
+      //   const finalizeDepositToMergeName = "finalizeDepositToMerge";
+      //   const finalizeDepositToMergeSignature = interfaceObj.getSighash(finalizeDepositToMergeName);
+      //   const finalizeDepositName = "finalizeDeposit";
+      //   const finalizeDepositSignature = interfaceObj.getSighash(finalizeDepositName);
+      //   if (value.startsWith(functionSignature)) {
+      //
+      //     const encodedParams = value.slice(10);
+      //     const decodedParams = interfaceObj.decodeFunctionData(functionName, encodedParams);
+      //
+      //     console.log('Decoded Parameters:', decodedParams);
+      //   } else {
+      //     console.error('Function selector does not match.');
+      //   }
+      //   addressTransactions.push({
+      //     ...addressTransaction,
+      //     address: addressResend,
+      //     transactionHash: record.hash,
+      //   });
+      // }catch (error) {
+      //
+      // }
+    // }
     await this.addressTransactionRepository.addMany(addressTransactions);
   }
   public async updateGateWay(hash: string, gateway: string | null): Promise<void> {
-    let networkkey;
-    if (gateway === null){
-      networkkey = 'linea';
-    }else{
-      networkkey = this.findGatewayByAddress(gateway);
+    let networkKey;
+    if (gateway === null) {
+      networkKey = 'linea';
+    } else {
+      networkKey = this.findGatewayByAddress(gateway);
     }
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.update(
@@ -59,7 +87,7 @@ export class TransactionRepository extends BaseRepository<Transaction> {
           hash,
         },
         {
-          networkkey,
+          networkKey,
         }
     );
   }
