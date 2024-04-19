@@ -23,10 +23,11 @@
         </TableBodyColumn>
         <TableBodyColumn class="transaction-table-value transaction-status-value">
           <TransactionStatus
-            :status="transaction!.status"
+            :status="status"
             :commit-tx-hash="transaction!.ethCommitTxHash"
             :prove-tx-hash="transaction!.ethProveTxHash"
             :execute-tx-hash="transaction!.ethExecuteTxHash"
+            :l1-batch-number="transaction!.l1BatchNumber || 0"
           />
         </TableBodyColumn>
       </tr>
@@ -221,7 +222,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from "vue";
+import { computed, ref, type PropType } from "vue";
 import { useI18n } from "vue-i18n";
 
 import AddressLink from "@/components/AddressLink.vue";
@@ -240,6 +241,11 @@ import TransactionData from "@/components/transactions/infoTable/TransactionData
 import TransferTableCell from "@/components/transactions/infoTable/TransferTableCell.vue";
 
 import type { TransactionItem } from "@/composables/useTransaction";
+import useTransaction from "@/composables/useTransaction";
+import useBatchRoot from "@/composables/useBatchRoot";
+const { getById, mainBatch, batchRoot } = useBatchRoot();
+
+const { getInfo } = useTransaction();
 
 const { t } = useI18n();
 
@@ -256,12 +262,24 @@ const props = defineProps({
     type: String,
   },
 });
-
 const tokenTransfers = computed(() => {
   // exclude transfers with no amount, such as NFT until we fully support them
   return props.transaction?.transfers.filter((transfer) => transfer.amount) || [];
 });
-
+let str =ref('')
+const getstatus = async(hash:any) => {
+  const info = await getInfo(props.transaction?.hash||'')
+  await getById(info.blockNumber.toString());
+  if (mainBatch && mainBatch.value?.executedAt) {
+    str.value = 'final'
+  } else {
+    str.value = 'validate'
+  }
+}
+const status = computed(() => {
+  getstatus(props.transaction?.hash)
+  return str.value
+});
 const gasUsedPercent = computed(() => {
   if (props.transaction) {
     const gasLimit = parseInt(props.transaction.gasLimit, 10);

@@ -16,7 +16,7 @@ declare namespace Api {
         previous: string;
       };
     };
-    type TotalSupply = { type: string; hex: string };
+
     type Token = {
       l2Address: string;
       l1Address: string | null;
@@ -27,8 +27,6 @@ declare namespace Api {
       liquidity: number | null;
       iconURL: string | null;
       tvl: string;
-      networkKey?: string;
-      totalSupply?: TotalSupply;
     };
 
     type BatchListItem = {
@@ -36,7 +34,7 @@ declare namespace Api {
       timestamp: string;
       rootHash?: string | null;
       executedAt: string | null;
-      status: "sealed" | "verified";
+      status: "sealed" | "verified" | "failed";
       l1TxCount: number;
       l2TxCount: number;
       size: number;
@@ -47,7 +45,7 @@ declare namespace Api {
       timestamp: string;
       rootHash?: string | null;
       executedAt: string | null;
-      status: "sealed" | "verified";
+      status: "sealed" | "verified" | "failed";
       l1TxCount: number;
       l2TxCount: number;
       size: number;
@@ -82,8 +80,6 @@ declare namespace Api {
     };
 
     type Transaction = {
-      contractAbi: any;
-      abi: any;
       hash: string;
       to: string;
       from: string;
@@ -107,10 +103,9 @@ declare namespace Api {
       isL1Originated: boolean;
       l1BatchNumber: number | null;
       isL1BatchSealed: boolean;
-      status: "included" | "committed" | "proved" | "verified" | "failed";
+      status: "included" | "committed" | "proved" | "verified" | "failed" | "validated" | "finalized";
       error: string | null;
       revertReason: string | null;
-      networkKey?:string |null;
     };
 
     type Transfer = {
@@ -123,9 +118,6 @@ declare namespace Api {
       tokenAddress: string;
       type: "deposit" | "transfer" | "withdrawal" | "fee" | "mint" | "refund";
       timestamp: string;
-      transaction?: {
-        networkKey:string;
-      };
     };
 
     type TokenAddress = {

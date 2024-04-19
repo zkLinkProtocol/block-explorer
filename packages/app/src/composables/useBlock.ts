@@ -1,68 +1,153 @@
-import { ref } from "vue";
+declare namespace Api {
+  namespace Response {
+    type Collection<T> = {
+      items: T[];
+      meta: {
+        currentPage: number;
+        itemCount: number;
+        itemsPerPage: number;
+        totalItems: number;
+        totalPages: number;
+      };
+      links: {
+        first: string;
+        last: string;
+        next: string;
+        previous: string;
+      };
+    };
 
-import { $fetch, FetchError } from "ohmyfetch";
+    type Token = {
+      l2Address: string;
+      l1Address: string | null;
+      name: string | null;
+      symbol: string | null;
+      decimals: number;
+      usdPrice: number | null;
+      liquidity: number | null;
+      iconURL: string | null;
+      tvl: string;
+    };
 
-import useContext from "@/composables/useContext";
+    type BatchListItem = {
+      number: string;
+      timestamp: string;
+      rootHash?: string | null;
+      executedAt: string | null;
+      status: "sealed" | "verified" | "failed";
+      l1TxCount: number;
+      l2TxCount: number;
+      size: number;
+    };
 
-import type { Hash } from "@/types";
+    type BatchDetails = {
+      number: string;
+      timestamp: string;
+      rootHash?: string | null;
+      executedAt: string | null;
+      status: "sealed" | "verified" | "failed";
+      l1TxCount: number;
+      l2TxCount: number;
+      size: number;
+      commitTxHash: string | null;
+      proveTxHash: string | null;
+      executeTxHash: string | null;
+      committedAt: string | null;
+      provenAt: string | null;
+      l1GasPrice: string;
+      l2FairGasPrice: string;
+    };
+    type BatchRootItem = {
+      number: string;
+      transactionHash: string | null;
+      rootHash: string | null;
+      executedAt: string | null;
+      l1BatchNumber: number | null;
+      chainId: number;
+      blockExplorersUrl?: string;
+      key?: string;
+      limitNumber?: number;
+    };
 
-export type BlockStatus = "sealed" | "verified";
-export type Block = {
-  number: number;
-  status: BlockStatus;
-  hash: Hash;
-  commitTxHash: null | Hash;
-  l1BatchNumber: number;
-  isL1BatchSealed: boolean;
-  executeTxHash: null | Hash;
-  proveTxHash: null | Hash;
-  committedAt: null | string;
-  executedAt: null | string;
-  provenAt: null | string;
-  l1TxCount: number;
-  l2TxCount: number;
-  timestamp: string;
-  isProvenByNewProver?: boolean;
-};
+    type Log = {
+      address: string;
+      topics: string[];
+      data: string;
+      blockNumber: number;
+      transactionHash: string | null;
+      transactionIndex: number;
+      logIndex: number;
+    };
 
-export type BlockListItem = {
-  number: number;
-  hash: Hash;
-  timestamp: string;
-  gasUsed: string;
-  l1BatchNumber: number;
-  l1TxCount: number;
-  l2TxCount: number;
-  size: number;
-  status: BlockStatus;
-  isL1BatchSealed: boolean;
-};
+    type Transaction = {
+      hash: string;
+      to: string;
+      from: string;
+      transactionIndex: number;
+      data: string;
+      value: string;
+      fee: string;
+      nonce: number;
+      blockNumber: number;
+      blockHash: string;
+      gasPrice: string;
+      gasLimit: string;
+      gasUsed: string;
+      gasPerPubdata: string | null;
+      maxFeePerGas: string | null;
+      maxPriorityFeePerGas: string | null;
+      receivedAt: string;
+      commitTxHash: string | null;
+      proveTxHash: string | null;
+      executeTxHash: string | null;
+      isL1Originated: boolean;
+      l1BatchNumber: number | null;
+      isL1BatchSealed: boolean;
+      status: "included" | "committed" | "proved" | "verified" | "failed" | "validated" | "finalized";
+      error: string | null;
+      revertReason: string | null;
+    };
 
-export default (context = useContext()) => {
-  const isRequestPending = ref(false);
-  const isRequestFailed = ref(false);
-  const blockItem = ref(<null | Block>null);
+    type Transfer = {
+      from: string;
+      to: string;
+      blockNumber: number;
+      transactionHash: string | null;
+      amount: string | null;
+      token: Token | null;
+      tokenAddress: string;
+      type: "deposit" | "transfer" | "withdrawal" | "fee" | "mint" | "refund";
+      timestamp: string;
+    };
 
-  const getById = async (id: string) => {
-    isRequestPending.value = true;
-    isRequestFailed.value = false;
+    type TokenAddress = {
+      balance: string;
+      token: null | Token;
+    };
 
-    try {
-      blockItem.value = await $fetch(`${context.currentNetwork.value.apiUrl}/blocks/${id}`);
-    } catch (error: unknown) {
-      blockItem.value = null;
-      if (!(error instanceof FetchError) || error.response?.status !== 404) {
-        isRequestFailed.value = true;
-      }
-    } finally {
-      isRequestPending.value = false;
-    }
-  };
+    type Balances = {
+      [tokenAddress: string]: TokenAddress;
+    };
 
-  return {
-    getById,
-    blockItem,
-    isRequestPending,
-    isRequestFailed,
-  };
-};
+    type Account = {
+      type: "account";
+      address: string;
+      blockNumber: number;
+      balances: Balances;
+      sealedNonce: number;
+      verifiedNonce: number;
+    };
+
+    type Contract = {
+      type: "contract";
+      address: string;
+      blockNumber: number;
+      balances: Balances;
+      bytecode: string;
+      creatorAddress: string;
+      creatorTxHash: string;
+      createdInBlockNumber: number;
+      totalTransactions: number;
+    };
+  }
+}

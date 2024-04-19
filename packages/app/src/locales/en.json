@@ -183,12 +183,12 @@
     },
     "status": {
       "included": "Processed on",
-      "committed": "Sent on",
-      "proved": "Validated on",
-      "verified": "Executed on",
+      "finalized": "Finalized on",
+      "validated": "Validating on",
       "failed": "Failed on"
     },
     "statusComponent": {
+      "finalized": "Finalized",
       "processed": "Processed",
       "indexing": "Being indexed by explorer",
       "sending": "Sending",
@@ -258,9 +258,9 @@
     "notYetExecuted": "Not yet executed",
     "notYetSealed": "This batch is not sealed yet",
     "finalizeTxHash": "Finalize tx hash",
-    "finalizeTxHashTooltip": "Hash of the transaction on which this Batch was finalized on Ethereum",
+    "finalizeTxHashTooltip":"Hash of the transaction on which this Batch was finalized on Ethereum",
     "finalizeAt": "Finalized",
-    "finalizeAtTooltip": "The date and time at which the Batch is finalized on Ethereum",
+    "finalizeAtTooltip":"The date and time at which the Batch is finalized on Ethereum",
     "finalizeStatus": "Status",
     "finalizePending": "Pending to be finalized on Ethereum",
     "transactionTable": {
@@ -280,9 +280,9 @@
     },
     "tooltipInfo": "Latest batches submitted to Ethereum Network",
     "status": {
-      "verified": "Executed on",
+      "verified": "Finalized on",
       "sealed": "Processed on",
-      "failed": "Failed"
+      "failed": "Failed on"
     }
   },
 
@@ -603,11 +603,7 @@
       "tokenName": "Token Name",
       "price": "Price",
       "tokenAddress": "Token Address",
-      "fromChain": "From Chain",
-      "totalQty": "Total qty",
-      "tvl": "Tvl",
-      "novaAddress": "Nova ADDRESS",
-      "originAddress": "Origin Address"
+      "fromChain": "From Chain"
     }
   },
   "pageError": {
