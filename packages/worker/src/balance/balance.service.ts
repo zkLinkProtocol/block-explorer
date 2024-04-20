@@ -53,8 +53,14 @@ export class BalanceService {
   public async deleteOldBalances(fromBlockNumber: number, toBlockNumber: number): Promise<void> {
     this.logger.log({ message: "Deleting old balances", fromBlockNumber, toBlockNumber });
     const stopDeleteBalancesDurationMeasuring = this.deleteOldBalancesDurationMetric.startTimer();
+    const blockStep = 5000;
     try {
-      await this.balanceRepository.deleteOldBalances(fromBlockNumber, toBlockNumber);
+      let startBlockNumber = fromBlockNumber;
+      while (startBlockNumber < toBlockNumber) {
+        const endBlockNumber = Math.min(startBlockNumber + blockStep, toBlockNumber);
+        await this.balanceRepository.deleteOldBalances(startBlockNumber, endBlockNumber);
+        startBlockNumber = endBlockNumber;
+      }
     } catch (error) {
       this.logger.error("Error on deleting old balances", error.stack);
     }
