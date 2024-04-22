@@ -127,7 +127,7 @@
       </button>
 
     </template>
-    <template #table-row-expanded="{ item }: { item: any }">
+    <template  #table-row-expanded="{ item }: { item: any }" >
       <td colspan="6">
         <SourceToken :items="item.matchingTokens" />
       </td>

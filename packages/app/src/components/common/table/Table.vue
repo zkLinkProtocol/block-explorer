@@ -13,14 +13,14 @@
             <template v-for="(item, index) in items" :key="index">
               <tr>
                 <slot name="table-row" :item="item" :index="index"></slot>
-                <td class="table-body-col mobile-col" v-if="expandable">
+                <td class="table-body-col mobile-col" v-if="expandable&&item.matchingTokens.length>0">
                   <div @click="toggleExpand(index, item)">
                     <slot name="expand-button" :item="item" :index="index" :active="expandedRows.includes(index)">
                     </slot>
                   </div>
                 </td>
               </tr>
-              <tr v-if="expandedRows.includes(index) && expandable">
+              <tr v-if="expandedRows.includes(index) && expandable && item.matchingTokens.length>0">
                 <slot name="table-row-expanded" :item="item" :index="index"></slot>
               </tr>
             </template>
