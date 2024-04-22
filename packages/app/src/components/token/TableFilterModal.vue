@@ -71,6 +71,7 @@ const emit = defineEmits<{
   (eventName: "update:modelValue", value: string): void;
   (eventName: "update:selected", value: string[]): void;
   (eventName: "filter"): void;
+  (eventName: "reset"): void;
 }>();
 const filterKeyword = ref(props.keyword);
 const selectedFilters = ref<string[]>([]);
@@ -85,6 +86,7 @@ const resetFilter = (close: any) => {
   selectedFilters.value = [];
   filterKeyword.value = "";
   emit("update:selected", []);
+  emit("reset")
 };
 const handleKeyUp = (event: any) => {
   const value = event.target.value.trim();

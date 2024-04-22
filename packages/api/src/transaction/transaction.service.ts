@@ -13,7 +13,7 @@ import { LRUCache } from "lru-cache";
 // const options: LRU. = { max: 500 };
 const options = {
   // how long to live in ms
-  ttl: 1000 * 10,
+  ttl: 1000 * 60,
   // return stale items before removing from cache?
   allowStale: false,
   ttlAutopurge: true,
@@ -191,10 +191,10 @@ export class TransactionService {
     if(total) {
       return total as number;
     }
-    const queryBuilder = this.addressTransactionRepository.createQueryBuilder("addressTransaction");
-    queryBuilder.select("COUNT(DISTINCT address)", "count");
-    const ntotal = (await queryBuilder.getRawOne()).count;
-    cache.set("totalAccountNumber", ntotal);
-    return ntotal;
+    const res = await this.addressTransactionRepository
+        .query("select count(*) from (select address from \"addressTransactions\" group by 1) adddresses");
+    const count = res[0].count;
+    cache.set("totalAccountNumber", count);
+    return count;
   }
 }
