@@ -46,9 +46,15 @@ export class TransactionRepository extends BaseRepository<Transaction> {
     await this.addressTransactionRepository.addMany(addressTransactions);
   }
 
-  public async countTransactions(): Promise<number> {
+  public async countTransactionsOnDate(date: string): Promise<number> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    return await transactionManager.count(this.entityTarget);
+    const result = await transactionManager.query(
+        `SELECT COUNT(*) AS transaction_count
+     FROM transactions
+     WHERE DATE("receivedAt") = $1`,
+        [date]
+    );
+    return result[0].transaction_count||0;
   }
 
   public async updateGateWay(hash: string, gateway: string | null): Promise<void> {
