@@ -212,6 +212,7 @@ import TokenAmountPriceTableCell from "@/components/transactions/TokenAmountPric
 import TransactionDirectionTableCell from "@/components/transactions/TransactionDirectionTableCell.vue";
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
+import useTransaction, { type TransactionItem } from "@/composables/useTransaction";
 
 import useToken, { type Token } from "@/composables/useToken";
 import { decodeDataWithABI } from "@/composables/useTransactionData";
@@ -227,6 +228,11 @@ import { ETH_TOKEN_L2_ADDRESS } from "@/utils/constants";
 import { utcStringFromISOString } from "@/utils/helpers";
 import useAddress from "@/composables/useAddress";
 import { NOVA } from '@/utils/constants'
+import { $fetch, FetchError } from "ohmyfetch";
+import useBatchRoot from "@/composables/useBatchRoot";
+const { getById, mainBatch, batchRoot } = useBatchRoot();
+
+const { getInfo } = useTransaction();
 // const { item, getByAddress, getContractVerificationInfo } = useAddress();
 
 const { chainNameList,ERC20Bridges } = useEnvironmentConfig();
@@ -350,6 +356,19 @@ type TransactionListItemMapped = TransactionListItem & {
   statusColor: "danger" | "dark-success";
 };
 const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
+  data.value?.map(async (transactions) => {
+    if (["failed", "included"].includes(transactions.status)) {
+      return transactions.status
+    } else {
+      const info = await getInfo(transactions.hash)
+      await getById(info.blockNumber.toString());
+      if (mainBatch && mainBatch.value?.executedAt) {
+        transactions.status = 'finalized'
+      } else {
+        transactions.status = 'validated'
+      }
+    }
+  })
   return data.value?.map((transaction) => {
     let fromNetwork=''
     if(transaction.isL1Originated){

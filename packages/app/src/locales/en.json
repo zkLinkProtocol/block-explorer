@@ -183,12 +183,12 @@
     },
     "status": {
       "included": "Processed on",
-      "committed": "Sent on",
-      "proved": "Validated on",
-      "verified": "Executed on",
+      "finalized": "Finalized on",
+      "validated": "Validating on",
       "failed": "Failed on"
     },
     "statusComponent": {
+      "finalized": "Finalized",
       "processed": "Processed",
       "indexing": "Being indexed by explorer",
       "sending": "Sending",
@@ -280,9 +280,9 @@
     },
     "tooltipInfo": "Latest batches submitted to Ethereum Network",
     "status": {
-      "verified": "Executed on",
+      "verified": "Finalized on",
       "sealed": "Processed on",
-      "failed": "Failed"
+      "failed": "Failed on"
     }
   },
 

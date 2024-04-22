@@ -1,5 +1,5 @@
 <template>
-  <Table class="batches-table" :class="{ loading }" :items="batches" :loading="loading">
+  <Table class="batches-table" :class="{ loading }" :items="list" :loading="loading">
     <template v-if="batches?.length || loading" #table-head>
       <TableHeadColumn v-if="columns.includes('status')">{{ t("batches.table.status") }}</TableHeadColumn>
       <TableHeadColumn v-if="columns.includes('txnBatch')">{{ t("batches.table.txnBatch") }}</TableHeadColumn>
@@ -52,6 +52,7 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 
+import { computed, ref, watch } from "vue";
 import Badge from "@/components/common/Badge.vue";
 import CopyButton from "@/components/common/CopyButton.vue";
 import ContentLoader from "@/components/common/loaders/ContentLoader.vue";
@@ -66,10 +67,12 @@ import type { BatchListItem } from "@/composables/useBatches";
 import type { PropType } from "vue";
 
 import { utcStringFromISOString } from "@/utils/helpers";
+import useBatchRoot from "@/composables/useBatchRoot";
+const { getById, mainBatch, batchRoot } = useBatchRoot();
 
 const { t, te } = useI18n();
 
-defineProps({
+const props = defineProps({
   batches: {
     type: Array as PropType<BatchListItem[]>,
     default: () => [],
@@ -87,7 +90,21 @@ defineProps({
     default: () => ["status", "txnBatch", "size", "age"],
   },
 });
-
+const list = computed<BatchListItem[] | undefined>(() => {
+  props.batches?.map(async (batche) => {
+    if (batche.status === 'failed') {
+      return batche.status
+    } else {
+      await getById(batche.number.toString());
+      if (mainBatch && mainBatch.value?.executedAt) {
+        batche.status = 'verified'
+      } else {
+        batche.status = 'sealed'
+      }
+    }
+  })
+  return props.batches
+});
 function getBadgeIconByStatus(status: BatchListItem["status"]) {
   if (status === "sealed") {
     return ZkSyncIcon;

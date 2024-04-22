@@ -36,7 +36,7 @@ declare namespace Api {
       timestamp: string;
       rootHash?: string | null;
       executedAt: string | null;
-      status: "sealed" | "verified";
+      status: "sealed" | "verified" | "failed";
       l1TxCount: number;
       l2TxCount: number;
       size: number;
@@ -47,7 +47,7 @@ declare namespace Api {
       timestamp: string;
       rootHash?: string | null;
       executedAt: string | null;
-      status: "sealed" | "verified";
+      status: "sealed" | "verified" | "failed";
       l1TxCount: number;
       l2TxCount: number;
       size: number;
@@ -107,7 +107,7 @@ declare namespace Api {
       isL1Originated: boolean;
       l1BatchNumber: number | null;
       isL1BatchSealed: boolean;
-      status: "included" | "committed" | "proved" | "verified" | "failed";
+      status: "included" | "committed" | "proved" | "verified" | "failed" | "validated" | "finalized";
       error: string | null;
       revertReason: string | null;
       networkKey?:string |null;
