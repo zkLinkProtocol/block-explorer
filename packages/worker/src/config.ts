@@ -1,4 +1,5 @@
 export type NetworkKey = string;
+export type GateWayKey = string;
 import * as fs from "fs";
 import * as JSONStream from "JSONStream";
 import * as path from "path";
@@ -36,6 +37,7 @@ export default async () => {
     COINGECKO_IS_PRO_PLAN,
     COINGECKO_API_KEY,
     BRIDGE_NETWORK_KEYS,
+    GATEWAY_NETWORK_KEYS,
     COINGECKO_PLATFORM_IDS,
     UPDATE_TOTAL_LOCKED_VALUE_INTERVAL,
     UPDATE_TOTAL_LOCKED_VALUE_DELAY,
@@ -68,6 +70,18 @@ export default async () => {
     networkKeys.map((key) => {
       return [(process.env[`L2_ERC20_BRIDGE_${key.toUpperCase()}`] || "").toLowerCase(), key];
     })
+  );
+
+  const gateways = GATEWAY_NETWORK_KEYS.split(",");
+  const gatewayValue = Object.fromEntries(
+      gateways.map((key) => {
+        return [key, process.env[`L2_GATEWAY_${key.toUpperCase()}`]];
+      })
+  );
+  const gatewayKey = Object.fromEntries(
+      gateways.map((key) => {
+        return [(process.env[`L2_GATEWAY_${key.toUpperCase()}`] || "").toLowerCase(), key];
+      })
   );
 
   return {
@@ -136,9 +150,15 @@ export default async () => {
       getNetworkKeyByL2Erc20Bridge: (bridgeAddress: string): NetworkKey | undefined =>
         L22Key[bridgeAddress.toLowerCase()],
     },
+    gateway: {
+      gateways,
+      getGateWay: (gateway: GateWayKey):string | undefined => gatewayValue[gateway],
+      getGateWayKey: (gateway: string): GateWayKey | undefined => gatewayKey[gateway.toLowerCase()],
+    },
     primaryChainMainContract: PRIMARY_CHAIN_MAIN_CONTRACT,
     primaryChainRpcUrl: PRIMARY_CHAIN_RPC_URL,
     isTestNet: parseInt(IS_TEST_NET, 10) || 0,
+
   };
 };
 async function getExtraCoinsList() {

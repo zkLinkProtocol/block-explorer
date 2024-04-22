@@ -12,15 +12,17 @@ import {
 import { TRANSACTION_PROCESSING_DURATION_METRIC_NAME } from "../metrics";
 import { TransactionData } from "../dataFetcher/types";
 import {ConfigService} from "@nestjs/config";
-import { GateWayConfig,GateWayConfigTestNet } from "../utils/gatewayConfig";
+type BridgeConfigFunction = (input: String) => string | undefined;
+type GatewayConfigFunction = (input: String) => string | undefined;
 
 @Injectable()
 export class TransactionProcessor {
   private readonly logger: Logger;
   private readonly GATEWAYNULLVALUE = 'linea';
   private readonly GATEWAYERROR = 'error';
-  private readonly isTestNet:number;
   configService: ConfigService;
+  public readonly getNetworkKeyByL2Erc20Bridge: BridgeConfigFunction;
+  public readonly getGateWayKey: GatewayConfigFunction;
   public constructor(
     private readonly transactionRepository: TransactionRepository,
     private readonly transactionReceiptRepository: TransactionReceiptRepository,
@@ -33,7 +35,8 @@ export class TransactionProcessor {
     configService: ConfigService
   ) {
     this.logger = new Logger(TransactionProcessor.name);
-    this.isTestNet = configService.get<number>("isTestNet");
+    this.getNetworkKeyByL2Erc20Bridge = configService.get<BridgeConfigFunction>("bridge.getNetworkKeyByL2Erc20Bridge");
+    this.getGateWayKey = configService.get<GatewayConfigFunction>("gateway.getGateWayKey");
   }
 
   public async add(blockNumber: number, transactionData: TransactionData): Promise<void> {
@@ -48,7 +51,7 @@ export class TransactionProcessor {
       const resTransferList =transactionData.transfers.filter((transfer) => transfer.transactionHash === transactionData.transaction.hash && transfer.gateway !== undefined && transfer.gateway !== null);
       const resTransfer = resTransferList.find((transfer) => transfer.gateway !== '0x' && transfer.gateway !== 'error' );
       if (resTransfer !== undefined && resTransfer !== null && resTransfer.gateway !== null && resTransfer.gateway !== undefined){
-        transactionData.transaction.networkKey = this.findGatewayByAddress(resTransfer.gateway);
+        transactionData.transaction.networkKey = this.getGateWayKey(resTransfer.gateway);
       }else if (resTransferList !== undefined && resTransferList !== null && resTransferList.length > 0) {
         transactionData.transaction.networkKey = this.GATEWAYERROR;
       }else {
@@ -113,14 +116,5 @@ export class TransactionProcessor {
     );
 
     stopTransactionProcessingMeasuring();
-  }
-  private  findGatewayByAddress(value: string): string {
-    const gateWayConfig = this.isTestNet === 0?GateWayConfig:GateWayConfigTestNet;
-    for (let key in gateWayConfig) {
-      if (gateWayConfig[key] === value) {
-        return key;
-      }
-    }
-    return "error";
   }
 }
