@@ -1,0 +1,23 @@
+FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.11.1-slim as build
+
+WORKDIR /block-explorer
+
+RUN apt update -y
+
+RUN apt install -y python-is-python3
+
+ADD . /block-explorer
+
+RUN npm install
+
+RUN cd packages/worker && npm run build && cd -
+
+FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.11.1-slim
+
+RUN mkdir /block-explorer
+
+COPY --from=build /block-explorer /block-explorer
+
+WORKDIR /block-explorer/packages/worker
+
+CMD ["./entrypoint.sh"]

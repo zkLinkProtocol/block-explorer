@@ -1,0 +1,21 @@
+FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/node:20.11.1-slim as build
+
+WORKDIR /block-explorer
+
+RUN apt update -y
+
+RUN apt install -y python-is-python3
+
+ADD . /block-explorer
+
+RUN npm install
+
+RUN cd packages/app && npm run build:nova && cd -
+
+FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/nginx:alpine3.18
+
+RUN mkdir /dist
+
+COPY --from=build /block-explorer/packages/app/dist /dist
+
+CMD ["/bin/sh", "-c", "nginx -g 'daemon off;'"]
