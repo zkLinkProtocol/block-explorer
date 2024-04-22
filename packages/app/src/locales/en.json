@@ -603,11 +603,22 @@
       "tokenName": "Token Name",
       "price": "Price",
       "tokenAddress": "Token Address",
-      "fromChain": "From Chain",
+      "sourceChain": "Source Chain",
       "totalQty": "Total qty",
       "tvl": "Tvl",
       "novaAddress": "Nova ADDRESS",
       "originAddress": "Origin Address"
+    },
+    "sourceToken": {
+      "title": "Source Token",
+      "sourceChain": "Source Chain",
+      "mergedQty": "Merged Qty",
+      "mergedTVL": "Merged TVL",
+      "novaAddress": "Nova ADDRESS",
+      "originAddress": "Origin Address"
+    },
+    "search": {
+      "placeholder": "Token name or symbol"
     }
   },
   "pageError": {

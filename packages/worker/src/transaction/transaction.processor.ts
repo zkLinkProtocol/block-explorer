@@ -11,11 +11,13 @@ import {
 } from "../repositories";
 import { TRANSACTION_PROCESSING_DURATION_METRIC_NAME } from "../metrics";
 import { TransactionData } from "../dataFetcher/types";
+import { GateWayConfig } from "../utils/gatewayConfig";
 
 @Injectable()
 export class TransactionProcessor {
   private readonly logger: Logger;
-
+  private readonly GATEWAYNULLVALUE = 'linea';
+  private readonly GATEWAYERROR = 'error';
   public constructor(
     private readonly transactionRepository: TransactionRepository,
     private readonly transactionReceiptRepository: TransactionReceiptRepository,
@@ -38,6 +40,17 @@ export class TransactionProcessor {
       transactionHash: transactionData.transaction.hash,
     });
 
+    if (transactionData.transaction.isL1Originated){
+      const resTransferList =transactionData.transfers.filter((transfer) => transfer.transactionHash === transactionData.transaction.hash && transfer.gateway !== undefined && transfer.gateway !== null);
+      const resTransfer = resTransferList.find((transfer) => transfer.gateway !== '0x' && transfer.gateway !== 'error' );
+      if (resTransfer !== undefined && resTransfer !== null && resTransfer.gateway !== null && resTransfer.gateway !== undefined){
+        transactionData.transaction.networkKey = this.findGatewayByAddress(resTransfer.gateway);
+      }else if (resTransferList !== undefined && resTransferList !== null && resTransferList.length > 0) {
+        transactionData.transaction.networkKey = this.GATEWAYERROR;
+      }else {
+        transactionData.transaction.networkKey = this.GATEWAYNULLVALUE;
+      }
+    }
     await this.transactionRepository.add(transactionData.transaction);
 
     this.logger.debug({
@@ -96,5 +109,13 @@ export class TransactionProcessor {
     );
 
     stopTransactionProcessingMeasuring();
+  }
+  private  findGatewayByAddress(value: string): string {
+    for (let key in GateWayConfig) {
+      if (GateWayConfig[key] === value) {
+        return key;
+      }
+    }
+    return "error";
   }
 }

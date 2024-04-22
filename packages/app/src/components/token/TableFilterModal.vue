@@ -22,7 +22,7 @@
             <ul class="options-wrap">
               <li v-for="(item, itemIndex) in filterOptions" :key="itemIndex">
                 <label class="label">
-                  <input type="checkbox" v-model="selectedFilters" :value="item" />
+                  <input type="checkbox" v-model="selectedFilters" class="input" :value="item" />
                   {{ item }}
                 </label>
               </li>
@@ -71,6 +71,7 @@ const emit = defineEmits<{
   (eventName: "update:modelValue", value: string): void;
   (eventName: "update:selected", value: string[]): void;
   (eventName: "filter"): void;
+  (eventName: "reset"): void;
 }>();
 const filterKeyword = ref(props.keyword);
 const selectedFilters = ref<string[]>([]);
@@ -85,6 +86,7 @@ const resetFilter = (close: any) => {
   selectedFilters.value = [];
   filterKeyword.value = "";
   emit("update:selected", []);
+  emit("reset")
 };
 const handleKeyUp = (event: any) => {
   const value = event.target.value.trim();
@@ -106,7 +108,7 @@ watch(
   }
 }
 .btn {
-  @apply rounded-md text-white bg-design-200 p-1.5 focus:outline-none;
+  @apply rounded-md text-white bg-design-900 p-1.5 focus:outline-none;
 }
 .btn-reset {
   @apply rounded-md border border-neutral-300 bg-white text-black p-1.5 focus:outline-none;
@@ -122,5 +124,9 @@ watch(
       @apply focus:outline-none;
     }
   }
+}
+.input{
+    @apply text-design-900 mr-2 bg-transparent checked:bg-design-900 rounded-sm focus:ring-offset-0 focus:outline-none focus:ring-0 focus:ring-offset-transparent;
+    
 }
 </style>

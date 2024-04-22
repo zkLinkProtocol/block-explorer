@@ -190,7 +190,22 @@ export default (context = useContext()) => {
       isRequestPending.value = false;
     }
   };
+  const getAddress = async (address: string) => {
+    isRequestPending.value = true;
+    isRequestFailed.value = false;
+
+    try {
+      const response = await $fetch(`${context.currentNetwork.value.apiUrl}/address/${address}`);
+      item.value = response;
+    } catch (error: unknown) {
+      item.value = null;
+      isRequestFailed.value = true;
+    } finally {
+      isRequestPending.value = false;
+    }
+  };
   return {
+    getAddress,
     getByAddress,
     getContractProxyInfo,
     getContractVerificationInfo,

@@ -79,6 +79,7 @@ export interface TransactionInfo
   receivedAt: string;
   error?: string;
   revertReason?: string;
+  networkKey?: string;
 }
 
 export type TransactionReceipt = Modify<

@@ -107,6 +107,9 @@ export class Transaction extends BaseEntity {
   @Column({ nullable: true })
   public readonly revertReason?: string;
 
+  @Column({ type: "varchar", default: ""})
+  public readonly networkKey?: string;
+
   public get status(): TransactionStatus {
     if (this.receiptStatus === 0) {
       return TransactionStatus.Failed;

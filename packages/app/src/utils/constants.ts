@@ -18,6 +18,8 @@ export const PROXY_CONTRACT_IMPLEMENTATION_ABI = [
   },
 ];
 export const ETH_BLOCKEXPLORER_URL = "https://etherscan.io";
-export const NOVA_NATIVE_TOKEN = "Nova Native Token";
+export const NOVA_NATIVE_TOKEN = "zkLink Nova";
 
-export const NOVA_MERGED_TOKEN = "Merged Token";
+export const NOVA_MERGED_TOKEN = "Multi-Chain";
+export const NOVA = "Nova";
+export const MERGE_TOKEN_PORTAL = "0x83FD59FD58C6A5E6eA449e5400D02803875e1104";

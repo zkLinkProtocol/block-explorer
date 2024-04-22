@@ -17,10 +17,60 @@
   ],
   "iconsList": {
     "sepolia": "/img/ethereum.svg",
-    "primary": "/img/linea.svg"
+    "primary": "/img/linea.svg",
+    "zksync": "/img/zksync.svg",
+    "arbitrum": "/img/arbitrum-arb-logo.svg",
+    "optimism": "/img/optimism.svg",
+    "base": "/img/base.svg",
+    "manta": "/img/manta.jpg",
+    "blast":"/img/blast.svg"
   },
   "chainNameList": {
     "sepolia": "Sepolia",
-    "primary": "Linea Sepolia Testnet"
-  }
+    "primary": "Linea Sepolia Testnet",
+    "zksync": "zkSync Sepolia Testnet",
+    "arbitrum": "Arbitrum One Sepolia Testnet",
+    "optimism": "Optimism Sepolia Testnet",
+    "base": "Base Sepolia Testnet",
+    "manta": "Manta Pacific Sepolia Testnet",
+    "blast": "Blast Sepolia Testnet"
+  },
+  "excuteBatchList": [
+    {
+      "key": "zksync",
+      "limitNumber": 50,
+      "chainId": 324,
+      "blockExplorersUrl": "https://sepolia.explorer.zksync.io"
+    },
+    {
+      "key": "arbitrum",
+      "limitNumber": 50,
+      "chainId": 42161,
+      "blockExplorersUrl": "https://sepolia.arbiscan.io"
+    },
+    {
+      "key": "optimism",
+      "limitNumber": 50,
+      "chainId": 10,
+      "blockExplorersUrl": "https://sepolia-optimism.etherscan.io/"
+    },
+    {
+      "key": "base",
+      "limitNumber": 50,
+      "chainId": 8453,
+      "blockExplorersUrl": "https://sepolia.basescan.org"
+    },
+    {
+      "key": "manta",
+      "limitNumber": 50,
+      "chainId": 169,
+      "blockExplorersUrl": "https://pacific-explorer.sepolia-testnet.manta.network"
+    },
+    {
+      "key": "blast",
+      "limitNumber": 50,
+      "chainId": 81457,
+      "blockExplorersUrl": "https://testnet.blastscan.io"
+    }
+  ]
 }
