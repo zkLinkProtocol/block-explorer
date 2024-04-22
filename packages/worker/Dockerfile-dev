@@ -20,4 +20,4 @@ COPY --from=build /block-explorer /block-explorer
 
 WORKDIR /block-explorer/packages/worker
 
-CMD ["entrypoint.sh"]
+CMD ["./entrypoint.sh"]
