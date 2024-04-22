@@ -32,7 +32,6 @@ import useTokenLibrary from "@/composables/useTokenLibrary";
 
 const {
   tokens,
-  sortTokens,
   isRequestPending: isTokensPending,
   isRequestFailed: isTokensFailed,
   getTokens,
