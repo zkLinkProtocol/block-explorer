@@ -72,7 +72,7 @@ export class TransactionProcessor {
             transactionData.transaction.networkKey = gateway;
           }
         }
-        else if (callData.slice(0,8) === '51cff8'){
+        else if (callData.slice(0,8) === '51cff8d9'){
           transactionData.transaction.networkKey = this.GATEWAYNULLVALUE;
         }
       }
