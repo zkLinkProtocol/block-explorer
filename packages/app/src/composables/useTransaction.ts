@@ -11,7 +11,7 @@ import type { types } from "zksync-web3";
 import useEnvironmentConfig from "./useEnvironmentConfig";
 import { NOVA } from "@/utils/constants";
 
-export type TransactionStatus = "included" | "committed" | "proved" | "verified" | "failed" | "indexing";
+export type TransactionStatus = "included" | "committed" | "proved" | "verified" | "failed" | "indexing" | "validated" | "finalized";
 type TokenInfo = {
   address: Hash;
   decimals: number;
@@ -210,11 +210,15 @@ export default (context = useContext()) => {
     }
   };
 
+  const getInfo = async (hash: string) => {
+    return await $fetch<Api.Response.Transaction>(`${context.currentNetwork.value.apiUrl}/transactions/${hash}`)
+  };
   return {
     transaction,
     isRequestPending,
     isRequestFailed,
     getByHash,
+    getInfo,
   };
 };
 
