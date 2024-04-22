@@ -4,8 +4,8 @@ import { Transaction } from "../entities";
 import { UnitOfWork } from "../unitOfWork";
 import { BaseRepository } from "./base.repository";
 import { AddressTransactionRepository } from "./addressTransaction.repository";
-import { GateWayConfig, GateWayConfigTestNet} from "../utils/gatewayConfig";
 import {ConfigService} from "@nestjs/config";
+type GatewayConfigFunction = (input: String) => string | undefined;
 
 export interface TransactionDto extends types.TransactionResponse {
   fee: string;
@@ -18,15 +18,15 @@ export interface TransactionDto extends types.TransactionResponse {
 
 @Injectable()
 export class TransactionRepository extends BaseRepository<Transaction> {
-  private readonly isTestNet :number;
   configService: ConfigService;
+  public readonly getGateWayKey: GatewayConfigFunction;
   public constructor(
     unitOfWork: UnitOfWork,
     private readonly addressTransactionRepository: AddressTransactionRepository,
     configService: ConfigService
   ) {
     super(Transaction, unitOfWork);
-    this.isTestNet = configService.get<number>("isTestNet");
+    this.getGateWayKey = configService.get<GatewayConfigFunction>("gateway.getGateWayKey");
   }
 
   public override async add(record: Partial<Transaction>): Promise<void> {
@@ -55,7 +55,7 @@ export class TransactionRepository extends BaseRepository<Transaction> {
     if (gateway === null) {
       networkKey = 'linea';
     } else {
-      networkKey = this.findGatewayByAddress(gateway);
+      networkKey = this.getGateWayKey(gateway);
     }
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.update(
@@ -67,15 +67,5 @@ export class TransactionRepository extends BaseRepository<Transaction> {
           networkKey,
         }
     );
-  }
-
-  private  findGatewayByAddress(value: string): string {
-    const gateWayConfig = this.isTestNet === 0?GateWayConfig:GateWayConfigTestNet;
-    for (let key in gateWayConfig) {
-      if (gateWayConfig[key] === value) {
-        return key;
-      }
-    }
-    return "error";
   }
 }
