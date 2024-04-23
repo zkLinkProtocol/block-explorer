@@ -227,6 +227,7 @@ export class TransactionService {
   public async getDailyTransaction(paginationOptions: IPaginationOptions): Promise<Pagination<DailyTxHistory>>{
     const queryBuilder = this.dailyTxHistoryRepository.createQueryBuilder("dailyTransaction");
     queryBuilder.select();
+    queryBuilder.orderBy('dailyTransaction.timestamp', 'DESC');
     return await paginate<DailyTxHistory>(queryBuilder, paginationOptions);
   }
 }
