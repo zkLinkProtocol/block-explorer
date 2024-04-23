@@ -127,7 +127,7 @@
       </button>
 
     </template>
-    <template  #table-row-expanded="{ item }: { item: any }" >
+    <template #table-row-expanded="{ item }: { item: any }">
       <td colspan="6">
         <SourceToken :items="item.matchingTokens" />
       </td>
@@ -178,10 +178,10 @@
         <TableBodyColumn>
           <ContentLoader />
         </TableBodyColumn>
-        <TableBodyColumn v-if="selectedTab===TAB_TYPE.Bridged">
+        <TableBodyColumn v-if="selectedTab === TAB_TYPE.Bridged">
           <ContentLoader />
         </TableBodyColumn>
-        <TableBodyColumn v-if="selectedTab===TAB_TYPE.Bridged">
+        <TableBodyColumn v-if="selectedTab === TAB_TYPE.Bridged">
           <ContentLoader />
         </TableBodyColumn>
       </tr>
@@ -301,7 +301,7 @@ const tabs: Tab[] = [
 
 // filter FROM CHAIN
 const selectedTokenList: Ref<string[]> = ref([]);
-const selectedFilterList: Ref<string[]> = ref([]);
+const selectedFilterList: Ref<string[]> = ref(['price']);
 const filterChain = (mergeData: Token[]) => {
   if (selectedTokenList.value.length === 0) {
     if (selectedTab.value)
@@ -419,7 +419,8 @@ const displayTokenList = computed(() => {
   }
 
   // Hide Assets Without Price
-  if (selectedFilterList.value.length < 1) {
+
+  if (selectedFilterList.value.length > 0) {
     mergeData = mergeData.filter((item) => {
       if (!item.usdPrice) {
         return false;

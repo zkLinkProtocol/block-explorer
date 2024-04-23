@@ -4,7 +4,6 @@
       <Breadcrumbs :items="breadcrumbItems" />
       <SearchForm class="search-form" />
     </div>
-    <div class="showing-tips">{{ `Showing ${showingCount} Token Contracts (From a total of ${ tokensCount } Token Contract)` }}</div>
     <div class="tokens-header">
       <h1>{{ t("tokensView.heading") }}</h1>
       <div v-if="tokens[0]?.iconURL" class="coingecko-attribution">
@@ -16,13 +15,13 @@
       <span v-if="isTokensFailed" class="error-message">
         {{ t("failedRequest") }}
       </span>
-      <TokenTable ref="childRef"  :tokens="tokens" :loading="isTokensPending"></TokenTable>
+      <TokenTable ref="childRef" :tokens="tokens" :loading="isTokensPending"></TokenTable>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref,computed,onMounted,watch } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import SearchForm from "@/components/SearchForm.vue";
@@ -30,11 +29,9 @@ import Breadcrumbs, { type BreadcrumbItem } from "@/components/common/Breadcrumb
 import TokenTable from "@/components/token/TokenListTable.vue";
 
 import useTokenLibrary from "@/composables/useTokenLibrary";
-import type TokenListTable from "@/components/token/TokenListTable.vue";
 
 const {
   tokens,
-  tokensWithTag,
   isRequestPending: isTokensPending,
   isRequestFailed: isTokensFailed,
   getTokens,
@@ -50,24 +47,19 @@ const breadcrumbItems = computed((): BreadcrumbItem[] => [
     text: `${t("tokensView.title")}`,
   },
 ]);
-const tokensCount=computed(()=>tokens.value.length)
-
-const childRef = ref<InstanceType<typeof TokenListTable>>();
-const showingCount=ref(0);
-watch(()=>childRef.value?.showingCount,(val)=>{
-  showingCount.value=val??0
-})
 
 getTokens();
 </script>
 
 <style scoped lang="scss">
 .head-token {
-  @apply mb-2 flex flex-col-reverse justify-between  lg:flex-row;
+  @apply mb-4 flex flex-col-reverse justify-between lg:flex-row;
+
   .search-form {
     @apply mb-6 w-full max-w-[26rem] lg:mb-0;
   }
 }
+
 .tokens-container {
   @apply mt-8;
 }
@@ -83,7 +75,8 @@ getTokens();
     }
   }
 }
-.showing-tips{
+
+.showing-tips {
   @apply mb-2;
   color: #D1D5DB;
 }
