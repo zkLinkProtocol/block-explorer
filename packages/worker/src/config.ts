@@ -74,12 +74,12 @@ export default async () => {
   const gateways = GATEWAY_NETWORK_KEYS.split(",");
   const gatewayValue = Object.fromEntries(
       gateways.map((key) => {
-        return [key, process.env[`L2_GATEWAY_${key.toUpperCase()}`]];
+        return [key, process.env[`L1_GATEWAY_${key.toUpperCase()}`]];
       })
   );
   const gatewayKey = Object.fromEntries(
       gateways.map((key) => {
-        return [(process.env[`L2_GATEWAY_${key.toUpperCase()}`] || "").toLowerCase(), key];
+        return [(process.env[`L1_GATEWAY_${key.toUpperCase()}`] || "").toLowerCase(), key];
       })
   );
 
