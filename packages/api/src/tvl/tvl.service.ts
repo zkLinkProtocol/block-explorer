@@ -175,7 +175,7 @@ export class TVLService {
   public async getTotalTokensTVL(): Promise<TokenTVLDto[]> {
     const totalTokens: TokenTvl[] = await this.tokenTvlRepository.find();
 
-    const tokenAddresses = totalTokens.map((token) => normalizeAddressTransformer.from(token.address));
+    const tokenAddresses = totalTokens.map((token) => token.address);
     const tokens = await this.tokenRepository.find({
       where: {
         l2Address: In(tokenAddresses),
@@ -186,7 +186,7 @@ export class TVLService {
 
     const result: TokenTVLDto[] = [];
     for (const token of totalTokens) {
-      const hexAddress = normalizeAddressTransformer.from(token.address);
+      const hexAddress = token.address;
       const cur_token = tokensMap.get(hexAddress);
       const symbol = cur_token ? cur_token.symbol : "";
       result.push({
