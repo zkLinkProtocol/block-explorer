@@ -23,7 +23,7 @@
     "arbitrum": "/img/arbitrum-arb-logo.svg",
     "mantle": "/img/mantle.svg",
     "manta": "/img/manta.jpg",
-    "blast":"/img/blast.svg",
+    "blast": "/img/blast.svg",
     "optimism": "/img/optimism.svg",
     "base": "/img/base.svg"
   },
@@ -89,7 +89,7 @@
     "mantle": "0x321Ce902eDFC6466B224ce5D9A7Bc16858855272",
     "zksync": "0x7187DB8AB8F65450a74dD40474bE778CF468C44a",
     "arbitrum": "0x6B7551DBbaE2fb728cF851baee5c3A52DF6F60a4",
-    "Blast Mainnet": "0x17887788E01A1192a26F636Cfcfc033c7Bb42348",
+    "blast": "0x17887788E01A1192a26F636Cfcfc033c7Bb42348",
     "optimism": "0x6aAdaA7Bf9F5283cAF3eb2E40573D1A4d02C8B15",
     "base": "0xa03248B029b4e348F156f4b1d93CB433a4e1361e"
   }
