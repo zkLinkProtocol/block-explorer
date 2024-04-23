@@ -1,5 +1,4 @@
 export type NetworkKey = string;
-export type GateWayKey = string;
 import * as fs from "fs";
 import * as JSONStream from "JSONStream";
 import * as path from "path";
@@ -150,8 +149,8 @@ export default async () => {
     },
     gateway: {
       gateways,
-      getGateWay: (gateway: GateWayKey):string | undefined => gatewayValue[gateway],
-      getGateWayKey: (gateway: string): GateWayKey | undefined => gatewayKey[gateway.toLowerCase()],
+      getGateWay: (gateway: NetworkKey):string | undefined => gatewayValue[gateway],
+      getGateWayKey: (gateway: string): NetworkKey | undefined => gatewayKey[gateway.toLowerCase()],
     },
     primaryChainMainContract: PRIMARY_CHAIN_MAIN_CONTRACT,
     primaryChainRpcUrl: PRIMARY_CHAIN_RPC_URL,
