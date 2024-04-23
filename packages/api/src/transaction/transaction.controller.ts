@@ -15,6 +15,7 @@ import { FilterTransactionsOptionsDto } from "./dtos/filterTransactionsOptions.d
 import { TransferDto } from "../transfer/transfer.dto";
 import { TransactionDto } from "./dtos/transaction.dto";
 import { TransactionDetailsDto } from "./dtos/transactionDetails.dto";
+import { DailyTransactionDto } from "./dtos/dailyTransaction.dto";
 import { TransferService } from "../transfer/transfer.service";
 import { LogDto } from "../log/log.dto";
 import { LogService } from "../log/log.service";
@@ -58,6 +59,21 @@ export class TransactionController {
         ...pagingOptions,
         route: entityName,
       }
+    );
+  }
+
+  @Get("/dailyTransaction")
+  @ApiListPageOkResponse(DailyTransactionDto, { description: "Successfully returned dailyTxDto list" })
+  @ApiBadRequestResponse({ description: "Query params are not valid or out of range" })
+  public async getDailyTransaction(
+      @Query() pagingOptions: PagingOptionsWithMaxItemsLimitDto
+  ): Promise<Pagination<DailyTransactionDto>> {
+
+    return await this.transactionService.getDailyTransaction(
+        {
+          ...pagingOptions,
+          route: `${entityName}/dailyTransaction`,
+        }
     );
   }
 

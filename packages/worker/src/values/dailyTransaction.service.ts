@@ -43,7 +43,7 @@ export class DailyTransactionService extends Worker {
         const time = new Date();
         time.setDate(time.getDate() - 1);
         const timeStr = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate();
-        return await this.dailyTransactionHistoryRepository.add({
+        await this.dailyTransactionHistoryRepository.add({
             timestamp: time,
             txNum:await this.transactionRepository.countTransactionsOnDate(timeStr),
         })
