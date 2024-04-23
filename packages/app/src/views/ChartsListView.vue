@@ -149,7 +149,7 @@ onMounted(async() => {
   })
   var myChart = echarts.init(document.getElementById('TVLChart'));
   myChart.setOption(setChart(xData,yData));
-  await getData('add')
+  await getData('UAW')
   xData = []
   yData = []
   data && data.value.map((i:{uaw:string,timestamp:string},index)=>{
