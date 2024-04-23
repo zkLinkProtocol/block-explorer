@@ -15,7 +15,7 @@
       <span v-if="isTokensFailed" class="error-message">
         {{ t("failedRequest") }}
       </span>
-      <TokenTable :tokens="tokens" :loading="isTokensPending"></TokenTable>
+      <TokenTable ref="childRef" :tokens="tokens" :loading="isTokensPending"></TokenTable>
     </div>
   </div>
 </template>
@@ -53,12 +53,13 @@ getTokens();
 
 <style scoped lang="scss">
 .head-token {
-  @apply mb-8 flex flex-col-reverse justify-between lg:mb-10 lg:flex-row;
+  @apply mb-4 flex flex-col-reverse justify-between lg:flex-row;
 
   .search-form {
     @apply mb-6 w-full max-w-[26rem] lg:mb-0;
   }
 }
+
 .tokens-container {
   @apply mt-8;
 }
@@ -73,5 +74,10 @@ getTokens();
       @apply text-blue-100;
     }
   }
+}
+
+.showing-tips {
+  @apply mb-2;
+  color: #D1D5DB;
 }
 </style>
