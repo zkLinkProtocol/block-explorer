@@ -36,7 +36,7 @@
         <template #default v-if="item.text">
           <a
             v-if="item.url"
-            class="badge-status-link"
+            class="badge-status-link cursor-pointer"
             @click="goBatch(item.url)"
           >
             <span class="badge-status-link-text">{{ item.text }}</span>
@@ -45,10 +45,10 @@
           <a
             v-else-if="item.urls"
             :href="currentNetwork.l1ExplorerUrl ? `https://etherscan.io/tx/${item.urls}` : undefined"
-            class="badge-status-link"
+            class="badge-status-link cursor-pointer"
             target="_blank"
           >
-            <span class="badge-status-link-text"><CheckIcon />{{ item.text }}</span>
+            <span class="badge-status-link-text">{{ item.text }}</span>
             <ExternalLinkIcon v-if="currentNetwork.l1ExplorerUrl" class="badge-status-link-icon" />
           </a>
           <span v-else>{{ item.text }}</span>
