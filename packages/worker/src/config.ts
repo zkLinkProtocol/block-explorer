@@ -71,7 +71,7 @@ export default async () => {
     })
   );
 
-  const gateways = GATEWAY_NETWORK_KEYS.split(",");
+  const gateways = BRIDGE_NETWORK_KEYS.split(",");
   const gatewayValue = Object.fromEntries(
       gateways.map((key) => {
         return [key, process.env[`L1_GATEWAY_${key.toUpperCase()}`]];
@@ -151,8 +151,8 @@ export default async () => {
     },
     gateway: {
       gateways,
-      getGateWay: (gateway: GateWayKey):string | undefined => gatewayValue[gateway],
-      getGateWayKey: (gateway: string): GateWayKey | undefined => gatewayKey[gateway.toLowerCase()],
+      getGateWay: (gateway: NetworkKey):string | undefined => gatewayValue[gateway],
+      getGateWayKey: (gateway: string): NetworkKey | undefined => gatewayKey[gateway.toLowerCase()],
     },
     primaryChainMainContract: PRIMARY_CHAIN_MAIN_CONTRACT,
     primaryChainRpcUrl: PRIMARY_CHAIN_RPC_URL,

@@ -20,8 +20,8 @@ export interface TransactionDto extends types.TransactionResponse {
 
 @Injectable()
 export class TransactionRepository extends BaseRepository<Transaction> {
-  public readonly getGateWayKey: GatewayConfigFunction;
   configService: ConfigService;
+  public readonly getGateWayKey: GatewayConfigFunction;
   public constructor(
     unitOfWork: UnitOfWork,
     private readonly addressTransactionRepository: AddressTransactionRepository,
