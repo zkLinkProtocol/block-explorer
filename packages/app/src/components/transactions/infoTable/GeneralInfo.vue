@@ -269,7 +269,7 @@ const tokenTransfers = computed(() => {
 let str =ref('')
 const getstatus = async(hash:any) => {
   const info = await getInfo(props.transaction?.hash||'')
-  await getById(info.blockNumber.toString());
+  await getById(info.l1BatchNumber?.toString()||'');
   if (mainBatch && mainBatch.value?.executedAt) {
     str.value = 'final'
   } else {

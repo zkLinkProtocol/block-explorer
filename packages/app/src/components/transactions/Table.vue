@@ -361,7 +361,7 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
       return transactions.status
     } else {
       const info = await getInfo(transactions.hash)
-      await getById(info.blockNumber.toString());
+      await getById(info.l1BatchNumber?.toString()||'');
       if (mainBatch && mainBatch.value?.executedAt) {
         transactions.status = 'finalized'
       } else {
