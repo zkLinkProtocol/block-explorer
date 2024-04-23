@@ -4,7 +4,8 @@ import { Transaction } from "../entities";
 import { UnitOfWork } from "../unitOfWork";
 import { BaseRepository } from "./base.repository";
 import { AddressTransactionRepository } from "./addressTransaction.repository";
-import {GateWayConfig} from "../utils/gatewayConfig";
+import {ConfigService} from "@nestjs/config";
+type GatewayConfigFunction = (input: String) => string | undefined;
 
 export interface TransactionDto extends types.TransactionResponse {
   fee: string;
@@ -17,18 +18,22 @@ export interface TransactionDto extends types.TransactionResponse {
 
 @Injectable()
 export class TransactionRepository extends BaseRepository<Transaction> {
+  configService: ConfigService;
+  public readonly getGateWayKey: GatewayConfigFunction;
   public constructor(
     unitOfWork: UnitOfWork,
-    private readonly addressTransactionRepository: AddressTransactionRepository
+    private readonly addressTransactionRepository: AddressTransactionRepository,
+    configService: ConfigService
   ) {
     super(Transaction, unitOfWork);
+    this.getGateWayKey = configService.get<GatewayConfigFunction>("gateway.getGateWayKey");
   }
 
   public override async add(record: Partial<Transaction>): Promise<void> {
     await super.add(record);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { number, ...addressTransaction } = record;
+    const {number, ...addressTransaction} = record;
     const addressTransactions = [
       {
         ...addressTransaction,
@@ -48,9 +53,9 @@ export class TransactionRepository extends BaseRepository<Transaction> {
   public async updateGateWay(hash: string, gateway: string | null): Promise<void> {
     let networkKey;
     if (gateway === null) {
-      networkKey = 'linea';
+      networkKey = 'primary';
     } else {
-      networkKey = this.findGatewayByAddress(gateway);
+      networkKey = this.getGateWayKey(gateway);
     }
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.update(
@@ -62,14 +67,5 @@ export class TransactionRepository extends BaseRepository<Transaction> {
           networkKey,
         }
     );
-  }
-
-  private  findGatewayByAddress(value: string): string {
-    for (let key in GateWayConfig) {
-      if (GateWayConfig[key] === value) {
-        return key;
-      }
-    }
-    return "error";
   }
 }

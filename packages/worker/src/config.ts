@@ -69,6 +69,18 @@ export default async () => {
     })
   );
 
+  const gateways = BRIDGE_NETWORK_KEYS.split(",");
+  const gatewayValue = Object.fromEntries(
+      gateways.map((key) => {
+        return [key, process.env[`L1_GATEWAY_${key.toUpperCase()}`]];
+      })
+  );
+  const gatewayKey = Object.fromEntries(
+      gateways.map((key) => {
+        return [(process.env[`L1_GATEWAY_${key.toUpperCase()}`] || "").toLowerCase(), key];
+      })
+  );
+
   return {
     port: parseInt(PORT, 10) || 3001,
     blockchain: {
@@ -134,6 +146,11 @@ export default async () => {
         L12Key[bridgeAddress.toLowerCase()],
       getNetworkKeyByL2Erc20Bridge: (bridgeAddress: string): NetworkKey | undefined =>
         L22Key[bridgeAddress.toLowerCase()],
+    },
+    gateway: {
+      gateways,
+      getGateWay: (gateway: NetworkKey):string | undefined => gatewayValue[gateway],
+      getGateWayKey: (gateway: string): NetworkKey | undefined => gatewayKey[gateway.toLowerCase()],
     },
     primaryChainMainContract: PRIMARY_CHAIN_MAIN_CONTRACT,
     primaryChainRpcUrl: PRIMARY_CHAIN_RPC_URL,
