@@ -1,4 +1,5 @@
 export type NetworkKey = string;
+export type GateWayKey = string;
 import * as fs from "fs";
 import * as JSONStream from "JSONStream";
 import * as path from "path";
@@ -36,6 +37,7 @@ export default async () => {
     COINGECKO_IS_PRO_PLAN,
     COINGECKO_API_KEY,
     BRIDGE_NETWORK_KEYS,
+    GATEWAY_NETWORK_KEYS,
     COINGECKO_PLATFORM_IDS,
     UPDATE_TOTAL_LOCKED_VALUE_INTERVAL,
     UPDATE_TOTAL_LOCKED_VALUE_DELAY,
@@ -44,7 +46,7 @@ export default async () => {
     COINGECKO_PROXY_URL,
     COINGECKO_ENABLE_PROXY,
     PRIMARY_CHAIN_MAIN_CONTRACT,
-    PRIMARY_CHAIN_RPC_URL
+    PRIMARY_CHAIN_RPC_URL,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");

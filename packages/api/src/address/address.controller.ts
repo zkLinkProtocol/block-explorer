@@ -25,6 +25,7 @@ import { LogService } from "../log/log.service";
 import { ParseAddressPipe, ADDRESS_REGEX_PATTERN } from "../common/pipes/parseAddress.pipe";
 import { TransferService } from "../transfer/transfer.service";
 import { TransferDto } from "../transfer/transfer.dto";
+import { TransactionDto } from "../transaction/dtos/transaction.dto";
 import { swagger } from "../config/featureFlags";
 import { constants } from "../config/docs";
 import { TransferType } from "src/transfer/transfer.entity";
@@ -171,6 +172,36 @@ export class AddressController {
         ...pagingOptions,
         route: `${entityName}/${address}/transfers`,
       }
+    );
+  }
+  @Get(":address/failedTransactions")
+  @ApiParam({
+    name: "address",
+    schema: { pattern: ADDRESS_REGEX_PATTERN },
+    example: constants.address,
+    description: "Valid hex address",
+  })
+  @ApiListPageOkResponse(TransferDto, { description: "Successfully returned address transfers" })
+  @ApiBadRequestResponse({
+    description: "Specified address is invalid or paging query params are not valid or out of range",
+  })
+  public async getAddressFailedTransactions(
+      @Param("address", new ParseAddressPipe()) address: string,
+      @Query() listFilterOptions: ListFiltersDto,
+      @Query() pagingOptions: PagingOptionsWithMaxItemsLimitDto
+  ): Promise<Pagination<TransactionDto>> {
+    const filterTransactionsListOptions = buildDateFilter(listFilterOptions.fromDate, listFilterOptions.toDate);
+
+    return await this.transactionService.findFailedByAddress(
+        {
+          address,
+          ...filterTransactionsListOptions,
+        },
+        {
+          filterOptions: listFilterOptions,
+          ...pagingOptions,
+          route: `${entityName}/${address}/failTransactions`,
+        }
     );
   }
   @Get(":address/firstdeposit")
