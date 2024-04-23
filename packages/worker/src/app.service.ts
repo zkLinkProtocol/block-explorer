@@ -13,6 +13,7 @@ import { ValuesService } from "./values/values.service";
 import runMigrations from "./utils/runMigrations";
 import { HistoryService } from "./values/history.service";
 import { GatewayService } from "./values/gateway.service";
+import {DailyTransactionService} from "./values/dailyTransaction.service";
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {
@@ -30,6 +31,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     private readonly configService: ConfigService,
     private readonly historyService: HistoryService,
     private readonly gatewayService: GatewayService,
+    private readonly dailyTransactionService: DailyTransactionService,
   ) {
     this.logger = new Logger(AppService.name);
   }
@@ -79,6 +81,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       tasks.push(this.valuesService.start());
       tasks.push(this.historyService.start());
       tasks.push(this.gatewayService.start());
+      tasks.push(this.dailyTransactionService.start());
     }
     return Promise.all(tasks);
   }
@@ -93,6 +96,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       this.valuesService.stop(),
       this.historyService.stop(),
       this.gatewayService.stop(),
+      this.dailyTransactionService.stop(),
     ]);
   }
 }
