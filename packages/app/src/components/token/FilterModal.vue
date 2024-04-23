@@ -16,13 +16,14 @@
                         <div class="btn-wrap">
                             <button @click="applyFilter(close)">Filter</button>
                             <button @click="resetFilter(close)"
-                                :class="{ 'btn-reset': true, active: isActive }">Reset</button>
+                                :class="{ 'btn-reset': true, active: !isActive }">Reset</button>
                         </div>
                         <ul class="options-wrap">
                             <li>
                                 <label class="label">
-                                    <input type="checkbox" class="input" v-model="selectedFilters" value="price" />
-                                    Show token without price
+                                    <input type="checkbox" class="input" v-model="selectedFilters" value="price"
+                                        @change="applyFilter(close)" />
+                                    Show token with price
                                 </label>
                             </li>
                         </ul>
@@ -68,17 +69,20 @@ const emit = defineEmits<{
     (eventName: "filter"): void;
     (eventName: "reset"): void;
 }>();
-const selectedFilters = ref<string[]>([]);
+const selectedFilters = ref<string[]>(['price']);
 const isActive = computed(() => selectedFilters.value.length > 0)
+
 const applyFilter = (close: any) => {
     close();
+    console.log('1', selectedFilters.value);
+
     emit("update:selected", selectedFilters.value);
     emit("filter");
 };
 const resetFilter = (close: any) => {
     close();
-    selectedFilters.value = [];
-    emit("update:selected", []);
+    selectedFilters.value = ['price'];
+    emit("update:selected", ['price']);
     emit("reset")
 };
 watch(
@@ -87,6 +91,7 @@ watch(
         selectedFilters.value = val;
     }
 );
+
 </script>
 <style lang="scss" scoped>
 .search-wrap {
@@ -116,7 +121,7 @@ watch(
         @apply py-2 flex focus:outline-none;
 
         .label {
-            @apply flex items-center focus:outline-none;
+            @apply flex items-center focus:outline-none cursor-pointer;
         }
     }
 }
