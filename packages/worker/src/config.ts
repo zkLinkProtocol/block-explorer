@@ -1,5 +1,4 @@
 export type NetworkKey = string;
-export type GateWayKey = string;
 import * as fs from "fs";
 import * as JSONStream from "JSONStream";
 import * as path from "path";
@@ -37,7 +36,6 @@ export default async () => {
     COINGECKO_IS_PRO_PLAN,
     COINGECKO_API_KEY,
     BRIDGE_NETWORK_KEYS,
-    GATEWAY_NETWORK_KEYS,
     COINGECKO_PLATFORM_IDS,
     UPDATE_TOTAL_LOCKED_VALUE_INTERVAL,
     UPDATE_TOTAL_LOCKED_VALUE_DELAY,
