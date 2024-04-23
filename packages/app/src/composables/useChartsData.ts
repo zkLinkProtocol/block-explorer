@@ -12,7 +12,7 @@ export default (context = useContext()) => {
   const data = ref([]);
   const getData = async (type:string) => {
     try {
-      const url = type === 'TVL'? 'blocks/total/tvl': 'blocks/total/uaw'
+      const url = type === 'TVL'? 'blocks/total/tvl': type === 'UAW'? 'blocks/total/uaw': 'transactions/dailyTransaction'
       data.value = await $fetch(`${context.currentNetwork.value.apiUrl}/${url}`);
     } catch (error: unknown) {
       data.value = [];
