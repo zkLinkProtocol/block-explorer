@@ -222,7 +222,7 @@ export class TvlStatisticalService extends Worker {
     for (const tokenAddress of tokenTvlMap.keys()) {
       const tokenTvlInfo = tokenTvlMap.get(tokenAddress);
       this.logger.log(`Token ${tokenAddress} balance: ${tokenTvlInfo.balance},tvl: ${tokenTvlInfo.tvl}`);
-      let tokenTvl = this.tokenTvlRepository.createDefaultTokenTvl(tokenAddress);
+      const tokenTvl = this.tokenTvlRepository.createDefaultTokenTvl(tokenAddress);
       tokenTvl.balance = tokenTvlInfo.balance;
       tokenTvl.tvl = tokenTvlInfo.tvl;
       await this.tokenTvlRepository.upsert(tokenTvl, true, ["address"]);
