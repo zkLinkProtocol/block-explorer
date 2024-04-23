@@ -18,7 +18,7 @@ type GatewayConfigFunction = (input: String) => string | undefined;
 @Injectable()
 export class TransactionProcessor {
   private readonly logger: Logger;
-  private readonly GATEWAYNULLVALUE = 'linea';
+  private readonly GATEWAYNULLVALUE = 'primary';
   private readonly GATEWAYERROR = 'error';
   configService: ConfigService;
   public readonly getNetworkKeyByL2Erc20Bridge: BridgeConfigFunction;
