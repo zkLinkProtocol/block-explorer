@@ -1,25 +1,26 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectMetric } from "@willsoto/nestjs-prometheus";
-import { Histogram } from "prom-client";
+import {Injectable, Logger} from "@nestjs/common";
+import {InjectMetric} from "@willsoto/nestjs-prometheus";
+import {Histogram} from "prom-client";
 import {
-  TransactionRepository,
-  TransactionReceiptRepository,
-  TransferRepository,
   AddressRepository,
-  TokenRepository,
   LogRepository,
+  TokenRepository,
+  TransactionReceiptRepository,
+  TransactionRepository,
+  TransferRepository,
 } from "../repositories";
-import { TRANSACTION_PROCESSING_DURATION_METRIC_NAME } from "../metrics";
-import { TransactionData } from "../dataFetcher/types";
+import {TRANSACTION_PROCESSING_DURATION_METRIC_NAME} from "../metrics";
+import {TransactionData} from "../dataFetcher/types";
 import {ConfigService} from "@nestjs/config";
 import {TokenType, TransferType} from "../entities";
+
 type BridgeConfigFunction = (input: String) => string | undefined;
 type GatewayConfigFunction = (input: String) => string | undefined;
 
 @Injectable()
 export class TransactionProcessor {
   private readonly logger: Logger;
-  private readonly GATEWAYNULLVALUE = 'linea';
+  private readonly GATEWAYNULLVALUE = 'primary';
   private readonly GATEWAYERROR = 'error';
   configService: ConfigService;
   public readonly getNetworkKeyByL2Erc20Bridge: BridgeConfigFunction;
@@ -63,20 +64,11 @@ export class TransactionProcessor {
     else {
       const transfer = transactionData.transfers.find((t) => t.type === TransferType.Withdrawal);
       if (transfer !== undefined && transfer !== null && transfer.tokenType === TokenType.ERC20){
-        let gateway = this.getNetworkKeyByL2Erc20Bridge(transactionData.transaction.to);
-        if (gateway === 'primary'){
-          gateway = this.GATEWAYNULLVALUE;
-        }
-        if (gateway !== 'error'){
-          transactionData.transaction.networkKey = gateway;
-        }
+        transactionData.transaction.networkKey = this.getNetworkKeyByL2Erc20Bridge(transactionData.transaction.to);
       }else if(transfer !== undefined && transfer !== null && transfer.tokenType === TokenType.ETH && transactionData.transaction.to === '0x000000000000000000000000000000000000800A'){
         const callData = transactionData.transaction.data.replace("0x","");
         if (callData.slice(0,8) === '84bc3eb0'){
-          const gateway = this.getGateWayKey(transfer.gateway);
-          if (gateway !== 'error'){
-            transactionData.transaction.networkKey = gateway;
-          }
+          transactionData.transaction.networkKey = this.getGateWayKey(transfer.gateway);
         }
         else if (callData.slice(0,8) === '51cff8d9'){
           transactionData.transaction.networkKey = this.GATEWAYNULLVALUE;

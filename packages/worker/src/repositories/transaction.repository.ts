@@ -53,7 +53,7 @@ export class TransactionRepository extends BaseRepository<Transaction> {
   public async updateGateWay(hash: string, gateway: string | null): Promise<void> {
     let networkKey;
     if (gateway === null) {
-      networkKey = 'linea';
+      networkKey = 'primary';
     } else {
       networkKey = this.getGateWayKey(gateway);
     }
