@@ -22,6 +22,7 @@ import { Invite } from "./entities/invite.entity";
 import {AccountLoyaltyBoosterDto} from "../api/dtos/tvl/accountLoyaltyBooster.dto";
 import BigNumber from "bignumber.js";
 import {AddressFirstDeposit} from "./entities/addressFirstDeposit.entity";
+import {TokenTvl} from "./entities/tokenTvl.entity";
 
 const L2_ETH_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
 const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -48,7 +49,9 @@ export class TVLService {
     @InjectRepository(GroupTvl)
     private readonly groupTVLRepository: Repository<GroupTvl>,
     @InjectRepository(AddressFirstDeposit)
-    private readonly addressFirstDepositRepository: Repository<AddressFirstDeposit>
+    private readonly addressFirstDepositRepository: Repository<AddressFirstDeposit>,
+    @InjectRepository(TokenTvl)
+    private readonly tokenTvlRepository: Repository<TokenTvl>
   ) {}
 
   public async getAccountTokensTVL(address: string): Promise<AccountTVLDto[]> {
@@ -170,17 +173,9 @@ export class TVLService {
   }
 
   public async getTotalTokensTVL(): Promise<TokenTVLDto[]> {
-    interface TokenTvl {
-      amount: number;
-      tvl: number;
-      tokenAddress: string;
-    }
+    const totalTokens: TokenTvl[] = await this.tokenTvlRepository.find();
 
-    const totalTokens: TokenTvl[] = await this.addressTokenRepository.query(
-      `SELECT sum("balance") as amount, sum("tvl") as tvl, "tokenAddress" FROM "addressTokenTvls" group by "tokenAddress"`
-    );
-
-    const tokenAddresses = totalTokens.map((token) => normalizeAddressTransformer.from(token.tokenAddress));
+    const tokenAddresses = totalTokens.map((token) => token.address);
     const tokens = await this.tokenRepository.find({
       where: {
         l2Address: In(tokenAddresses),
@@ -191,13 +186,13 @@ export class TVLService {
 
     const result: TokenTVLDto[] = [];
     for (const token of totalTokens) {
-      const hexAddress = normalizeAddressTransformer.from(token.tokenAddress);
+      const hexAddress = token.address;
       const cur_token = tokensMap.get(hexAddress);
       const symbol = cur_token ? cur_token.symbol : "";
       result.push({
         symbol,
         tokenAddress: hexAddress,
-        amount: token.amount,
+        amount: token.balance,
         tvl: token.tvl,
         type: "",
         yieldType: "",

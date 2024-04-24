@@ -35,6 +35,7 @@ import {
   PointsHistoryRepository,
   AddressTokenTvlRepository,
   AddressFirstDepositRepository,
+  TokenTvlRepository,
 } from "./repositories";
 import {
   Batch,
@@ -56,6 +57,7 @@ import {
   AddressTvl,
   AddressTokenTvl,
   GroupTvl,
+  TokenTvl,
 } from "./entities";
 import { typeOrmModuleOptions, typeOrmReferModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -113,6 +115,7 @@ import { AddressFirstDeposit } from "./entities/addressFirstDeposit.entity";
       AddressTokenTvl,
       AddressFirstDeposit,
       GroupTvl,
+      TokenTvl,
     ]),
     TypeOrmModule.forRootAsync({
       name: "refer",
@@ -189,6 +192,7 @@ import { AddressFirstDeposit } from "./entities/addressFirstDeposit.entity";
     AddressTvlRepository,
     AddressTokenTvlRepository,
     AddressFirstDepositRepository,
+    TokenTvlRepository,
   ],
 })
 export class AppModule {}

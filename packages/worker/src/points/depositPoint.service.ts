@@ -118,19 +118,19 @@ export class DepositPointService extends Worker {
     // handle transfer where type is deposit
     const transfers = await this.transferRepository.getBlockDeposits(currentRunBlock.number);
     this.logger.log(`Block ${currentRunBlock.number} deposit num: ${transfers.length}`);
-    let newFirstDeposits: Array<AddressFirstDeposit> = [];
+    const newFirstDeposits: Array<AddressFirstDeposit> = [];
     for (const transfer of transfers) {
       const depositReceiver = hexTransformer.from(transfer.from);
       if (!this.addressFirstDepositTimeCache.get(depositReceiver)) {
         const addressFirstDeposit = await this.addressFirstDepositRepository.getAddressFirstDeposit(depositReceiver);
         let firstDepositTime = addressFirstDeposit?.firstDepositTime;
         if (!firstDepositTime) {
-            firstDepositTime = new Date(transfer.timestamp);
-            const addressFirstDeposit: AddressFirstDeposit = {
-              address: depositReceiver,
-              firstDepositTime,
-            };
-            newFirstDeposits.push(addressFirstDeposit);
+          firstDepositTime = new Date(transfer.timestamp);
+          const addressFirstDeposit: AddressFirstDeposit = {
+            address: depositReceiver,
+            firstDepositTime,
+          };
+          newFirstDeposits.push(addressFirstDeposit);
         }
         this.addressFirstDepositTimeCache.set(depositReceiver, firstDepositTime);
       }
