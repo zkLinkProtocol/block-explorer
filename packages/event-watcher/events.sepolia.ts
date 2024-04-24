@@ -6,56 +6,49 @@ export const EVENTS_MAINNET = {
       // eth
       '1': [
         {
-          contractAddress: '0x5fD9F73286b7E8683Bab45019C94553b93e015Cf',
+          contractAddress: '0x9719cD314BBf84B18aAEDEF56DF88E2267aA01e3',
           contractDeploymentBlock: 19338891,
         },
       ],
       // zks
       '324': [
         {
-          contractAddress: '0xaFe8C7Cf33eD0fee179DFF20ae174C660883273A',
+          contractAddress: '0x02627EFACfc2B000E77132fE9346C543eB980bAb',
           contractDeploymentBlock: 27849895,
         },
       ],
       // arb
       '42161': [
         {
-          contractAddress: '0xFF73a1a1d27951A005eb23276dc99CB7F8d5420A',
+          contractAddress: '0xaE1875112Ae010A9fe755418B206AfB33Ee0b1fA',
           contractDeploymentBlock: 185950340,
-        },
-      ],
-      // mantle
-      '5000': [
-        {
-          contractAddress: '0xD784d7128B46B60Ca7d8BdC17dCEC94917455657',
-          contractDeploymentBlock: 58659816,
         },
       ],
       // manta
       '169': [
         {
-          contractAddress: '0xD784d7128B46B60Ca7d8BdC17dCEC94917455657',
+          contractAddress: '0xEe5aFbd53D661968d13315f6960BBb103C2a1eCc',
           contractDeploymentBlock: 1505514,
         },
       ],
       // blast
       '81457': [
         {
-          contractAddress: '0x29BA92Fe724beD5c5EBfd0099F2F64a6DC5078FD',
+          contractAddress: '0x27CBbE82447a0C188eBD7Bc5fd706d140c7B0642',
           contractDeploymentBlock: 1505514,
         },
       ],
       // optim
       '10': [
         {
-          contractAddress: '0x46C8D02E93d5a03899dFa7Cf8A40A07589A3fA1b',
+          contractAddress: '0xbaC8EF345C684B0871dF390f44273160Ba3E6bc1',
           contractDeploymentBlock: 1505514,
         },
       ],
       // base
       '8453': [
         {
-          contractAddress: '0xE473ce141b1416Fe526eb63Cf7433b7B8d7264Dd',
+          contractAddress: '0x8c4b80A5D5374Ff2Dc07310EF9Fdbc44e487b6C2',
           contractDeploymentBlock: 1505514,
         },
       ],
