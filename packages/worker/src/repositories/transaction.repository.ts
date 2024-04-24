@@ -1,10 +1,12 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { types } from "zksync-web3";
 import { Transaction } from "../entities";
 import { UnitOfWork } from "../unitOfWork";
 import { BaseRepository } from "./base.repository";
 import { AddressTransactionRepository } from "./addressTransaction.repository";
 import {ConfigService} from "@nestjs/config";
+import { abi as l2BridgeAbi} from "../abis/L2ERC20Bridge.json";
+import { ethers } from "ethers";
 type GatewayConfigFunction = (input: String) => string | undefined;
 
 export interface TransactionDto extends types.TransactionResponse {

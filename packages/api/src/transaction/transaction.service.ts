@@ -1,16 +1,16 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, FindOperator, SelectQueryBuilder, MoreThanOrEqual, LessThanOrEqual } from "typeorm";
-import { Pagination } from "nestjs-typeorm-paginate";
-import { paginate } from "../common/utils";
-import { IPaginationOptions, CounterCriteria, SortingOrder } from "../common/types";
-import { Transaction } from "./entities/transaction.entity";
-import { TransactionDetails } from "./entities/transactionDetails.entity";
-import { AddressTransaction } from "./entities/addressTransaction.entity";
-import { Batch } from "../batch/batch.entity";
-import { DailyTxHistory } from "./entities/dailyTxHistory.entity";
-import { CounterService } from "../counter/counter.service";
-import { LRUCache } from "lru-cache";
+import {Injectable} from "@nestjs/common";
+import {InjectRepository} from "@nestjs/typeorm";
+import {FindOperator, LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder} from "typeorm";
+import {Pagination} from "nestjs-typeorm-paginate";
+import {paginate} from "../common/utils";
+import {CounterCriteria, IPaginationOptions, SortingOrder} from "../common/types";
+import {Transaction} from "./entities/transaction.entity";
+import {TransactionDetails} from "./entities/transactionDetails.entity";
+import {AddressTransaction} from "./entities/addressTransaction.entity";
+import {Batch} from "../batch/batch.entity";
+import {DailyTxHistory} from "./entities/dailyTxHistory.entity";
+import {CounterService} from "../counter/counter.service";
+import {LRUCache} from "lru-cache";
 import {FilterTransfersOptions} from "../transfer/transfer.service";
 // const options: LRU. = { max: 500 };
 const options = {
@@ -153,7 +153,7 @@ export class TransactionService {
     const addressTransactions = await queryBuilder.getMany();
     return addressTransactions;
   }
-
+  
   public async findFailedByAddress(
       filterOptions: FilterTransfersOptions = {},
       paginationOptions: IPaginationOptions
@@ -175,7 +175,6 @@ export class TransactionService {
       items: addressTransactions.items.map((item) => item.transaction),
     };
   }
-
   private getAccountNonceQueryBuilder(accountAddress: string, isVerified: boolean): SelectQueryBuilder<Transaction> {
     const queryBuilder = this.transactionRepository.createQueryBuilder("transaction");
     queryBuilder.select("nonce");
@@ -227,7 +226,8 @@ export class TransactionService {
   public async getDailyTransaction(paginationOptions: IPaginationOptions): Promise<Pagination<DailyTxHistory>>{
     const queryBuilder = this.dailyTxHistoryRepository.createQueryBuilder("dailyTransaction");
     queryBuilder.select();
-    queryBuilder.orderBy('dailyTransaction.timestamp', 'DESC');
+    queryBuilder.distinctOn(["DATE(\"dailyTransaction\".timestamp)"]);
+    queryBuilder.orderBy('DATE(\"dailyTransaction\".timestamp)', 'DESC');
     return await paginate<DailyTxHistory>(queryBuilder, paginationOptions);
   }
 }
