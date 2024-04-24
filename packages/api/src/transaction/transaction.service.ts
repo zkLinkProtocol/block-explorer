@@ -175,6 +175,7 @@ export class TransactionService {
       items: addressTransactions.items.map((item) => item.transaction),
     };
   }
+
   private getAccountNonceQueryBuilder(accountAddress: string, isVerified: boolean): SelectQueryBuilder<Transaction> {
     const queryBuilder = this.transactionRepository.createQueryBuilder("transaction");
     queryBuilder.select("nonce");
