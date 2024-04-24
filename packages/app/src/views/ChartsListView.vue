@@ -25,6 +25,17 @@
             </a>
           </div>
         </div>
+        <div class="rounded flex-auto box">
+          <div class="title">
+            <a href="/charts/chart?type=Tra" class="p-2 inline-block w-full no-underline">Daily Transactions Chart</a>
+          </div>
+          <div class="p-2 content">
+            <a href="/charts/chart?type=Tra" class="inline-block w-full relative">
+              <div class="absolute w-full h-full top-0 left-0 z-10"></div>
+              <div class="w-full h-28" id="traChart"></div>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -60,156 +71,114 @@ const { t } = useI18n();
 
 const context = useContext();
 const route = useRoute();
-
+const setChart = (xData: any[],yData: string[]) => {
+  let option = {
+    animation: false,
+    interactive: false,
+    grid: {
+        top: '10%',
+        left: '15%',
+        right: '5%',
+        bottom: '15%'
+    },
+    xAxis: {
+        type: 'category',
+        data: yData,
+        axisTick: {
+          show: false
+        },
+        axisLabel: {
+            textStyle: {
+                fontSize: 6
+            },
+        }
+    },
+    yAxis: {
+        type: 'value',
+        axisLabel: {
+            textStyle: {
+                fontSize: 6
+            },
+            formatter: function (value:any, index:number) {
+                if (value < 1000) {
+                    return '$ '+value;
+                } else if (value < 1000000) {
+                    return '$ '+(value / 1000).toFixed(0) + 'K';
+                } else {
+                    return '$ '+(value / 1000000).toFixed(0) + 'M';
+                }
+            }
+        }
+    },
+    series: [{
+        type: 'line',
+        smooth: true,
+        data: xData,
+        symbol: 'none',
+        emphasis: {
+            focus: 'series'
+        },
+        onclick: function (params:any) {
+            console.log(params);
+        },
+        lineStyle: {
+            width: 1
+        },
+        itemStyle: {
+          normal: {
+              color: '#000'
+          }
+        }
+    }]
+  };
+  return option
+}
 onMounted(async() => {
   await getData('TVL')
-    let xData: any[] = [];
-    let yData: string[] = []
-    data && data.value.map((i:{tvl:string,timestamp:string},index)=>{
-      if (index) {
-        xData.unshift({value: i.tvl, date: i.timestamp, type: false})
-        const timer = format(i.timestamp,'yLine',false)
-        yData.unshift(timer)
-      } else {
-        xData.unshift({value: i.tvl, date: i.timestamp, type: true})
-        yData.unshift('Now')
-      }
-    })
-    let option = {
-      animation: false,
-      interactive: false,
-      grid: {
-          top: '10%',
-          left: '15%',
-          right: '5%',
-          bottom: '15%'
-      },
-      xAxis: {
-          type: 'category',
-          data: yData,
-          axisTick: {
-            show: false
-          },
-          axisLabel: {
-              textStyle: {
-                  fontSize: 6
-              },
-          }
-      },
-      yAxis: {
-          type: 'value',
-          axisLabel: {
-              textStyle: {
-                  fontSize: 6
-              },
-              formatter: function (value:any, index:number) {
-                  if (value < 1000) {
-                      return '$ '+value;
-                  } else if (value < 1000000) {
-                      return '$ '+(value / 1000).toFixed(0) + 'K';
-                  } else {
-                      return '$ '+(value / 1000000).toFixed(0) + 'M';
-                  }
-              }
-          }
-      },
-      series: [{
-          type: 'line',
-          smooth: true,
-          data: xData,
-          symbol: 'none',
-          emphasis: {
-              focus: 'series'
-          },
-          onclick: function (params:any) {
-              console.log(params);
-          },
-          lineStyle: {
-              width: 1
-          },
-          itemStyle: {
-            normal: {
-                color: '#000'
-            }
-          }
-      }]
-    };
-    var myChart = echarts.init(document.getElementById('TVLChart'));
-    myChart.setOption(option);
-    await getData('add')
-    xData = []
-    yData = []
-    data && data.value.map((i:{uaw:string,timestamp:string},index)=>{
-      if (index) {
-        xData.unshift({value: i.uaw, date: i.timestamp, type: false})
-        const timer = format(i.timestamp,'yLine',false)
-        yData.unshift(timer)
-      } else {
-        xData.unshift({value: i.uaw, date: i.timestamp, type: true})
-        yData.unshift('Now')
-      }
-    })
-    option = {
-      animation: false,
-      interactive: false,
-      grid: {
-          top: '10%',
-          left: '15%',
-          right: '5%',
-          bottom: '15%'
-      },
-      xAxis: {
-          type: 'category',
-          data: yData,
-          axisTick: {
-            show: false
-          },
-          axisLabel: {
-              textStyle: {
-                  fontSize: 6
-              },
-          }
-      },
-      yAxis: {
-          type: 'value',
-          axisLabel: {
-              textStyle: {
-                  fontSize: 6
-              },
-              formatter: function (value:any, index:number) {
-                  if (value < 1000) {
-                      return ' '+value;
-                  } else if (value < 1000000) {
-                      return ' '+(value / 1000).toFixed(0) + 'K';
-                  } else {
-                      return ' '+(value / 1000000).toFixed(0) + 'M';
-                  }
-              }
-          }
-      },
-      series: [{
-          type: 'line',
-          smooth: true,
-          data: xData,
-          symbol: 'none',
-          emphasis: {
-              focus: 'series'
-          },
-          onclick: function (params:any) {
-              console.log(params);
-          },
-          lineStyle: {
-              width: 1
-          },
-          itemStyle: {
-            normal: {
-                color: '#000'
-            }
-          }
-      }]
-    };
-    var addChart = echarts.init(document.getElementById('addChart'));
-    addChart.setOption(option);
+  let xData: any[] = [];
+  let yData: string[] = []
+  data && data.value.map((i:{tvl:string,timestamp:string},index)=>{
+    if (index) {
+      xData.unshift({value: i.tvl, date: i.timestamp, type: false})
+      const timer = format(i.timestamp,'yLine',false)
+      yData.unshift(timer)
+    } else {
+      xData.unshift({value: i.tvl, date: i.timestamp, type: true})
+      yData.unshift('Now')
+    }
+  })
+  var myChart = echarts.init(document.getElementById('TVLChart'));
+  myChart.setOption(setChart(xData,yData));
+  await getData('UAW')
+  xData = []
+  yData = []
+  data && data.value.map((i:{uaw:string,timestamp:string},index)=>{
+    if (index) {
+      xData.unshift({value: i.uaw, date: i.timestamp, type: false})
+      const timer = format(i.timestamp,'yLine',false)
+      yData.unshift(timer)
+    } else {
+      xData.unshift({value: i.uaw, date: i.timestamp, type: true})
+      yData.unshift('Now')
+    }
+  })
+  var addChart = echarts.init(document.getElementById('addChart'));
+  addChart.setOption(setChart(xData,yData));
+  await getData('Tra')
+  xData = []
+  yData = []
+  data && data.value.items.map((i:{txNum:number,timestamp:string},index)=>{
+    // if (index) {
+      xData.unshift({value: i.txNum, date: i.timestamp, type: false})
+      const timer = format(i.timestamp,'yLine',false)
+      yData.unshift(timer)
+    // } else {
+    //   xData.unshift({value: i.txNum, date: i.timestamp, type: true})
+    //   yData.unshift('Now')
+    // }
+  })
+  var traChart = echarts.init(document.getElementById('traChart'));
+  traChart.setOption(setChart(xData,yData));
 });
 </script>
 

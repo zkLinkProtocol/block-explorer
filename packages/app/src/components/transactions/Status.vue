@@ -20,9 +20,7 @@
           <ol v-for="(finishedStatus, index) in item.finishedStatuses" :key="index">
             <li>
               <a
-                :href="
-                  currentNetwork.l1ExplorerUrl ? `${currentNetwork.l1ExplorerUrl}/tx/${finishedStatus.url}` : undefined
-                "
+                @click="goBatch(finishedStatus.url)"
                 class="badge-status-link"
                 target="_blank"
               >
@@ -38,11 +36,19 @@
         <template #default v-if="item.text">
           <a
             v-if="item.url"
-            :href="currentNetwork.l1ExplorerUrl ? `${currentNetwork.l1ExplorerUrl}/tx/${item.url}` : undefined"
-            class="badge-status-link"
+            class="badge-status-link cursor-pointer"
+            @click="goBatch(item.url)"
+          >
+            <span class="badge-status-link-text">{{ item.text }}</span>
+            <ExternalLinkIcon v-if="currentNetwork.l1ExplorerUrl" class="badge-status-link-icon" />
+          </a>
+          <a
+            v-else-if="item.urls"
+            :href="currentNetwork.l1ExplorerUrl ? `https://etherscan.io/tx/${item.urls}` : undefined"
+            class="badge-status-link cursor-pointer"
             target="_blank"
           >
-            <span class="badge-status-link-text"><CheckIcon />{{ item.text }}</span>
+            <span class="badge-status-link-text">{{ item.text }}</span>
             <ExternalLinkIcon v-if="currentNetwork.l1ExplorerUrl" class="badge-status-link-icon" />
           </a>
           <span v-else>{{ item.text }}</span>
@@ -147,6 +153,7 @@
 <script lang="ts" setup>
 import { computed, type PropType, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 
 import { CheckIcon, ExclamationCircleIcon, ExternalLinkIcon, XIcon } from "@heroicons/vue/outline";
 import { OnClickOutside } from "@vueuse/components";
@@ -161,10 +168,11 @@ import useContext from "@/composables/useContext";
 import type { TransactionStatus } from "@/composables/useTransaction";
 
 const { currentNetwork } = useContext();
+const router = useRouter();
 
 const props = defineProps({
   status: {
-    type: String as PropType<TransactionStatus>,
+    type: String,
     required: true,
   },
   commitTxHash: {
@@ -177,6 +185,10 @@ const props = defineProps({
   },
   executeTxHash: {
     type: [String, null] as PropType<string | null>,
+    required: true,
+  },
+  l1BatchNumber: {
+    type: Number,
     required: true,
   },
 });
@@ -200,19 +212,13 @@ type RemainingStatus = {
 type FinishedStatus = RemainingStatus & {
   url: string | null;
 };
-
+const goBatch = (url:any) => {
+  router.push({ name: 'batch', params: { id: url } });
+}
 const finishedTxStatuses: FinishedStatus[] = [
   {
-    text: t("transactions.statusComponent.sent"),
-    url: props.commitTxHash,
-  },
-  {
     text: t("transactions.statusComponent.validated"),
-    url: props.proveTxHash,
-  },
-  {
-    text: t("transactions.statusComponent.executed"),
-    url: props.executeTxHash,
+    url: props.l1BatchNumber.toString()
   },
 ];
 
@@ -226,6 +232,7 @@ const remainingTxStatuses: RemainingStatus[] = [
 ];
 
 const badges = computed(() => {
+  console.log(props.status)
   const badgesArr: {
     color: "neutral" | "dark-neutral" | "success" | "dark-success" | "danger" | "progress";
     text?: string;
@@ -238,18 +245,9 @@ const badges = computed(() => {
     finishedStatuses?: FinishedStatus[];
     remainingStatuses?: RemainingStatus[];
     url?: string | null;
+    urls?: string | null;
     withDetailedPopup?: boolean;
   }[] = [];
-  if (props.status === "failed") {
-    badgesArr.push({
-      testId: "failed",
-      color: "danger",
-      text: t("transactions.statusComponent.failed"),
-      icon: ExclamationCircleIcon,
-    });
-    return badgesArr;
-  }
-
   badgesArr.push({
     testId: "l2-badge-title",
     color: "success",
@@ -263,59 +261,37 @@ const badges = computed(() => {
     icon: CheckIcon,
   });
 
-  if (props.status === "indexing") {
+  if (props.status === "validate") {
     badgesArr.push({
       testId: "indexing",
       color: "neutral",
-      text: t("transactions.statusComponent.indexing"),
+      text: t("transactions.statusComponent.validating"),
       icon: Spinner,
+      url: props.l1BatchNumber.toString()
     });
     return badgesArr;
   }
 
   badgesArr.push({
     testId: "l1-badge-title",
-    color: props.status === "verified" ? "success" : "neutral",
+    color: props.status === "final" ? "success" : "neutral",
     text: t("general.l1NetworkName"),
     textColor: "neutral",
   });
 
-  if (props.status === "verified") {
-    badgesArr.push({
-      testId: "verified",
-      color: "dark-success",
-      text: t("transactions.statusComponent.executed"),
-      finishedStatuses: [finishedTxStatuses[0], finishedTxStatuses[1]],
-      url: props.executeTxHash,
-      withDetailedPopup: true,
-    });
-  } else {
-    let textKey;
+  if (props.status === "final"){
     const finishedStatuses: FinishedStatus[] = [];
     const remainingStatuses: RemainingStatus[] = [];
-
-    if (props.status === "committed") {
-      textKey = "validating";
-      finishedStatuses.push(finishedTxStatuses[0]);
-      remainingStatuses.push(remainingTxStatuses[1]);
-    } else if (props.status === "proved") {
-      textKey = "executing";
-      finishedStatuses.push(finishedTxStatuses[0]);
-      finishedStatuses.push(finishedTxStatuses[1]);
-    } else {
-      textKey = "sending";
-      remainingStatuses.push(remainingTxStatuses[0]);
-      remainingStatuses.push(remainingTxStatuses[1]);
-    }
+    finishedStatuses.push(finishedTxStatuses[0]);
 
     badgesArr.push({
       testId: "l1-badge-value",
       color: "dark-neutral",
       iconColor: "dark-neutral",
-      text: t(`transactions.statusComponent.${textKey}`),
-      icon: Spinner,
+      text: t(`transactions.statusComponent.finalized`),
+      icon: CheckIcon,
+      urls: props.executeTxHash,
       finishedStatuses,
-      remainingStatuses,
       withDetailedPopup: true,
     });
   }
