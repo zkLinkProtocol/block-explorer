@@ -10,7 +10,7 @@ ADD . /block-explorer
 
 RUN npm install
 
-RUN cd packages/app && npm run build:nova && cd -
+RUN cd packages/app && npm run build:preview && cd -
 
 FROM 475911326710.dkr.ecr.ap-northeast-1.amazonaws.com/nginx:alpine3.18
 
