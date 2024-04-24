@@ -91,7 +91,7 @@ watch(
             }else if (type === "UAW"){
               char = '';
             }
-            return timer + '<br />'+ type +': ' + char + ' ' + yValue.toLocaleString();
+            return timer + '<br />'+ (type === "Tra"?"Trans": type) +': ' + char + ' ' + yValue.toLocaleString();
           }
       },
       grid: {
