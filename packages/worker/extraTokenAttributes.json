@@ -42,6 +42,12 @@
     "market_cap": 1
   },
   {
+    "name": "rnETH-ethereum",
+    "address": "0x9Dc7e196092DaC94f0c76CFB020b60FA75B97C5b",
+    "image": "https://zklink.io/images/token/rneth.png",
+    "market_cap": 1
+  },
+  {
     "name": "DAI-base",
     "address": "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
     "image": "https://assets.coingecko.com/coins/images/9956/large/Badge_Dai.png?1696509996",
