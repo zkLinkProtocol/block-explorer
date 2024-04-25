@@ -919,6 +919,26 @@ export default [
     address: [
       {
         chain: "Ethereum",
+        l1Address: "0x9Dc7e196092DaC94f0c76CFB020b60FA75B97C5b",
+        l2Address: "0xfa70fD01EbD5aa64f31E5D3575C444919C79275E",
+      },
+    ],
+    decimals: 18,
+    symbol: "rnETH",
+    cgPriceId: "ethereum",
+    type: "LRT",
+    yieldType: ["NOVA Points", "Native Yield"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "Ethereum",
         l1Address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
         l2Address: "0x075893f535b9DDE1D28492EA13085f27ecEf6320",
       },
