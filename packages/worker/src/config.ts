@@ -49,7 +49,6 @@ export default async () => {
     COINGECKO_ENABLE_PROXY,
     PRIMARY_CHAIN_MAIN_CONTRACT,
     PRIMARY_CHAIN_RPC_URL,
-    CHAIN_IDS,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
