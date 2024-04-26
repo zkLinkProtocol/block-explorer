@@ -87,7 +87,6 @@ export class ValuesService extends Worker {
       const chainId = networkChainIdMap[token.networkKey];
       const provider = providerByChainId(chainId);
       const balance = await provider.send("eth_call", [{ from: this.getL1Erc20Bridge(token.networkKey), to: token.l1Address, data: "0x18160ddd000000000000000000000000"+this.getL1Erc20Bridge(token.networkKey).replace("0x","") }, "latest"]);
-      console.log("balance : ",balance);
       this.logger.debug(` ${token.symbol} reserve amount: ${balance.toString()} `);
       await sleep(5 * this.updateTotalLockedValueDelay);
       return balance;
