@@ -1,10 +1,14 @@
 export type NetworkKey = string;
+import { config } from "dotenv";
+config();
 import * as fs from "fs";
 import * as JSONStream from "JSONStream";
 import * as path from "path";
 import { IExtraTokenAttribute } from "./token/tokenOffChainData/providers/coingecko/coingeckoTokenOffChainDataProvider";
 const extraCoinsListPath = "../extraCoinsList.json";
 const extraTokenAttributesPath = "../extraTokenAttributes.json";
+import { ChainId } from './types'
+import { ChainInfo, chainsFromEnvironments } from './conf/chains'
 export default async () => {
   const {
     PORT,
@@ -44,7 +48,8 @@ export default async () => {
     COINGECKO_PROXY_URL,
     COINGECKO_ENABLE_PROXY,
     PRIMARY_CHAIN_MAIN_CONTRACT,
-    PRIMARY_CHAIN_RPC_URL
+    PRIMARY_CHAIN_RPC_URL,
+    CHAIN_IDS,
   } = process.env;
 
   const networkKeys = BRIDGE_NETWORK_KEYS.split(",");
@@ -198,3 +203,20 @@ interface ITokenListItemProviderResponse {
   id: string;
   platforms: Record<string, string>;
 }
+export const CHAIN_IDS: ChainId[] = process.env['CHAIN_IDS'].split(',')
+    .map((v) => Number(v))
+
+export const CHAINS: Record<ChainId, ChainInfo> =
+    chainsFromEnvironments(CHAIN_IDS)
+
+export const networkChainIdMap = {
+  ethereum: 1,
+  zksync: 324,
+  arbitrum: 42161,
+  mantle: 5000,
+  manta: 169,
+  blast: 81457,
+  optimism: 10,
+  base: 8453,
+  primary: 59144,
+};

@@ -5,10 +5,11 @@ import { Token } from "../entities";
 import { BaseRepository } from "./base.repository";
 import { UnitOfWork } from "../unitOfWork";
 import { BigNumber } from "ethers";
+import { TransferRepository } from "./transfer.repository";
 
 @Injectable()
 export class TokenRepository extends BaseRepository<Token> {
-  public constructor(unitOfWork: UnitOfWork) {
+  public constructor(unitOfWork: UnitOfWork,private readonly transferRepository: TransferRepository) {
     super(Token, unitOfWork);
   }
 
@@ -71,11 +72,19 @@ export class TokenRepository extends BaseRepository<Token> {
       if (token.l1Address === null){
         continue;
       }
-      let tvl = BigNumber.from(token.totalSupply)
-        .mul(((token.usdPrice ?? 0) * 1000) | 0)
-        .div(1000)
-        .div(BigNumber.from(10).pow(token.decimals));
-
+      let tvl = BigNumber.from(0);
+      if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()){
+        tvl.add(BigNumber.from(token.totalSupply))
+            .add(await this.transferRepository.getLast7DaysWithdrawalTransferAmount())
+            .mul(((token.usdPrice ?? 0) * 1000) | 0)
+            .div(1000)
+            .div(BigNumber.from(10).pow(token.decimals));
+      } else {
+        tvl.add(BigNumber.from(token.reserveAmount))
+            .mul(((token.usdPrice ?? 0) * 1000) | 0)
+            .div(1000)
+            .div(BigNumber.from(10).pow(token.decimals));
+      }
       totalTVL = totalTVL.add(tvl);
     }
     return totalTVL;
@@ -135,6 +144,27 @@ export class TokenRepository extends BaseRepository<Token> {
       {
         totalSupply,
       }
+    );
+  }
+  public async updateTokenReserveAmount({
+    l2Address,
+    reserveAmount,
+  }: {
+    l2Address?: string;
+    reserveAmount: BigNumber;
+  }): Promise<void> {
+    if (!l2Address) {
+      throw new Error("l2Address must be provided");
+    }
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update(
+        this.entityTarget,
+        {
+          l2Address,
+        },
+        {
+          reserveAmount,
+        }
     );
   }
 }

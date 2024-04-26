@@ -7,6 +7,7 @@ import { paginate } from "../common/utils";
 import { Token, ETH_TOKEN } from "./token.entity";
 import { BigNumber, ethers } from "ethers";
 import { LRUCache } from "lru-cache";
+import { Transfer } from "../transfer/transfer.entity";
 
 // const options: LRU. = { max: 500 };
 const options = {
@@ -44,7 +45,9 @@ export interface TokenTvl extends Token {
 export class TokenService {
   constructor(
     @InjectRepository(Token)
-    private readonly tokenRepository: Repository<Token>
+    private readonly tokenRepository: Repository<Token>,
+    @InjectRepository(Transfer)
+    private readonly transferRepository: Repository<Transfer>,
   ) {}
 
   public async findOne(address: string, fields?: FindOptionsSelect<Token>): Promise<Token> {
@@ -124,11 +127,21 @@ export class TokenService {
     }
     const tokens = await this.tokenRepository.find();
     let totalTvl = BigNumber.from(0);
+    const value7DaysWithdrawalTransfer = await this.getLast7DaysWithdrawalTransferAmount()
     const ntvl = tokens.map((token) => {
-      const tvl = token.totalSupply
-        .mul(Math.floor((token.usdPrice ?? 0) * 10 ** 3))
-        .div(10 ** 3)
-        .div(BigNumber.from(10).pow(token.decimals));
+      let tvl = BigNumber.from(0);
+      if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()) {
+        tvl.add(BigNumber.from(token.totalSupply))
+            .add(value7DaysWithdrawalTransfer)
+            .mul(((token.usdPrice ?? 0) * 1000) | 0)
+            .div(1000)
+            .div(BigNumber.from(10).pow(token.decimals));
+      } else {
+        tvl.add(BigNumber.from(token.reserveAmount))
+            .mul(((token.usdPrice ?? 0) * 1000) | 0)
+            .div(1000)
+            .div(BigNumber.from(10).pow(token.decimals));
+      }
       if (token.l1Address !== null){
         totalTvl = totalTvl.add(tvl);
       }
@@ -145,4 +158,15 @@ export class TokenService {
     }
     return ntvl;
   }
+  public async getLast7DaysWithdrawalTransferAmount(): Promise<number> {
+      const transactionManager = this.transferRepository.createQueryBuilder("transfer");
+      const res = await transactionManager
+            .where("transfer.type = :type", { type: "withdrawal" })
+            .andWhere("transfer.timestamp >= :timestamp", {
+                timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+            })
+            .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: "0x000000000000000000000000000000000000800A" })
+            .getMany();
+      return res.reduce((acc, cur) => acc + Number(cur.amount), 0);
+    }
 }
