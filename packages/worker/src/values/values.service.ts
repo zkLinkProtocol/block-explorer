@@ -7,13 +7,17 @@ import { JsonRpcProviderBase } from "../rpcProvider";
 import { Token } from "../entities";
 import { BigNumber } from "ethers";
 import { sleep } from "zksync-web3/build/src/utils";
+import {providerByChainId} from "../utils/providers";
+import {networkChainIdMap} from "../config";
 const UPDATE_TOKENS_BATCH_SIZE = 3;
+type BridgeConfigFunction = (input: String) => string | undefined;
 
 @Injectable()
 export class ValuesService extends Worker {
   private readonly updateTotalLockedValueInterval: number;
   private readonly updateTotalLockedValueDelay: number;
   private readonly logger: Logger;
+  public readonly getL1Erc20Bridge: BridgeConfigFunction;
 
   public constructor(
     private readonly tokenRepository: TokenRepository,
@@ -23,6 +27,7 @@ export class ValuesService extends Worker {
     super();
     this.updateTotalLockedValueInterval = configService.get<number>("tokens.updateTotalLockedValueInterval");
     this.updateTotalLockedValueDelay = configService.get<number>("tokens.updateTotalLockedValueDelay");
+    this.getL1Erc20Bridge = configService.get<BridgeConfigFunction>("bridge.getL1Erc20Bridge");
     this.logger = new Logger(ValuesService.name);
   }
 
@@ -33,18 +38,24 @@ export class ValuesService extends Worker {
         return {
           ...t,
           totalSupply: await this.getTokensTotalSupply(t),
+          reserveAmount: await this.getTokensReserveAmount(t),
         };
       });
       let updateTokensTasks = [];
       for (let i = 0; i < tokensToUpdate.length; i++) {
         const tu = await tokensToUpdate[i](); // send eth_call
-        await sleep(this.updateTotalLockedValueDelay);
         updateTokensTasks.push(
           this.tokenRepository.updateTokenTotalSupply({
             l2Address: tu.l2Address,
             totalSupply: tu.totalSupply,
           })
         );
+        updateTokensTasks.push(
+            this.tokenRepository.updateTokenReserveAmount({
+              l2Address: tu.l2Address,
+              reserveAmount: tu.reserveAmount,
+            })
+        )
         if (updateTokensTasks.length === UPDATE_TOKENS_BATCH_SIZE || i === tokensToUpdate.length - 1) {
           await Promise.all(updateTokensTasks);
           updateTokensTasks = [];
@@ -68,6 +79,20 @@ export class ValuesService extends Worker {
   private async getTokensTotalSupply(token: Token): Promise<BigNumber> {
     const balance = await this.provider.send("eth_call", [{ to: token.l2Address, data: "0x18160ddd" }, "latest"]);
     this.logger.debug(` ${token.symbol} total supply: ${balance.toString()} `);
+    await sleep(this.updateTotalLockedValueDelay);
     return balance;
+  }
+  private async getTokensReserveAmount(token: Token): Promise<BigNumber> {
+    if (token.networkKey in networkChainIdMap) {
+      const chainId = networkChainIdMap[token.networkKey];
+      const provider = providerByChainId(chainId);
+      const balance = await provider.send("eth_call", [{ from: this.getL1Erc20Bridge(token.networkKey), to: token.l1Address, data: "0x18160ddd000000000000000000000000"+this.getL1Erc20Bridge(token.networkKey).replace("0x","") }, "latest"]);
+      console.log("balance : ",balance);
+      this.logger.debug(` ${token.symbol} reserve amount: ${balance.toString()} `);
+      await sleep(5 * this.updateTotalLockedValueDelay);
+      return balance;
+    }else {
+     return BigNumber.from(0);
+    }
   }
 }

@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { Transfer } from "../entities";
+import { Transfer , TransferType} from "../entities";
 import { UnitOfWork } from "../unitOfWork";
 import { BaseRepository } from "./base.repository";
 import { AddressTransferRepository } from "./addressTransfer.repository";
+import { MoreThanOrEqual } from "typeorm";
 
 @Injectable()
 export class TransferRepository extends BaseRepository<Transfer> {
@@ -47,5 +48,17 @@ export class TransferRepository extends BaseRepository<Transfer> {
           gateway,
         }
     );
+  }
+
+  public async getLast7DaysWithdrawalTransferAmount(): Promise<number> {
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const res = await transactionManager.find(this.entityTarget, {
+      where: {
+        type: TransferType.Withdrawal,
+        timestamp: MoreThanOrEqual(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toString()),
+        tokenAddress: "0x000000000000000000000000000000000000800A",
+      },
+    });
+    return res.reduce((acc, cur) => acc + Number(cur.amount), 0);
   }
 }
