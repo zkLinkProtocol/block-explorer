@@ -13,6 +13,7 @@ import {TRANSACTION_PROCESSING_DURATION_METRIC_NAME} from "../metrics";
 import {TransactionData} from "../dataFetcher/types";
 import {ConfigService} from "@nestjs/config";
 import {TokenType, TransferType} from "../entities";
+
 type BridgeConfigFunction = (input: String) => string | undefined;
 type GatewayConfigFunction = (input: String) => string | undefined;
 
@@ -48,6 +49,7 @@ export class TransactionProcessor {
       blockNumber: blockNumber,
       transactionHash: transactionData.transaction.hash,
     });
+
     if (transactionData.transaction.isL1Originated){
       const resTransferList =transactionData.transfers.filter((transfer) => transfer.transactionHash === transactionData.transaction.hash && transfer.gateway !== undefined && transfer.gateway !== null);
       const resTransfer = resTransferList.find((transfer) => transfer.gateway !== '0x' && transfer.gateway !== '0x11' );
