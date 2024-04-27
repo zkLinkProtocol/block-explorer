@@ -80,7 +80,7 @@ export class TokenRepository extends BaseRepository<Token> {
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
       } else {
-        tvl.add(BigNumber.from(token.reserveAmount))
+        tvl.add(BigNumber.from(token.totalSupply))
             .mul(((token.usdPrice ?? 0) * 1000) | 0)
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
