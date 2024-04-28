@@ -44,6 +44,7 @@ export class ValuesService extends Worker {
       let updateTokensTasks = [];
       for (let i = 0; i < tokensToUpdate.length; i++) {
         const tu = await tokensToUpdate[i](); // send eth_call
+        await sleep(this.updateTotalLockedValueDelay);
         updateTokensTasks.push(
           this.tokenRepository.updateTokenTotalSupply({
             l2Address: tu.l2Address,
@@ -51,10 +52,10 @@ export class ValuesService extends Worker {
           })
         );
         updateTokensTasks.push(
-            this.tokenRepository.updateTokenReserveAmount({
-              l2Address: tu.l2Address,
-              reserveAmount: tu.reserveAmount,
-            })
+          this.tokenRepository.updateTokenReserveAmount({
+            l2Address: tu.l2Address,
+            reserveAmount: tu.reserveAmount,
+          })
         )
         if (updateTokensTasks.length === UPDATE_TOKENS_BATCH_SIZE || i === tokensToUpdate.length - 1) {
           await Promise.all(updateTokensTasks);
@@ -77,21 +78,25 @@ export class ValuesService extends Worker {
   }
 
   private async getTokensTotalSupply(token: Token): Promise<BigNumber> {
+    // function totalSupply() public view returns (uint256)
     const balance = await this.provider.send("eth_call", [{ to: token.l2Address, data: "0x18160ddd" }, "latest"]);
     this.logger.debug(` ${token.symbol} total supply: ${balance.toString()} `);
-    await sleep(this.updateTotalLockedValueDelay);
     return balance;
   }
   private async getTokensReserveAmount(token: Token): Promise<BigNumber> {
     if (token.networkKey in networkChainIdMap) {
       const chainId = networkChainIdMap[token.networkKey];
       const provider = providerByChainId(chainId);
-      const balance = await provider.send("eth_call", [{ from: this.getL1Erc20Bridge(token.networkKey), to: token.l1Address, data: "0x18160ddd000000000000000000000000"+this.getL1Erc20Bridge(token.networkKey).replace("0x","") }, "latest"]);
+      const func = FunctionFragment.from(
+        `function balanceOf(address _owner) public view returns (uint256 balance)`
+      );
+      const iface = new Interface([func]);
+      const data = iface.encodeFunctionData(func, [this.getL1Erc20Bridge(token.networkKey)])
+      const balance = await provider.send("eth_call", [{ to: token.l1Address, data }, "latest"]);
       this.logger.debug(` ${token.symbol} reserve amount: ${balance.toString()} `);
-      await sleep(5 * this.updateTotalLockedValueDelay);
       return balance;
-    }else {
-     return BigNumber.from(0);
+    } else {
+      return BigNumber.from(0);
     }
   }
 }
