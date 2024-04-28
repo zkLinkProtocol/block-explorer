@@ -88,7 +88,7 @@ export class ValuesService extends Worker {
       const chainId = networkChainIdMap[token.networkKey];
       const provider = providerByChainId(chainId);
       const func = ethers.utils.FunctionFragment.from(
-        `function balanceOf(address _owner) public view returns (uint256 balance)`
+        `balanceOf(address)`
       );
       const iface = new ethers.utils.Interface([func]);
       const data = iface.encodeFunctionData(func, [this.getL1Erc20Bridge(token.networkKey)])
