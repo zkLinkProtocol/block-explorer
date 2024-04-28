@@ -218,4 +218,5 @@ export const networkChainIdMap = {
   optimism: 10,
   base: 8453,
   primary: 59144,
+  sepolia: 11155111,
 };
