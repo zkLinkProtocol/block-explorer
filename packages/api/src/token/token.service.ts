@@ -137,9 +137,26 @@ export class TokenService {
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
       } else {
+        let price_t = 3;
+        if (token.usdPrice <= 0) {
+          price_t = 0;
+        }
+        if (token.usdPrice < 1) {
+          let priceNum = token.usdPrice;
+          let num = 0;
+          while(priceNum<1 && priceNum > 0){
+            priceNum *= 10;
+            num++;
+          }
+          price_t = price_t + num;
+        } else {
+          if (token.usdPrice * 10 ** price_t >= Number.MAX_VALUE) {
+            price_t = 0;
+          }
+        }
         tvl.add(BigNumber.from(token.reserveAmount))
-            .mul(((token.usdPrice ?? 0) * 1000) | 0)
-            .div(1000)
+            .mul(((token.usdPrice ?? 0) * 10 ** price_t) | 0)
+            .div(10 ** price_t)
             .div(BigNumber.from(10).pow(token.decimals));
       }
       if (token.l1Address !== null){
@@ -158,7 +175,7 @@ export class TokenService {
     }
     return ntvl;
   }
-  public async getLast7DaysWithdrawalTransferAmount(): Promise<number> {
+  public async getLast7DaysWithdrawalTransferAmount(): Promise<BigNumber> {
       const transactionManager = this.transferRepository.createQueryBuilder("transfer");
       const res = await transactionManager
             .where("transfer.type = :type", { type: "withdrawal" })
@@ -167,6 +184,6 @@ export class TokenService {
             })
             .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: "0x000000000000000000000000000000000000800A" })
             .getMany();
-      return res.reduce((acc, cur) => acc + Number(cur.amount), 0);
+      return res.reduce((acc, cur) => BigNumber.from(acc).add(BigNumber.from(cur.amount)), BigNumber.from(0));
     }
 }

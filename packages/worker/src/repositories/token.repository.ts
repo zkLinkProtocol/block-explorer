@@ -80,9 +80,26 @@ export class TokenRepository extends BaseRepository<Token> {
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
       } else {
+        let price_t = 3;
+        if (token.usdPrice <= 0) {
+          price_t = 0;
+        }
+        if (token.usdPrice < 1) {
+          let priceNum = token.usdPrice;
+          let num = 0;
+          while(priceNum<1 && priceNum > 0){
+            priceNum *= 10;
+            num++;
+          }
+          price_t = price_t + num;
+        } else {
+          if (token.usdPrice * 10 ** price_t >= Number.MAX_VALUE) {
+            price_t = 0;
+          }
+        }
         tvl.add(BigNumber.from(token.reserveAmount))
-            .mul(((token.usdPrice ?? 0) * 1000) | 0)
-            .div(1000)
+            .mul(((token.usdPrice ?? 0) * 10 ** price_t) | 0)
+            .div(10 ** price_t)
             .div(BigNumber.from(10).pow(token.decimals));
       }
       totalTVL = totalTVL.add(tvl);

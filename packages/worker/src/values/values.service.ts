@@ -5,10 +5,10 @@ import { Worker } from "../common/worker";
 import { TokenRepository } from "../repositories";
 import { JsonRpcProviderBase } from "../rpcProvider";
 import { Token } from "../entities";
-import { BigNumber } from "ethers";
+import { BigNumber , ethers} from "ethers";
 import { sleep } from "zksync-web3/build/src/utils";
-import {providerByChainId} from "../utils/providers";
-import {networkChainIdMap} from "../config";
+import { providerByChainId } from "../utils/providers";
+import { networkChainIdMap } from "../config";
 const UPDATE_TOKENS_BATCH_SIZE = 3;
 type BridgeConfigFunction = (input: String) => string | undefined;
 
@@ -87,10 +87,10 @@ export class ValuesService extends Worker {
     if (token.networkKey in networkChainIdMap) {
       const chainId = networkChainIdMap[token.networkKey];
       const provider = providerByChainId(chainId);
-      const func = FunctionFragment.from(
+      const func = ethers.utils.FunctionFragment.from(
         `function balanceOf(address _owner) public view returns (uint256 balance)`
       );
-      const iface = new Interface([func]);
+      const iface = new ethers.utils.Interface([func]);
       const data = iface.encodeFunctionData(func, [this.getL1Erc20Bridge(token.networkKey)])
       const balance = await provider.send("eth_call", [{ to: token.l1Address, data }, "latest"]);
       this.logger.debug(` ${token.symbol} reserve amount: ${balance.toString()} `);

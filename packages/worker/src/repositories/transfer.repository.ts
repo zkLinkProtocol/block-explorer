@@ -4,6 +4,7 @@ import { UnitOfWork } from "../unitOfWork";
 import { BaseRepository } from "./base.repository";
 import { AddressTransferRepository } from "./addressTransfer.repository";
 import { MoreThanOrEqual } from "typeorm";
+import { BigNumber } from "ethers";
 
 @Injectable()
 export class TransferRepository extends BaseRepository<Transfer> {
@@ -50,7 +51,7 @@ export class TransferRepository extends BaseRepository<Transfer> {
     );
   }
 
-  public async getLast7DaysWithdrawalTransferAmount(): Promise<number> {
+  public async getLast7DaysWithdrawalTransferAmount(): Promise<BigNumber> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     const res = await transactionManager.find(this.entityTarget, {
       where: {
@@ -59,6 +60,6 @@ export class TransferRepository extends BaseRepository<Transfer> {
         tokenAddress: "0x000000000000000000000000000000000000800A",
       },
     });
-    return res.reduce((acc, cur) => acc + Number(cur.amount), 0);
+    return res.reduce((acc, cur) => BigNumber.from(acc).add(BigNumber.from(cur.amount)), BigNumber.from(0));
   }
 }
