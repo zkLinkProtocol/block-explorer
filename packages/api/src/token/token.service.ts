@@ -137,7 +137,7 @@ export class TokenService {
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
       } else {
-        tvl.add(BigNumber.from(token.totalSupply))
+        tvl.add(BigNumber.from(token.reserveAmount))
             .mul(((token.usdPrice ?? 0) * 1000) | 0)
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
