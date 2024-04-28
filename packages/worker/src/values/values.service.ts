@@ -86,14 +86,12 @@ export class ValuesService extends Worker {
   private async getTokensReserveAmount(token: Token): Promise<BigNumber> {
     if (token.networkKey in networkChainIdMap) {
       const chainId = networkChainIdMap[token.networkKey];
-      console.log("token : ",token);
       const provider = providerByChainId(chainId);
       const func = ethers.utils.FunctionFragment.from(
         `balanceOf(address)`
       );
       const iface = new ethers.utils.Interface([func]);
       const data = iface.encodeFunctionData(func, [this.getL1Erc20Bridge(token.networkKey)])
-      console.log("data : ",data);
       const balance = await provider.send("eth_call", [{ to: token.l1Address, data }, "latest"]);
       this.logger.debug(` ${token.symbol} reserve amount: ${balance.toString()} `);
       return balance;
