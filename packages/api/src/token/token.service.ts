@@ -180,7 +180,7 @@ export class TokenService {
       const res = await transactionManager
             .where("transfer.type = :type", { type: "withdrawal" })
             .andWhere("transfer.timestamp >= :timestamp", {
-                timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                timestamp: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
             })
             .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: "0x000000000000000000000000000000000000800A" })
             .getMany();
