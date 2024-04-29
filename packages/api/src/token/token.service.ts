@@ -176,14 +176,15 @@ export class TokenService {
     return ntvl;
   }
   public async getLast7DaysWithdrawalTransferAmount(): Promise<BigNumber> {
-      const transactionManager = this.transferRepository.createQueryBuilder("transfer");
-      const res = await transactionManager
-            .where("transfer.type = :type", { type: "withdrawal" })
-            .andWhere("transfer.timestamp >= :timestamp", {
-                timestamp: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-            })
-            .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: Buffer.from("000000000000000000000000000000000000800A","hex") })
-            .getMany();
-      return res.reduce((acc, cur) => BigNumber.from(acc).add(BigNumber.from(cur.amount)), BigNumber.from(0));
+    const sevenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const tokenAddress = Buffer.from("000000000000000000000000000000000000800A", 'hex');
+
+    const res = await this.transferRepository.createQueryBuilder("transfer")
+        .select("SUM(CAST(transfer.amount AS NUMERIC))", "totalAmount")
+        .where("transfer.type = :type", { type: "withdrawal" })
+        .andWhere("transfer.timestamp >= :timestamp", { timestamp: sevenDaysAgo })
+        .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: tokenAddress })
+        .getRawOne();
+    return BigNumber.from(res.totalAmount);
     }
 }

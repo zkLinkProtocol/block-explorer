@@ -53,13 +53,15 @@ export class TransferRepository extends BaseRepository<Transfer> {
 
   public async getLast7DaysWithdrawalTransferAmount(): Promise<BigNumber> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const res = await transactionManager.find(this.entityTarget, {
-      where: {
-        type: TransferType.Withdrawal,
-        timestamp: MoreThanOrEqual(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()),
-        tokenAddress: "0x000000000000000000000000000000000000800A",
-      },
-    });
-    return res.reduce((acc, cur) => BigNumber.from(acc).add(BigNumber.from(cur.amount)), BigNumber.from(0));
+    const sevenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const tokenAddress = Buffer.from("000000000000000000000000000000000000800A","hex");
+    const res = await transactionManager.query(`
+      SELECT SUM(CAST(transfers.amount AS NUMERIC)) as totalAmount
+      FROM transfers
+      WHERE transfers.type = $1
+      AND transfers.timestamp >= $2
+      AND transfers."tokenAddress" = $3
+    `, [TransferType.Withdrawal, sevenDaysAgo, tokenAddress]);
+    return BigNumber.from(res[0].totalAmount);
   }
 }
