@@ -180,9 +180,9 @@ export class TokenService {
       const res = await transactionManager
             .where("transfer.type = :type", { type: "withdrawal" })
             .andWhere("transfer.timestamp >= :timestamp", {
-                timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                timestamp: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
             })
-            .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: "0x000000000000000000000000000000000000800A" })
+            .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: Buffer.from("000000000000000000000000000000000000800A","hex") })
             .getMany();
       return res.reduce((acc, cur) => BigNumber.from(acc).add(BigNumber.from(cur.amount)), BigNumber.from(0));
     }

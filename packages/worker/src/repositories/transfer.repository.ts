@@ -56,7 +56,7 @@ export class TransferRepository extends BaseRepository<Transfer> {
     const res = await transactionManager.find(this.entityTarget, {
       where: {
         type: TransferType.Withdrawal,
-        timestamp: MoreThanOrEqual(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toString()),
+        timestamp: MoreThanOrEqual(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()),
         tokenAddress: "0x000000000000000000000000000000000000800A",
       },
     });
