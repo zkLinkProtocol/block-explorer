@@ -73,9 +73,10 @@ export class TokenRepository extends BaseRepository<Token> {
         continue;
       }
       let tvl = BigNumber.from(0);
+      const value7DaysWithdrawalTransfer = await this.transferRepository.getLast7DaysWithdrawalTransferAmount()
       if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()){
         tvl = tvl.add(BigNumber.from(token.totalSupply))
-            .add(await this.transferRepository.getLast7DaysWithdrawalTransferAmount())
+            .add(value7DaysWithdrawalTransfer)
             .mul(((token.usdPrice ?? 0) * 1000) | 0)
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
