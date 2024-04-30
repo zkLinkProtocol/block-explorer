@@ -14,10 +14,11 @@ import { Invite } from "./entities/invite.entity";
 import { GroupTvl } from "./entities/groupTvl.entity";
 import { AddressFirstDeposit } from "./entities/addressFirstDeposit.entity";
 import { TokenTvl } from "./entities/tokenTvl.entity";
+import {IneligibleAddress} from "./entities/ineligbleAddress.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AddressTokenTvl, Token, Point, AddressTvl, GroupTvl,AddressFirstDeposit,TokenTvl]),
+    TypeOrmModule.forFeature([AddressTokenTvl, Token, Point, AddressTvl, GroupTvl,AddressFirstDeposit,TokenTvl,IneligibleAddress]),
     TypeOrmModule.forFeature([Referral], "refer"),
     TypeOrmModule.forFeature([Invite], "refer"),
     LogModule,

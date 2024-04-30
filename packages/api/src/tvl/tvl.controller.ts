@@ -52,6 +52,15 @@ export class TVLController {
   @ApiOperation({ summary: "Get account TVL" })
   @Get("/getAccounTvl")
   public async getAccountvl(@Query("address", new ParseAddressPipe()) address: string): Promise<AccountTVLResponseDto> {
+    const isIneligible = await this.tvlService.isAddressIneligible(address);
+    if (isIneligible) {
+      return {
+        status: ResponseStatus.OK,
+        message: ResponseMessage.OK,
+        result: [],
+      };
+    }
+
     const tokenAccounts = await this.tvlService.getAccountTokensTVL(address);
     return {
       status: ResponseStatus.OK,
@@ -65,6 +74,19 @@ export class TVLController {
   public async getAccountPoint(
     @Query("address", new ParseAddressPipe()) address: string
   ): Promise<AccountPointResponseDto> {
+    const isIneligible = await this.tvlService.isAddressIneligible(address);
+    if (isIneligible) {
+      return {
+        status: ResponseStatus.OK,
+        message: ResponseMessage.OK,
+        result: {
+          novaPoint: 0,
+          referPoint: 0,
+          address,
+        },
+      };
+    }
+
     const point = await this.tvlService.getAccountPoints(address);
     return {
       status: ResponseStatus.OK,
