@@ -23,6 +23,8 @@ import {AccountLoyaltyBoosterDto} from "../api/dtos/tvl/accountLoyaltyBooster.dt
 import BigNumber from "bignumber.js";
 import {AddressFirstDeposit} from "./entities/addressFirstDeposit.entity";
 import {TokenTvl} from "./entities/tokenTvl.entity";
+import {IneligibleAddress} from "./entities/ineligbleAddress.entity";
+import {ResponseMessage, ResponseStatus} from "../api/dtos/common/responseBase.dto";
 
 const L2_ETH_TOKEN_ADDRESS = "0x000000000000000000000000000000000000800a";
 const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -51,8 +53,23 @@ export class TVLService {
     @InjectRepository(AddressFirstDeposit)
     private readonly addressFirstDepositRepository: Repository<AddressFirstDeposit>,
     @InjectRepository(TokenTvl)
-    private readonly tokenTvlRepository: Repository<TokenTvl>
+    private readonly tokenTvlRepository: Repository<TokenTvl>,
+    @InjectRepository(IneligibleAddress)
+    private readonly ineligibleAddressRepository: Repository<IneligibleAddress>
   ) {}
+
+  public async getIneligibleAddresses(): Promise<IneligibleAddress[]> {
+    return await this.ineligibleAddressRepository.find();
+  }
+
+  public async isAddressIneligible(address: string): Promise<boolean> {
+    let ret = await this.ineligibleAddressRepository.find( {
+      where: {
+        address
+      }
+    });
+    return ret.length > 0;
+  }
 
   public async getAccountTokensTVL(address: string): Promise<AccountTVLDto[]> {
     const tokenBalance = await this.addressTokenRepository.find({
@@ -107,6 +124,17 @@ export class TVLService {
   }
 
   public async getAccountRank(address: string): Promise<AccountRankDto> {
+    const isIneligible = await this.isAddressIneligible(address);
+    if (isIneligible) {
+      return {
+        novaPoint: 0,
+        referPoint: 0,
+        rank: 0,
+        inviteBy: null,
+        address,
+      };
+    }
+
     const points = await this.pointRepository.findOne({
       where: { address },
     });
@@ -138,7 +166,7 @@ export class TVLService {
 
   public async getAccountsRank(page: PagingOptionsDto): Promise<AccountRankDto[]> {
     const ranks: Point[] = await this.addressTVLRepository.query(
-      `select * from "points" order by "refPoint" + "stakePoint" desc limit $1 offset $2`,
+      `select * from "points" where address not in (select address from "ineligibleAddresses") order by "refPoint" + "stakePoint" desc limit $1 offset $2`,
       [page.limit, (page.page - 1) * page.limit]
     );
 
