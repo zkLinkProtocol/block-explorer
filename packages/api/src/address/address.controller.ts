@@ -174,6 +174,37 @@ export class AddressController {
       }
     );
   }
+  @Get(":address/withdrawalTransfers")
+  @ApiParam({
+    name: "address",
+    schema: { pattern: ADDRESS_REGEX_PATTERN },
+    example: constants.address,
+    description: "Valid hex address",
+  })
+  @ApiListPageOkResponse(TransferDto, { description: "Successfully returned address transfers" })
+  @ApiBadRequestResponse({
+    description: "Specified address is invalid or paging query params are not valid or out of range",
+  })
+  public async getAddressWithdrawalTransfers(
+      @Param("address", new ParseAddressPipe()) address: string,
+      @Query() listFilterOptions: ListFiltersDto,
+      @Query() pagingOptions: PagingOptionsWithMaxItemsLimitDto
+  ): Promise<Pagination<TransferDto>> {
+    const filterTransactionsListOptions = buildDateFilter(listFilterOptions.fromDate, listFilterOptions.toDate);
+
+    return await this.transferService.findAllWithdrawal(
+        {
+          address,
+          isFeeOrRefund: false,
+          ...filterTransactionsListOptions,
+        },
+        {
+          filterOptions: listFilterOptions,
+          ...pagingOptions,
+          route: `${entityName}/${address}/withdrawalTransfers`,
+        }
+    );
+  }
   @Get(":address/failedTransactions")
   @ApiParam({
     name: "address",
