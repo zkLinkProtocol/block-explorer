@@ -150,13 +150,13 @@ export class TokenService {
           }
           price_t = price_t + num;
         } else {
-          if (token.usdPrice * 10 ** price_t >= Number.MAX_VALUE) {
+          if (token.usdPrice * 10 ** price_t >= Number.MAX_SAFE_INTEGER) {
             price_t = 0;
           }
         }
         tvl = tvl.add(BigNumber.from(token.reserveAmount))
             .mul(((token.usdPrice ?? 0) * 10 ** price_t) | 0)
-            .div(10 ** price_t)
+            .div(BigNumber.from(10).pow(price_t))
             .div(BigNumber.from(10).pow(token.decimals));
       }
       if (token.l1Address !== null){
