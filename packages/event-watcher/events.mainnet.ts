@@ -45,7 +45,7 @@ export const EVENTS_MAINNET = {
           contractDeploymentBlock: 803957,
         },
       ],
-      // optim
+      // optimistic
       '10': [
         {
           contractAddress: '0x46C8D02E93d5a03899dFa7Cf8A40A07589A3fA1b',
