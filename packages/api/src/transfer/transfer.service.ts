@@ -8,7 +8,7 @@ import { IPaginationOptions, SortingOrder } from "../common/types";
 import { paginate } from "../common/utils";
 import { TokenType } from "../token/token.entity";
 import { AddressTransfer } from "./addressTransfer.entity";
-import { Transfer } from "./transfer.entity";
+import { Transfer, TransferType } from "./transfer.entity";
 
 export interface FilterTransfersOptions {
   tokenAddress?: string;
@@ -72,6 +72,38 @@ export class TransferService {
       queryBuilder.leftJoin("transfer.transaction", "transaction");
       queryBuilder.addSelect("transaction.networkKey");
       queryBuilder.where(filterOptions);
+      queryBuilder.leftJoinAndSelect("transfer.token", "token");
+      queryBuilder.orderBy("transfer.timestamp", "DESC");
+      queryBuilder.addOrderBy("transfer.logIndex", "ASC");
+      return await paginate<Transfer>(queryBuilder, paginationOptions);
+    }
+  }
+  public async findAllWithdrawal(
+      filterOptions: FilterTransfersOptions = {},
+      paginationOptions: IPaginationOptions
+  ): Promise<Pagination<Transfer>> {
+    if (filterOptions.address) {
+      const queryBuilder = this.addressTransferRepository.createQueryBuilder("addressTransfer");
+      queryBuilder.select("addressTransfer.number");
+      queryBuilder.leftJoinAndSelect("addressTransfer.transfer", "transfer");
+      queryBuilder.leftJoinAndSelect("transfer.token", "token");
+      queryBuilder.leftJoin("transfer.transaction", "transaction");
+      queryBuilder.addSelect("transaction.networkKey");
+      queryBuilder.where(filterOptions);
+      queryBuilder.andWhere("transfer.type = :type", { type: TransferType.Withdrawal });
+      queryBuilder.orderBy("addressTransfer.timestamp", "DESC");
+      queryBuilder.addOrderBy("addressTransfer.logIndex", "ASC");
+      const addressTransfers = await paginate<AddressTransfer>(queryBuilder, paginationOptions);
+      return {
+        ...addressTransfers,
+        items: addressTransfers.items.map((item) => item.transfer),
+      };
+    } else {
+      const queryBuilder = this.transferRepository.createQueryBuilder("transfer");
+      queryBuilder.leftJoin("transfer.transaction", "transaction");
+      queryBuilder.addSelect("transaction.networkKey");
+      queryBuilder.where(filterOptions);
+      queryBuilder.andWhere("transfer.type = :type", { type: TransferType.Withdrawal });
       queryBuilder.leftJoinAndSelect("transfer.token", "token");
       queryBuilder.orderBy("transfer.timestamp", "DESC");
       queryBuilder.addOrderBy("transfer.logIndex", "ASC");
