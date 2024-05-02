@@ -7,6 +7,7 @@ import { paginate } from "../common/utils";
 import { Token, ETH_TOKEN } from "./token.entity";
 import { BigNumber, ethers } from "ethers";
 import { LRUCache } from "lru-cache";
+import { Transfer } from "../transfer/transfer.entity";
 
 // const options: LRU. = { max: 500 };
 const options = {
@@ -44,7 +45,9 @@ export interface TokenTvl extends Token {
 export class TokenService {
   constructor(
     @InjectRepository(Token)
-    private readonly tokenRepository: Repository<Token>
+    private readonly tokenRepository: Repository<Token>,
+    @InjectRepository(Transfer)
+    private readonly transferRepository: Repository<Transfer>,
   ) {}
 
   public async findOne(address: string, fields?: FindOptionsSelect<Token>): Promise<Token> {
@@ -124,11 +127,38 @@ export class TokenService {
     }
     const tokens = await this.tokenRepository.find();
     let totalTvl = BigNumber.from(0);
+    const value7DaysWithdrawalTransfer = await this.getLast7DaysWithdrawalTransferAmount()
     const ntvl = tokens.map((token) => {
-      const tvl = token.totalSupply
-        .mul(Math.floor((token.usdPrice ?? 0) * 10 ** 3))
-        .div(10 ** 3)
-        .div(BigNumber.from(10).pow(token.decimals));
+      let tvl = BigNumber.from(0);
+      if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()) {
+        tvl = tvl.add(BigNumber.from(token.totalSupply))
+            .add(value7DaysWithdrawalTransfer)
+            .mul(((token.usdPrice ?? 0) * 1000) | 0)
+            .div(1000)
+            .div(BigNumber.from(10).pow(token.decimals));
+      } else {
+        let price_t = 3;
+        if (token.usdPrice <= 0) {
+          price_t = 0;
+        }
+        if (token.usdPrice < 1) {
+          let priceNum = token.usdPrice;
+          let num = 0;
+          while(priceNum<1 && priceNum > 0){
+            priceNum *= 10;
+            num++;
+          }
+          price_t = price_t + num;
+        } else {
+          if (token.usdPrice * 10 ** price_t >= Number.MAX_SAFE_INTEGER) {
+            price_t = 0;
+          }
+        }
+        tvl = tvl.add(BigNumber.from(token.reserveAmount))
+            .mul(((token.usdPrice ?? 0) * 10 ** price_t) | 0)
+            .div(BigNumber.from(10).pow(price_t))
+            .div(BigNumber.from(10).pow(token.decimals));
+      }
       if (token.l1Address !== null){
         totalTvl = totalTvl.add(tvl);
       }
@@ -145,4 +175,16 @@ export class TokenService {
     }
     return ntvl;
   }
+  public async getLast7DaysWithdrawalTransferAmount(): Promise<BigNumber> {
+    const sevenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const tokenAddress = Buffer.from("000000000000000000000000000000000000800A", 'hex');
+
+    const res = await this.transferRepository.createQueryBuilder("transfer")
+        .select("SUM(CAST(transfer.amount AS NUMERIC))", "totalAmount")
+        .where("transfer.type = :type", { type: "withdrawal" })
+        .andWhere("transfer.timestamp >= :timestamp", { timestamp: sevenDaysAgo })
+        .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: tokenAddress })
+        .getRawOne();
+    return BigNumber.from(res.totalAmount);
+    }
 }

@@ -20,7 +20,7 @@ const context = useContext();
 const route = useRoute();
 const searchParams = computed(() => route.query);
 const { getData,data } = useChartsData();
-const Title = route.query.type === 'TVL'? 'zkLink Nova Daily TVL Chart': 'zkLink Nova Unique Addresses Chart'
+const Title = route.query.type === 'TVL'? 'zkLink Nova Daily TVL Chart': route.query.type === 'UAW'?'zkLink Nova Unique Addresses Chart':'Daily Transactions Chart'
 const format = (str:string,type:string,isNow:boolean) => {
   const date = new Date(str)
   var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -57,7 +57,7 @@ watch(
           yData.unshift('Now')
         }
       })
-    } else {
+    } else if (type === 'UAW') {
       data && data.value.map((i:{uaw:string,timestamp:string},index)=>{
         if (index) {
           xData.unshift({value: i.uaw, date: i.timestamp, type: false})
@@ -67,6 +67,12 @@ watch(
           xData.unshift({value: i.uaw, date: i.timestamp, type: true})
           yData.unshift('Now')
         }
+      })
+    } else if (type === 'Tra') {
+      data && data.value.items.map((i:{txNum:number,timestamp:string},index)=>{
+        xData.unshift({value: i.txNum, date: i.timestamp, type: false})
+        const timer = format(i.timestamp,'yLine',false)
+        yData.unshift(timer)
       })
     }
     const option = {
@@ -85,7 +91,7 @@ watch(
             }else if (type === "UAW"){
               char = '';
             }
-            return timer + '<br />'+ type +': ' + char + ' ' + yValue.toLocaleString();
+            return timer + '<br />'+ (type === "Tra"?"Trans": type) +': ' + char + ' ' + yValue.toLocaleString();
           }
       },
       grid: {

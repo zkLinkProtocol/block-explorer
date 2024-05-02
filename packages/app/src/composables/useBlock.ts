@@ -6,7 +6,7 @@ import useContext from "@/composables/useContext";
 
 import type { Hash } from "@/types";
 
-export type BlockStatus = "sealed" | "verified";
+export type BlockStatus = "sealed" | "verified" | "failed";
 export type Block = {
   number: number;
   status: BlockStatus;

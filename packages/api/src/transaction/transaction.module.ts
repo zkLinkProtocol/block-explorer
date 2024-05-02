@@ -7,6 +7,7 @@ import { Transaction } from "./entities/transaction.entity";
 import { TransactionDetails } from "./entities/transactionDetails.entity";
 import { AddressTransaction } from "./entities/addressTransaction.entity";
 import { TransactionReceipt } from "./entities/transactionReceipt.entity";
+import { DailyTxHistory } from "./entities/dailyTxHistory.entity";
 import { Batch } from "../batch/batch.entity";
 import { TransferModule } from "../transfer/transfer.module";
 import { CounterModule } from "../counter/counter.module";
@@ -14,7 +15,7 @@ import { LogModule } from "../log/log.module";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Transaction, TransactionDetails, AddressTransaction, TransactionReceipt, Batch]),
+    TypeOrmModule.forFeature([Transaction, TransactionDetails, AddressTransaction, TransactionReceipt, Batch, DailyTxHistory]),
     TransferModule,
     LogModule,
     CounterModule,

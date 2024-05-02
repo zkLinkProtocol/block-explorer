@@ -8,6 +8,7 @@ import { Transaction } from "./entities/transaction.entity";
 import { TransactionDetails } from "./entities/transactionDetails.entity";
 import { AddressTransaction } from "./entities/addressTransaction.entity";
 import { Batch } from "../batch/batch.entity";
+import { DailyTxHistory } from "./entities/dailyTxHistory.entity";
 import { CounterService } from "../counter/counter.service";
 import { LRUCache } from "lru-cache";
 import {FilterTransfersOptions} from "../transfer/transfer.service";
@@ -46,6 +47,8 @@ export class TransactionService {
     private readonly transactionDetailsRepository: Repository<TransactionDetails>,
     @InjectRepository(AddressTransaction)
     private readonly addressTransactionRepository: Repository<AddressTransaction>,
+    @InjectRepository(DailyTxHistory)
+    private readonly dailyTxHistoryRepository: Repository<DailyTxHistory>,
     @InjectRepository(Batch)
     private readonly batchRepository: Repository<Batch>,
     private readonly counterService: CounterService
@@ -150,7 +153,7 @@ export class TransactionService {
     const addressTransactions = await queryBuilder.getMany();
     return addressTransactions;
   }
-
+  
   public async findFailedByAddress(
       filterOptions: FilterTransfersOptions = {},
       paginationOptions: IPaginationOptions
@@ -219,5 +222,13 @@ export class TransactionService {
     const count = res[0].count;
     cache.set("totalAccountNumber", count);
     return count;
+  }
+
+  public async getDailyTransaction(paginationOptions: IPaginationOptions): Promise<Pagination<DailyTxHistory>>{
+    const queryBuilder = this.dailyTxHistoryRepository.createQueryBuilder("dailyTransaction");
+    queryBuilder.select();
+    queryBuilder.distinctOn(["DATE(\"dailyTransaction\".timestamp)"]);
+    queryBuilder.orderBy('DATE(\"dailyTransaction\".timestamp)', 'DESC');
+    return await paginate<DailyTxHistory>(queryBuilder, paginationOptions);
   }
 }

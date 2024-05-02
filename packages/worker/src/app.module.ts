@@ -32,6 +32,7 @@ import {
   LogRepository,
   BalanceRepository,
   TVLHistoryRepository,
+  DailyTransactionHistoryRepository,
 } from "./repositories";
 import {
   Batch,
@@ -46,6 +47,7 @@ import {
   AddressTransfer,
   Balance,
   TVLHistory,
+  DailyTxHistory,
 } from "./entities";
 import { typeOrmModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -57,6 +59,7 @@ import { DataFetcherService } from "./dataFetcher/dataFetcher.service";
 import { ValuesService } from "./values/values.service";
 import { HistoryService } from "./values/history.service";
 import { GatewayService } from "./values/gateway.service";
+import { DailyTransactionService } from "./values/dailyTransaction.service";
 
 @Module({
   imports: [
@@ -86,6 +89,7 @@ import { GatewayService } from "./values/gateway.service";
       Transfer,
       TVLHistory,
       Balance,
+      DailyTxHistory,
     ]),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),
@@ -125,6 +129,7 @@ import { GatewayService } from "./values/gateway.service";
     AddressRepository,
     TransferRepository,
     TVLHistoryRepository,
+    DailyTransactionHistoryRepository,
     AddressTransferRepository,
     BalanceRepository,
     LogRepository,
@@ -140,6 +145,7 @@ import { GatewayService } from "./values/gateway.service";
     ValuesService,
     HistoryService,
     GatewayService,
+    DailyTransactionService,
   ],
 })
 export class AppModule {}

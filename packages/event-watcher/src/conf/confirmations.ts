@@ -11,7 +11,7 @@ export const BLOCK_CONFIRMATIONS: Record<ChainId, number> = {
   59144: 5, // Linea
   5000: 30, // Mantle
   169: 30, // Manta
-  81457: 30, //  Blast
+  81457: 30, // Blast
 
   // ~~~ Testnet ~~~
   5: 64, // Goerli
