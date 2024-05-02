@@ -174,7 +174,6 @@ export class WatcherService implements OnModuleInit {
             await this.batchRootEventLogsRepository.addMany(eventLogRecords.slice(i*batchSize,(i+1)*batchSize));
             await sleep(2000);
         }
-        // await this.batchRootEventLogsRepository.addMany(eventLogRecords);
       }
 
       await this.eventProcessorRepository.upsertEventProcess(
