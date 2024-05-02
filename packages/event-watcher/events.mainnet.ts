@@ -59,27 +59,6 @@ export const EVENTS_MAINNET = {
           contractDeploymentBlock: 13328673,
         },
       ],
-      // blast
-      '81457': [
-        {
-          contractAddress: '0x29BA92Fe724beD5c5EBfd0099F2F64a6DC5078FD',
-          contractDeploymentBlock: 803957,
-        },
-      ],
-      // optimistic
-      '10': [
-        {
-          contractAddress: '0x46C8D02E93d5a03899dFa7Cf8A40A07589A3fA1b',
-          contractDeploymentBlock: 117746854,
-        },
-      ],
-      // base
-      '8453': [
-        {
-          contractAddress: '0xE473ce141b1416Fe526eb63Cf7433b7B8d7264Dd',
-          contractDeploymentBlock: 12153175,
-        },
-      ],
     },
   },
 };
