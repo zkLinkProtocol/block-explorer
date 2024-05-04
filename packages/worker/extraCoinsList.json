@@ -106,5 +106,13 @@
     "platforms": {
       "ethereum": "0x9Dc7e196092DaC94f0c76CFB020b60FA75B97C5b"
     }
+  },
+  {
+    "id": "bitcoin",
+    "symbol": "btc",
+    "name": "Bitcoin",
+    "platforms": {
+      "zklink-nova": "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067"
+    }
   }
 ]
