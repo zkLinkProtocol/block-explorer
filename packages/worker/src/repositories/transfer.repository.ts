@@ -4,6 +4,7 @@ import { UnitOfWork } from "../unitOfWork";
 import { BaseRepository } from "./base.repository";
 import { AddressTransferRepository } from "./addressTransfer.repository";
 import { MoreThanOrEqual } from "typeorm";
+import { BigNumber } from "ethers";
 
 @Injectable()
 export class TransferRepository extends BaseRepository<Transfer> {
@@ -50,15 +51,17 @@ export class TransferRepository extends BaseRepository<Transfer> {
     );
   }
 
-  public async getLast7DaysWithdrawalTransferAmount(): Promise<number> {
+  public async getLast7DaysWithdrawalTransferAmount(): Promise<BigNumber> {
     const transactionManager = this.unitOfWork.getTransactionManager();
-    const res = await transactionManager.find(this.entityTarget, {
-      where: {
-        type: TransferType.Withdrawal,
-        timestamp: MoreThanOrEqual(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toString()),
-        tokenAddress: "0x000000000000000000000000000000000000800A",
-      },
-    });
-    return res.reduce((acc, cur) => acc + Number(cur.amount), 0);
+    const sevenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const tokenAddress = Buffer.from("000000000000000000000000000000000000800A","hex");
+    const res = await transactionManager.query(`
+      SELECT SUM(CAST(transfers.amount AS NUMERIC)) as totalAmount
+      FROM transfers
+      WHERE transfers.type = $1
+      AND transfers.timestamp >= $2
+      AND transfers."tokenAddress" = $3
+    `, [TransferType.Withdrawal, sevenDaysAgo, tokenAddress]);
+    return BigNumber.from(res[0].totalAmount);
   }
 }

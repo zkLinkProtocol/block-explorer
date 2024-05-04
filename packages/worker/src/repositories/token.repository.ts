@@ -73,16 +73,34 @@ export class TokenRepository extends BaseRepository<Token> {
         continue;
       }
       let tvl = BigNumber.from(0);
+      const value7DaysWithdrawalTransfer = await this.transferRepository.getLast7DaysWithdrawalTransferAmount()
       if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()){
-        tvl.add(BigNumber.from(token.totalSupply))
-            .add(await this.transferRepository.getLast7DaysWithdrawalTransferAmount())
+        tvl = tvl.add(BigNumber.from(token.totalSupply))
+            .add(value7DaysWithdrawalTransfer)
             .mul(((token.usdPrice ?? 0) * 1000) | 0)
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
       } else {
-        tvl.add(BigNumber.from(token.reserveAmount))
-            .mul(((token.usdPrice ?? 0) * 1000) | 0)
-            .div(1000)
+        let price_t = 3;
+        if (token.usdPrice <= 0) {
+          price_t = 0;
+        }
+        if (token.usdPrice < 1) {
+          let priceNum = token.usdPrice;
+          let num = 0;
+          while(priceNum<1 && priceNum > 0){
+            priceNum *= 10;
+            num++;
+          }
+          price_t = price_t + num;
+        } else {
+          if (token.usdPrice * 10 ** price_t >= Number.MAX_SAFE_INTEGER) {
+            price_t = 0;
+          }
+        }
+        tvl = tvl.add(BigNumber.from(token.reserveAmount))
+            .mul(((token.usdPrice ?? 0) * 10 ** price_t) | 0)
+            .div(BigNumber.from(10).pow(price_t))
             .div(BigNumber.from(10).pow(token.decimals));
       }
       totalTVL = totalTVL.add(tvl);

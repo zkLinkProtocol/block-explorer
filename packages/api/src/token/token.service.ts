@@ -131,15 +131,32 @@ export class TokenService {
     const ntvl = tokens.map((token) => {
       let tvl = BigNumber.from(0);
       if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()) {
-        tvl.add(BigNumber.from(token.totalSupply))
+        tvl = tvl.add(BigNumber.from(token.totalSupply))
             .add(value7DaysWithdrawalTransfer)
             .mul(((token.usdPrice ?? 0) * 1000) | 0)
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
       } else {
-        tvl.add(BigNumber.from(token.reserveAmount))
-            .mul(((token.usdPrice ?? 0) * 1000) | 0)
-            .div(1000)
+        let price_t = 3;
+        if (token.usdPrice <= 0) {
+          price_t = 0;
+        }
+        if (token.usdPrice < 1) {
+          let priceNum = token.usdPrice;
+          let num = 0;
+          while(priceNum<1 && priceNum > 0){
+            priceNum *= 10;
+            num++;
+          }
+          price_t = price_t + num;
+        } else {
+          if (token.usdPrice * 10 ** price_t >= Number.MAX_SAFE_INTEGER) {
+            price_t = 0;
+          }
+        }
+        tvl = tvl.add(BigNumber.from(token.reserveAmount))
+            .mul(((token.usdPrice ?? 0) * 10 ** price_t) | 0)
+            .div(BigNumber.from(10).pow(price_t))
             .div(BigNumber.from(10).pow(token.decimals));
       }
       if (token.l1Address !== null){
@@ -158,15 +175,16 @@ export class TokenService {
     }
     return ntvl;
   }
-  public async getLast7DaysWithdrawalTransferAmount(): Promise<number> {
-      const transactionManager = this.transferRepository.createQueryBuilder("transfer");
-      const res = await transactionManager
-            .where("transfer.type = :type", { type: "withdrawal" })
-            .andWhere("transfer.timestamp >= :timestamp", {
-                timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-            })
-            .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: "0x000000000000000000000000000000000000800A" })
-            .getMany();
-      return res.reduce((acc, cur) => acc + Number(cur.amount), 0);
+  public async getLast7DaysWithdrawalTransferAmount(): Promise<BigNumber> {
+    const sevenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const tokenAddress = Buffer.from("000000000000000000000000000000000000800A", 'hex');
+
+    const res = await this.transferRepository.createQueryBuilder("transfer")
+        .select("SUM(CAST(transfer.amount AS NUMERIC))", "totalAmount")
+        .where("transfer.type = :type", { type: "withdrawal" })
+        .andWhere("transfer.timestamp >= :timestamp", { timestamp: sevenDaysAgo })
+        .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: tokenAddress })
+        .getRawOne();
+    return BigNumber.from(res.totalAmount);
     }
 }
