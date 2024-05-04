@@ -76,5 +76,11 @@
     "address": "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab",
     "image": "https://assets.coingecko.com/coins/images/9956/large/Badge_Dai.png?1696509996",
     "market_cap": 1
+  },
+  {
+    "name": "BTCT-tron",
+    "address": "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067",
+    "image": "https://assets.coingecko.com/coins/images/16999/standard/9486.png?1696516564",
+    "market_cap": 1
   }
 ]
