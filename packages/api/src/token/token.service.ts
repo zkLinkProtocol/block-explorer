@@ -136,6 +136,12 @@ export class TokenService {
             .mul(((token.usdPrice ?? 0) * 1000) | 0)
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
+      } else if(token.l2Address.toLowerCase() === "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067".toLowerCase()){
+        //TODO @yuke plz fix external bridge token
+        tvl = tvl.add(BigNumber.from(token.totalSupply))
+            .mul(((token.usdPrice ?? 0) * 1000) | 0)
+            .div(1000)
+            .div(BigNumber.from(10).pow(token.decimals));
       } else {
         let price_t = 3;
         if (token.usdPrice <= 0) {
@@ -160,6 +166,10 @@ export class TokenService {
             .div(BigNumber.from(10).pow(token.decimals));
       }
       if (token.l1Address !== null){
+        totalTvl = totalTvl.add(tvl);
+      }
+      //TODO @yuke plz fix external bridge token
+      if (token.l2Address.toLowerCase() === "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067"){
         totalTvl = totalTvl.add(tvl);
       }
       return {
