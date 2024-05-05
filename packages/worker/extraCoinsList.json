@@ -108,7 +108,7 @@
     }
   },
   {
-    "id": "bitcoin",
+    "id": "binance-wrapped-btc",
     "symbol": "btc",
     "name": "Bitcoin",
     "platforms": {
