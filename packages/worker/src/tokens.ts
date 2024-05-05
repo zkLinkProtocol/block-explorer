@@ -1030,4 +1030,24 @@ export default [
       },
     ],
   },
+  {
+    address: [
+      {
+        chain: "Nova",
+        l1Address: "",
+        l2Address: "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067",
+      },
+    ],
+    symbol: "BTCT",
+    decimals: 18,
+    cgPriceId: "bitcoin",
+    type: "Native",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
+  },
 ];
