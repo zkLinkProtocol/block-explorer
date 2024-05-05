@@ -9,6 +9,12 @@ export class DailyTransactionDto {
   })
   public readonly txNum: number;
 
+  @ApiProperty({
+    type: Number,
+    description: "The daily exchange address number",
+    example: 114514,
+  })
+  public readonly exchangeNum: number;
 
   @ApiProperty({
     type: Date,
