@@ -137,36 +137,43 @@ export class WatcherService implements OnModuleInit {
       this.logger.debug(
         `[POLLING] ${eventName} ${chainId} ${contractAddress}, ${fromBlock} - ${toBlock} = ${newLogs.length}`,
       );
-
-      if (newLogs && eventName === 'SyncBatchRoot') {
+      if (newLogs && eventName === 'OpenRangeBatchRoot') {
         const abiCoder = new AbiCoder();
 
         const eventLogsFunc = newLogs.map(
-          (log) => async (): Promise<Partial<BatchRootEventLogs>> => {
+          (log) => async (): Promise<Partial<BatchRootEventLogs[]>> => {
             const decodedLog = abiCoder.decode(
-              ['uint256', 'bytes32', 'uint256'],
+              ['uint256', 'uint256'],
               log.data,
             );
-            const batchNumber = decodedLog[0];
-            const l2LogsRootHash = decodedLog[1];
+            const batchNumberFrom = decodedLog[0];
+            const batchNumberTo = decodedLog[1];
+            const eventBatchRecords = [];
             const block = await this.getBlock(log.blockNumber, chainId);
-            return {
-              l1BatchNumber: batchNumber,
-              rootHash: l2LogsRootHash,
-              transactionHash: log.transactionHash,
-              chainId,
-              executedAt: new Date(block.timestamp * 1000),
-            };
+            for(let i = batchNumberFrom.toNumber(); i <= batchNumberTo; i++) {
+              eventBatchRecords.push({
+                l1BatchNumber: i,
+                rootHash: '0x11',
+                transactionHash: log.transactionHash,
+                chainId,
+                executedAt: new Date(block.timestamp * 1000),
+              });
+            }
+            return eventBatchRecords;
           },
         );
-        const eventLogRecords = [];
+        let eventLogRecords = [];
         for (const eventLog of eventLogsFunc) {
           const eventLogRecord = await eventLog();
           this.logger.debug('eventLogRecord', JSON.stringify(eventLogRecord));
-          await sleep(2000);
-          eventLogRecords.push(eventLogRecord);
+          eventLogRecords = eventLogRecords.concat(eventLogRecord);
         }
-        await this.batchRootEventLogsRepository.addMany(eventLogRecords);
+        const batchSize = 100;
+        const totalBatches = Math.ceil(eventLogRecords.length / batchSize);
+        for (let i = 0;i<totalBatches;i++){
+            await this.batchRootEventLogsRepository.addMany(eventLogRecords.slice(i*batchSize,(i+1)*batchSize));
+            await sleep(2000);
+        }
       }
 
       await this.eventProcessorRepository.upsertEventProcess(

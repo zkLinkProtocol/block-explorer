@@ -69,7 +69,8 @@ export class TokenRepository extends BaseRepository<Token> {
     const allTokens = await transactionManager.find(this.entityTarget);
     let totalTVL = BigNumber.from(0);
     for (const token of allTokens) {
-      if (token.l1Address === null){
+      //TODO @yuke plz fix external bridge token
+      if (token.l1Address === null && token.l2Address.toLowerCase() !== "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067".toLowerCase()){
         continue;
       }
       let tvl = BigNumber.from(0);
@@ -77,6 +78,12 @@ export class TokenRepository extends BaseRepository<Token> {
       if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()){
         tvl = tvl.add(BigNumber.from(token.totalSupply))
             .add(value7DaysWithdrawalTransfer)
+            .mul(((token.usdPrice ?? 0) * 1000) | 0)
+            .div(1000)
+            .div(BigNumber.from(10).pow(token.decimals));
+      //TODO @yuke plz fix external bridge token 
+      } else if (token.l2Address.toLowerCase() === "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067".toLowerCase()){
+        tvl = tvl.add(BigNumber.from(token.totalSupply))
             .mul(((token.usdPrice ?? 0) * 1000) | 0)
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
