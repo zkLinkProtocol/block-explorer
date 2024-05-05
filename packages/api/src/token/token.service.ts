@@ -169,7 +169,7 @@ export class TokenService {
         totalTvl = totalTvl.add(tvl);
       }
       //TODO @yuke plz fix external bridge token
-      if (token.l2Address.toLowerCase() === "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067"){
+      if (token.l2Address.toLowerCase() === "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067".toLowerCase()){
         totalTvl = totalTvl.add(tvl);
       }
       return {
