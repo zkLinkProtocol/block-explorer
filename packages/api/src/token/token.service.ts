@@ -185,6 +185,9 @@ export class TokenService {
         .andWhere("transfer.timestamp >= :timestamp", { timestamp: sevenDaysAgo })
         .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: tokenAddress })
         .getRawOne();
+    if (res.totalAmount === null || res.totalAmount === undefined){
+        return BigNumber.from(0);
+    }
     return BigNumber.from(res.totalAmount);
     }
 }
