@@ -62,9 +62,9 @@ export class TransferRepository extends BaseRepository<Transfer> {
       AND transfers.timestamp >= $2
       AND transfers."tokenAddress" = $3
     `, [TransferType.Withdrawal, sevenDaysAgo, tokenAddress]);
-    if (res[0].totalAmount === null || res[0].totalAmount === undefined) {
+    if (res[0].totalamount === null || res[0].totalamount === undefined) {
       return BigNumber.from(0);
     }
-    return BigNumber.from(res[0].totalAmount);
+    return BigNumber.from(res[0].totalamount);
   }
 }
