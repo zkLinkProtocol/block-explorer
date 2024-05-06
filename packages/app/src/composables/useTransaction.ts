@@ -206,7 +206,7 @@ export default (context = useContext()) => {
         isRequestFailed.value = true;
       }
     } finally {
-      isRequestPending.value = false;
+      isRequestPending.value = false
     }
   };
 

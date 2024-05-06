@@ -136,6 +136,12 @@ export class TokenService {
             .mul(((token.usdPrice ?? 0) * 1000) | 0)
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
+      } else if(token.l2Address.toLowerCase() === "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067".toLowerCase()){
+        //TODO @yuke plz fix external bridge token
+        tvl = tvl.add(BigNumber.from(token.totalSupply))
+            .mul(((token.usdPrice ?? 0) * 1000) | 0)
+            .div(1000)
+            .div(BigNumber.from(10).pow(token.decimals));
       } else {
         let price_t = 3;
         if (token.usdPrice <= 0) {
@@ -162,6 +168,10 @@ export class TokenService {
       if (token.l1Address !== null){
         totalTvl = totalTvl.add(tvl);
       }
+      //TODO @yuke plz fix external bridge token
+      if (token.l2Address.toLowerCase() === "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067".toLowerCase()){
+        totalTvl = totalTvl.add(tvl);
+      }
       return {
         ...token,
         tvl: tvl.toString(),
@@ -185,6 +195,9 @@ export class TokenService {
         .andWhere("transfer.timestamp >= :timestamp", { timestamp: sevenDaysAgo })
         .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: tokenAddress })
         .getRawOne();
+    if (res.totalAmount === null || res.totalAmount === undefined){
+        return BigNumber.from(0);
+    }
     return BigNumber.from(res.totalAmount);
     }
 }

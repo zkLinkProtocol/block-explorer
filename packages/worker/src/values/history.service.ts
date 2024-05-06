@@ -31,6 +31,7 @@ export class HistoryService extends Worker {
         message: "Failed to update tokens total supply data",
         originalError: err,
       });
+      console.log(err);
     }
 
     await waitFor(() => !this.currentProcessPromise, this.updateTvlHistoryInterval);
