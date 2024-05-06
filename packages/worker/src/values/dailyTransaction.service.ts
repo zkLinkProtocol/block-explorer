@@ -4,6 +4,7 @@ import { Worker } from "../common/worker";
 import {
     TransactionRepository,
     DailyTransactionHistoryRepository,
+    AddressTransactionRepository
 } from "../repositories";
 import {ConfigService} from "@nestjs/config";
 @Injectable()
@@ -14,6 +15,7 @@ export class DailyTransactionService extends Worker {
     public constructor(
         private readonly dailyTransactionHistoryRepository:DailyTransactionHistoryRepository,
         private readonly transactionRepository:TransactionRepository,
+        private readonly addressTransactionRepository:AddressTransactionRepository,
         configService: ConfigService
     ) {
         super();
@@ -46,6 +48,7 @@ export class DailyTransactionService extends Worker {
         await this.dailyTransactionHistoryRepository.add({
             timestamp: time,
             txNum:await this.transactionRepository.countTransactionsOnDate(timeStr),
+            exchangeNum:await this.addressTransactionRepository.countAddressOnDate(timeStr),
         })
     }
 }
