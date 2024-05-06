@@ -42,6 +42,12 @@
     "market_cap": 1
   },
   {
+    "name": "rnETH-ethereum",
+    "address": "0x9Dc7e196092DaC94f0c76CFB020b60FA75B97C5b",
+    "image": "https://zklink.io/images/token/rneth.png",
+    "market_cap": 1
+  },
+  {
     "name": "DAI-base",
     "address": "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
     "image": "https://assets.coingecko.com/coins/images/9956/large/Badge_Dai.png?1696509996",
@@ -56,7 +62,7 @@
   {
     "name": "USDT-nova",
     "address": "0x2F8A25ac62179B31D62D7F80884AE57464699059",
-    "image": "https://assets.coingecko.com/coins/images/325/large/Tether.png?1696501661",
+    "image": "https://assets.coingecko.com/coins/images/31271/large/usdt.jpeg?1696530095",
     "market_cap": 1
   },
   {
@@ -69,6 +75,12 @@
     "name": "DAI-nova",
     "address": "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab",
     "image": "https://assets.coingecko.com/coins/images/9956/large/Badge_Dai.png?1696509996",
+    "market_cap": 1
+  },
+  {
+    "name": "BTCT-tron",
+    "address": "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067",
+    "image": "https://assets.coingecko.com/coins/images/16999/standard/9486.png?1696516564",
     "market_cap": 1
   }
 ]

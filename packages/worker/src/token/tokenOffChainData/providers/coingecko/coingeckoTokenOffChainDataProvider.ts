@@ -80,7 +80,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     const supportedTokens = tokensList.filter(
       (token) =>
         token.id === "ethereum" ||
-        token.platforms.zklinkNova || // unless the nova token is list on coingecko, this will not take effect here
+        token.platforms["zklink-nova"] || // unless the nova token is list on coingecko, this will not take effect here
         bridgedTokensToInclude.find((bridgetTokenAddress) =>
           this.isPlatformIncluded(token.platforms, bridgetTokenAddress)
         )

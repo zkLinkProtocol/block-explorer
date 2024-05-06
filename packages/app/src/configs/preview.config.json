@@ -1,0 +1,96 @@
+{
+  "networks": [
+    {
+      "apiUrl": "https://preview.explorer-api.zklink.io",
+      "verificationApiUrl": "https://explorer.zklink.io",
+      "bridgeUrl": "https://preview.portal.zklink.io",
+      "hostnames": [],
+      "icon": "/images/icons/cion.png",
+      "l1ExplorerUrl": "https://lineascan.build",
+      "l2ChainId": 810180,
+      "l2NetworkName": "zkLink Nova Mainnet",
+      "maintenance": false,
+      "name": "mainnet",
+      "published": true,
+      "rpcUrl": "https://rpc.zklink.io"
+    }
+  ],
+  "iconsList": {
+    "goerli": "/img/ethereum.svg",
+    "primary": "/img/linea.svg",
+    "ethereum": "/img/ethereum.svg",
+    "zksync": "/img/zksync.svg",
+    "arbitrum": "/img/arbitrum-arb-logo.svg",
+    "mantle": "/img/mantle.svg",
+    "manta": "/img/manta.jpg",
+    "blast": "/img/blast.svg",
+    "optimism": "/img/optimism.svg",
+    "base": "/img/base.svg"
+  },
+  "chainNameList": {
+    "primary": "Linea",
+    "ethereum": "Ethereum",
+    "zksync": "zkSync",
+    "arbitrum": "Arbitrum One",
+    "mantle": "Mantle",
+    "manta": "Manta Pacific",
+    "blast": "Blast",
+    "optimism": "Optimism",
+    "base": "Base"
+  },
+  "excuteBatchList": [
+    {
+      "key": "zksync",
+      "limitNumber": 50,
+      "chainId": 324,
+      "blockExplorersUrl": "https://explorer.zksync.io"
+    },
+    {
+      "key": "arbitrum",
+      "limitNumber": 50,
+      "chainId": 42161,
+      "blockExplorersUrl": "https://arbiscan.io"
+    },
+    {
+      "key": "mantle",
+      "limitNumber": 50,
+      "chainId": 5000,
+      "blockExplorersUrl": "https://explorer.mantle.xyz"
+    },
+    {
+      "key": "manta",
+      "limitNumber": 50,
+      "chainId": 169,
+      "blockExplorersUrl": "https://pacific-explorer.manta.network"
+    },
+    {
+      "key": "blast",
+      "limitNumber": 50,
+      "chainId": 81457,
+      "blockExplorersUrl": "https://blastscan.io"
+    },
+    {
+      "key": "optimism",
+      "limitNumber": 50,
+      "chainId": 10,
+      "blockExplorersUrl": "https://optimistic.etherscan.io"
+    },
+    {
+      "key": "base",
+      "limitNumber": 50,
+      "chainId": 8453,
+      "blockExplorersUrl": "https://basescan.org"
+    }
+  ],
+  "ERC20Bridges": {
+    "primary": "0x01c3f51294494e350AD69B999Db6B382b3B510b9",
+    "ethereum": "0x36CaABbAbfB9C09B722d9C3697C3Cb4A93650ea7",
+    "manta": "0xa898E175CfDE9C6ABfCF5948eEfBA1B852eE5B09",
+    "mantle": "0x321Ce902eDFC6466B224ce5D9A7Bc16858855272",
+    "zksync": "0x7187DB8AB8F65450a74dD40474bE778CF468C44a",
+    "arbitrum": "0x6B7551DBbaE2fb728cF851baee5c3A52DF6F60a4",
+    "blast": "0x17887788E01A1192a26F636Cfcfc033c7Bb42348",
+    "optimism": "0x6aAdaA7Bf9F5283cAF3eb2E40573D1A4d02C8B15",
+    "base": "0xa03248B029b4e348F156f4b1d93CB433a4e1361e"
+  }
+}

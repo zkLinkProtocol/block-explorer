@@ -23,7 +23,7 @@
     "optimism": "/img/optimism.svg",
     "base": "/img/base.svg",
     "manta": "/img/manta.jpg",
-    "blast":"/img/blast.svg"
+    "blast": "/img/blast.svg"
   },
   "chainNameList": {
     "sepolia": "Sepolia",
@@ -72,5 +72,15 @@
       "chainId": 81457,
       "blockExplorersUrl": "https://testnet.blastscan.io"
     }
-  ]
+  ],
+  "ERC20Bridges": {
+    "sepolia": "0xcc43208B28B1eC25F000EfC0D2c2aF044715F888",
+    "primary": " 0x6336D1DfE362a84933e526588A0fa20dd87736aE",
+    "zksync": "0xEbEAf62E4bCb4FdeC35100838c86c84B8134ADE0",
+    "arbitrum": "0x7e1B152f25D2ff0771026067B5c8B5A1C8457478",
+    "optimism": "0x07476D10A8B3c614DC92a698cCeC34Aa9B844B92",
+    "base": "0x7c3c5C8528D55Af0C641846fF4756200DEFDC513",
+    "manta": "0x1F282e46d75622C5B26921094b4ebF7D58D83CE2",
+    "blast": "0x4E5622E4A41985C29028d92e1Cc2EdF02012c82E"
+  }
 }
