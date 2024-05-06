@@ -13,4 +13,6 @@ export class DailyTxHistory extends BaseEntity {
   @Column({ type: "timestamp" })
   public readonly timestamp: Date;
 
+  @Column({ type: "int", default: '0'})
+  public readonly exchangeNum: number;
 }

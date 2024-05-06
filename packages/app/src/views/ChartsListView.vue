@@ -36,6 +36,17 @@
             </a>
           </div>
         </div>
+        <div class="rounded flex-auto box">
+          <div class="title">
+            <a href="/charts/chart?type=INT" class="p-2 inline-block w-full no-underline">Daily Active User Chart</a>
+          </div>
+          <div class="p-2 content">
+            <a href="/charts/chart?type=INT" class="inline-block w-full relative">
+              <div class="absolute w-full h-full top-0 left-0 z-10"></div>
+              <div class="w-full h-28" id="intChart"></div>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -179,6 +190,21 @@ onMounted(async() => {
   })
   var traChart = echarts.init(document.getElementById('traChart'));
   traChart.setOption(setChart(xData,yData));
+  await getData('INT')
+  xData = []
+  yData = []
+  data && data.value.items.map((i:{exchangeNum:number,timestamp:string},index)=>{
+    // if (index) {
+      xData.unshift({value: i.exchangeNum, date: i.timestamp, type: false})
+      const timer = format(i.timestamp,'yLine',false)
+      yData.unshift(timer)
+    // } else {
+    //   xData.unshift({value: i.txNum, date: i.timestamp, type: true})
+    //   yData.unshift('Now')
+    // }
+  })
+  var intChart = echarts.init(document.getElementById('intChart'));
+  intChart.setOption(setChart(xData,yData));
 });
 </script>
 
