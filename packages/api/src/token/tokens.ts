@@ -1033,7 +1033,7 @@ export default [
   {
     address: [
       {
-        chain: "Nova",
+        chain: "zkLinkNova",
         l1Address: "",
         l2Address: "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067",
       },
