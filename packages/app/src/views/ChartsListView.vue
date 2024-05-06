@@ -38,7 +38,7 @@
         </div>
         <div class="rounded flex-auto box">
           <div class="title">
-            <a href="/charts/chart?type=INT" class="p-2 inline-block w-full no-underline">Daily Interacted Address Chart</a>
+            <a href="/charts/chart?type=INT" class="p-2 inline-block w-full no-underline">Daily Active User Chart</a>
           </div>
           <div class="p-2 content">
             <a href="/charts/chart?type=INT" class="inline-block w-full relative">
