@@ -24,7 +24,7 @@ const titleList = {
   'TVL': 'zkLink Nova Daily TVL Chart',
   'UAW': 'zkLink Nova Unique Addresses Chart',
   'Tra': 'Daily Transactions Chart',
-  'INT': 'zkLink Nova Daily Interacted Address Chart'
+  'INT': 'zkLink Nova Daily Active User Chart'
 }
 const Title = titleList[route.query.type]
 const format = (str:string,type:string,isNow:boolean) => {
