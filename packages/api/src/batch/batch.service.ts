@@ -65,6 +65,19 @@ export class BatchService {
   }
 
   public findOneBatchRoot(batchNumber: number): Promise<BatchRootEventLogs[]> {
-    return this.batchRootEventLogsRepository.findBy({ l1BatchNumber: batchNumber });
+    let res =  this.batchRootEventLogsRepository.findBy({ l1BatchNumber: batchNumber });
+    return this.removeDuplicateChainIdDate(res);
+  }
+
+  private async removeDuplicateChainIdDate(date : Promise<BatchRootEventLogs[]>): Promise<BatchRootEventLogs[]> {
+    let res = [];
+    let map = new Map();
+    for (let item of await date) {
+      if (!map.has(item.chainId)) {
+        map.set(item.chainId, true);
+        res.push(item);
+      }
+    }
+    return res;
   }
 }
