@@ -20,7 +20,13 @@ const context = useContext();
 const route = useRoute();
 const searchParams = computed(() => route.query);
 const { getData,data } = useChartsData();
-const Title = route.query.type === 'TVL'? 'zkLink Nova Daily TVL Chart': route.query.type === 'UAW'?'zkLink Nova Unique Addresses Chart':'Daily Transactions Chart'
+const titleList = {
+  'TVL': 'zkLink Nova Daily TVL Chart',
+  'UAW': 'zkLink Nova Unique Addresses Chart',
+  'Tra': 'Daily Transactions Chart',
+  'INT': 'zkLink Nova Daily Active User Chart'
+}
+const Title = titleList[route.query.type]
 const format = (str:string,type:string,isNow:boolean) => {
   const date = new Date(str)
   var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -71,6 +77,12 @@ watch(
     } else if (type === 'Tra') {
       data && data.value.items.map((i:{txNum:number,timestamp:string},index)=>{
         xData.unshift({value: i.txNum, date: i.timestamp, type: false})
+        const timer = format(i.timestamp,'yLine',false)
+        yData.unshift(timer)
+      })
+    } else if (type === 'INT') {
+      data && data.value.items.map((i:{exchangeNum:number,timestamp:string},index)=>{
+        xData.unshift({value: i.exchangeNum, date: i.timestamp, type: false})
         const timer = format(i.timestamp,'yLine',false)
         yData.unshift(timer)
       })
