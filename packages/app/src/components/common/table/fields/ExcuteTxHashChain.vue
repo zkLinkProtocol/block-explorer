@@ -8,7 +8,7 @@
       </Tooltip>
     </a>
     <template v-for="(item, i) in iconList" :key="i">
-      <a v-if="item?.url && item?.limitNumber! > parseInt(item.number)" :href="item?.url" target="_blank">
+      <a v-if="item?.url" :href="item?.url" target="_blank">
         <Tooltip class="batches-tooltip">
           <img class="from-chain-icon" :src="item?.logoUrl" alt="" />
           <template #content>{{ chainNameList[item?.key!] }}</template>
