@@ -5,8 +5,8 @@ import { hexTransformer } from "../common/transformers/hex.transformer";
 import { BaseEntity } from "../common/entities/base.entity";
 
 @Entity({ name: "batchRootEventLogs" })
-@Index(["l1BatchNumber", "chainId"])
-@Index(["rootHash", "chainId"], { unique: true })
+@Index(["l1BatchNumber", "chainId"],{ unique: true })
+@Index(["rootHash", "chainId"])
 export class BatchRootEventLogs extends BaseEntity {
   @PrimaryColumn({ generated: true, type: "bigint" })
   public readonly number: number;
