@@ -6,7 +6,7 @@ import { bigNumberTransformer } from 'src/transformers/bigNumber.transformer';
 import { hexTransformer } from "../transformers/hex.transformer";
 
 @Entity({ name: 'batchRootEventLogs' })
-@Index(['l1BatchNumber', 'chainId'])
+@Index(['l1BatchNumber', 'chainId'], {unique: true})
 @Index(["rootHash", "chainId"])
 export class BatchRootEventLogs extends BaseEntity {
   @PrimaryColumn({ generated: true, type: 'bigint' })
