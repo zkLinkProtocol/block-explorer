@@ -5,7 +5,7 @@ import { dateTransformer } from '../transformers/date.transformer';
 import { bigNumberTransformer } from '../transformers/bigNumber.transformer';
 
 @Entity({ name: 'batchRootEventLogs' })
-@Index(['l1BatchNumber', 'chainId'])
+@Index(['l1BatchNumber', 'chainId'], {unique: true})
 @Index(["rootHash", "chainId"])
 export class BatchRootEventLogs extends BaseEntity {
   @PrimaryColumn({ generated: true, type: 'bigint' })
