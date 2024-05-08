@@ -102,6 +102,7 @@ const tableInfoItems = computed(() => {
             tooltip: t(`batches.${key}Tooltip`),
             value: {
               value: props.batch[key],
+              batchNumber:props.batchNumber,
               batchRoot: batchRoot.value,
               url: currentNetwork.value.l1ExplorerUrl
                 ? `${currentNetwork.value.l1ExplorerUrl}/tx/${props.batch[key]}`

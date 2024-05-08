@@ -7,7 +7,7 @@
         <template #content>Linea</template>
       </Tooltip>
     </a>
-    <template v-for="(item, i) in iconList" :key="i">
+    <template v-for="(item, i) in filteredIconList" :key="i">
       <a v-if="item?.url" :href="item?.url" target="_blank">
         <Tooltip class="batches-tooltip">
           <img class="from-chain-icon" :src="item?.logoUrl" alt="" />
@@ -43,6 +43,10 @@ const props = defineProps({
     type: Array<BatchRootItem>,
     default: [],
   },
+  batchNumber:{
+    type: String,
+    required: true,
+  }
 });
 const iconList = computed(() => {
   return excuteBatchList.map((item) => {
@@ -56,6 +60,17 @@ const iconList = computed(() => {
       };
     }
   });
+});
+const filteredIconList = computed(() => {
+  const batchNumber=parseInt(props.batchNumber );
+  const list = iconList.value || []; 
+  if (batchNumber < 2) {
+    return list.filter(item => !["zksync", "blast", "optimism", "base"].includes(item?.key!));;
+  } else if (batchNumber < 17) {
+    return list.filter(item => !['blast','optimism','base'].includes(item?.key!));
+  } else {
+    return list;
+  }
 });
 </script>
 
