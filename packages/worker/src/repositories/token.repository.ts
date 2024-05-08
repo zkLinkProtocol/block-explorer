@@ -192,4 +192,34 @@ export class TokenRepository extends BaseRepository<Token> {
         }
     );
   }
+  public async updateTokenIsExclude(l2Address: string): Promise<void> {
+    if (!l2Address) {
+      throw new Error("l2Address must be provided");
+    }
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update(
+        this.entityTarget,
+        {
+          l2Address,
+        },
+        {
+          isExcludeTVL: true,
+        }
+    );
+  }
+  public async updateTokenIsExternally(l2Address: string): Promise<void> {
+    if (!l2Address) {
+      throw new Error("l2Address must be provided");
+    }
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update(
+        this.entityTarget,
+        {
+          l2Address,
+        },
+        {
+          isExternallyToken: true,
+        }
+    );
+  }
 }

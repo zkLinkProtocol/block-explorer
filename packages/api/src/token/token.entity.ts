@@ -71,4 +71,11 @@ export class Token extends BaseEntity {
 
   @Column({ type: "varchar", length: 256, transformer: bigNumberTransformer, default: "", nullable: true })
   public readonly reserveAmount?: BigNumber;
+
+  @Column({ type: "boolean",default: false})
+  public readonly isExcludedTVL: boolean;
+
+
+  @Column({ type: "boolean",default: false})
+  public readonly isExternallyToken: boolean;
 }

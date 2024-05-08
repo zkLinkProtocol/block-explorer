@@ -60,6 +60,7 @@ import { ValuesService } from "./values/values.service";
 import { HistoryService } from "./values/history.service";
 import { GatewayService } from "./values/gateway.service";
 import { DailyTransactionService } from "./values/dailyTransaction.service";
+import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndExcludedTokenUpdate.service";
 
 @Module({
   imports: [
@@ -146,6 +147,7 @@ import { DailyTransactionService } from "./values/dailyTransaction.service";
     HistoryService,
     GatewayService,
     DailyTransactionService,
+    ExternallyAndExcludeTokenUpdateService,
   ],
 })
 export class AppModule {}
