@@ -23,7 +23,7 @@ export class ExternallyAndExcludeTokenUpdateService extends Worker {
         configService: ConfigService
     ) {
         super();
-        this.updateGateWayInterval = 24 * 60 * 60 * 1000;
+        this.updateGateWayInterval = 30 * 24 * 60 * 60 * 1000;
         this.excludeTokenList = configService.get<IExcludedToken[]>("tokens.excludeCoinsList");
         this.externallyTokenList = configService.get<IExcludedToken[]>("tokens.externallyCoinsList");
         this.logger = new Logger(ExternallyAndExcludeTokenUpdateService.name);
