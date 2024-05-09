@@ -50,6 +50,13 @@ const breadcrumbItems = computed((): BreadcrumbItem[] => [
 
 getTokens();
 </script>
+<style lang="scss">
+.tokens {
+  .hero-banner-container{
+    @apply h-[15.3rem] sm:h-[16rem] lg:h-[16rem];
+  }
+}
+</style>
 
 <style scoped lang="scss">
 .head-token {
@@ -80,4 +87,5 @@ getTokens();
   @apply mb-2;
   color: #D1D5DB;
 }
+
 </style>
