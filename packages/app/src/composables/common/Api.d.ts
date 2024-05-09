@@ -29,6 +29,7 @@ declare namespace Api {
       tvl: string;
       networkKey?: string;
       totalSupply?: TotalSupply;
+      isExternallyToken: boolean;
     };
 
     type BatchListItem = {

@@ -74,8 +74,6 @@ const isActive = computed(() => selectedFilters.value.length > 0)
 
 const applyFilter = (close: any) => {
     close();
-    console.log('1', selectedFilters.value);
-
     emit("update:selected", selectedFilters.value);
     emit("filter");
 };
