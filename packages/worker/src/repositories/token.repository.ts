@@ -69,46 +69,46 @@ export class TokenRepository extends BaseRepository<Token> {
     const allTokens = await transactionManager.find(this.entityTarget);
     let totalTVL = BigNumber.from(0);
     for (const token of allTokens) {
-      //TODO @yuke plz fix external bridge token
-      if (token.l1Address === null && token.l2Address.toLowerCase() !== "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067".toLowerCase()){
+      if (token.isExcludeTVL) {
         continue;
       }
       let tvl = BigNumber.from(0);
       const value7DaysWithdrawalTransfer = await this.transferRepository.getLast7DaysWithdrawalTransferAmount()
-      if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()){
-        tvl = tvl.add(BigNumber.from(token.totalSupply))
-            .add(value7DaysWithdrawalTransfer)
-            .mul(((token.usdPrice ?? 0) * 1000) | 0)
-            .div(1000)
-            .div(BigNumber.from(10).pow(token.decimals));
-      //TODO @yuke plz fix external bridge token 
-      } else if (token.l2Address.toLowerCase() === "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067".toLowerCase()){
+      if (token.isExternallyToken){
         tvl = tvl.add(BigNumber.from(token.totalSupply))
             .mul(((token.usdPrice ?? 0) * 1000) | 0)
             .div(1000)
             .div(BigNumber.from(10).pow(token.decimals));
-      } else {
-        let price_t = 3;
-        if (token.usdPrice <= 0) {
-          price_t = 0;
-        }
-        if (token.usdPrice < 1) {
-          let priceNum = token.usdPrice;
-          let num = 0;
-          while(priceNum<1 && priceNum > 0){
-            priceNum *= 10;
-            num++;
-          }
-          price_t = price_t + num;
+      }else {
+        if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()){
+          tvl = tvl.add(BigNumber.from(token.totalSupply))
+              .add(value7DaysWithdrawalTransfer)
+              .mul(((token.usdPrice ?? 0) * 1000) | 0)
+              .div(1000)
+              .div(BigNumber.from(10).pow(token.decimals));
         } else {
-          if (token.usdPrice * 10 ** price_t >= Number.MAX_SAFE_INTEGER) {
+          let price_t = 3;
+          if (token.usdPrice <= 0) {
             price_t = 0;
           }
+          if (token.usdPrice < 1) {
+            let priceNum = token.usdPrice;
+            let num = 0;
+            while(priceNum<1 && priceNum > 0){
+              priceNum *= 10;
+              num++;
+            }
+            price_t = price_t + num;
+          } else {
+            if (token.usdPrice * 10 ** price_t >= Number.MAX_SAFE_INTEGER) {
+              price_t = 0;
+            }
+          }
+          tvl = tvl.add(BigNumber.from(token.reserveAmount))
+              .mul(((token.usdPrice ?? 0) * 10 ** price_t) | 0)
+              .div(BigNumber.from(10).pow(price_t))
+              .div(BigNumber.from(10).pow(token.decimals));
         }
-        tvl = tvl.add(BigNumber.from(token.reserveAmount))
-            .mul(((token.usdPrice ?? 0) * 10 ** price_t) | 0)
-            .div(BigNumber.from(10).pow(price_t))
-            .div(BigNumber.from(10).pow(token.decimals));
       }
       totalTVL = totalTVL.add(tvl);
     }
@@ -189,6 +189,36 @@ export class TokenRepository extends BaseRepository<Token> {
         },
         {
           reserveAmount,
+        }
+    );
+  }
+  public async updateTokenIsExclude(l2Address: string): Promise<void> {
+    if (!l2Address) {
+      throw new Error("l2Address must be provided");
+    }
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update(
+        this.entityTarget,
+        {
+          l2Address,
+        },
+        {
+          isExcludeTVL: true,
+        }
+    );
+  }
+  public async updateTokenIsExternally(l2Address: string): Promise<void> {
+    if (!l2Address) {
+      throw new Error("l2Address must be provided");
+    }
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    await transactionManager.update(
+        this.entityTarget,
+        {
+          l2Address,
+        },
+        {
+          isExternallyToken: true,
         }
     );
   }
