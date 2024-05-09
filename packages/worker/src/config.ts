@@ -5,8 +5,11 @@ import * as fs from "fs";
 import * as JSONStream from "JSONStream";
 import * as path from "path";
 import { IExtraTokenAttribute } from "./token/tokenOffChainData/providers/coingecko/coingeckoTokenOffChainDataProvider";
+import { IExcludedToken } from "./values/externallyAndExcludedTokenUpdate.service";
 const extraCoinsListPath = "../extraCoinsList.json";
 const extraTokenAttributesPath = "../extraTokenAttributes.json";
+const excludeCoinsListPath = "../excludeCoinsList.json";
+const externallyCoinsListPath = "../externallyCoinsList.json";
 import { ChainId } from './types'
 import { ChainInfo, chainsFromEnvironments } from './conf/chains'
 export default async () => {
@@ -133,6 +136,8 @@ export default async () => {
         proxyUrl: COINGECKO_PROXY_URL,
         enableProxy: COINGECKO_ENABLE_PROXY === "true",
       },
+      externallyCoinsList: await getExternallyCoinsList(),
+      excludeCoinsList: await getExcludeCoinsList(),
       updateTotalLockedValueInterval: parseInt(UPDATE_TOTAL_LOCKED_VALUE_INTERVAL, 10) || 30000,
       updateTotalLockedValueDelay: parseInt(UPDATE_TOTAL_LOCKED_VALUE_DELAY, 10) || 500,
       updateTvlHistoryInterval: parseInt(UPDATE_TVL_HISTORY_INTERVAL, 10) || 3600000,// 1 hour = 3600000
@@ -194,6 +199,44 @@ async function getExtraTokenAttributes(): Promise<IExtraTokenAttribute[]> {
     jsonStream.on("error", reject);
   });
   return (res as IExtraTokenAttribute[]).map((item) => ({
+    ...item,
+    address: item.address.toLowerCase(),
+  }));
+}
+async function getExcludeCoinsList(): Promise<IExcludedToken[]> {
+  const readStream = fs.createReadStream(path.join(__dirname, excludeCoinsListPath));
+  const jsonStream = JSONStream.parse("*");
+
+  readStream.pipe(jsonStream);
+  const res = [];
+  await new Promise((resolve, reject) => {
+    jsonStream.on("data", (item: any) => {
+      res.push(item);
+    });
+
+    jsonStream.on("end", resolve);
+    jsonStream.on("error", reject);
+  });
+  return (res as IExcludedToken[]).map((item) => ({
+    ...item,
+    address: item.address.toLowerCase(),
+  }));
+}
+async function getExternallyCoinsList(): Promise<IExcludedToken[]> {
+  const readStream = fs.createReadStream(path.join(__dirname, externallyCoinsListPath));
+  const jsonStream = JSONStream.parse("*");
+
+  readStream.pipe(jsonStream);
+  const res = [];
+  await new Promise((resolve, reject) => {
+    jsonStream.on("data", (item: any) => {
+      res.push(item);
+    });
+
+    jsonStream.on("end", resolve);
+    jsonStream.on("error", reject);
+  });
+  return (res as IExcludedToken[]).map((item) => ({
     ...item,
     address: item.address.toLowerCase(),
   }));

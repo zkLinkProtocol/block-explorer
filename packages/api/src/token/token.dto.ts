@@ -77,4 +77,22 @@ export class TokenDto {
     required: false,
   })
   public readonly tvl?: string;
+
+    @ApiProperty({
+        type: Boolean,
+        description: "Token is excluded from TVL",
+        example: false,
+        examples: [true, false],
+        required: false,
+    })
+  public readonly isExcludeTVL?: boolean;
+
+    @ApiProperty({
+        type: Boolean,
+        description: "Token is externally from TVL",
+        example: false,
+        examples: [true, false],
+        required: false,
+    })
+  public readonly isExternallyToken?: boolean;
 }
