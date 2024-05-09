@@ -53,7 +53,7 @@
         <span>{{ t("tokensView.table.totalQty") }}</span>
       </table-head-column>
       <table-head-column @click="sortBy('tvl')">
-        <div class="th-box">
+        <div class="th-box min-w-[8rem]">
           {{ t("tokensView.table.tvl") }}
           <ranking :sort-order="sortOrder" />
         </div>
@@ -66,7 +66,7 @@
         </div>
       </table-head-column>
       <table-head-column>{{ t("tokensView.table.novaAddress") }}</table-head-column>
-      <table-head-column v-if="selectedTab !== TAB_TYPE.Native">
+      <table-head-column v-if="selectedTab !== TAB_TYPE.Native && selectedTab !== TAB_TYPE.Externally">
         <span v-if="selectedTab !== TAB_TYPE.Merged">{{ t("tokensView.table.originAddress") }}</span>
         <div v-else class="min-h-[20px]"></div>
       </table-head-column>
@@ -262,6 +262,7 @@ const isRequestPending = ref(false);
 enum TAB_TYPE {
   Merged,
   Native,
+  Externally,
   Bridged
 };
 const selectedTab = ref(TAB_TYPE.Merged);
@@ -295,8 +296,9 @@ interface Tab {
 
 const tabs: Tab[] = [
   { id: 'merged', name: 'Merged Tokens' },
-  { id: 'native', name: 'Native Tokens' },
-  { id: 'bridged', name: 'Bridged Tokens' },
+  { id: 'native', name: 'Natively Minted' },
+  { id: 'externally', name: 'Externally Bridged' },
+  { id: 'bridged', name: 'Canonically Bridged' },
 ];
 
 // filter FROM CHAIN
@@ -323,11 +325,13 @@ const filterByTab = () => {
     // merged Token
     return [...mergedToken.value]
 
-  } else if (selectedTab.value == TAB_TYPE.Native) {
+  } else if (selectedTab.value === TAB_TYPE.Native) {
     // Native Token
     return [...nativeToken.value]
 
-  } else {
+  } else if(selectedTab.value ===TAB_TYPE.Externally){
+    return [...externallyBridgedToken.value]
+  }else {
     // Bridge Token
     return [...bridgedToken.value];
 
@@ -394,7 +398,13 @@ const mergedToken = computed(() => {
 })
 const nativeToken = computed(() => {
   return [...props.tokens].filter((item) => {
-    return !item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address!)
+    return !item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address!)&& !item.isExternallyToken
+  });
+
+})
+const externallyBridgedToken = computed(() => {
+  return [...props.tokens].filter((item) => {
+    return !item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address!)&& item.isExternallyToken
   });
 
 })
