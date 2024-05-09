@@ -73,7 +73,7 @@ export class Token extends BaseEntity {
   public readonly reserveAmount?: BigNumber;
 
   @Column({ type: "boolean",default: false})
-  public readonly isExcludedTVL: boolean;
+  public readonly isExcludeTVL: boolean;
 
 
   @Column({ type: "boolean",default: false})

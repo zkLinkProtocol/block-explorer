@@ -167,7 +167,7 @@ export class TokenService {
               .div(BigNumber.from(10).pow(token.decimals));
         }
       }
-      if (!token.isExcludedTVL){
+      if (!token.isExcludeTVL){
         totalTvl = totalTvl.add(tvl);
       }
       return {

@@ -85,7 +85,7 @@ export class TokenDto {
         examples: [true, false],
         required: false,
     })
-  public readonly isExcludedTVL?: boolean;
+  public readonly isExcludeTVL?: boolean;
 
     @ApiProperty({
         type: Boolean,
@@ -94,5 +94,5 @@ export class TokenDto {
         examples: [true, false],
         required: false,
     })
-  public readonly isExternallyTVL?: boolean;
+  public readonly isExternallyToken?: boolean;
 }
