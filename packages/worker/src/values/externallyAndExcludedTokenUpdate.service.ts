@@ -13,7 +13,6 @@ export interface IExcludedToken {
 
 @Injectable()
 export class ExternallyAndExcludeTokenUpdateService extends Worker {
-    private readonly updateGateWayInterval: number;
     private readonly excludeTokenList: IExcludedToken[];
     private readonly externallyTokenList: IExcludedToken[];
     private readonly logger: Logger;
@@ -23,7 +22,6 @@ export class ExternallyAndExcludeTokenUpdateService extends Worker {
         configService: ConfigService
     ) {
         super();
-        this.updateGateWayInterval = 30 * 24 * 60 * 60 * 1000;
         this.excludeTokenList = configService.get<IExcludedToken[]>("tokens.excludeCoinsList");
         this.externallyTokenList = configService.get<IExcludedToken[]>("tokens.externallyCoinsList");
         this.logger = new Logger(ExternallyAndExcludeTokenUpdateService.name);
@@ -38,13 +36,6 @@ export class ExternallyAndExcludeTokenUpdateService extends Worker {
                 originalError: err,
             });
         }
-
-        await waitFor(() => !this.currentProcessPromise, this.updateGateWayInterval);
-        if (!this.currentProcessPromise) {
-            return;
-        }
-
-        return this.runProcess();
     }
 
     private async updateExternallyAndExcludedToken(): Promise<void> {
