@@ -75,7 +75,6 @@ export class Token extends BaseEntity {
   @Column({ type: "boolean",default: false})
   public readonly isExcludeTVL: boolean;
 
-
   @Column({ type: "boolean",default: false})
   public readonly isExternallyToken: boolean;
 }
