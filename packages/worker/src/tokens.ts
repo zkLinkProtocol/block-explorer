@@ -1030,4 +1030,64 @@ export default [
       },
     ],
   },
+  {
+    address: [
+      {
+        chain: "Arbitrum",
+        l1Address: "0x3647c54c4c2C65bC7a2D63c0Da2809B399DBBDC0",
+        l2Address: "0x6923B01D6FA1524aC1AF1b85F0140FBF4E7c66e4",
+      },
+    ],
+    decimals: 18,
+    symbol: "solvBTC", //add
+    cgPriceId: "bitcoin",
+    type: "Native",
+    yieldType: ["NOVA Points", "Native Yield"],
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "Nova",
+        l1Address: "",
+        l2Address: "0xbEAf16cFD8eFe0FC97C2a07E349B9411F5dC272C",
+      },
+    ],
+    symbol: "solvBTC.m", //add
+    decimals: 18,
+    cgPriceId: "bitcoin",
+    type: "Native",
+    yieldType: ["NOVA Points", "Native Yield"],
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "Nova",
+        l1Address: "",
+        l2Address: "0x85D431A3a56FDf2d2970635fF627f386b4ae49CC",
+      },
+    ],
+    symbol: "M-BTC", //add
+    decimals: 18,
+    cgPriceId: "bitcoin",
+    type: "Native",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 1.5,
+        timestamp: 0,
+      },
+    ],
+  },
 ];
