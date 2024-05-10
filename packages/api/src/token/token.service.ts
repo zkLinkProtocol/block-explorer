@@ -8,7 +8,6 @@ import { Token, ETH_TOKEN } from "./token.entity";
 import { BigNumber, ethers } from "ethers";
 import { LRUCache } from "lru-cache";
 import { Transfer } from "../transfer/transfer.entity";
-import {contain} from "echarts/types/src/scale/helper";
 
 // const options: LRU. = { max: 500 };
 const options = {

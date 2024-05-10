@@ -83,9 +83,15 @@
     "image": "https://assets.coingecko.com/coins/images/16999/standard/9486.png?1696516564",
     "market_cap": 1
   },
-    {
+  {
     "name": "uniETH-Manta",
     "address": "0xb8FF1eD3CEC08533F32E85Bd44a37e8822DDd368",
+    "image": "https://assets.coingecko.com/coins/images/28477/standard/uniETH_200.png?1696527471",
+    "market_cap": 1
+  },
+  {
+    "name": "solvBTC.m",
+    "address": "0xbEAf16cFD8eFe0FC97C2a07E349B9411F5dC272C",
     "image": "https://assets.coingecko.com/coins/images/28477/standard/uniETH_200.png?1696527471",
     "market_cap": 1
   }
