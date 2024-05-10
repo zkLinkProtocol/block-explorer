@@ -112,7 +112,8 @@
     "symbol": "btc",
     "name": "Bitcoin",
     "platforms": {
-      "zklink-nova": "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067"
+      "zklink-nova": "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067",
+      "zklink-nova2": "0xbEAf16cFD8eFe0FC97C2a07E349B9411F5dC272C"
     }
   },
   {
