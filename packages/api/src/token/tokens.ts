@@ -879,8 +879,8 @@ export default [
     address: [
       {
         chain: "Ethereum",
-        l1Address: "0x8a053350ca5F9352a16deD26ab333e2D251DAd7c", //add
-        l2Address: "0xB5B8C247C740d53b6Fbab10f1C17922788baeD54", //add
+        l1Address: "0x8a053350ca5F9352a16deD26ab333e2D251DAd7c",
+        l2Address: "0xB5B8C247C740d53b6Fbab10f1C17922788baeD54",
       },
     ],
     decimals: 18,
@@ -1059,7 +1059,7 @@ export default [
       },
     ],
     decimals: 18,
-    symbol: "solvBTC", //add
+    symbol: "solvBTC",
     cgPriceId: "bitcoin",
     type: "Native",
     yieldType: ["NOVA Points", "Native Yield"],
@@ -1078,7 +1078,7 @@ export default [
         l2Address: "0xbEAf16cFD8eFe0FC97C2a07E349B9411F5dC272C",
       },
     ],
-    symbol: "solvBTC.m", //add
+    symbol: "solvBTC.m",
     decimals: 18,
     cgPriceId: "bitcoin",
     type: "Native",
@@ -1098,7 +1098,7 @@ export default [
         l2Address: "0x85D431A3a56FDf2d2970635fF627f386b4ae49CC",
       },
     ],
-    symbol: "M-BTC", //add
+    symbol: "M-BTC",
     decimals: 18,
     cgPriceId: "bitcoin",
     type: "Native",
