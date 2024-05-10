@@ -88,5 +88,11 @@
     "address": "0xb8FF1eD3CEC08533F32E85Bd44a37e8822DDd368",
     "image": "https://assets.coingecko.com/coins/images/28477/standard/uniETH_200.png?1696527471",
     "market_cap": 1
+  },
+    {
+    "name": "solvBTC-arbitrum",
+    "address": "0x6923B01D6FA1524aC1AF1b85F0140FBF4E7c66e4",
+    "image": "https://assets.coingecko.com/coins/images/36800/standard/SOLV_BTC.jpg?1712469500",
+    "market_cap": 1
   }
 ]
