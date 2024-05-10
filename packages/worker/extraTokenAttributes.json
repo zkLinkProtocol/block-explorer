@@ -92,13 +92,13 @@
   {
     "name": "solvBTC.m",
     "address": "0xbEAf16cFD8eFe0FC97C2a07E349B9411F5dC272C",
-    "image": "https://assets.coingecko.com/coins/images/36800/standard/SOLV_BTC.jpg?1712469500",
+    "image": "https://res1.sft-api.com/token/SolvBTC.png",
     "market_cap": 1
   },
   {
     "name": "solvBTC-arbitrum",
     "address": "0x6923B01D6FA1524aC1AF1b85F0140FBF4E7c66e4",
-    "image": "https://assets.coingecko.com/coins/images/36800/standard/SOLV_BTC.jpg?1712469500",
+    "image": "https://res1.sft-api.com/token/SolvBTC.png",
     "market_cap": 1
   }
 ]
