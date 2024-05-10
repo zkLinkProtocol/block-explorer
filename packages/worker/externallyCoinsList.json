@@ -2,5 +2,13 @@
   {
     "name": "BTCT-tron",
     "address": "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067"
+  },
+  {
+    "name": "solvBTC.m",
+    "address": "0xbEAf16cFD8eFe0FC97C2a07E349B9411F5dC272C"
+  },
+  {
+    "name": "M-BTC",
+    "address": "0x85D431A3a56FDf2d2970635fF627f386b4ae49CC"
   }
 ]

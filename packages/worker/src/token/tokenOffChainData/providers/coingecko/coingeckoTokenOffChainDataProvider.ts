@@ -80,7 +80,7 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
     const supportedTokens = tokensList.filter(
       (token) =>
         token.id === "ethereum" ||
-        token.platforms["zklink-nova"] || // unless the nova token is list on coingecko, this will not take effect here
+        Object.keys(token.platforms).some((t) => t.includes("zklink-nova")) || // unless the nova token is list on coingecko, this will not take effect here, write platforms in zklink-nova 1 2 3 for native token add price
         bridgedTokensToInclude.find((bridgetTokenAddress) =>
           this.isPlatformIncluded(token.platforms, bridgetTokenAddress)
         )
@@ -103,10 +103,10 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
               continue;
             }
             const [market_cap, image] = this.getMarketCapAndImage(token.platforms[platform], tokenMarketData);
-            if (platform === "zklink-nova") {
+            if (platform.includes("zklink-nova")) {
               tokensOffChainData.push({
                 l1Address: null,
-                l2Address: token.platforms["zklink-nova"], // unless the nova token is list on coingecko, this will not take effect here
+                l2Address: token.platforms[platform], // unless the nova token is list on coingecko, this will not take effect here
                 liquidity: market_cap,
                 usdPrice: tokenMarketData.current_price,
                 iconURL: image,
