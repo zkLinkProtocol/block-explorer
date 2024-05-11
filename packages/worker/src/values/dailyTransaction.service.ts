@@ -20,9 +20,9 @@ export class DailyTransactionService extends Worker {
         super();
         this.logger = new Logger(DailyTransactionService.name);
     }
-    @Cron('0 0 7 * * *', { name: 'daily-morning-task', timeZone: 'UTC' })
+    @Cron('0 0 1 * * *', { name: 'daily-morning-task', timeZone: 'UTC' })
     async handleDailyTransactionService() {
-        this.logger.log('Daily task executed at 7:00 UTC');
+        this.logger.log('Daily task executed at 1:00 UTC');
         this.runProcess();
     }
     protected async runProcess(): Promise<void> {
