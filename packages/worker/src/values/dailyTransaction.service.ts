@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import waitFor from "../utils/waitFor";
+import { Cron } from "@nestjs/schedule";
 import { Worker } from "../common/worker";
 import {
     TransactionRepository,
@@ -9,7 +9,6 @@ import {
 import {ConfigService} from "@nestjs/config";
 @Injectable()
 export class DailyTransactionService extends Worker {
-    private readonly updateGateWayInterval: number;
     private readonly logger: Logger;
     configService: ConfigService;
     public constructor(
@@ -19,10 +18,13 @@ export class DailyTransactionService extends Worker {
         configService: ConfigService
     ) {
         super();
-        this.updateGateWayInterval = 24 * 60 * 60 * 1000;
         this.logger = new Logger(DailyTransactionService.name);
     }
-
+    @Cron('0 20 8 * * *', { name: 'daily-morning-task', timeZone: 'UTC' })
+    async handleDailyTransactionService() {
+        this.logger.log('Daily task executed at 7:00 UTC');
+        this.runProcess();
+    }
     protected async runProcess(): Promise<void> {
         try {
             await this.recordDailyTransaction();
@@ -32,13 +34,6 @@ export class DailyTransactionService extends Worker {
                 originalError: err,
             });
         }
-
-        await waitFor(() => !this.currentProcessPromise, this.updateGateWayInterval);
-        if (!this.currentProcessPromise) {
-            return;
-        }
-
-        return this.runProcess();
     }
 
     private async recordDailyTransaction(): Promise<void> {
