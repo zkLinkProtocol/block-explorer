@@ -21,8 +21,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 5, 
-        timestamp: 1715594400, 
+        multiplier: 5,
+        timestamp: 1715594400,
       },
     ],
   },
@@ -95,8 +95,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 5, 
-        timestamp: 1715594400, 
+        multiplier: 5,
+        timestamp: 1715594400,
       },
     ],
   },
@@ -189,8 +189,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 5, 
-        timestamp: 1715594400, 
+        multiplier: 5,
+        timestamp: 1715594400,
       },
     ],
   },
@@ -268,8 +268,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 5, 
-        timestamp: 1715594400, 
+        multiplier: 5,
+        timestamp: 1715594400,
       },
     ],
   },
@@ -1005,8 +1005,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 5, 
-        timestamp: 1715594400, 
+        multiplier: 5,
+        timestamp: 1715594400,
       },
     ],
   },
@@ -1133,7 +1133,7 @@ export default [
   {
     address: [
       {
-        chain: "Nova",
+        chain: "zkLinkNova",
         l1Address: "",
         l2Address: "0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169",
       },
@@ -1149,8 +1149,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 5, 
-        timestamp: 1715594400, 
+        multiplier: 5,
+        timestamp: 1715594400,
       },
     ],
   },
