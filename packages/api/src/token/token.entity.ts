@@ -3,8 +3,7 @@ import { BaseEntity } from "../common/entities/base.entity";
 import { normalizeAddressTransformer } from "../common/transformers/normalizeAddress.transformer";
 import { BigNumber } from "ethers";
 import { bigNumberTransformer } from "../common/transformers/bigNumber.transformer";
-import { hexTransformer } from "../common/transformers/hex.transformer";
-import {multiChainAddressTransformer} from "../common/transformers/multiChainAddress.transformer";
+import { multiChainAddressTransformer } from "../common/transformers/multiChainAddress.transformer";
 
 export enum TokenType {
   ETH = "ETH",
