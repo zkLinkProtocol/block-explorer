@@ -3,6 +3,7 @@ import { BaseEntity } from "../common/entities/base.entity";
 import { normalizeAddressTransformer } from "../common/transformers/normalizeAddress.transformer";
 import { BigNumber } from "ethers";
 import { bigNumberTransformer } from "../common/transformers/bigNumber.transformer";
+import { hexTransformer } from "../common/transformers/hex.transformer";
 
 export enum TokenType {
   ETH = "ETH",
@@ -32,7 +33,7 @@ export class Token extends BaseEntity {
   public readonly number: number;
 
   @Index()
-  @Column({ type: "bytea", nullable: true, transformer: normalizeAddressTransformer })
+  @Column({ type: "bytea", nullable: true, transformer: hexTransformer })
   public readonly l1Address?: string;
 
   @Column()
