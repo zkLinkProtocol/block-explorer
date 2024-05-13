@@ -16,7 +16,9 @@
     "platforms": {
       "linea": "0x3aAB2285ddcDdaD8edf438C1bAB47e1a9D05a9b4",
       "mantle": "0xCAbAE6f6Ea1ecaB08Ad02fE02ce9A44F09aebfA2",
-      "zklink-nova": "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f"
+      "zklink-nova": "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
+      "arbitrum-one":"0x3647c54c4c2C65bC7a2D63c0Da2809B399DBBDC0",
+      "zklink-nova2":"0x85D431A3a56FDf2d2970635fF627f386b4ae49CC"
     }
   },
 {
