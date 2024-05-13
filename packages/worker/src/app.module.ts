@@ -1,4 +1,5 @@
 import { Module, Logger } from "@nestjs/common";
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { EventEmitterModule } from "@nestjs/event-emitter";
@@ -65,6 +66,7 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [config] }),
+    ScheduleModule.forRoot(),
     PrometheusModule.register(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
