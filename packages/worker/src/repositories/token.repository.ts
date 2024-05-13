@@ -208,7 +208,7 @@ export class TokenRepository extends BaseRepository<Token> {
         }
     );
   }
-  public async updateTokenIsExternally(l2Address: string, network: string): Promise<void> {
+  public async updateTokenIsExternally(l2Address: string, network: string, l1Address: string): Promise<void> {
     if (!l2Address) {
       throw new Error("l2Address must be provided");
     }
@@ -220,7 +220,8 @@ export class TokenRepository extends BaseRepository<Token> {
         },
         {
           isExternallyToken: true,
-          networkKey: network
+          networkKey: network,
+          l1Address,
         }
     );
   }
