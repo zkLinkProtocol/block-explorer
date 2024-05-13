@@ -58,7 +58,7 @@
           <ranking :sort-order="sortOrder" />
         </div>
       </table-head-column>
-      <table-head-column v-if="selectedTab === TAB_TYPE.Bridged">
+      <table-head-column v-if="selectedTab === TAB_TYPE.Bridged || selectedTab === TAB_TYPE.Externally">
         <div class="th-box">
           <span>{{ t("tokensView.table.sourceChain") }}</span>
           <TableFilterModel @click="handleChildClick" v-model:selected="selectedTokenList"
@@ -85,7 +85,7 @@
       <TableBodyColumn :data-heading="t('tokensView.table.tvl')">
         <TokenTVL :tvl="item.tvl" />
       </TableBodyColumn>
-      <TableBodyColumn v-if="selectedTab === TAB_TYPE.Bridged" :data-heading="t('tokensView.table.sourceChain')">
+      <TableBodyColumn v-if="selectedTab === TAB_TYPE.Bridged||selectedTab === TAB_TYPE.Externally" :data-heading="t('tokensView.table.sourceChain')">
         <div v-if="chainNameList[item.networkKey]" class="from-chain-text">
           {{ chainNameList[item.networkKey] }}
         </div>
@@ -410,7 +410,7 @@ const externallyBridgedToken = computed(() => {
 })
 const bridgedToken = computed(() => {
   return [...props.tokens].filter((item) => {
-    return (item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)) || item.networkKey
+    return item.l1Address&& !item.isExternallyToken
   })
 })
 const displayTokenList = computed(() => {
