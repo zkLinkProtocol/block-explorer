@@ -1110,4 +1110,19 @@ export default [
       },
     ],
   },
+  {
+    address: [
+      {
+        chain: "Ethereum",
+        l1Address: "",
+        l2Address: "0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169",
+      },
+    ],
+    decimals: 18,
+    symbol: "WETH",
+    cgPriceId: "ethereum",
+    type: "zkLinkNova",
+    yieldType: ["NOVA Points"],
+    multiplier: 2,
+  },
 ];
