@@ -47,6 +47,7 @@ export class ExternallyAndExcludeTokenUpdateService extends Worker {
         for (const token of excludeTokenList) {
             await this.tokenRepository.updateTokenIsExclude(token.address);
         }
+        // update externally tokens information from externallyCoinList.json
         for (const token of externallyTokenlist) {
             await this.tokenRepository.updateTokenIsExternally(token.address,token.network,token.l1Address);
         }
