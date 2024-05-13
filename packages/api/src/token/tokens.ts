@@ -20,6 +20,10 @@ export default [
         multiplier: 2,
         timestamp: 0,
       },
+      {
+        multiplier: 5, 
+        timestamp: 1715594400, 
+      },
     ],
   },
   {
@@ -89,6 +93,10 @@ export default [
       {
         multiplier: 2.5,
         timestamp: 0,
+      },
+      {
+        multiplier: 5, 
+        timestamp: 1715594400, 
       },
     ],
   },
@@ -180,6 +188,10 @@ export default [
         multiplier: 3,
         timestamp: 0,
       },
+      {
+        multiplier: 5, 
+        timestamp: 1715594400, 
+      },
     ],
   },
   {
@@ -254,6 +266,10 @@ export default [
       {
         multiplier: 3,
         timestamp: 0,
+      },
+      {
+        multiplier: 5, 
+        timestamp: 1715594400, 
       },
     ],
   },
@@ -988,6 +1004,10 @@ export default [
         multiplier: 3,
         timestamp: 0,
       },
+      {
+        multiplier: 5, 
+        timestamp: 1715594400, 
+      },
     ],
   },
   {
@@ -1113,7 +1133,7 @@ export default [
   {
     address: [
       {
-        chain: "Ethereum",
+        chain: "Nova",
         l1Address: "",
         l2Address: "0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169",
       },
@@ -1123,6 +1143,15 @@ export default [
     cgPriceId: "ethereum",
     type: "zkLinkNova",
     yieldType: ["NOVA Points"],
-    multiplier: 2,
+    multipliers: [
+      {
+        multiplier: 2,
+        timestamp: 0,
+      },
+      {
+        multiplier: 5, 
+        timestamp: 1715594400, 
+      },
+    ],
   },
 ];
