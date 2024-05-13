@@ -8,6 +8,7 @@ import { ConfigService } from "@nestjs/config";
 
 export interface IExcludedToken {
     address: string;
+    l1Address: string;
     name: string;
     network: string;
 }
@@ -47,7 +48,7 @@ export class ExternallyAndExcludeTokenUpdateService extends Worker {
             await this.tokenRepository.updateTokenIsExclude(token.address);
         }
         for (const token of externallyTokenlist) {
-            await this.tokenRepository.updateTokenIsExternally(token.address,token.network);
+            await this.tokenRepository.updateTokenIsExternally(token.address,token.network,token.l1Address);
         }
     }
 }
