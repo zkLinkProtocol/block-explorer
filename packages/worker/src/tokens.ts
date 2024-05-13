@@ -1141,7 +1141,7 @@ export default [
     decimals: 18,
     symbol: "WETH",
     cgPriceId: "ethereum",
-    type: "zkLinkNova",
+    type: "Native",
     yieldType: ["NOVA Points"],
     multipliers: [
       {
