@@ -223,6 +223,7 @@ import { XIcon, ChevronDownIcon } from "@heroicons/vue/outline";
 import useSourceTokens from '@/composables/useSourceTokens'
 import { SearchIcon } from "@heroicons/vue/outline";
 import { getExplorerUrlPrefix } from "@/configs/networkKey";
+import externallyCoinsList from "./externallyCoinsList.json";
 
 
 
@@ -233,7 +234,6 @@ import { NOVA_NATIVE_TOKEN, ETH_TOKEN_L1_ADDRESS, NOVA_MERGED_TOKEN } from "@/ut
 const { chainNameList } = useEnvironmentConfig();
 
 import type { Token } from "@/composables/useToken";
-
 const props = defineProps({
   tokens: {
     type: Array as PropType<Token[]>,
@@ -423,6 +423,15 @@ const displayTokenList = computed(() => {
   // toggle tab 
   if (selectedTab.value) {
     mergeData = filterByTab()
+  }
+  if (selectedTab.value === 2) {
+    mergeData.map((item)=>{
+      externallyCoinsList.map((i)=>{
+        if (i.address === item.l2Address) {
+          item.l1Address = i.l1Address;
+        }
+      })
+    })
   }
   //search by TokenName or symbol
   if (isSearchVal.value) {
