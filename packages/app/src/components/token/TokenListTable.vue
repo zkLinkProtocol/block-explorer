@@ -66,7 +66,7 @@
         </div>
       </table-head-column>
       <table-head-column>{{ t("tokensView.table.novaAddress") }}</table-head-column>
-      <table-head-column v-if="selectedTab !== TAB_TYPE.Native && selectedTab !== TAB_TYPE.Externally">
+      <table-head-column v-if="selectedTab !== TAB_TYPE.Native">
         <span v-if="selectedTab !== TAB_TYPE.Merged">{{ t("tokensView.table.originAddress") }}</span>
         <div v-else class="min-h-[20px]"></div>
       </table-head-column>
@@ -104,13 +104,16 @@
           <CopyButton :value="item.l2Address" />
         </div>
       </TableBodyColumn>
-      <TableBodyColumn v-if="selectedTab === TAB_TYPE.Bridged" :data-heading="t('tokensView.table.originAddress')">
+      <TableBodyColumn v-if="selectedTab === TAB_TYPE.Bridged || selectedTab === TAB_TYPE.Externally" :data-heading="t('tokensView.table.originAddress')">
         <div v-if="item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)"
           class="token-address-container max-w-sm">
           <!--          <TransactionNetworkSquareBlock network="ORIGIN" />-->
           <div v-if="!item.networkKey">
             {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
           </div>
+          <a v-if="item.networkKey === 'tron'" target='_blank'  :href="`${getExplorerUrlPrefix(item.networkKey)}/#/token20/${item.l1Address}` ">
+            {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
+          </a>
           <AddressLink v-else :data-testid="$testId.tokenAddress" :address="item.l1Address" network="origin"
             :networkKey="item.networkKey" class="token-address block max-w-sm">
             {{ shortenFitText(item.l1Address, "left", 100, subtraction) }}
@@ -219,6 +222,7 @@ import SourceToken from "./SourceToken.vue"
 import { XIcon, ChevronDownIcon } from "@heroicons/vue/outline";
 import useSourceTokens from '@/composables/useSourceTokens'
 import { SearchIcon } from "@heroicons/vue/outline";
+import { getExplorerUrlPrefix } from "@/configs/networkKey";
 
 
 
@@ -269,7 +273,7 @@ const selectedTab = ref(TAB_TYPE.Merged);
 const expandable = computed(() => {
   return selectedTab.value === TAB_TYPE.Merged
 })
-function changeTab(index: number) {
+function changeTab(index: number) {  
   selectedTab.value = index;
 }
 const searchValue = ref("");
@@ -404,7 +408,7 @@ const nativeToken = computed(() => {
 })
 const externallyBridgedToken = computed(() => {
   return [...props.tokens].filter((item) => {
-    return !item.l1Address && !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address!)&& item.isExternallyToken
+    return !ETH_TOKEN_L1_ADDRESS.includes(item.l1Address!)&& item.isExternallyToken
   });
 
 })
