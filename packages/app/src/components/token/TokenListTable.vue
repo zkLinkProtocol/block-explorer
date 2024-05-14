@@ -428,7 +428,7 @@ const displayTokenList = computed(() => {
     mergeData.map((item)=>{
       externallyCoinsList.map((i)=>{
         if (i.address === item.l2Address) {
-          item.l1Address = i.l1Address
+          item.l1Address = i.l1Address;
         }
       })
     })
