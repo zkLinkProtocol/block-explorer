@@ -2,19 +2,16 @@
   {
     "name": "BTCT-tron",
     "address": "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067",
-    "l1Address": "TN3W4H6rK2ce4vX9YnFQHwKENnHjoxb3m9",
     "network": "tron"
   },
   {
     "name": "solvBTC.m",
     "address": "0xbEAf16cFD8eFe0FC97C2a07E349B9411F5dC272C",
-    "l1Address": "0x41d9036454be47d3745a823c4aacd0e29cfb0f71",
     "network": "merlin"
   },
   {
     "name": "M-BTC",
     "address": "0x85D431A3a56FDf2d2970635fF627f386b4ae49CC",
-    "l1Address": "0xB880fd278198bd590252621d4CD071b1842E9Bcd",
     "network": "merlin"
   }
 ]
