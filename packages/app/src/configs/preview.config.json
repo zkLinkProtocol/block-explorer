@@ -36,7 +36,9 @@
     "manta": "Manta Pacific",
     "blast": "Blast",
     "optimism": "Optimism",
-    "base": "Base"
+    "base": "Base",
+    "tron":"Tron",
+    "merlin":"Merlin"
   },
   "excuteBatchList": [
     {

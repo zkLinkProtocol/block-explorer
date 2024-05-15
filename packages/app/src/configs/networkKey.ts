@@ -10,6 +10,8 @@ const networkKeysMapping: Record<string, string> = {
   base: "https://basescan.org",
   scroll: "https://scrollscan.com",
   polygonzkevm: "https://zkevm.polygonscan.com",
+  merlin: "https://scan.merlinchain.io",
+  tron: "https://tronscan.org",
 };
 
 export const getExplorerUrlPrefix = (networkKey: string | undefined): string => {
