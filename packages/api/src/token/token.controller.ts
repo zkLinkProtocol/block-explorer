@@ -205,9 +205,15 @@ export class TokenController {
     const result = await this.tokenService.getBalanceRankByToken(tokenAddress, pagingOptions.page, pagingOptions.limit);
     const tokenBals = result.map((bal) => {
       const balance = BigNumber.from(bal.balanceNum).div(BigNumber.from(10).pow(token.decimals)).toString();
+      let balanceDeciaml= BigNumber.from(token.reserveAmount).mod(BigNumber.from(10).pow(token.decimals)).toString();
+      if (!balanceDeciaml.startsWith('0')){
+        while (balanceDeciaml.length < token.decimals){
+          balanceDeciaml = '0' + balanceDeciaml;
+        }
+      }
       return {
         tokenAddress,
-        balance,
+        balance:balance+balanceDeciaml,
         address: normalizeAddressTransformer.from(bal.address),
       };
     });
