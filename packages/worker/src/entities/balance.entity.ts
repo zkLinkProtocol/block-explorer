@@ -25,5 +25,5 @@ export class Balance extends BaseEntity {
   public readonly balance: string;
 
   @Column({ type: "numeric", generatedType: "STORED", asExpression: "balance::numeric" })
-  public readonly balanceNum: number;
+  public readonly balanceNum: string;
 }
