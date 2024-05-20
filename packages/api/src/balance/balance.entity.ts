@@ -5,6 +5,7 @@ import { normalizeAddressTransformer } from "../common/transformers/normalizeAdd
 import { bigIntNumberTransformer } from "../common/transformers/bigIntNumber.transformer";
 
 @Entity({ name: "balances" })
+@Index(["tokenAddress", "address", "balanceNum"])
 export class Balance extends BaseEntity {
   @PrimaryColumn({ type: "bytea", transformer: normalizeAddressTransformer })
   public readonly address: string;
@@ -22,6 +23,9 @@ export class Balance extends BaseEntity {
 
   @Column({ type: "varchar", length: 128 })
   public readonly balance: string;
+
+  @Column({ type: "numeric", generatedType: "STORED", asExpression: "balance::numeric" })
+  public readonly balanceNum: string;
 
   @AfterLoad()
   populateEthToken() {
