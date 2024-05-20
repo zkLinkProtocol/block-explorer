@@ -1,3 +1,4 @@
+import { Balance } from "src/balance/balance.entity";
 import { Controller, Get, Param, NotFoundException, Query, Post, HttpCode, Req } from "@nestjs/common";
 import {
   ApiTags,
@@ -16,13 +17,25 @@ import { PagingOptionsDto, PagingOptionsWithMaxItemsLimitDto } from "../common/d
 import { ApiListPageOkResponse } from "../common/decorators/apiListPageOkResponse";
 import { TokenService } from "./token.service";
 import { TransferService } from "../transfer/transfer.service";
-import { TokenDto } from "./token.dto";
+import { TokenBalance, TokenDto } from "./token.dto";
 import { TransferDto } from "../transfer/transfer.dto";
 import { ParseLimitedIntPipe } from "../common/pipes/parseLimitedInt.pipe";
 import { ParseAddressPipe, ADDRESS_REGEX_PATTERN } from "../common/pipes/parseAddress.pipe";
 import { swagger } from "../config/featureFlags";
 import { constants } from "../config/docs";
 import { BigNumber, ethers } from "ethers";
+import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
+import { LRUCache } from "lru-cache";
+
+const options = {
+  // how long to live in ms
+  ttl: 1000 * 60 * 60,
+  // return stale items before removing from cache?
+  allowStale: false,
+  ttlAutopurge: true,
+};
+
+const cache = new LRUCache(options);
 
 const entityName = "tokens";
 
@@ -148,6 +161,59 @@ export class TokenController {
   @ApiBadRequestResponse({ description: "Paging query params are not valid or out of range" })
   public async getAllTokens(@Query("isall") isall: boolean): Promise<TokenDto[]> {
     return await this.tokenService.calculateTvl(isall === false);
+  }
+
+  @ApiOperation({ summary: "Tokens that support the balance ranking" })
+  @Get("/list")
+  public async getValidTokens(): Promise<TokenDto[]> {
+    const result = await this.tokenService.usdPriceNotNullTokens();
+    return result.map((token) => {
+      return {
+        l2Address: token.l2Address,
+        l1Address: token.l1Address,
+        symbol: token.symbol,
+        name: token.name,
+        decimals: token.decimals,
+        usdPrice: token.usdPrice,
+        iconURL: token.iconURL,
+        totalSupply: token.totalSupply,
+      };
+    });
+  }
+
+  @ApiOperation({
+    summary: "token balance ranking, paging support, the cache time is one hour",
+  })
+  @ApiBadRequestResponse({ description: "Token address is invalid" })
+  @ApiNotFoundResponse({ description: "Token with the specified address does not exist" })
+  @Get("/balance/list")
+  public async getBalanceList(
+    @Query() pagingOptions: PagingOptionsDto,
+    @Query("tokenAddress", new ParseAddressPipe()) tokenAddress: string
+  ): Promise<TokenBalance[]> {
+    const token = await this.tokenService.findOne(tokenAddress);
+    if (!token) {
+      throw new NotFoundException();
+    }
+
+    const cacheKey = `TOKEN_BAL_${tokenAddress}_${pagingOptions.page}_${pagingOptions.limit}`;
+    const cacheResult = cache.get(cacheKey) as TokenBalance[];
+    if (cacheResult) {
+      return cacheResult;
+    }
+
+    const result = await this.tokenService.getBalanceRankByToken(tokenAddress, pagingOptions.page, pagingOptions.limit);
+    const tokenBals = result.map((bal) => {
+      const balance = BigNumber.from(bal.balanceNum).div(BigNumber.from(10).pow(token.decimals)).toString();
+      return {
+        tokenAddress,
+        balance,
+        address: normalizeAddressTransformer.from(bal.address),
+      };
+    });
+
+    cache.set(cacheKey, tokenBals);
+    return tokenBals;
   }
 
   @Get(":address")
