@@ -113,7 +113,7 @@ export class TokenBalance {
   public readonly address: string;
 
   @ApiProperty({
-    type: Number,
+    type: String,
     description: "token balance",
     example: "1000000000000000000",
   })
