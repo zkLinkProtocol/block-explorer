@@ -212,7 +212,6 @@ export class TokenController {
         }
       }
       return {
-        tokenAddress,
         balance:balance+'.'+balanceDeciaml,
         address: normalizeAddressTransformer.from(bal.address),
       };

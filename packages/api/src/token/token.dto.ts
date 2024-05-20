@@ -98,12 +98,6 @@ export class TokenDto {
 }
 
 export class TokenBalance {
-  @ApiProperty({
-    type: String,
-    description: "token address",
-    example: "0xd754Ff5e8a6f257E162F72578A4bB0493c0681d8",
-  })
-  public readonly tokenAddress: string;
 
   @ApiProperty({
     type: String,
