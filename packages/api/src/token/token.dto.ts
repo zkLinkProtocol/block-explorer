@@ -96,3 +96,20 @@ export class TokenDto {
     })
   public readonly isExternallyToken?: boolean;
 }
+
+export class TokenBalance {
+
+  @ApiProperty({
+    type: String,
+    description: "address",
+    example: "0xd754Ff5e8a6f257E162F72578A4bB0493c0681d8",
+  })
+  public readonly address: string;
+
+  @ApiProperty({
+    type: String,
+    description: "token balance",
+    example: "1000000000000000000",
+  })
+  public readonly balance: string;
+}

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, FindOptionsSelect, MoreThanOrEqual, Brackets } from "typeorm";
+import { Repository, FindOptionsSelect, MoreThanOrEqual, Brackets, IsNull, Not } from "typeorm";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { IPaginationOptions } from "../common/types";
 import { paginate } from "../common/utils";
@@ -8,6 +8,8 @@ import { Token, ETH_TOKEN } from "./token.entity";
 import { BigNumber, ethers } from "ethers";
 import { LRUCache } from "lru-cache";
 import { Transfer } from "../transfer/transfer.entity";
+import { Balance } from "src/balance/balance.entity";
+import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
 
 // const options: LRU. = { max: 500 };
 const options = {
@@ -48,6 +50,8 @@ export class TokenService {
     private readonly tokenRepository: Repository<Token>,
     @InjectRepository(Transfer)
     private readonly transferRepository: Repository<Transfer>,
+    @InjectRepository(Balance)
+    private readonly balanceRepository: Repository<Balance>
   ) {}
 
   public async findOne(address: string, fields?: FindOptionsSelect<Token>): Promise<Token> {
@@ -196,5 +200,24 @@ export class TokenService {
         return BigNumber.from(0);
     }
     return BigNumber.from(res.totalAmount);
-    }
+  }
+
+  public async usdPriceNotNullTokens() {
+    return await this.tokenRepository.findBy({
+      usdPrice: Not(IsNull()),
+    });
+  }
+
+  public async getBalanceRankByToken(
+    tokenAddress: string,
+    page: number,
+    limit: number
+  ): Promise<{ address: Buffer; balanceNum: string }[]> {
+    return await this.balanceRepository.query(
+      `
+select address, "balanceNum" from
+(select DISTINCT on (address) address, "balanceNum"  from  balances  where "tokenAddress" = $1 order by address, "blockNumber" desc) tmp order by "balanceNum" desc limit $2 offset $3`,
+      [normalizeAddressTransformer.to(tokenAddress), limit, (page - 1) * limit]
+    );
+  }
 }
