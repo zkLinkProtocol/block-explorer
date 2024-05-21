@@ -45,7 +45,7 @@ export class HistoryTokenService extends Worker {
             const token = await this.tokenService.findOne(historyToken.address);
             if (!token) {
                 this.logger.error("token "+ historyToken.address +" is not found ");
-                return ;
+                continue;
             }
             const result = await this.tokenService.getAllBalanceByToken(historyToken.address);
             const tokenBals = result.map((bal) => {
