@@ -220,4 +220,14 @@ select address, "balanceNum" from
       [normalizeAddressTransformer.to(tokenAddress), limit, (page - 1) * limit]
     );
   }
+  public async getAllBalanceByToken(
+      tokenAddress: string,
+  ): Promise<{ address: Buffer; balanceNum: string }[]> {
+    return await this.balanceRepository.query(
+        `
+select address, "balanceNum" from
+(select DISTINCT on (address) address, "balanceNum"  from  balances  where "tokenAddress" = $1 order by address, "blockNumber" desc) tmp order by "balanceNum" desc`,
+        [normalizeAddressTransformer.to(tokenAddress)]
+    );
+  }
 }

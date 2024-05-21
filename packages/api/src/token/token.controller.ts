@@ -1,4 +1,3 @@
-import { Balance } from "src/balance/balance.entity";
 import { Controller, Get, Param, NotFoundException, Query, Post, HttpCode, Req } from "@nestjs/common";
 import {
   ApiTags,
@@ -26,6 +25,9 @@ import { constants } from "../config/docs";
 import { BigNumber, ethers } from "ethers";
 import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
 import { LRUCache } from "lru-cache";
+import { getHistoryTokenList } from "../configureApp";
+import * as fs from "fs";
+import * as path from "path";
 
 const options = {
   // how long to live in ms
@@ -219,6 +221,37 @@ export class TokenController {
 
     cache.set(cacheKey, tokenBals);
     return tokenBals;
+  }
+
+  @ApiOperation({
+    summary: "token history balance ranking, run when utc 1 am everyday",
+  })
+  @ApiBadRequestResponse({ description: "Token address is invalid" })
+  @ApiNotFoundResponse({ description: "Token with the specified address does not exist" })
+  @Get("/historyBalance/list")
+  public async getHistoryBalanceList(
+      @Query("tokenAddress", new ParseAddressPipe()) tokenAddress: string
+  ): Promise<TokenBalance[]> {
+    const token = await this.tokenService.findOne(tokenAddress);
+    if (!token) {
+      throw new NotFoundException();
+    }
+    const historyTokenList =  await getHistoryTokenList();
+    const time = new Date();
+    time.setDate(time.getDate() - 1);
+    const timeStr = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate();
+    const historyToken = historyTokenList.find((r) => r.address === tokenAddress);
+    if ( historyToken ){
+      try {
+        const filePath = path.join(__dirname, '../../historyTokenJson/'+historyToken.name+'-'+timeStr+'.json');
+        const data = await fs.promises.readFile(filePath, 'utf8');
+        return JSON.parse(data);
+      } catch (err) {
+        throw new NotFoundException("the json file "+ historyToken.name+'-'+timeStr+'.json' +" read failed ");
+      }
+    }else {
+     throw new NotFoundException("this token "+tokenAddress+" now is not supply ");
+    }
   }
 
   @Get(":address")
