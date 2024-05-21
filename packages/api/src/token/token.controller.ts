@@ -240,7 +240,6 @@ export class TokenController {
     }
     const historyTokenList =  await getHistoryTokenList();
     let time: Date ;
-    console.log("time",lookTime.date);
     if (lookTime.date && !isNaN(new Date(lookTime.date).getTime())){
       time = new Date(lookTime.date);
     }else {
