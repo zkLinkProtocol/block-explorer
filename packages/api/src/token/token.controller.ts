@@ -1,4 +1,3 @@
-import { Balance } from "src/balance/balance.entity";
 import { Controller, Get, Param, NotFoundException, Query, Post, HttpCode, Req } from "@nestjs/common";
 import {
   ApiTags,
@@ -242,16 +241,16 @@ export class TokenController {
     time.setDate(time.getDate() - 1);
     const timeStr = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate();
     const historyToken = historyTokenList.find((r) => r.address === tokenAddress);
-    const filePath = path.join(__dirname, '../historyTokenJson/'+historyToken.name+'-'+timeStr+'.json');
     if ( historyToken ){
       try {
+        const filePath = path.join(__dirname, '../../historyTokenJson/'+historyToken.name+'-'+timeStr+'.json');
         const data = await fs.promises.readFile(filePath, 'utf8');
         return JSON.parse(data);
       } catch (err) {
-        throw new Error("Error reading file:"+ err);
+        throw new NotFoundException("the json file "+ historyToken.name+'-'+timeStr+'.json' +" read failed ");
       }
     }else {
-     throw new NotFoundException();
+     throw new NotFoundException("this token "+tokenAddress+" now is not supply ");
     }
   }
 
