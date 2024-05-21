@@ -28,6 +28,7 @@ import { LRUCache } from "lru-cache";
 import { getHistoryTokenList } from "../configureApp";
 import * as fs from "fs";
 import * as path from "path";
+import {DateDto} from "../common/dtos/date.dto";
 
 const options = {
   // how long to live in ms
@@ -231,7 +232,7 @@ export class TokenController {
   @Get("/historyBalance/list")
   public async getHistoryBalanceList(
       @Query("tokenAddress", new ParseAddressPipe()) tokenAddress: string,
-      @Query("lookTime") lookTime: Date,
+      @Query() lookTime: DateDto,
   ): Promise<TokenBalance[]> {
     const token = await this.tokenService.findOne(tokenAddress);
     if (!token) {
@@ -239,8 +240,8 @@ export class TokenController {
     }
     const historyTokenList =  await getHistoryTokenList();
     let time: Date ;
-    if (!isNaN(lookTime.getTime())){
-      time = lookTime;
+    if (lookTime.date && !isNaN(new Date(lookTime.date).getTime())){
+      time = new Date(lookTime.date);
     }else {
       throw new NotFoundException("Invalid date format, file will not found ");
     }
