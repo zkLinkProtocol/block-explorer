@@ -24,6 +24,8 @@ import { metricProviders } from "./metrics";
 import { DbMetricsService } from "./dbMetrics.service";
 import { disableExternalAPI } from "./config/featureFlags";
 import config from "./config";
+import { AppService } from "./app.service";
+import { HistoryTokenService } from "./historyToken/historyToken.service";
 
 @Module({
   imports: [
@@ -50,7 +52,7 @@ import config from "./config";
     StatsModule,
     HealthModule,
   ],
-  providers: [Logger, ...metricProviders, DbMetricsService],
+  providers: [Logger, ...metricProviders, DbMetricsService, AppService, HistoryTokenService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
