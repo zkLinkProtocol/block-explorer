@@ -230,15 +230,20 @@ export class TokenController {
   @ApiNotFoundResponse({ description: "Token with the specified address does not exist" })
   @Get("/historyBalance/list")
   public async getHistoryBalanceList(
-      @Query("tokenAddress", new ParseAddressPipe()) tokenAddress: string
+      @Query("tokenAddress", new ParseAddressPipe()) tokenAddress: string,
+      @Query("lookTime") lookTime: Date,
   ): Promise<TokenBalance[]> {
     const token = await this.tokenService.findOne(tokenAddress);
     if (!token) {
       throw new NotFoundException();
     }
     const historyTokenList =  await getHistoryTokenList();
-    const time = new Date();
-    time.setDate(time.getDate() - 1);
+    let time: Date ;
+    if (!isNaN(lookTime.getTime())){
+      time = lookTime;
+    }else {
+      throw new NotFoundException("Invalid date format, file will not found ");
+    }
     const timeStr = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate();
     const historyToken = historyTokenList.find((r) => r.address === tokenAddress);
     if ( historyToken ){
