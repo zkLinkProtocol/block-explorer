@@ -1,15 +1,16 @@
-import { Controller, Get, HttpCode, NotFoundException, Param, Post, Query, Req } from "@nestjs/common";
+import { Balance } from "src/balance/balance.entity";
+import { Controller, Get, Param, NotFoundException, Query, Post, HttpCode, Req } from "@nestjs/common";
 import {
-  ApiBadRequestResponse,
-  ApiBody,
-  ApiExcludeController,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiResponse,
   ApiTags,
+  ApiParam,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiExcludeController,
+  ApiQuery,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
 } from "@nestjs/swagger";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { PagingOptionsDto, PagingOptionsWithMaxItemsLimitDto } from "../common/dtos";
@@ -19,7 +20,7 @@ import { TransferService } from "../transfer/transfer.service";
 import { TokenBalance, TokenDto } from "./token.dto";
 import { TransferDto } from "../transfer/transfer.dto";
 import { ParseLimitedIntPipe } from "../common/pipes/parseLimitedInt.pipe";
-import { ADDRESS_REGEX_PATTERN, ParseAddressPipe } from "../common/pipes/parseAddress.pipe";
+import { ParseAddressPipe, ADDRESS_REGEX_PATTERN } from "../common/pipes/parseAddress.pipe";
 import { swagger } from "../config/featureFlags";
 import { constants } from "../config/docs";
 import { BigNumber, ethers } from "ethers";
