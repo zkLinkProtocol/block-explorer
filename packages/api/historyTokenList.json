@@ -1,0 +1,14 @@
+[
+  {
+    "name": "uniETH-eth",
+    "address": "0x011E385631488F3318F0C5541A343306626200D7"
+  },
+  {
+    "name": "uniETH-manta",
+    "address": "0xb8FF1eD3CEC08533F32E85Bd44a37e8822DDd368"
+  },
+  {
+    "name": "uniETH-linea",
+    "address": "0xd77c50384edA6018d4a9951521E9B77c2af1842E"
+  }
+]
