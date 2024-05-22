@@ -38,7 +38,9 @@
     "optimism": "Optimism",
     "base": "Base",
     "tron":"Tron",
-    "merlin":"Merlin"
+    "merlin":"Merlin",
+    "Binance Smart Chain":"BNB Chain",
+    "BounceBit":"Bounce Bit"
   },
   "excuteBatchList": [
     {
