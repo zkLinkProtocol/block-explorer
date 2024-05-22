@@ -107,10 +107,28 @@
     "image": "https://assets.coingecko.com/coins/images/36566/standard/photo_2024-03-25_22-04-42.jpg?1711936162",
     "market_cap": 1
   },
-    {
+  {
     "name": "uniETH-Linea",
     "address": "0xd77c50384edA6018d4a9951521E9B77c2af1842E",
     "image": "https://assets.coingecko.com/coins/images/28477/standard/uniETH_200.png?1696527471",
     "market_cap": 1
   },
+  {
+    "name": "BBUSD",
+    "address": "0x7F934E97101e2239b9cB438A4B07d9474AD51406",
+    "image": "https://assets.coingecko.com/coins/images/37931/standard/bbusd_icon.png?1715939661",
+    "market_cap": 1
+  },
+  {
+    "name": "BBTC",
+    "address": "0x7118D8700B1b635CA37992294349Dc616fDC94Fe",
+    "image": "https://www.geckoterminal.com/_next/image?url=https%3A%2F%2Fassets.coingecko.com%2Fcoins%2Fimages%2F37985%2Fsmall%2Fbbtc_icon.png%3F1716215414&w=32&q=75",
+    "market_cap": 1
+  },
+  {
+    "name": "SolvBTC.b",
+    "address": "0x586E593Ffa60c15Ed722342f3C08cc90410e4fEA",
+    "image": "https://res1.sft-api.com/token/SolvBTC.png",
+    "market_cap": 1
+  }
 ]
