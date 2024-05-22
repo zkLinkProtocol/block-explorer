@@ -44,7 +44,8 @@
     "platforms": {
       "extra": "0xC6572019548dfeBA782bA5a2093C836626C7789A",
       "zklink-nova": "0x8280a4e7D5B3B658ec4580d3Bc30f5e50454F169",
-      "ethereum": "0xE46a5E19B19711332e33F33c2DB3eA143e86Bc10"
+      "ethereum": "0xE46a5E19B19711332e33F33c2DB3eA143e86Bc10",
+      "linea": "0x15EEfE5B297136b8712291B632404B66A8eF4D25"
     }
   },
   {
@@ -116,6 +117,23 @@
     "platforms": {
       "zklink-nova": "0xFb8dBdc644eb54dAe0D7A9757f1e6444a07F8067",
       "zklink-nova2": "0xbEAf16cFD8eFe0FC97C2a07E349B9411F5dC272C"
+    }
+  },
+    {
+    "id": "binance-peg-busd",
+    "symbol": "busd",
+    "name": "Binance Peg USD",
+    "platforms": {
+      "zklink-nova": "0x7F934E97101e2239b9cB438A4B07d9474AD51406",
+    }
+  },
+    {
+    "id": "bitcoin-avalanche-bridged-btc-b",
+    "symbol": "btc",
+    "name": "Bitcoin",
+    "platforms": {
+      "zklink-nova": "0x7118D8700B1b635CA37992294349Dc616fDC94Fe",
+      "zklink-nova2": "0x586E593Ffa60c15Ed722342f3C08cc90410e4fEA"
     }
   },
   {
