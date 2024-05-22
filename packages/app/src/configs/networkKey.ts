@@ -12,6 +12,8 @@ const networkKeysMapping: Record<string, string> = {
   polygonzkevm: "https://zkevm.polygonscan.com",
   merlin: "https://scan.merlinchain.io",
   tron: "https://tronscan.org",
+  "binance smart chain":" https://bscscan.com",
+  bouncebit:"https://bbscan.io"
 };
 
 export const getExplorerUrlPrefix = (networkKey: string | undefined): string => {
