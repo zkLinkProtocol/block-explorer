@@ -283,7 +283,6 @@ const badges = computed(() => {
     const finishedStatuses: FinishedStatus[] = [];
     const remainingStatuses: RemainingStatus[] = [];
     finishedStatuses.push(finishedTxStatuses[0]);
-
     badgesArr.push({
       testId: "l1-badge-value",
       color: "dark-neutral",
