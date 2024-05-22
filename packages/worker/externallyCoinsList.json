@@ -13,5 +13,19 @@
     "name": "M-BTC",
     "address": "0x85D431A3a56FDf2d2970635fF627f386b4ae49CC",
     "network": "merlin"
-  }
+  },
+    {
+    "name": "BBUSD",
+    "address": "0x7F934E97101e2239b9cB438A4B07d9474AD51406",
+    "network": "BounceBit"
+  },
+    {
+    "name": "BBTC",
+    "address": "0x7118D8700B1b635CA37992294349Dc616fDC94Fe",
+    "network": "BounceBit"
+  },    {
+    "name": "SolvBTC.b",
+    "address": "0x586E593Ffa60c15Ed722342f3C08cc90410e4fEA",
+    "network": "Binance Smart Chain"
+  },
 ]
