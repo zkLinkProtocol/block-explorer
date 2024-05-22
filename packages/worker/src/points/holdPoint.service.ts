@@ -326,7 +326,8 @@ export class HoldPointService extends Worker {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const diffInMilliseconds = blockTs - firstDepositTs;
     const loyaltyDays = new BigNumber(Math.floor(diffInMilliseconds / millisecondsPerDay));
-    const loyaltyBooster = loyaltyDays.multipliedBy(LOYALTY_BOOSTER_FACTOR);
+    let loyaltyBooster = loyaltyDays.multipliedBy(LOYALTY_BOOSTER_FACTOR);
+    loyaltyBooster = BigNumber.min(0.5, loyaltyBooster);
     return loyaltyBooster.plus(1);
   }
 
