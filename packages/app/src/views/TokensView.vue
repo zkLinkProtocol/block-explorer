@@ -36,7 +36,6 @@ const {
   isRequestFailed: isTokensFailed,
   getTokens,
 } = useTokenLibrary();
-
 const { t } = useI18n();
 const breadcrumbItems = computed((): BreadcrumbItem[] => [
   {

@@ -26,7 +26,7 @@
             :status="status"
             :commit-tx-hash="transaction!.ethCommitTxHash"
             :prove-tx-hash="transaction!.ethProveTxHash"
-            :execute-tx-hash="mainBatch.transactionHash"
+            :execute-tx-hash="mainBatch && mainBatch.transactionHash"
             :l1-batch-number="transaction!.l1BatchNumber || 0"
           />
         </TableBodyColumn>
