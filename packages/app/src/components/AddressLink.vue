@@ -6,7 +6,7 @@
     </slot>
   </a>
   <a v-else-if="network === 'origin' && networkKey" target="_blank"
-    :href="`${getExplorerUrlPrefix(networkKey)}/${networkKey==='merlin'?'token':'address'}/${formattedAddress}`">
+  :href="`${getExplorerUrlPrefix(networkKey)}/${networkKey==='merlin' || networkKey==='Binance Smart Chain' || networkKey==='BounceBit'?'token':'address'}/${formattedAddress}`">
     <slot>
       {{ formattedAddress }}
     </slot>
