@@ -168,7 +168,7 @@ export class TVLService {
     //TODO only return first 100 ranks
     const ranks: Point[] = await this.addressTVLRepository.query(
       `select * from "points" where address not in (select address from "ineligibleAddresses") order by "refPoint" + "stakePoint" desc limit $1 offset $2`,
-      [page.limit, 0]//(page.page - 1) * page.limit
+      [100, 0]//page.limit (page.page - 1) * page.limit
     );
 
     if (ranks.length === 0) {
