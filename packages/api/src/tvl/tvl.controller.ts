@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Query, UseFilters } from "@nestjs/common";
-import { ApiTags, ApiExcludeController, ApiOperation } from "@nestjs/swagger";
+import { Controller, Get, Request, Query, Req, UseFilters, UseGuards } from "@nestjs/common";
+import { ApiTags, ApiExcludeController, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { ParseAddressPipe } from "../common/pipes/parseAddress.pipe";
 import { ResponseStatus, ResponseMessage } from "../api/dtos/common/responseBase.dto";
 import { ApiExceptionFilter } from "../api/exceptionFilter";
@@ -19,9 +19,11 @@ import { AccountReferTVLResponseDto } from "src/api/dtos/tvl/accountReferalTVL.d
 import { ConfigService } from "@nestjs/config";
 import { DepositThresholdDto } from "../api/dtos/stats/depositThreshold.dto";
 import { AccountLoyaltyBoosterResponseDto } from "../api/dtos/tvl/accountLoyaltyBooster.dto";
+import { AuthGuard } from "src/auth/authGuard";
 
 const entityName = "addressTokenTvl";
 
+@ApiBearerAuth()
 @ApiTags("Points")
 @Controller(entityName)
 @ApiExcludeController(!swagger.bffEnabled)
@@ -146,10 +148,11 @@ export class TVLController {
   }
 
   @ApiOperation({ summary: "referral tvl" })
+  @UseGuards(AuthGuard)
   @Get("/getReferralTvl")
-  public async getReferralTvl(
-    @Query("address", new ParseAddressPipe()) address: string
-  ): Promise<ReferralTotalTVLResponseDto> {
+  public async getReferralTvl(@Request() req: Request): Promise<ReferralTotalTVLResponseDto> {
+    // @ts-ignore
+    const address = req.address;
     const result = await this.tvlService.getReferralTvl(address);
     return {
       status: ResponseStatus.OK,
@@ -158,9 +161,12 @@ export class TVLController {
     };
   }
 
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: "group tvl" })
   @Get("/getGroupTvl")
-  public async getGroupTvl(@Query("address", new ParseAddressPipe()) address: string): Promise<TotalTVLResponseDto> {
+  public async getGroupTvl(@Request() req: Request): Promise<TotalTVLResponseDto> {
+    // @ts-ignore
+    const address = req.address;
     const result = await this.tvlService.getGroupTVL(address);
     return {
       status: ResponseStatus.OK,
@@ -169,12 +175,15 @@ export class TVLController {
     };
   }
 
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: "getAccount Refferals point" })
   @Get("/getAccountRefferals")
   public async getAccountRefferals(
-    @Query("address", new ParseAddressPipe()) address: string,
+    @Request() req: Request,
     @Query() pagingOptions: PagingOptionsDto
   ): Promise<AccountPointsResponseDto> {
+    // @ts-ignore
+    const address = req.address;
     const result = await this.tvlService.getAccountRefferals(address, pagingOptions);
     return {
       status: ResponseStatus.OK,
@@ -184,11 +193,14 @@ export class TVLController {
   }
 
   @ApiOperation({ summary: "getAccount Refferals tvl" })
+  @UseGuards(AuthGuard)
   @Get("/getAccountRefferalsTVL")
   public async getAccountRefferalsTVL(
-    @Query("address", new ParseAddressPipe()) address: string,
+    @Request() req: Request,
     @Query() pagingOptions: PagingOptionsDto
   ): Promise<AccountReferTVLResponseDto> {
+    // @ts-ignore
+    const address = req.address;
     const result = await this.tvlService.getAccountRefferalsTVL(address, pagingOptions);
     return {
       status: ResponseStatus.OK,
@@ -200,10 +212,10 @@ export class TVLController {
   @ApiOperation({ summary: "Get account loyalty booster" })
   @Get("/getAccountLoyaltyBooster")
   public async getAccountLoyaltyBooster(
-      @Query("address", new ParseAddressPipe()) address: string
+    @Query("address", new ParseAddressPipe()) address: string
   ): Promise<AccountLoyaltyBoosterResponseDto> {
     const pointsStartDate = new Date(this.pointsPhase1StartTime);
-    const result = await this.tvlService.getAccountLoyaltyBooster(address,pointsStartDate);
+    const result = await this.tvlService.getAccountLoyaltyBooster(address, pointsStartDate);
     return {
       status: ResponseStatus.OK,
       message: ResponseMessage.OK,
