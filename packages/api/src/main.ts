@@ -27,6 +27,7 @@ async function bootstrap() {
       .setTitle("Block explorer API")
       .setDescription("ZkSync Block Explorer API")
       .setVersion("1.0")
+      .addBearerAuth({ type: "http", scheme: "Bearer", bearerFormat: "JWT", in: "Header" }, "bearer")
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup("docs", app, document);
