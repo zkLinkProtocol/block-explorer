@@ -14,6 +14,7 @@
     "symbol": "WBTC",
     "name": "Wrapped Bitcoin",
     "platforms": {
+      "ethereum": "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568",
       "linea": "0x3aAB2285ddcDdaD8edf438C1bAB47e1a9D05a9b4",
       "mantle": "0xCAbAE6f6Ea1ecaB08Ad02fE02ce9A44F09aebfA2",
       "zklink-nova": "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
