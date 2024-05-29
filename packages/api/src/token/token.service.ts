@@ -14,13 +14,13 @@ import { normalizeAddressTransformer } from "src/common/transformers/normalizeAd
 // const options: LRU. = { max: 500 };
 const options = {
   // how long to live in ms
-  ttl: 1000 * 5,
+  ttl: 1000 * 60 * 5,
   // return stale items before removing from cache?
   allowStale: false,
   ttlAutopurge: true,
 };
 
-const cache = new LRUCache(options);
+export const cache = new LRUCache(options);
 
 export interface FilterTokensOptions {
   minLiquidity?: number;
