@@ -26,10 +26,12 @@ import { disableExternalAPI } from "./config/featureFlags";
 import config from "./config";
 import { AppService } from "./app.service";
 import { HistoryTokenService } from "./historyToken/historyToken.service";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [config] }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => configService.get<TypeOrmModuleOptions>("typeORM"),
