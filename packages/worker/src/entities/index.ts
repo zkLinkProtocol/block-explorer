@@ -15,3 +15,5 @@ export * from "./counter.entity";
 export * from "./counterState.entity";
 export * from "./tvlHistory.entity";
 export * from "./dailyTxHistory.entity";
+export * from "./fetSqlRecordStatus.entity";
+export * from "./withdrawalTxAmount.entity";

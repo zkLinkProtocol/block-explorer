@@ -23,6 +23,7 @@ export enum TransferType {
 @Index(["tokenAddress", "blockNumber", "logIndex"])
 @Index(["transactionHash", "isInternal", "blockNumber", "logIndex"])
 @Index(["isInternal", "blockNumber", "logIndex"])
+@Index(["type", "number", "tokenAddress"])
 export class Transfer extends CountableEntity {
   @PrimaryColumn({ generated: true, type: "bigint" })
   public override readonly number: number;

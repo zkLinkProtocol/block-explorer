@@ -49,6 +49,8 @@ import {
   Balance,
   TVLHistory,
   DailyTxHistory,
+  FetSqlRecordStatus,
+  WithdrawalTxAmount,
 } from "./entities";
 import { typeOrmModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -93,6 +95,8 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
       TVLHistory,
       Balance,
       DailyTxHistory,
+      FetSqlRecordStatus,
+      WithdrawalTxAmount,
     ]),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),
