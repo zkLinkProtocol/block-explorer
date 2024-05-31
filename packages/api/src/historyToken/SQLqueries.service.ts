@@ -32,7 +32,6 @@ export class SQLQueriesService extends Worker {
   protected async runProcess(): Promise<void> {
     try {
       await this.updateWithdrawalAmount();
-      // await this.test();
     } catch (err) {
       this.logger.error({
         message: "Failed to update sql record status",
@@ -71,14 +70,13 @@ export class SQLQueriesService extends Worker {
     sourceSQLValue = sourceSQLValue.add(addAmount).sub(removeAmount);
     let newTableNumber =  await this.findLastNumberInTransfer();
     if (newTableNumber === 0){
-      newTableNumber = resFetSqlRecordStatus.sourceSQLTableNumber;
+      newTableNumber = Number(resFetSqlRecordStatus.sourceSQLTableNumber);
     }
     await this.updateSQLRecordStatusByName(withdrawalTransferAmountSQLName,newTableNumber,sourceSQLValue)
   }
 
   private async removeOut14DaysTransfer() {
-    // const time = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
-    const time = new Date("2024-05-02 20:49:06.622").toISOString();
+    const time = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
     const res = await this.withdrawalTxAmountRepository.query('SELECT "withdrawalTxAmount".amount FROM public."withdrawalTxAmount" ' +
         'WHERE "withdrawalTxAmount".timestamp < \''+ time +'\';');
     let ans = BigNumber.from(0);
@@ -103,7 +101,7 @@ export class SQLQueriesService extends Worker {
         .andWhere("transfer.number >= :number", { number: number })
         .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: tokenAddress })
         .getRawMany();
-    if (res === null || res === undefined){
+    if (res === null || res === undefined || res.length === 0){
       return [];
     }
     return res;
@@ -118,7 +116,7 @@ export class SQLQueriesService extends Worker {
     const record = await this.fetSqlRecordStatusRepository.query('SELECT "sourceSQLTableNumber", "sourceSQLValue" ' +
         'FROM public."fetSqlRecordStatus" ' +
         'where "fetSqlRecordStatus".name = \''+ name +'\' ;');
-    if (record === null || record === undefined){
+    if (record === null || record === undefined || record.length === 0){
       return null;
     }
     return record[0];
@@ -128,13 +126,7 @@ export class SQLQueriesService extends Worker {
     if (record === null || record === undefined){
       return 0;
     }
-    return record.number;
+    return Number(record.number);
   }
 
-  public async test(){
-    // console.log("test sql queries :",await this.findLastNumberInTransfer());
-    console.log("test sql queries :",await this.findFetSqlRecordStatusByName(withdrawalTransferAmountSQLName));
-    // console.log("test sql queries :",await this.updateSQLRecordStatusByName(withdrawalTransferAmountSQLName, 161852, BigNumber.from(0)));
-    // console.log("test sql queries :",hexTransformer.from((await this.getLastSourceSQLTableNumberWithdrawalTransfers())[1].transactionHash));
-  }
 }
