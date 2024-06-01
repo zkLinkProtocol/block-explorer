@@ -109,7 +109,6 @@ export class HoldPointService extends Worker {
     const tokenPriceMap = await this.getTokenPriceMap(currentStatisticalBlock.number);
     const blockTs = currentStatisticalBlock.timestamp.getTime();
     const addressTvlMap = await this.getAddressTvlMap(currentStatisticalBlock.number, blockTs, tokenPriceMap);
-    const groupTvlMap = await this.getGroupTvlMap(currentStatisticalBlock.number, addressTvlMap);
     for (const address of addressTvlMap.keys()) {
       const fromBlockAddressPoint = await this.blockAddressPointRepository.getBlockAddressPoint(
         currentStatisticalBlock.number,
@@ -120,15 +119,8 @@ export class HoldPointService extends Worker {
         continue;
       }
       const addressTvl = addressTvlMap.get(address);
-      let groupBooster = new BigNumber(1);
       const addressMultiplier = this.getAddressMultiplier(address, blockTs);
-      const invite = await this.inviteRepository.getInvite(address);
-      if (!!invite) {
-        const groupTvl = groupTvlMap.get(invite.groupId);
-        if (!!groupTvl) {
-          groupBooster = groupBooster.plus(this.getGroupBooster(groupTvl));
-        }
-      }
+
       let firstDepositTime = this.addressFirstDepositTimeCache.get(address);
       if (!firstDepositTime) {
         const addressFirstDeposit = await this.addressFirstDepositRepository.getAddressFirstDeposit(address);
@@ -138,6 +130,7 @@ export class HoldPointService extends Worker {
           this.addressFirstDepositTimeCache.set(address, depositTime);
         }
       }
+      let groupBooster = new BigNumber(1);
       const loyaltyBooster = this.getLoyaltyBooster(blockTs, firstDepositTime?.getTime());
       // NOVA Point = sum_all tokens in activity list (Early_Bird_Multiplier * Token Multiplier * Address Multiplier * Token Amount * Token Price * (1 + Group Booster + Growth Booster) * Loyalty Booster / ETH_Price )
       const newHoldPoint = addressTvl.holdBasePoint
@@ -348,19 +341,4 @@ export class HoldPointService extends Worker {
     }
   }
 
-  getGroupBooster(groupTvl: BigNumber): BigNumber {
-    if (groupTvl.gte(5000)) {
-      return new BigNumber(0.5);
-    } else if (groupTvl.gte(1000)) {
-      return new BigNumber(0.4);
-    } else if (groupTvl.gte(500)) {
-      return new BigNumber(0.3);
-    } else if (groupTvl.gte(100)) {
-      return new BigNumber(0.2);
-    } else if (groupTvl.gte(20)) {
-      return new BigNumber(0.1);
-    } else {
-      return new BigNumber(0);
-    }
-  }
 }
