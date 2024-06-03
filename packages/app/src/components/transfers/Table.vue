@@ -1,5 +1,5 @@
 <template>
-  <Table :items="data" :loading="pending || !address" :class="{ empty: !data?.length }" class="transfers-table">
+  <Table :items="transfers" :loading="pending || !address" :class="{ empty: !data?.length }" class="transfers-table">
     <template #table-head v-if="total && total > 0">
       <TableHeadColumn>
         {{ t("transfers.table.transactionHash") }}
@@ -153,13 +153,16 @@ import TransactionDirectionTableCell, {
   type Direction,
 } from "@/components/transactions/TransactionDirectionTableCell.vue";
 import TransactionNetworkSquareBlock from "@/components/transactions/TransactionNetworkSquareBlock.vue";
+import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 
 import useTransfers, { type Transfer } from "@/composables/useTransfers";
 
 import { utcStringFromISOString } from "@/utils/helpers";
+import { NOVA } from '@/utils/constants'
 
 const { t } = useI18n();
 
+const { chainNameList,ERC20Bridges } = useEnvironmentConfig();
 const props = defineProps({
   address: {
     type: String,
@@ -174,6 +177,31 @@ const { data, load, total, pending, pageSize } = useTransfers(
   })
 );
 
+const transfers = computed<any[] | undefined>(() => {
+  return data.value?.map((transfer) => {
+    if(transfer.fromNetwork === 'L1'){
+      if(transfer.transaction?.networkKey && transfer.transaction?.networkKey !== "error"){
+        const key=transfer.transaction?.networkKey==='linea'?'primary':transfer.transaction?.networkKey
+        transfer.fromNetwork=chainNameList[key]
+      }else{
+        transfer.fromNetwork="Linea"
+      }
+    }else{
+      transfer.fromNetwork=NOVA
+    }
+    if(transfer.toNetwork === 'L1'){
+      if(transfer.transaction?.networkKey && transfer.transaction?.networkKey !== "error"){
+        const key=transfer.transaction?.networkKey==='linea'?'primary':transfer.transaction?.networkKey
+        transfer.toNetwork=chainNameList[key]
+      }else{
+        transfer.toNetwork="Linea"
+      }
+    }else{
+      transfer.toNetwork=NOVA
+    }
+    return transfer
+  });
+})
 function getTransferDirection(item: Transfer): Direction {
   return item.from === item.to ? "self" : item.to !== props.address ? "out" : "in";
 }

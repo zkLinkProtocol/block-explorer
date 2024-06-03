@@ -361,6 +361,7 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
       return transactions.status
     } else {
       const info = await getInfo(transactions.hash)
+      transactions.toNetworkkey = info.networkKey || '';
       await getById(info.l1BatchNumber?.toString()||'');
       if (mainBatch && mainBatch.value?.executedAt) {
         transactions.status = 'finalized'
@@ -371,6 +372,7 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
   })
   return data.value?.map((transaction) => {
     let fromNetwork=''
+    let toNetwork=''
     if(transaction.isL1Originated){
       const foundKey = Object.entries(ERC20Bridges).find(([key, value]) => value === transaction.from)
       // is the value in ERC20Bridges
@@ -385,6 +387,16 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
       }
     }else{
       fromNetwork=NOVA
+    }
+    if (getTransactionMethod(transaction) !== 'withdraw' && getTransactionMethod(transaction) !== 'Withdraw' ) {
+      toNetwork=NOVA
+    } else {
+      if(transaction.toNetworkkey && transaction.toNetworkkey !== "error"){
+        const key=transaction.toNetworkkey==='linea'?'primary':transaction.toNetworkkey
+        toNetwork=chainNameList[key]
+      }else{
+        toNetwork="Linea"
+      }
     }
     return {
     ...transaction,
