@@ -19,7 +19,7 @@ export class HistoryTokenService extends Worker {
         super();
         this.logger = new Logger(HistoryTokenService.name);
     }
-    @Cron('0 0 1 * * *', { name: 'daily-morning-task', timeZone: 'UTC' })
+    @Cron('0 0 11 * * *', { name: 'daily-morning-task', timeZone: 'UTC' })
     async handleHistoryTokenService() {
         this.logger.log('Daily History Token save address task executed at 1:00 UTC');
         this.runProcess();
