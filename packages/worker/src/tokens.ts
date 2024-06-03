@@ -1163,4 +1163,24 @@ export default [
       },
     ],
   },
+  {
+    address: [
+      {
+        chain: "Ethereum",
+        l1Address: "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568",
+        l2Address: "0x9f02D615bC201e596681ac707b7B9d6AF0a3fA77",
+      },
+    ],
+    decimals: 8,
+    symbol: "uniBTC",
+    cgPriceId: "bitcoin",
+    type: "Native",
+    yieldType: ["NOVA Points", "Native Yield", "EL Points", "Bedrock Diamonds"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 0,
+      },
+    ],
+  },
 ];
