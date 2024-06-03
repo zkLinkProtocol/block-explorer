@@ -7,9 +7,13 @@ import { BigNumber } from "ethers";
 import { FetSqlRecordStatus } from "./entities/fetSqlRecordStatus.entity";
 import { Transfer } from "../transfer/transfer.entity";
 import { WithdrawalTxAmount } from "./entities/withdrawalTxAmount.entity";
+import { AddressTransaction } from "../transaction/entities/addressTransaction.entity";
 import { hexTransformer } from "../common/transformers/hex.transformer";
+import { UawAddress } from "./entities/uawAddress.entity";
+import { normalizeAddressTransformer } from "../common/transformers/normalizeAddress.transformer";
 
 const withdrawalTransferAmountSQLName = "getLast14DaysWithdrawalTransferAmount";
+const UAWAddressSQLName = "uawAddressNum";
 
 @Injectable()
 export class SQLQueriesService extends Worker {
@@ -21,8 +25,12 @@ export class SQLQueriesService extends Worker {
       private readonly fetSqlRecordStatusRepository: Repository<FetSqlRecordStatus>,
       @InjectRepository(WithdrawalTxAmount)
       private readonly withdrawalTxAmountRepository: Repository<WithdrawalTxAmount>,
+      @InjectRepository(UawAddress)
+      private readonly uawAddressRepository: Repository<UawAddress>,
       @InjectRepository(Transfer)
       private readonly transferRepository: Repository<Transfer>,
+      @InjectRepository(AddressTransaction)
+      private readonly addressTransactionRepository: Repository<AddressTransaction>,
   ) {
     super();
     this.updateSQLRecordStatusInterval = 1000 * 60 * 5;
@@ -32,6 +40,7 @@ export class SQLQueriesService extends Worker {
   protected async runProcess(): Promise<void> {
     try {
       await this.updateWithdrawalAmount();
+      await this.updateUawAddressNum();
     } catch (err) {
       this.logger.error({
         message: "Failed to update sql record status",
@@ -75,6 +84,31 @@ export class SQLQueriesService extends Worker {
     await this.updateSQLRecordStatusByName(withdrawalTransferAmountSQLName,newTableNumber,sourceSQLValue)
   }
 
+  public async updateUawAddressNum(){
+    const resFetSqlRecordStatus  = await this.findFetSqlRecordStatusByName(UAWAddressSQLName);
+    if (resFetSqlRecordStatus === null || resFetSqlRecordStatus === undefined){
+      return null;
+    }
+    const addresses = await this.getNewAddressFromAddressTransactions();
+    let records :UawAddress[] = [];
+    addresses.forEach(address => {
+      const uawAddress = new UawAddress();
+      uawAddress.address = normalizeAddressTransformer.from(address.address);
+      uawAddress.number = Number(address.number);
+      records.push(uawAddress);
+    })
+    await this.uawAddressRepository.createQueryBuilder("uawAddress").insert().into(UawAddress).values(records).orIgnore().execute();
+    let sourceSQLValue = await this.getUawAddressNum();
+    if (sourceSQLValue.eq(0)){
+      sourceSQLValue = BigNumber.from(resFetSqlRecordStatus.sourceSQLValue);
+    }
+    let newTableNumber =  await this.findLastNumberInAddressTransactions();
+    if (newTableNumber === 0){
+      newTableNumber = Number(resFetSqlRecordStatus.sourceSQLTableNumber);
+    }
+    await this.updateSQLRecordStatusByName(UAWAddressSQLName,newTableNumber,sourceSQLValue);
+  }
+
   private async removeOut14DaysTransfer() {
     const time = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
     const res = await this.withdrawalTxAmountRepository.query('SELECT "withdrawalTxAmount".amount FROM public."withdrawalTxAmount" ' +
@@ -98,13 +132,36 @@ export class SQLQueriesService extends Worker {
     const res = await this.transferRepository.createQueryBuilder("transfer")
         .select("transfer.*")
         .where("transfer.type = :type", { type: "withdrawal" })
-        .andWhere("transfer.number >= :number", { number: number })
+        .andWhere("transfer.number > :number", { number: number })
         .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: tokenAddress })
         .getRawMany();
     if (res === null || res === undefined || res.length === 0){
       return [];
     }
     return res;
+  }
+  private async getNewAddressFromAddressTransactions(): Promise<AddressTransaction[]>{
+    const resFetSqlRecordStatus  = await this.findFetSqlRecordStatusByName(UAWAddressSQLName);
+    if (resFetSqlRecordStatus === null || resFetSqlRecordStatus === undefined){
+      return [];
+    }
+    const number =  resFetSqlRecordStatus.sourceSQLTableNumber;
+
+    const res = await this.addressTransactionRepository.createQueryBuilder("addressTransaction")
+        .select("*")
+        .where("number > :number", { number: number })
+        .getRawMany();
+    if (res === null || res === undefined || res.length === 0){
+      return [];
+    }
+    return res;
+  }
+  private async getUawAddressNum(): Promise<BigNumber>{
+    const res = await this.uawAddressRepository.createQueryBuilder("uawAddress").getCount();
+    if (res === null || res === undefined){
+      return BigNumber.from(0);
+    }
+    return BigNumber.from(res);
   }
   private async updateSQLRecordStatusByName(name: string, tableNumber: number, sourceSQLValue: BigNumber): Promise<void> {
     await this.fetSqlRecordStatusRepository.query('UPDATE public."fetSqlRecordStatus" ' +
@@ -128,5 +185,11 @@ export class SQLQueriesService extends Worker {
     }
     return Number(record.number);
   }
-
+  private async findLastNumberInAddressTransactions(): Promise<number> {
+    const record = await this.addressTransactionRepository.createQueryBuilder("addressTransaction").select("number").orderBy("number","DESC").limit(1).getRawOne();
+    if (record === null || record === undefined){
+      return 0;
+    }
+    return Number(record.number);
+  }
 }
