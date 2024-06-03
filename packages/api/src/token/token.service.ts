@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import {Injectable, Logger} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, FindOptionsSelect, MoreThanOrEqual, Brackets, IsNull, Not } from "typeorm";
 import { Pagination } from "nestjs-typeorm-paginate";
@@ -45,6 +45,7 @@ export interface TokenTvl extends Token {
 
 @Injectable()
 export class TokenService {
+  private readonly logger: Logger;
   constructor(
     @InjectRepository(Token)
     private readonly tokenRepository: Repository<Token>,
@@ -52,7 +53,9 @@ export class TokenService {
     private readonly transferRepository: Repository<Transfer>,
     @InjectRepository(Balance)
     private readonly balanceRepository: Repository<Balance>
-  ) {}
+  ) {
+    this.logger = new Logger(TokenService.name);
+  }
 
   public async findOne(address: string, fields?: FindOptionsSelect<Token>): Promise<Token> {
     const token = await this.tokenRepository.findOne({
@@ -132,6 +135,7 @@ export class TokenService {
     const tokens = await this.tokenRepository.find();
     let totalTvl = BigNumber.from(0);
     const value7DaysWithdrawalTransfer = await this.getLast7DaysWithdrawalTransferAmount()
+    this.logger.log("the last 14 days withdrawal amount:",value7DaysWithdrawalTransfer.toString());
     const ntvl = tokens.map((token) => {
       let tvl = BigNumber.from(0);
       if (token.isExternallyToken){

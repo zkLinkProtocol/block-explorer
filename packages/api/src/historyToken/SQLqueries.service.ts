@@ -68,6 +68,7 @@ export class SQLQueriesService extends Worker {
     })
     await this.withdrawalTxAmountRepository.createQueryBuilder("withdrawalTxAmount").insert().into(WithdrawalTxAmount).values(records).execute();
     sourceSQLValue = sourceSQLValue.add(addAmount).sub(removeAmount);
+    this.logger.log("service get withdrawal amount :",sourceSQLValue);
     let newTableNumber =  await this.findLastNumberInTransfer();
     if (newTableNumber === 0){
       newTableNumber = Number(resFetSqlRecordStatus.sourceSQLTableNumber);
