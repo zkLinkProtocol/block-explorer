@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable ,Logger} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, FindOperator, SelectQueryBuilder, MoreThanOrEqual, LessThanOrEqual } from "typeorm";
 import { Pagination } from "nestjs-typeorm-paginate";
@@ -40,6 +40,7 @@ export interface FindByAddressFilterTransactionsOptions {
 
 @Injectable()
 export class TransactionService {
+  private readonly logger: Logger;
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
@@ -52,7 +53,9 @@ export class TransactionService {
     @InjectRepository(Batch)
     private readonly batchRepository: Repository<Batch>,
     private readonly counterService: CounterService
-  ) {}
+  ) {
+    this.logger = new Logger(TransactionService.name);
+  }
 
   public async findOne(hash: string): Promise<TransactionDetails> {
     const queryBuilder = this.transactionDetailsRepository.createQueryBuilder("transaction");
@@ -220,6 +223,7 @@ export class TransactionService {
     const res = await this.addressTransactionRepository
         .query("select count(*) from (select address from \"addressTransactions\" group by 1) adddresses");
     const count = res[0].count;
+    this.logger.log("from sql get uaw :",count);
     cache.set("totalAccountNumber", count);
     return count;
   }
