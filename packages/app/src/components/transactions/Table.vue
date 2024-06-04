@@ -357,11 +357,12 @@ type TransactionListItemMapped = TransactionListItem & {
 };
 const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
   data.value?.map(async (transactions) => {
+      const info = await getInfo(transactions.hash)
+      console.log(info.networkKey)
+      transactions.toNetworkkey = info.networkKey || '';
     if (["failed", "included"].includes(transactions.status)) {
       return transactions.status
     } else {
-      const info = await getInfo(transactions.hash)
-      transactions.toNetworkkey = info.networkKey || '';
       await getById(info.l1BatchNumber?.toString()||'');
       if (mainBatch && mainBatch.value?.executedAt) {
         transactions.status = 'finalized'
@@ -402,7 +403,7 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
     ...transaction,
     methodName: getTransactionMethod(transaction),
     fromNetwork: fromNetwork,
-    toNetwork: NOVA, // even withdrawals go through L2 addresses (800A or bridge addresses)
+    toNetwork: toNetwork, // even withdrawals go through L2 addresses (800A or bridge addresses)
     statusColor: transaction.status === "failed" ? "danger" : "dark-success",
     statusIcon: ["failed", "included"].includes(transaction.status) ? ZkSyncIcon : EthereumIcon,
   }
