@@ -7,9 +7,10 @@ import { paginate } from "../common/utils";
 import { Token, ETH_TOKEN } from "./token.entity";
 import { BigNumber, ethers } from "ethers";
 import { LRUCache } from "lru-cache";
-import { Transfer } from "../transfer/transfer.entity";
 import { Balance } from "src/balance/balance.entity";
 import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
+import { withdrawalTransferAmountSQLName} from "../historyToken/SQLqueries.service";
+import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
 
 // const options: LRU. = { max: 500 };
 const options = {
@@ -48,8 +49,8 @@ export class TokenService {
   constructor(
     @InjectRepository(Token)
     private readonly tokenRepository: Repository<Token>,
-    @InjectRepository(Transfer)
-    private readonly transferRepository: Repository<Transfer>,
+    @InjectRepository(FetSqlRecordStatus)
+    private readonly fetSqlRecordStatusRepository: Repository<FetSqlRecordStatus>,
     @InjectRepository(Balance)
     private readonly balanceRepository: Repository<Balance>
   ) {}
@@ -131,7 +132,7 @@ export class TokenService {
     }
     const tokens = await this.tokenRepository.find();
     let totalTvl = BigNumber.from(0);
-    const value7DaysWithdrawalTransfer = await this.getLast7DaysWithdrawalTransferAmount()
+    const value7DaysWithdrawalTransfer = await this.getLast7DaysWithdrawalTransferAmount();
     const ntvl = tokens.map((token) => {
       let tvl = BigNumber.from(0);
       if (token.isExternallyToken){
@@ -187,19 +188,19 @@ export class TokenService {
     return ntvl;
   }
   public async getLast7DaysWithdrawalTransferAmount(): Promise<BigNumber> {
-    const sevenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
-    const tokenAddress = Buffer.from("000000000000000000000000000000000000800A", 'hex');
-
-    const res = await this.transferRepository.createQueryBuilder("transfer")
-        .select("SUM(CAST(transfer.amount AS NUMERIC))", "totalAmount")
-        .where("transfer.type = :type", { type: "withdrawal" })
-        .andWhere("transfer.timestamp >= :timestamp", { timestamp: sevenDaysAgo })
-        .andWhere("transfer.tokenAddress = :tokenAddress", { tokenAddress: tokenAddress })
-        .getRawOne();
-    if (res.totalAmount === null || res.totalAmount === undefined){
-        return BigNumber.from(0);
+    const record = await this.fetSqlRecordStatusRepository.query('SELECT "sourceSQLTableNumber", "sourceSQLValue" ' +
+        'FROM public."fetSqlRecordStatus" ' +
+        'where "fetSqlRecordStatus".name = \''+ withdrawalTransferAmountSQLName +'\' ;');
+    let resFetSqlRecordStatus : FetSqlRecordStatus;
+    if (record === null || record === undefined || record.length === 0){
+      resFetSqlRecordStatus = null;
+    }else {
+      resFetSqlRecordStatus = record[0];
     }
-    return BigNumber.from(res.totalAmount);
+    if (resFetSqlRecordStatus === null || resFetSqlRecordStatus === undefined){
+      return BigNumber.from(0);
+    }
+    return BigNumber.from(resFetSqlRecordStatus.sourceSQLValue);
   }
 
   public async usdPriceNotNullTokens() {
