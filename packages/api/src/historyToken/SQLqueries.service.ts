@@ -12,8 +12,8 @@ import { hexTransformer } from "../common/transformers/hex.transformer";
 import { UawAddress } from "./entities/uawAddress.entity";
 import { normalizeAddressTransformer } from "../common/transformers/normalizeAddress.transformer";
 
-const withdrawalTransferAmountSQLName = "getLast14DaysWithdrawalTransferAmount";
-const UAWAddressSQLName = "uawAddressNum";
+export const withdrawalTransferAmountSQLName = "getLast14DaysWithdrawalTransferAmount";
+export const UAWAddressSQLName = "uawAddressNum";
 
 @Injectable()
 export class SQLQueriesService extends Worker {
@@ -170,7 +170,7 @@ export class SQLQueriesService extends Worker {
         'WHERE "fetSqlRecordStatus".name = \''+ name +'\';')
   }
 
-  private async findFetSqlRecordStatusByName(name : string): Promise<FetSqlRecordStatus> {
+  public async findFetSqlRecordStatusByName(name : string): Promise<FetSqlRecordStatus> {
     const record = await this.fetSqlRecordStatusRepository.query('SELECT "sourceSQLTableNumber", "sourceSQLValue" ' +
         'FROM public."fetSqlRecordStatus" ' +
         'where "fetSqlRecordStatus".name = \''+ name +'\' ;');

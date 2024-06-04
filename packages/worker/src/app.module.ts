@@ -34,6 +34,7 @@ import {
   BalanceRepository,
   TVLHistoryRepository,
   DailyTransactionHistoryRepository,
+  FetSqlRecordStatusRepository,
 } from "./repositories";
 import {
   Batch,
@@ -140,6 +141,7 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
     AddressTransferRepository,
     BalanceRepository,
     LogRepository,
+    FetSqlRecordStatusRepository,
     BlocksRevertService,
     BatchService,
     BlockProcessor,
