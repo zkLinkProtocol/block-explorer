@@ -9,7 +9,7 @@ import { BigNumber, ethers } from "ethers";
 import { LRUCache } from "lru-cache";
 import { Balance } from "src/balance/balance.entity";
 import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
-import { withdrawalTransferAmountSQLName} from "../historyToken/SQLqueries.service";
+import { withdrawalTransferAmountSQLName } from "../historyToken/SQLqueries.service";
 import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
 
 // const options: LRU. = { max: 500 };

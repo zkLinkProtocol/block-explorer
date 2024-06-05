@@ -1,4 +1,4 @@
-import { Injectable ,Logger} from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, FindOperator, SelectQueryBuilder, MoreThanOrEqual, LessThanOrEqual } from "typeorm";
 import { Pagination } from "nestjs-typeorm-paginate";
@@ -12,10 +12,12 @@ import { DailyTxHistory } from "./entities/dailyTxHistory.entity";
 import { CounterService } from "../counter/counter.service";
 import { LRUCache } from "lru-cache";
 import {FilterTransfersOptions} from "../transfer/transfer.service";
+import { UAWAddressSQLName } from "../historyToken/SQLqueries.service";
+import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
 // const options: LRU. = { max: 500 };
 const options = {
   // how long to live in ms
-  ttl: 1000 * 60,
+  ttl: 1000 * 60 * 5,
   // return stale items before removing from cache?
   allowStale: false,
   ttlAutopurge: true,
@@ -40,7 +42,6 @@ export interface FindByAddressFilterTransactionsOptions {
 
 @Injectable()
 export class TransactionService {
-  private readonly logger: Logger;
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
@@ -48,14 +49,14 @@ export class TransactionService {
     private readonly transactionDetailsRepository: Repository<TransactionDetails>,
     @InjectRepository(AddressTransaction)
     private readonly addressTransactionRepository: Repository<AddressTransaction>,
+    @InjectRepository(FetSqlRecordStatus)
+    private readonly fetSqlRecordStatusRepository: Repository<FetSqlRecordStatus>,
     @InjectRepository(DailyTxHistory)
     private readonly dailyTxHistoryRepository: Repository<DailyTxHistory>,
     @InjectRepository(Batch)
     private readonly batchRepository: Repository<Batch>,
     private readonly counterService: CounterService
-  ) {
-    this.logger = new Logger(TransactionService.name);
-  }
+  ) {}
 
   public async findOne(hash: string): Promise<TransactionDetails> {
     const queryBuilder = this.transactionDetailsRepository.createQueryBuilder("transaction");
@@ -220,10 +221,19 @@ export class TransactionService {
     if(total) {
       return total as number;
     }
-    const res = await this.addressTransactionRepository
-        .query("select count(*) from (select address from \"addressTransactions\" group by 1) adddresses");
-    const count = res[0].count;
-    this.logger.log("from sql get uaw :",count);
+    const record = await this.fetSqlRecordStatusRepository.query('SELECT "sourceSQLTableNumber", "sourceSQLValue" ' +
+        'FROM public."fetSqlRecordStatus" ' +
+        'where "fetSqlRecordStatus".name = \''+ UAWAddressSQLName +'\' ;');
+    let resFetSqlRecordStatus : FetSqlRecordStatus;
+    if (record === null || record === undefined || record.length === 0){
+      resFetSqlRecordStatus = null;
+    }else {
+      resFetSqlRecordStatus = record[0];
+    }
+    if (resFetSqlRecordStatus === null || resFetSqlRecordStatus === undefined){
+      return 0;
+    }
+    const count = Number(resFetSqlRecordStatus.sourceSQLValue);
     cache.set("totalAccountNumber", count);
     return count;
   }
