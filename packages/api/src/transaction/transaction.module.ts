@@ -12,10 +12,11 @@ import { Batch } from "../batch/batch.entity";
 import { TransferModule } from "../transfer/transfer.module";
 import { CounterModule } from "../counter/counter.module";
 import { LogModule } from "../log/log.module";
+import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Transaction, TransactionDetails, AddressTransaction, TransactionReceipt, Batch, DailyTxHistory]),
+    TypeOrmModule.forFeature([Transaction, TransactionDetails, AddressTransaction, TransactionReceipt, Batch, DailyTxHistory, FetSqlRecordStatus]),
     TransferModule,
     LogModule,
     CounterModule,

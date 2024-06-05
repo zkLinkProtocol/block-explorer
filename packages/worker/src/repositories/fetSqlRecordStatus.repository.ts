@@ -28,4 +28,11 @@ export class FetSqlRecordStatusRepository extends BaseRepository<FetSqlRecordSta
     }
     return BigNumber.from(resFetSqlRecordStatus.sourceSQLValue);
   }
+  public async getUawAddressNum(): Promise<BigNumber>{
+    const resFetSqlRecordStatus = await this.findFetSqlRecordStatusByName(UAWAddressSQLName);
+    if (resFetSqlRecordStatus === null || resFetSqlRecordStatus === undefined){
+      return BigNumber.from(0);
+    }
+    return BigNumber.from(resFetSqlRecordStatus.sourceSQLValue);
+  }
 }

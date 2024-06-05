@@ -45,12 +45,12 @@ export class HistoryService extends Worker {
   private async recordTVLHistory(): Promise<void> {
     const block: Block = await this.blockRepository.getLastBlock({ select: { number: true, timestamp: true } });
     const totalTVL: BigNumber = await this.tokenRepository.getTotalTVL();
-    const totalUaw: number = await this.addressTransferRepository.getUawNumber();
+    const totalUaw: BigNumber = await this.addressTransferRepository.getUawNumber();
     await this.tvlHistoryRepository.add({
       blockNumber: block.number,
       timestamp: block.timestamp,
       tvl: BigNumber.from(totalTVL.toString()),
-      uaw: Number(totalUaw),
+      uaw: Number(totalUaw.toString()),
     });
   }
 }
