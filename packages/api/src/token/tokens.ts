@@ -398,7 +398,7 @@ export default [
       },
       {
         multiplier: 0,
-        timestamp: 0,
+        timestamp: 1715594400,
       },
     ],
   },
