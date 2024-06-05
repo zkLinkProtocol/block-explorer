@@ -106,7 +106,6 @@ export class SQLQueriesService extends Worker {
     if (newTableNumber === 0){
       newTableNumber = Number(resFetSqlRecordStatus.sourceSQLTableNumber);
     }
-    this.logger.log("from service get uaw:",sourceSQLValue);
     await this.updateSQLRecordStatusByName(UAWAddressSQLName,newTableNumber,sourceSQLValue);
   }
 
