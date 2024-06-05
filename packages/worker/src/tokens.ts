@@ -118,6 +118,10 @@ export default [
         multiplier: 2,
         timestamp: 0,
       },
+      {
+        multiplier: 0,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -291,6 +295,10 @@ export default [
         multiplier: 2,
         timestamp: 0,
       },
+      {
+        multiplier: 0,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -310,6 +318,10 @@ export default [
       {
         multiplier: 2,
         timestamp: 0,
+      },
+      {
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -336,6 +348,10 @@ export default [
         multiplier: 1.5,
         timestamp: 0,
       },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -355,6 +371,10 @@ export default [
       {
         multiplier: 1.5,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -376,6 +396,10 @@ export default [
         multiplier: 1.5,
         timestamp: 0,
       },
+      {
+        multiplier: 0,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -395,6 +419,10 @@ export default [
       {
         multiplier: 1.5,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -423,6 +451,10 @@ export default [
       {
         multiplier: 1.5,
         timestamp: 1712224800,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -457,6 +489,10 @@ export default [
         multiplier: 1.5,
         timestamp: 1712224800,
       },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -490,6 +526,10 @@ export default [
         multiplier: 1.5,
         timestamp: 1712224800,
       },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -509,6 +549,10 @@ export default [
       {
         multiplier: 1.5,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -534,6 +578,10 @@ export default [
       {
         multiplier: 1.5,
         timestamp: 0,
+      },
+      {
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -575,6 +623,10 @@ export default [
         multiplier: 1.5,
         timestamp: 0,
       },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -594,6 +646,10 @@ export default [
       {
         multiplier: 1.5,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -779,6 +835,10 @@ export default [
         multiplier: 1.2,
         timestamp: 1711015200,
       },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -837,6 +897,10 @@ export default [
       {
         multiplier: 1.15,
         timestamp: 1712559600,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -1037,6 +1101,10 @@ export default [
         multiplier: 1,
         timestamp: 0,
       },
+      {
+        multiplier: 0,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -1048,7 +1116,7 @@ export default [
       },
     ],
     decimals: 6,
-    symbol: "USDC",
+    symbol: "USDC.e",
     cgPriceId: "usd-coin",
     type: "Stablecoin",
     yieldType: ["NOVA Points", "Native Yield"],
@@ -1056,6 +1124,10 @@ export default [
       {
         multiplier: 1,
         timestamp: 0,
+      },
+      {
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -1097,6 +1169,10 @@ export default [
         multiplier: 1.5,
         timestamp: 0,
       },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -1117,6 +1193,10 @@ export default [
         multiplier: 1.5,
         timestamp: 0,
       },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
+      },
     ],
   },
   {
@@ -1136,6 +1216,10 @@ export default [
       {
         multiplier: 1.5,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -1180,6 +1264,46 @@ export default [
       {
         multiplier: 1,
         timestamp: 0,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "zkLinkNova",
+        l1Address: "",
+        l2Address: "0x7118D8700B1b635CA37992294349Dc616fDC94Fe",
+      },
+    ],
+    decimals: 18,
+    symbol: "BBTC",
+    cgPriceId: "bitcoin",
+    type: "Native",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "zkLinkNova",
+        l1Address: "",
+        l2Address: "0x7F934E97101e2239b9cB438A4B07d9474AD51406",
+      },
+    ],
+    decimals: 18,
+    symbol: "BBUSD",
+    cgPriceId: "tether",
+    type: "Stablecoin",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
