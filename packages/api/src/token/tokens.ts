@@ -1174,7 +1174,7 @@ export default [
     decimals: 8,
     symbol: "uniBTC",
     cgPriceId: "bitcoin",
-    type: "Native",
+    type: "LRT",
     yieldType: ["NOVA Points", "Native Yield", "EL Points", "Bedrock Diamonds"],
     multipliers: [
       {
