@@ -388,7 +388,7 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
     }else{
       fromNetwork=NOVA
     }
-    if (getTransactionMethod(transaction) !== 'withdraw' && getTransactionMethod(transaction) !== 'Withdraw' ) {
+    if (getTransactionMethod(transaction) !== 'withdraw' && getTransactionMethod(transaction) !== 'Withdraw' && getTransactionMethod(transaction) !== 'withdrawWithMessage' ) {
       toNetwork=NOVA
     } else {
       if(transaction.toNetworkkey && transaction.toNetworkkey !== "error"){
