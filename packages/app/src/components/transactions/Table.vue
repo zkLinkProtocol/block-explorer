@@ -357,10 +357,11 @@ type TransactionListItemMapped = TransactionListItem & {
 };
 const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
   data.value?.map(async (transactions) => {
+    const info = await getInfo(transactions.hash)
+      transactions.toNetworkkey = info.networkKey || '';
     if (["failed", "included"].includes(transactions.status)) {
       return transactions.status
     } else {
-      const info = await getInfo(transactions.hash)
       await getById(info.l1BatchNumber?.toString()||'');
       if (mainBatch && mainBatch.value?.executedAt) {
         transactions.status = 'finalized'
@@ -371,6 +372,7 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
   })
   return data.value?.map((transaction) => {
     let fromNetwork=''
+    let toNetwork=''
     if(transaction.isL1Originated){
       const foundKey = Object.entries(ERC20Bridges).find(([key, value]) => value === transaction.from)
       // is the value in ERC20Bridges
@@ -386,11 +388,21 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
     }else{
       fromNetwork=NOVA
     }
+    if (getTransactionMethod(transaction) !== 'withdraw' && getTransactionMethod(transaction) !== 'Withdraw' ) {
+      toNetwork=NOVA
+    } else {
+      if(transaction.toNetworkkey && transaction.toNetworkkey !== "error"){
+        const key=transaction.toNetworkkey==='linea'?'primary':transaction.toNetworkkey
+        toNetwork=chainNameList[key]
+      }else{
+        toNetwork="Linea"
+      }
+    }
     return {
     ...transaction,
     methodName: getTransactionMethod(transaction),
     fromNetwork: fromNetwork,
-    toNetwork: NOVA, // even withdrawals go through L2 addresses (800A or bridge addresses)
+    toNetwork: toNetwork, // even withdrawals go through L2 addresses (800A or bridge addresses)
     statusColor: transaction.status === "failed" ? "danger" : "dark-success",
     statusIcon: ["failed", "included"].includes(transaction.status) ? ZkSyncIcon : EthereumIcon,
   }

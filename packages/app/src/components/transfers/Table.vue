@@ -1,5 +1,5 @@
 <template>
-  <Table :items="data" :loading="pending || !address" :class="{ empty: !data?.length }" class="transfers-table">
+  <Table :items="transfers" :loading="pending || !address" :class="{ empty: !data?.length }" class="transfers-table">
     <template #table-head v-if="total && total > 0">
       <TableHeadColumn>
         {{ t("transfers.table.transactionHash") }}
