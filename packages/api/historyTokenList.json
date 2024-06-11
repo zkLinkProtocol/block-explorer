@@ -10,5 +10,9 @@
   {
     "name": "uniETH-linea",
     "address": "0xd77c50384edA6018d4a9951521E9B77c2af1842E"
+  },
+  {
+    "name": "uniBTC-eth",
+    "address": "0x9f02D615bC201e596681ac707b7B9d6AF0a3fA77"
   }
 ]

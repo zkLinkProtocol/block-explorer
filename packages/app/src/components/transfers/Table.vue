@@ -156,12 +156,11 @@ import TransactionNetworkSquareBlock from "@/components/transactions/Transaction
 import useEnvironmentConfig from "@/composables/useEnvironmentConfig";
 
 import useTransfers, { type Transfer } from "@/composables/useTransfers";
-
-import { utcStringFromISOString } from "@/utils/helpers";
 import { NOVA } from '@/utils/constants'
 
-const { t } = useI18n();
+import { utcStringFromISOString } from "@/utils/helpers";
 
+const { t } = useI18n();
 const { chainNameList,ERC20Bridges } = useEnvironmentConfig();
 const props = defineProps({
   address: {
@@ -176,7 +175,6 @@ const { data, load, total, pending, pageSize } = useTransfers(
     return props.address;
   })
 );
-
 const transfers = computed<any[] | undefined>(() => {
   return data.value?.map((transfer) => {
     if(transfer.fromNetwork === 'L1'){

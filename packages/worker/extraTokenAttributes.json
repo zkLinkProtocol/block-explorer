@@ -118,5 +118,11 @@
     "address": "0x586E593Ffa60c15Ed722342f3C08cc90410e4fEA",
     "image": "https://res1.sft-api.com/token/SolvBTC.png",
     "market_cap": 1
+  },
+    {
+    "name": "UniBTC",
+    "address": "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568",
+    "image": "https://zklink.io/images/token/UniBTC.png",
+    "market_cap": 1
   }
 ]

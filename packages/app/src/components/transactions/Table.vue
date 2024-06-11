@@ -357,8 +357,7 @@ type TransactionListItemMapped = TransactionListItem & {
 };
 const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
   data.value?.map(async (transactions) => {
-      const info = await getInfo(transactions.hash)
-      console.log(info.networkKey)
+    const info = await getInfo(transactions.hash)
       transactions.toNetworkkey = info.networkKey || '';
     if (["failed", "included"].includes(transactions.status)) {
       return transactions.status
@@ -389,7 +388,7 @@ const transactions = computed<TransactionListItemMapped[] | undefined>(() => {
     }else{
       fromNetwork=NOVA
     }
-    if (getTransactionMethod(transaction) !== 'withdraw' && getTransactionMethod(transaction) !== 'Withdraw' ) {
+    if (getTransactionMethod(transaction) !== 'withdraw' && getTransactionMethod(transaction) !== 'Withdraw' && getTransactionMethod(transaction) !== 'withdrawWithMessage' && getTransactionMethod(transaction) !== 'WithdrawWithMessage' ) {
       toNetwork=NOVA
     } else {
       if(transaction.toNetworkkey && transaction.toNetworkkey !== "error"){
