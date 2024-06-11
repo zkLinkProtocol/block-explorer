@@ -260,6 +260,7 @@ export const networkChainIdMap = {
   blast: 81457,
   optimism: 10,
   base: 8453,
+  scroll: 534352,
   primary: 59144,
   sepolia: 11155111,
 };
