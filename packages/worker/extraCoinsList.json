@@ -6,7 +6,8 @@
     "platforms": {
       "extra": "0xbdAd407F77f44F7Da6684B416b1951ECa461FB07",
       "extra2": "0x57F5E098CaD7A3D1Eed53991D4d66C45C9AF7812",
-      "zklink-nova": "0x1a1A3b2ff016332e866787B311fcB63928464509"
+      "zklink-nova": "0x1a1A3b2ff016332e866787B311fcB63928464509",
+      "scroll": "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"
     }
   },  
   {
@@ -19,7 +20,8 @@
       "mantle": "0xCAbAE6f6Ea1ecaB08Ad02fE02ce9A44F09aebfA2",
       "zklink-nova": "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
       "arbitrum-one":"0x3647c54c4c2C65bC7a2D63c0Da2809B399DBBDC0",
-      "zklink-nova2":"0x85D431A3a56FDf2d2970635fF627f386b4ae49CC"
+      "zklink-nova2":"0x85D431A3a56FDf2d2970635fF627f386b4ae49CC",
+      "scroll": "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1"
     }
   },
 {
@@ -27,7 +29,8 @@
     "symbol": "USDT",
     "name": "USDT",
     "platforms": {
-      "zklink-nova": "0x2F8A25ac62179B31D62D7F80884AE57464699059"
+      "zklink-nova": "0x2F8A25ac62179B31D62D7F80884AE57464699059",
+      "scroll": "0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df"
     }
   },
   {
@@ -64,17 +67,9 @@
     "platforms": {
       "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
       "base": "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
-      "ethereum": "0x49446A0874197839D15395B908328a74ccc96Bc0"
-    }
-  },
-  {
-    "id": "wrapped-steth",
-    "symbol": "wsteth",
-    "name": "wstETH",
-    "platforms": {
-      "mantle": "0xB5beDd42000b71FddE22D3eE8a79Bd49A568fC8F",
-      "base": "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
-      "ethereum": "0x49446A0874197839D15395B908328a74ccc96Bc0"
+      "ethereum": "0x49446A0874197839D15395B908328a74ccc96Bc0",
+      "scroll": "0xf610A9dfB7C89644979b4A0f27063E9e7d7Cda32"
+      
     }
   },
   {
@@ -99,7 +94,8 @@
     "symbol": "rseth",
     "name": "rsETH",
     "platforms": {
-      "arbitrum-one": "0x4186BFC76E2E237523CBC30FD220FE055156b41F"
+      "arbitrum-one": "0x4186BFC76E2E237523CBC30FD220FE055156b41F",
+      "scroll": "0x65421ba909200b81640d98B979d07487C9781B66"
     }
   },
   {
@@ -143,6 +139,14 @@
     "platforms": {
       "manta-pacific": "0x34c7Ad65E4163306f8745996688b476914201cE0",
       "linea": "0x15EEfE5B297136b8712291B632404B66A8eF4D25"
+    }
+  },
+    {
+    "id": "stakestone-ether",
+    "symbol": "Stone",
+    "name": "StakeStone ETH",
+    "platforms": {
+      "scroll": "0x80137510979822322193FC997d400D5A6C747bf7"
     }
   }
 ]
