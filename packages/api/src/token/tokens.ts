@@ -124,8 +124,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 0, //change
-        timestamp: 1717516800, //change
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -311,8 +311,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 0, //change
-        timestamp: 1717516800, //change
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -335,8 +335,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 0, //change
-        timestamp: 1717516800, //change
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -364,8 +364,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -388,8 +388,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -412,8 +412,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 0, //change
-        timestamp: 1717516800, //change
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -436,8 +436,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -468,8 +468,8 @@ export default [
         timestamp: 1712224800,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -505,8 +505,8 @@ export default [
         timestamp: 1712224800,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -547,8 +547,8 @@ export default [
         timestamp: 1712224800,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -571,8 +571,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -600,8 +600,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 0, //change
-        timestamp: 1717516800, //change
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -649,8 +649,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -673,8 +673,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -866,8 +866,8 @@ export default [
         timestamp: 1711015200,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -929,8 +929,8 @@ export default [
         timestamp: 1712559600,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -1132,8 +1132,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 0, //change
-        timestamp: 1717516800, //change
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -1156,8 +1156,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 0, //change
-        timestamp: 1717516800, //change
+        multiplier: 0,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -1200,8 +1200,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -1224,8 +1224,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
@@ -1248,8 +1248,8 @@ export default [
         timestamp: 0,
       },
       {
-        multiplier: 1, //change
-        timestamp: 1717516800, //change
+        multiplier: 1,
+        timestamp: 1717516800,
       },
     ],
   },
