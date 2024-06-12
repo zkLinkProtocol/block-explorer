@@ -25,7 +25,8 @@
     "manta": "/img/manta.jpg",
     "blast": "/img/blast.svg",
     "optimism": "/img/optimism.svg",
-    "base": "/img/base.svg"
+    "base": "/img/base.svg",
+    "scroll": "/img/scroll.svg"
   },
   "chainNameList": {
     "primary": "Linea",
@@ -37,6 +38,7 @@
     "blast": "Blast",
     "optimism": "Optimism",
     "base": "Base",
+    "scroll": "Scroll",
     "tron":"Tron",
     "merlin":"Merlin",
     "Binance Smart Chain":"BNB Chain",
@@ -84,6 +86,12 @@
       "limitNumber": 50,
       "chainId": 8453,
       "blockExplorersUrl": "https://basescan.org"
+    },
+    {
+      "key": "scroll",
+      "limitNumber": 50,
+      "chainId": 534352,
+      "blockExplorersUrl": "https://scrollscan.com/"
     }
   ],
   "ERC20Bridges": {
@@ -95,6 +103,7 @@
     "arbitrum": "0x6B7551DBbaE2fb728cF851baee5c3A52DF6F60a4",
     "blast": "0x17887788E01A1192a26F636Cfcfc033c7Bb42348",
     "optimism": "0x6aAdaA7Bf9F5283cAF3eb2E40573D1A4d02C8B15",
-    "base": "0xa03248B029b4e348F156f4b1d93CB433a4e1361e"
+    "base": "0xa03248B029b4e348F156f4b1d93CB433a4e1361e",
+    "scroll": "0xC97c5E43c14D4F524347795410C299db1FA331b3"
   }
 }

@@ -59,6 +59,13 @@ export const EVENTS_MAINNET = {
           contractDeploymentBlock: 13328673,
         },
       ],
+      // scroll
+      '534352': [
+        {
+          contractAddress: '0x119B9459D9119D07c23aD06778AeaBec804Fd1a2',
+          contractDeploymentBlock: 6433793,
+        }
+      ],
     },
   },
 };
