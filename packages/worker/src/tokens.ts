@@ -1,5 +1,5 @@
-// Version 20240317-1448
-// Add Arbitrum rsETH, please note that cg does not have Arbitrum rsETH price
+// Version 20240612-1700
+// Add Scroll WBTC, USDC, USDT, wstETH, rsETH, STONE
 
 export default [
   {
@@ -62,6 +62,11 @@ export default [
         chain: "Optimism",
         l1Address: "0x68f180fcce6836688e9084f035309e29bf0a2095",
         l2Address: "0xA011145882C392e17C468CF0A85d2b385eAeDdd9",
+      },
+      {
+        chain: "scroll",
+        l1Address: "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1",
+        l2Address: "0xCA1838084F8078EffF0E1FDEf79fad7e725A7F41",
       },
     ],
     symbol: "wBTC",
@@ -161,6 +166,11 @@ export default [
         l1Address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
         l2Address: "0x6aFb043b4955505fc9B2B965FCF6972Fa561291d",
       },
+      {
+        chain: "scroll",
+        l1Address: "0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df",
+        l2Address: "0x003Dfe7ac51b36f184795448427fec9BA4947C02",
+      },
     ],
     symbol: "USDT",
     decimals: 6,
@@ -239,6 +249,11 @@ export default [
         chain: "Base",
         l1Address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         l2Address: "0x70064389730D2BDBcF85D8565A855716Cda0Bfca",
+      },
+      {
+        chain: "scroll",
+        l1Address: "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4",
+        l2Address: "0x2d258E25ecB7861C95bB88a10BdF00FE7fB677Cc",
       },
     ],
     decimals: 6,
@@ -507,6 +522,11 @@ export default [
         l1Address: "0xEc901DA9c68E90798BbBb74c11406A32A70652C3",
         l2Address: "0xDeEC33dc735Baf36b473598C33BCD077A0f32049",
       },
+      {
+        chain: "scroll",
+        l1Address: "0x80137510979822322193FC997d400D5A6C747bf7",
+        l2Address: "0xAC8EDAfBa11FeC19C8C4Fe23de45b5f5CA6c7Ac2",
+      },
     ],
     symbol: "Stone",
     decimals: 18,
@@ -611,6 +631,11 @@ export default [
         chain: "Base",
         l1Address: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
         l2Address: "0xBBAeCf969a0b239dc4A21C2489BdD16e17EAF4e8",
+      },
+      {
+        chain: "scroll",
+        l1Address: "0xf610A9dfB7C89644979b4A0f27063E9e7d7Cda32",
+        l2Address: "0x63DD43944Fd31C84121121E30F565B0FA9fA0648",
       },
     ],
     symbol: "wstETH",
@@ -819,6 +844,11 @@ export default [
         chain: "Arbitrum",
         l1Address: "0x4186BFC76E2E237523CBC30FD220FE055156b41F",
         l2Address: "0x4A2da287deB06163fB4D77c52901683d69bD06f4",
+      },
+      {
+        chain: "scroll",
+        l1Address: "0x65421ba909200b81640d98B979d07487C9781B66",
+        l2Address: "0xd6E8412457E6B99d998018a52868c897a878299c",
       },
     ],
     symbol: "rsETH",
