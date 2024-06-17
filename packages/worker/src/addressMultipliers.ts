@@ -51,6 +51,10 @@ export default [
         multiplier: 2.25,
         timestamp: 0,
       },
+      {
+        multiplier: 0,
+        timestamp: 1718593542,
+      },
     ],
   },
   {
@@ -59,6 +63,10 @@ export default [
       {
         multiplier: 2.25,
         timestamp: 0,
+      },
+      {
+        multiplier: 0,
+        timestamp: 1718593542,
       },
     ],
   },
@@ -69,6 +77,10 @@ export default [
         multiplier: 2.25,
         timestamp: 0,
       },
+      {
+        multiplier: 0,
+        timestamp: 1718593542,
+      },
     ],
   },
   {
@@ -77,6 +89,10 @@ export default [
       {
         multiplier: 2.25,
         timestamp: 0,
+      },
+      {
+        multiplier: 0,
+        timestamp: 1718593542,
       },
     ],
   },
@@ -87,6 +103,10 @@ export default [
         multiplier: 2.25,
         timestamp: 0,
       },
+      {
+        multiplier: 0,
+        timestamp: 1718593542,
+      },
     ],
   },
   {
@@ -95,6 +115,10 @@ export default [
       {
         multiplier: 2.25,
         timestamp: 0,
+      },
+      {
+        multiplier: 0,
+        timestamp: 1718593542,
       },
     ],
   },
@@ -105,6 +129,10 @@ export default [
         multiplier: 2.25,
         timestamp: 0,
       },
+      {
+        multiplier: 0,
+        timestamp: 1718593542,
+      },
     ],
   },
   {
@@ -114,6 +142,10 @@ export default [
         multiplier: 2.25,
         timestamp: 0,
       },
+      {
+        multiplier: 0,
+        timestamp: 1718593542,
+      },
     ],
   },
   {
@@ -122,6 +154,10 @@ export default [
       {
         multiplier: 2.25,
         timestamp: 0,
+      },
+      {
+        multiplier: 0,
+        timestamp: 1718593542,
       },
     ],
   },
