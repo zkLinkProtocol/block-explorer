@@ -27,6 +27,7 @@ import config from "./config";
 import { AppService } from "./app.service";
 import { HistoryTokenService } from "./historyToken/historyToken.service";
 import { ScheduleModule } from "@nestjs/schedule";
+import { SQLQueriesModule } from "./historyToken/SQLqueries.module";
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ScheduleModule } from "@nestjs/schedule";
     LogModule,
     StatsModule,
     HealthModule,
+    SQLQueriesModule,
   ],
   providers: [Logger, ...metricProviders, DbMetricsService, AppService, HistoryTokenService],
 })

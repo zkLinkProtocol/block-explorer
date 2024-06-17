@@ -12,10 +12,12 @@ import { DailyTxHistory } from "./entities/dailyTxHistory.entity";
 import { CounterService } from "../counter/counter.service";
 import { LRUCache } from "lru-cache";
 import {FilterTransfersOptions} from "../transfer/transfer.service";
+import { UAWAddressSQLName } from "../historyToken/SQLqueries.service";
+import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
 // const options: LRU. = { max: 500 };
 const options = {
   // how long to live in ms
-  ttl: 1000 * 60,
+  ttl: 1000 * 60 * 5,
   // return stale items before removing from cache?
   allowStale: false,
   ttlAutopurge: true,
@@ -47,6 +49,8 @@ export class TransactionService {
     private readonly transactionDetailsRepository: Repository<TransactionDetails>,
     @InjectRepository(AddressTransaction)
     private readonly addressTransactionRepository: Repository<AddressTransaction>,
+    @InjectRepository(FetSqlRecordStatus)
+    private readonly fetSqlRecordStatusRepository: Repository<FetSqlRecordStatus>,
     @InjectRepository(DailyTxHistory)
     private readonly dailyTxHistoryRepository: Repository<DailyTxHistory>,
     @InjectRepository(Batch)
@@ -217,9 +221,19 @@ export class TransactionService {
     if(total) {
       return total as number;
     }
-    const res = await this.addressTransactionRepository
-        .query("select count(*) from (select address from \"addressTransactions\" group by 1) adddresses");
-    const count = res[0].count;
+    const record = await this.fetSqlRecordStatusRepository.query('SELECT "sourceSQLTableNumber", "sourceSQLValue" ' +
+        'FROM public."fetSqlRecordStatus" ' +
+        'where "fetSqlRecordStatus".name = \''+ UAWAddressSQLName +'\' ;');
+    let resFetSqlRecordStatus : FetSqlRecordStatus;
+    if (record === null || record === undefined || record.length === 0){
+      resFetSqlRecordStatus = null;
+    }else {
+      resFetSqlRecordStatus = record[0];
+    }
+    if (resFetSqlRecordStatus === null || resFetSqlRecordStatus === undefined){
+      return 0;
+    }
+    const count = Number(resFetSqlRecordStatus.sourceSQLValue);
     cache.set("totalAccountNumber", count);
     return count;
   }

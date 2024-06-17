@@ -5,11 +5,11 @@ import { Token } from "../entities";
 import { BaseRepository } from "./base.repository";
 import { UnitOfWork } from "../unitOfWork";
 import { BigNumber } from "ethers";
-import { TransferRepository } from "./transfer.repository";
+import { FetSqlRecordStatusRepository } from "./fetSqlRecordStatus.repository";
 
 @Injectable()
 export class TokenRepository extends BaseRepository<Token> {
-  public constructor(unitOfWork: UnitOfWork,private readonly transferRepository: TransferRepository) {
+  public constructor(unitOfWork: UnitOfWork,private readonly fetSqlRecordStatusRepository: FetSqlRecordStatusRepository) {
     super(Token, unitOfWork);
   }
 
@@ -75,7 +75,7 @@ export class TokenRepository extends BaseRepository<Token> {
       let tvl = BigNumber.from(0);
       let value7DaysWithdrawalTransfer: BigNumber = BigNumber.from(0);
       if (token.l2Address.toLowerCase() === "0x000000000000000000000000000000000000800A".toLowerCase()){
-        value7DaysWithdrawalTransfer = await this.transferRepository.getLast7DaysWithdrawalTransferAmount()
+        value7DaysWithdrawalTransfer = await this.fetSqlRecordStatusRepository.getLast7DaysWithdrawalTransferAmount();
       }
       if (token.isExternallyToken){
         //TODO if externally token will have too low price ,and price_t in there 

@@ -34,6 +34,7 @@ import {
   BalanceRepository,
   TVLHistoryRepository,
   DailyTransactionHistoryRepository,
+  FetSqlRecordStatusRepository,
 } from "./repositories";
 import {
   Batch,
@@ -49,6 +50,8 @@ import {
   Balance,
   TVLHistory,
   DailyTxHistory,
+  FetSqlRecordStatus,
+  WithdrawalTxAmount,
 } from "./entities";
 import { typeOrmModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -93,6 +96,8 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
       TVLHistory,
       Balance,
       DailyTxHistory,
+      FetSqlRecordStatus,
+      WithdrawalTxAmount,
     ]),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),
@@ -136,6 +141,7 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
     AddressTransferRepository,
     BalanceRepository,
     LogRepository,
+    FetSqlRecordStatusRepository,
     BlocksRevertService,
     BatchService,
     BlockProcessor,

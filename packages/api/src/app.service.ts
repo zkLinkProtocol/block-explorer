@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from "@nestjs/common";
 import { HistoryTokenService } from "./historyToken/historyToken.service";
+import { SQLQueriesService } from "./historyToken/SQLqueries.service";
 
 
 @Injectable()
@@ -8,6 +9,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
 
   public constructor(
       private readonly historyTokenService:HistoryTokenService,
+      private readonly sqlQueriesService:SQLQueriesService,
   ) {
     this.logger = new Logger(AppService.name);
   }
@@ -21,13 +23,14 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
   }
 
   private startWorkers() {
-    const tasks = [this.historyTokenService.start()];
+    const tasks = [this.historyTokenService.start(),this.sqlQueriesService.start()];
     return Promise.all(tasks);
   }
 
   private stopWorkers() {
     return Promise.all([
-        this.historyTokenService.stop()
+        this.historyTokenService.stop(),
+        this.sqlQueriesService.stop(),
     ]);
   }
 }
