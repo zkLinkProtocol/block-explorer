@@ -1,5 +1,5 @@
-// Version 20240612-1700
-// Add Scroll WBTC, USDC, USDT, wstETH, rsETH, STONE
+// Version 20240620-1200
+// Add zkSync zk
 
 export default [
   {
@@ -390,6 +390,26 @@ export default [
       {
         multiplier: 1,
         timestamp: 1717516800,
+      },
+    ],
+  },
+  {
+    address: [
+      {
+        chain: "zkSync",
+        l1Address: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
+        l2Address: "0x6D316F7bFC72D3924Ef37C782f066044A4347DA8",
+      },
+    ],
+    symbol: "ZK",
+    decimals: 18,
+    cgPriceId: "zksync",
+    type: "Native",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 1,
+        timestamp: 1718856000,
       },
     ],
   },
