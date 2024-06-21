@@ -26,7 +26,7 @@
     "blast": "/img/blast.svg",
     "optimism": "/img/optimism.svg",
     "base": "/img/base.svg",
-    "scroll": "/img/scroll.svg"
+    "scroll": "/img/scroll.png"
   },
   "chainNameList": {
     "primary": "Linea",
