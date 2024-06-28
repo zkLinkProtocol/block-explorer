@@ -347,7 +347,8 @@ export class TVLService {
       const firstDepositTime = firstDeposit.firstDepositTime.getTime();
       const diffInMilliseconds = currentTs - firstDepositTime;
       const loyaltyDays = Math.floor(diffInMilliseconds / millisecondsPerDay);
-      const loyaltyBooster = (loyaltyDays * 5.0) / 1000.0;
+      let loyaltyBooster = (loyaltyDays * 5.0) / 1000.0;
+      loyaltyBooster = BigNumber.min(0.5, loyaltyBooster).toNumber();
       booster = new BigNumber(loyaltyBooster).plus(1);
     }
 
