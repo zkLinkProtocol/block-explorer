@@ -253,9 +253,9 @@ export class HoldPointService extends Worker {
     for (const priceId of allPriceIds) {
       const blockTokenPrice = await this.blockTokenPriceRepository.getBlockTokenPrice(blockNumber, priceId);
       if (!blockTokenPrice) {
-        throw new Error(`Token ${priceId} price not found`);
+        this.logger.warn(`Token ${priceId} price not found, blockNumber: ${blockNumber}`);
       }
-      tokenPrices.set(priceId, new BigNumber(blockTokenPrice.usdPrice));
+      tokenPrices.set(priceId, new BigNumber(blockTokenPrice?.usdPrice || 0));
     }
     return tokenPrices;
   }
