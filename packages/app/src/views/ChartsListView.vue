@@ -82,7 +82,7 @@ const { t } = useI18n();
 
 const context = useContext();
 const route = useRoute();
-const setChart = (xData: any[],yData: string[]) => {
+const setChart = (xData: any[],yData: string[],flag: boolean) => {
   let option = {
     animation: false,
     interactive: false,
@@ -112,11 +112,11 @@ const setChart = (xData: any[],yData: string[]) => {
             },
             formatter: function (value:any, index:number) {
                 if (value < 1000) {
-                    return '$ '+value;
+                    return flag? value:('$ '+value);
                 } else if (value < 1000000) {
-                    return '$ '+(value / 1000).toFixed(0) + 'K';
+                    return flag? ((value / 1000).toFixed(0) + 'K'):('$ '+(value / 1000).toFixed(0) + 'K');
                 } else {
-                    return '$ '+(value / 1000000).toFixed(0) + 'M';
+                    return flag? ((value / 1000000).toFixed(0) + 'M'):('$ '+(value / 1000000).toFixed(0) + 'M');
                 }
             }
         }
@@ -159,7 +159,7 @@ onMounted(async() => {
     }
   })
   var myChart = echarts.init(document.getElementById('TVLChart'));
-  myChart.setOption(setChart(xData,yData));
+  myChart.setOption(setChart(xData,yData,false));
   await getData('UAW')
   xData = []
   yData = []
@@ -174,7 +174,7 @@ onMounted(async() => {
     }
   })
   var addChart = echarts.init(document.getElementById('addChart'));
-  addChart.setOption(setChart(xData,yData));
+  addChart.setOption(setChart(xData,yData,true));
   await getData('Tra')
   xData = []
   yData = []
@@ -189,7 +189,7 @@ onMounted(async() => {
     // }
   })
   var traChart = echarts.init(document.getElementById('traChart'));
-  traChart.setOption(setChart(xData,yData));
+  traChart.setOption(setChart(xData,yData,false));
   await getData('INT')
   xData = []
   yData = []
@@ -204,7 +204,7 @@ onMounted(async() => {
     // }
   })
   var intChart = echarts.init(document.getElementById('intChart'));
-  intChart.setOption(setChart(xData,yData));
+  intChart.setOption(setChart(xData,yData,true));
 });
 </script>
 
