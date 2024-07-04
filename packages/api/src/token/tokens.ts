@@ -696,6 +696,10 @@ export default [
         multiplier: 1,
         timestamp: 1717516800,
       },
+      {
+        multiplier: 0,
+        timestamp: 1720087200,
+      },
     ],
   },
   {
@@ -1071,6 +1075,10 @@ export default [
       {
         multiplier: 1,
         timestamp: 0,
+      },
+      {
+        multiplier: 0,
+        timestamp: 1720087200,
       },
     ],
   },
