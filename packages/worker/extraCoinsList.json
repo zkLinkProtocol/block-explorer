@@ -15,13 +15,13 @@
     "symbol": "WBTC",
     "name": "Wrapped Bitcoin",
     "platforms": {
-      "ethereum": "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568",
       "linea": "0x3aAB2285ddcDdaD8edf438C1bAB47e1a9D05a9b4",
       "mantle": "0xCAbAE6f6Ea1ecaB08Ad02fE02ce9A44F09aebfA2",
       "zklink-nova": "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
-      "arbitrum-one":"0x3647c54c4c2C65bC7a2D63c0Da2809B399DBBDC0",
       "zklink-nova2":"0x85D431A3a56FDf2d2970635fF627f386b4ae49CC",
-      "scroll": "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1"
+      "scroll": "0x3C1BCa5a656e69edCD0D4E36BEbb3FcDAcA60Cf1",
+      "extra": "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568",
+      "extra2":"0x3647c54c4c2C65bC7a2D63c0Da2809B399DBBDC0",
     }
   },
 {
