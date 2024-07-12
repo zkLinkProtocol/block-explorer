@@ -1,5 +1,5 @@
-// Version 20240620-1200
-// Add zkSync zk
+// Version 20240712-1200
+// Change non-merge token multiplier to 1 & BTCT multiplier to 0
 
 export default [
   {
@@ -78,6 +78,10 @@ export default [
       {
         multiplier: 2,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1720713600,
       },
     ],
   },
@@ -182,6 +186,10 @@ export default [
         multiplier: 2,
         timestamp: 0,
       },
+      {
+        multiplier: 1,
+        timestamp: 1720713600,
+      },
     ],
   },
   {
@@ -265,6 +273,10 @@ export default [
       {
         multiplier: 2,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1720713600,
       },
     ],
   },
@@ -734,6 +746,10 @@ export default [
         multiplier: 2,
         timestamp: 1716825600,
       },
+      {
+        multiplier: 1,
+        timestamp: 1720713600,
+      },
     ],
   },
   {
@@ -996,6 +1012,10 @@ export default [
         multiplier: 2,
         timestamp: 0,
       },
+      {
+        multiplier: 1,
+        timestamp: 1720713600,
+      },
     ],
   },
   {
@@ -1015,6 +1035,10 @@ export default [
       {
         multiplier: 2,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1720713600,
       },
     ],
   },
@@ -1036,6 +1060,10 @@ export default [
         multiplier: 2,
         timestamp: 0,
       },
+      {
+        multiplier: 1,
+        timestamp: 1720713600,
+      },
     ],
   },
   {
@@ -1055,6 +1083,10 @@ export default [
       {
         multiplier: 2,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1720713600,
       },
     ],
   },
@@ -1114,6 +1146,10 @@ export default [
       {
         multiplier: 2,
         timestamp: 0,
+      },
+      {
+        multiplier: 1,
+        timestamp: 1720713600,
       },
     ],
   },
@@ -1206,6 +1242,10 @@ export default [
       {
         multiplier: 1,
         timestamp: 0,
+      },
+      {
+        multiplier: 0,
+        timestamp: 1720713600,
       },
     ],
   },
