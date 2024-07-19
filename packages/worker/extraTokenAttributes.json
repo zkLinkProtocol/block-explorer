@@ -6,6 +6,12 @@
     "market_cap": 1
   },
   {
+    "name": "ZKL-ethereum",
+    "address": "0xfC385A1dF85660a7e041423DB512f779070FCede",
+    "image": "https://etherscan.io/token/images/zklink_32.png",
+    "market_cap": 1
+  },
+  {
     "name": "wUSDM-manta",
     "address": "0xbdAd407F77f44F7Da6684B416b1951ECa461FB07",
     "image": "https://assets.coingecko.com/coins/images/33785/large/wUSDM_PNG_240px.png?1702981552",
