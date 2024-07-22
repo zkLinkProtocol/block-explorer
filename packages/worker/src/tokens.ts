@@ -1,7 +1,27 @@
-// Version 20240712-1200
-// Change non-merge token multiplier to 1 & BTCT multiplier to 0
+// Version 20240719-1200
+// Add ZKL
 
 export default [
+  {
+    address: [
+      {
+        chain: "Ethereum",
+        l1Address: "0xfC385A1dF85660a7e041423DB512f779070FCede",
+        l2Address: "0xC967dabf591B1f4B86CFc74996EAD065867aF19E",
+      },
+    ],
+    symbol: "ZKL",
+    decimals: 18,
+    cgPriceId: "zklink",
+    type: "Native",
+    yieldType: ["NOVA Points"],
+    multipliers: [
+      {
+        multiplier: 5,
+        timestamp: 0,
+      },
+    ],
+  },
   {
     address: [
       {
