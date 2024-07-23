@@ -263,8 +263,8 @@ export class TokenController {
   @Get("/zkl-Circulating")
   @ApiListPageOkResponse(TokenDto, { description: "Successfully returned zkLink token liquidity" })
   @ApiBadRequestResponse({ description: "failed found zkLink amount" })
-  public async getZkLinkLiquidity(): Promise<BigNumber> {
-    const cacheResult = cache.get("zkLinkAmount") as BigNumber;
+  public async getZkLinkLiquidity(): Promise<string> {
+    const cacheResult = cache.get("zkLinkAmount") as string;
     if (cacheResult) {
       return cacheResult;
     }

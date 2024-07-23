@@ -9,12 +9,11 @@ import { TransferModule } from "../transfer/transfer.module";
 import { Transfer } from "../transfer/transfer.entity";
 import { Balance } from "../balance/balance.entity";
 import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
-import { BalanceService } from "../balance/balance.service";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Token, Block, Transaction, Transfer, Balance, FetSqlRecordStatus]), TransferModule],
   controllers: [TokenController],
-  providers: [TokenService,BalanceService],
+  providers: [TokenService],
   exports: [TokenService],
 })
 export class TokenModule {}
