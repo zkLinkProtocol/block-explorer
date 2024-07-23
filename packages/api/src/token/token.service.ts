@@ -239,7 +239,6 @@ select address, "balanceNum" from
     const timeStr = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate();
     for (let i=0;i<timeLineSupplyCirculatingList.length;i++){
       if (new Date(timeStr) < new Date(timeLineSupplyCirculatingList[i].date)){
-        console.log(timeStr,'     ',timeLineSupplyCirculatingList[i].date);
         if (i === 0){
           amount = timeLineSupplyCirculatingList[i].value;
         }else {
