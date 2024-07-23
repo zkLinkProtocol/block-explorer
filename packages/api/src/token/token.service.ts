@@ -11,6 +11,7 @@ import { Balance } from "src/balance/balance.entity";
 import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
 import { withdrawalTransferAmountSQLName } from "../historyToken/SQLqueries.service";
 import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
+import { timeLineSupplyCirculatingList } from "./timeLineSupplyCirculatingList";
 
 // const options: LRU. = { max: 500 };
 const options = {
@@ -52,7 +53,7 @@ export class TokenService {
     @InjectRepository(FetSqlRecordStatus)
     private readonly fetSqlRecordStatusRepository: Repository<FetSqlRecordStatus>,
     @InjectRepository(Balance)
-    private readonly balanceRepository: Repository<Balance>
+    private readonly balanceRepository: Repository<Balance>,
   ) {}
 
   public async findOne(address: string, fields?: FindOptionsSelect<Token>): Promise<Token> {
@@ -231,4 +232,16 @@ select address, "balanceNum" from
         [normalizeAddressTransformer.to(tokenAddress)]
     );
   }
+
+  public async getZkLinkLiquidityAmount(){
+    const time = new Date();
+    const dataLength = timeLineSupplyCirculatingList.length;
+    for (let i = 1; i < dataLength; i++ ) {
+      if (time < new Date(timeLineSupplyCirculatingList[i].date )) {
+          return timeLineSupplyCirculatingList[ i - 1 ].value;
+      }
+    }
+    return timeLineSupplyCirculatingList[ dataLength - 1 ].value;
+  }
+
 }
