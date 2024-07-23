@@ -234,20 +234,14 @@ select address, "balanceNum" from
   }
 
   public async getZkLinkLiquidityAmount(){
-    let amount = BigNumber.from('1000000000').toString();
     const time = new Date();
-    const timeStr = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate();
-    for (let i=0;i<timeLineSupplyCirculatingList.length;i++){
-      if (new Date(timeStr) < new Date(timeLineSupplyCirculatingList[i].date)){
-        if (i === 0){
-          amount = timeLineSupplyCirculatingList[i].value;
-        }else {
-          amount = timeLineSupplyCirculatingList[i-1].value;
-        }
-        break;
+    const dataLength = timeLineSupplyCirculatingList.length;
+    for (let i = 1; i < dataLength + 1; i++ ) {
+      if (time < new Date(timeLineSupplyCirculatingList[i].date )) {
+          return timeLineSupplyCirculatingList[ i - 1 ].value;
       }
     }
-    return amount;
+    return timeLineSupplyCirculatingList[ dataLength - 1 ];
   }
 
 }
