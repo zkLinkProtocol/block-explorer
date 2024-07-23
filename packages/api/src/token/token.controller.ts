@@ -260,6 +260,19 @@ export class TokenController {
     }
   }
 
+  @Get("/zkLinkLiquidity")
+  @ApiListPageOkResponse(TokenDto, { description: "Successfully returned zkLink token liquidity" })
+  @ApiBadRequestResponse({ description: "failed found zkLink amount" })
+  public async getZkLinkLiquidity(): Promise<BigNumber> {
+    const cacheResult = cache.get("zkLinkAmount") as BigNumber;
+    if (cacheResult) {
+      return cacheResult;
+    }
+    const ans =  await this.tokenService.getZkLinkLiquidityAmount();
+    cache.set("zkLinkAmount",ans);
+    return ans;
+  }
+
   @Get(":address")
   @ApiParam({
     name: "address",
