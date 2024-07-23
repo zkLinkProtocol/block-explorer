@@ -9,6 +9,7 @@ import lineaIcon from "/img/linea.svg";
 import mantleIcon from "/img/mantle.svg";
 import mantaIcon from "/img/manta.jpg";
 import optimismIcon from "/img/optimism.svg";
+import scrollIcon from "/img/scroll.png";
 import ethereumIcon from "/img/ethereum.svg";
 import baseIcon from "/img/base.svg";
 
@@ -101,6 +102,14 @@ export const sourceTokens: SourceTokenStatic[] = [
     tokenAddress: "0x6aFb043b4955505fc9B2B965FCF6972Fa561291d",
   },
   {
+    symbol: "USDT",
+    iconURL: usdtIcon,
+    chainName: "Scroll",
+    chainIcon: scrollIcon,
+    chainId: 534352,
+    tokenAddress: "0x003Dfe7ac51b36f184795448427fec9BA4947C02",
+  },
+  {
     symbol: "WBTC",
     iconURL: wbtcIcon,
     chainName: "Ethereum",
@@ -155,6 +164,14 @@ export const sourceTokens: SourceTokenStatic[] = [
     chainIcon: optimismIcon,
     chainId: 10,
     tokenAddress: "0xA011145882C392e17C468CF0A85d2b385eAeDdd9",
+  },
+  {
+    symbol: "WBTC",
+    iconURL: wbtcIcon,
+    chainName: "Scroll",
+    chainIcon: scrollIcon,
+    chainId: 534352,
+    tokenAddress: "0xCA1838084F8078EffF0E1FDEf79fad7e725A7F41",
   },
   {
     symbol: "USDC",
@@ -219,6 +236,14 @@ export const sourceTokens: SourceTokenStatic[] = [
     chainIcon: baseIcon,
     chainId: 8453,
     tokenAddress: "0x70064389730D2BDBcF85D8565A855716Cda0Bfca",
+  },
+  {
+    symbol: "USDC",
+    iconURL: usdcIcon,
+    chainName: "Scroll",
+    chainIcon: scrollIcon,
+    chainId: 534352,
+    tokenAddress: "0x2d258E25ecB7861C95bB88a10BdF00FE7fB677Cc",
   },
   {
     symbol: "DAI",
