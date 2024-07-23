@@ -241,7 +241,7 @@ select address, "balanceNum" from
           return timeLineSupplyCirculatingList[ i - 1 ].value;
       }
     }
-    return timeLineSupplyCirculatingList[ dataLength - 1 ];
+    return timeLineSupplyCirculatingList[ dataLength - 1 ].value;
   }
 
 }
