@@ -11,7 +11,7 @@ import { Balance } from "src/balance/balance.entity";
 import { normalizeAddressTransformer } from "src/common/transformers/normalizeAddress.transformer";
 import { withdrawalTransferAmountSQLName } from "../historyToken/SQLqueries.service";
 import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
-import { BalanceService } from "../balance/balance.service";
+import { timeLineSupplyCirculatingList } from "./timeLineSupplyCirculatingList";
 
 // const options: LRU. = { max: 500 };
 const options = {
@@ -54,7 +54,6 @@ export class TokenService {
     private readonly fetSqlRecordStatusRepository: Repository<FetSqlRecordStatus>,
     @InjectRepository(Balance)
     private readonly balanceRepository: Repository<Balance>,
-    private readonly balanceService: BalanceService,
   ) {}
 
   public async findOne(address: string, fields?: FindOptionsSelect<Token>): Promise<Token> {
@@ -235,33 +234,14 @@ select address, "balanceNum" from
   }
 
   public async getZkLinkLiquidityAmount(){
-    const addressOnNovaList = [
-        '0xC9A3Cf506180757AcfCbE8D78B73E5335926e65B',
-        '0x82C1889F00EfcDaB3Cde8Ce2DBAAEa57f8Dd6D0B',
-        '0x223e33eBBD7005D5a7C6ef4BAA35eBd74C691D79',
-        '0x262cac775BBe38f161275B5d25bD365B20a2Ed00',
-        '0x2123f6d10B580BAf5Eb25a16Bf62F2782cc514C6'
-    ];
-    const addressOnChain = {
-      1:'0x2dc1a672DC57CC8F115ff04ADE40d2E507E05609'
-    };
-    let amount = BigNumber.from('1000000000');
-    const zkLinkTokenL2Address = '0xC967dabf591B1f4B86CFc74996EAD065867aF19E';
-    const zkLinkTokenL1Address = '0xfC385A1dF85660a7e041423DB512f779070FCede';
-    for (let i = 0;i<addressOnNovaList.length;i++){
-      const balance = await this.balanceService.getBalance(addressOnNovaList[i],zkLinkTokenL2Address);
-      amount = amount.sub(BigNumber.from(balance).div(BigNumber.from(10).pow(18)));
+    const time = new Date();
+    const dataLength = timeLineSupplyCirculatingList.length;
+    for (let i = 1; i < dataLength; i++ ) {
+      if (time < new Date(timeLineSupplyCirculatingList[i].date )) {
+          return timeLineSupplyCirculatingList[ i - 1 ].value;
+      }
     }
-    for (const key in addressOnChain){
-      const func = ethers.utils.FunctionFragment.from(
-          `balanceOf(address)`
-      );
-      const iface = new ethers.utils.Interface([func]);
-      const data = iface.encodeFunctionData(func, [addressOnChain[key]]);
-      const provider = new ethers.providers.JsonRpcProvider(String(process.env[`CHAIN_${key}_CLIENT_WEB3_URL`]),);
-      const balance = await provider.send("eth_call", [{ to: zkLinkTokenL1Address, data }, "latest"]);
-      amount = amount.sub(BigNumber.from(balance).div(BigNumber.from(10).pow(18)));
-    }
-    return amount;
+    return timeLineSupplyCirculatingList[ dataLength - 1 ].value;
   }
+
 }

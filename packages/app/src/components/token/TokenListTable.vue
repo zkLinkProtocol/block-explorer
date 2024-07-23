@@ -380,8 +380,12 @@ const mergedToken = computed(() => {
     "0x2F8A25ac62179B31D62D7F80884AE57464699059",
     "0xDa4AaEd3A53962c83B35697Cd138cc6df43aF71f",
     "0x1a1A3b2ff016332e866787B311fcB63928464509",
-    "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab"
+    "0xF573fA04A73d5AC442F3DEa8741317fEaA3cDeab",
+    "0x2d258E25ecB7861C95bB88a10BdF00FE7fB677Cc",
+    "0x003Dfe7ac51b36f184795448427fec9BA4947C02",
+    "0xCA1838084F8078EffF0E1FDEf79fad7e725A7F41"
   ];
+  console.log(props.tokens)
   const mergedArr = [...props.tokens].filter((item) => {
     return !item.networkKey &&
       ((item.l1Address && ETH_TOKEN_L1_ADDRESS.includes(item.l1Address)) ||

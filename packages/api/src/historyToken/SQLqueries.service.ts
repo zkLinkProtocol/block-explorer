@@ -11,6 +11,7 @@ import { AddressTransaction } from "../transaction/entities/addressTransaction.e
 import { hexTransformer } from "../common/transformers/hex.transformer";
 import { UawAddress } from "./entities/uawAddress.entity";
 import { normalizeAddressTransformer } from "../common/transformers/normalizeAddress.transformer";
+import {sleep} from "./sleep";
 
 export const withdrawalTransferAmountSQLName = "getLast14DaysWithdrawalTransferAmount";
 export const UAWAddressSQLName = "uawAddressNum";
@@ -66,15 +67,20 @@ export class SQLQueriesService extends Worker {
     let addAmount = BigNumber.from(0);
     const transfers = await this.getLastSourceSQLTableNumberWithdrawalTransfers();
     let records : WithdrawalTxAmount[] = [];
-    transfers.forEach(transfer =>{
+    for (let i=0;i<transfers.length;i++){
       const withdrawalTxAmount = new WithdrawalTxAmount();
-      withdrawalTxAmount.amount = transfer.amount;
-      withdrawalTxAmount.number = transfer.number;
-      withdrawalTxAmount.transactionHash = hexTransformer.from(transfer.transactionHash);
-      withdrawalTxAmount.timestamp = transfer.timestamp;
-      addAmount = addAmount.add(BigNumber.from(transfer.amount));
+      withdrawalTxAmount.amount = transfers[i].amount;
+      withdrawalTxAmount.number = transfers[i].number;
+      withdrawalTxAmount.transactionHash = hexTransformer.from(transfers[i].transactionHash);
+      withdrawalTxAmount.timestamp = transfers[i].timestamp;
+      addAmount = addAmount.add(BigNumber.from(transfers[i].amount));
       records.push(withdrawalTxAmount);
-    })
+      if (records.length >= 1000){
+        await this.withdrawalTxAmountRepository.createQueryBuilder("withdrawalTxAmount").insert().into(WithdrawalTxAmount).values(records).execute();
+        records = [];
+        await sleep(1000);
+      }
+    }
     await this.withdrawalTxAmountRepository.createQueryBuilder("withdrawalTxAmount").insert().into(WithdrawalTxAmount).values(records).execute();
     sourceSQLValue = sourceSQLValue.add(addAmount).sub(removeAmount);
     let newTableNumber =  await this.findLastNumberInTransfer();
@@ -91,12 +97,17 @@ export class SQLQueriesService extends Worker {
     }
     const addresses = await this.getNewAddressFromAddressTransactions();
     let records :UawAddress[] = [];
-    addresses.forEach(address => {
+    for (let i = 0;i<addresses.length;i++){
       const uawAddress = new UawAddress();
-      uawAddress.address = normalizeAddressTransformer.from(address.address);
-      uawAddress.number = Number(address.number);
+      uawAddress.address = normalizeAddressTransformer.from(addresses[i].address);
+      uawAddress.number = Number(addresses[i].number);
       records.push(uawAddress);
-    })
+      if (records.length >= 1000){
+        await this.uawAddressRepository.createQueryBuilder("uawAddress").insert().into(UawAddress).values(records).orIgnore().execute();
+        records = [];
+        await sleep(1000);
+      }
+    }
     await this.uawAddressRepository.createQueryBuilder("uawAddress").insert().into(UawAddress).values(records).orIgnore().execute();
     let sourceSQLValue = await this.getUawAddressNum();
     if (sourceSQLValue.eq(0)){
