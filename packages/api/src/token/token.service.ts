@@ -235,13 +235,13 @@ select address, "balanceNum" from
 
   public async getZkLinkLiquidityAmount(){
     const time = new Date();
-    const maxPos = timeLineSupplyCirculatingList.length - 1;
-    for (let i = 1; i < maxPos + 1; i++ ) {
+    const dataLength = timeLineSupplyCirculatingList.length;
+    for (let i = 1; i < dataLength; i++ ) {
       if (time < new Date(timeLineSupplyCirculatingList[i].date )) {
           return timeLineSupplyCirculatingList[ i - 1 ].value;
       }
     }
-    return timeLineSupplyCirculatingList[ maxPos ];
+    return timeLineSupplyCirculatingList[ dataLength - 1 ];
   }
 
 }
