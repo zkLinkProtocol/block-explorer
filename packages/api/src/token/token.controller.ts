@@ -260,7 +260,7 @@ export class TokenController {
     }
   }
 
-  @Get("/zkl-Circulating")
+  @Get("/zkl/circulating")
   @ApiListPageOkResponse(TokenDto, { description: "Successfully returned zkLink token liquidity" })
   @ApiBadRequestResponse({ description: "failed found zkLink amount" })
   public async getZkLinkLiquidity(): Promise<string> {
