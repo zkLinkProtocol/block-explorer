@@ -139,6 +139,38 @@ export class AccountController {
     };
   }
 
+  @Get("/tokenALLtx")
+  public async getAccountALLTokenTransfers(
+      @Query("address", new ParseAddressPipe({ required: false, errorMessage: "Error! Invalid address format" }))
+          address: string,
+      @Query(
+          "contractaddress",
+          new ParseAddressPipe({ required: false, errorMessage: "Error! Invalid contract address format" })
+      )
+          contractAddress: string,
+      @Query() sortingOptions: SortingOptionsDto,
+      @Query("startblock", new ParseLimitedIntPipe({ min: 0, isOptional: true })) startBlock?: number,
+      @Query("endblock", new ParseLimitedIntPipe({ min: 0, isOptional: true })) endBlock?: number
+  ): Promise<AccountTokenTransfersResponseDto> {
+    const [lastBlockNumber, transfers] = await Promise.all([
+      this.blockService.getLastBlockNumber(),
+      this.transferService.findTokenALLTransfers({
+        tokenType: TokenType.ERC20,
+        address,
+        tokenAddress: contractAddress,
+        startBlock,
+        endBlock,
+        ...sortingOptions,
+      }),
+    ]);
+    const transfersList = transfers.map((transfer) => mapTransferListItem(transfer, lastBlockNumber));
+    return {
+      status: transfersList.length ? ResponseStatus.OK : ResponseStatus.NOTOK,
+      message: transfersList.length ? ResponseMessage.OK : ResponseMessage.NO_TRANSACTIONS_FOUND,
+      result: transfersList,
+    };
+  }
+
   @Get("/tokennfttx")
   public async getAccountNFTTransfers(
     @Query("address", new ParseAddressPipe({ required: false, errorMessage: "Error! Invalid address format" }))

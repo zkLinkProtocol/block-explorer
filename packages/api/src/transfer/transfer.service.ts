@@ -224,6 +224,100 @@ export class TransferService {
     return transfers;
   }
 
+  public async findTokenALLTransfers({
+                                    tokenAddress,
+                                    address,
+                                    startBlock,
+                                    endBlock,
+                                    tokenType = TokenType.ERC20,
+                                    sort = SortingOrder.Desc,
+                                  }: FilterTokenTransfersOptions = {}): Promise<Transfer[]> {
+    if (address) {
+      const queryBuilder = this.addressTransferRepository.createQueryBuilder("addressTransfer");
+      queryBuilder.select("addressTransfer.number");
+      queryBuilder.leftJoinAndSelect("addressTransfer.transfer", "transfer");
+      queryBuilder.leftJoinAndSelect("transfer.token", "token");
+      queryBuilder.leftJoin("transfer.transaction", "transaction");
+      queryBuilder.addSelect([
+        "transaction.nonce",
+        "transaction.blockHash",
+        "transaction.transactionIndex",
+        "transaction.gasLimit",
+        "transaction.gasPrice",
+        "transaction.data",
+        "transaction.fee",
+        "transaction.l1BatchNumber",
+        "transaction.type",
+      ]);
+      queryBuilder.leftJoin("transaction.transactionReceipt", "transactionReceipt");
+      queryBuilder.addSelect(["transactionReceipt.gasUsed", "transactionReceipt.cumulativeGasUsed"]);
+      queryBuilder.where({
+        address,
+      });
+      if (tokenAddress) {
+        queryBuilder.andWhere(`"addressTransfer"."tokenAddress" = :tokenAddress`, {
+          tokenAddress: normalizeAddressTransformer.to(tokenAddress),
+        });
+      } else {
+        queryBuilder.andWhere(`"addressTransfer"."tokenType" = :tokenType`, {
+          tokenType,
+        });
+      }
+      if (startBlock !== undefined) {
+        queryBuilder.andWhere({
+          blockNumber: MoreThanOrEqual(startBlock),
+        });
+      }
+      if (endBlock !== undefined) {
+        queryBuilder.andWhere({
+          blockNumber: LessThanOrEqual(endBlock),
+        });
+      }
+      const order = sort === SortingOrder.Asc ? "ASC" : "DESC";
+      queryBuilder.orderBy("addressTransfer.blockNumber", order);
+      queryBuilder.addOrderBy("addressTransfer.logIndex", order);
+      const addressTransfers = await queryBuilder.getMany();
+      return addressTransfers.map((item) => item.transfer);
+    }
+    if (!tokenAddress) {
+      throw new BadRequestException("Error! Missing address or contract address");
+    }
+    const queryBuilder = this.transferRepository.createQueryBuilder("transfer");
+    queryBuilder.leftJoinAndSelect("transfer.token", "token");
+    queryBuilder.leftJoin("transfer.transaction", "transaction");
+    queryBuilder.addSelect([
+      "transaction.nonce",
+      "transaction.blockHash",
+      "transaction.transactionIndex",
+      "transaction.gasLimit",
+      "transaction.gasPrice",
+      "transaction.data",
+      "transaction.fee",
+      "transaction.l1BatchNumber",
+      "transaction.type",
+    ]);
+    queryBuilder.leftJoin("transaction.transactionReceipt", "transactionReceipt");
+    queryBuilder.addSelect(["transactionReceipt.gasUsed", "transactionReceipt.cumulativeGasUsed"]);
+    queryBuilder.where({
+      tokenAddress,
+    });
+    if (startBlock !== undefined) {
+      queryBuilder.andWhere({
+        blockNumber: MoreThanOrEqual(startBlock),
+      });
+    }
+    if (endBlock !== undefined) {
+      queryBuilder.andWhere({
+        blockNumber: LessThanOrEqual(endBlock),
+      });
+    }
+    const order = sort === SortingOrder.Asc ? "ASC" : "DESC";
+    queryBuilder.orderBy("transfer.blockNumber", order);
+    queryBuilder.addOrderBy("transfer.logIndex", order);
+    const transfers = await queryBuilder.getMany();
+    return transfers;
+  }
+
   public async findInternalTransfers({
     address,
     transactionHash,
