@@ -1,5 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import {Injectable, Logger, Query} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { HttpService } from "@nestjs/axios";
 import { Repository, FindOptionsSelect, MoreThanOrEqual, Brackets, IsNull, Not } from "typeorm";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { IPaginationOptions } from "../common/types";
@@ -12,6 +13,7 @@ import { normalizeAddressTransformer } from "src/common/transformers/normalizeAd
 import { withdrawalTransferAmountSQLName } from "../historyToken/SQLqueries.service";
 import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
 import { timeLineSupplyCirculatingList } from "./timeLineSupplyCirculatingList";
+import { firstValueFrom } from "rxjs";
 
 // const options: LRU. = { max: 500 };
 const options = {
@@ -54,7 +56,11 @@ export class TokenService {
     private readonly fetSqlRecordStatusRepository: Repository<FetSqlRecordStatus>,
     @InjectRepository(Balance)
     private readonly balanceRepository: Repository<Balance>,
-  ) {}
+    private readonly httpService: HttpService,
+    private readonly logger: Logger
+  ) {
+    this.logger = new Logger(TokenService.name);
+  }
 
   public async findOne(address: string, fields?: FindOptionsSelect<Token>): Promise<Token> {
     const token = await this.tokenRepository.findOne({
@@ -244,4 +250,26 @@ select address, "balanceNum" from
     return timeLineSupplyCirculatingList[ dataLength - 1 ].value;
   }
 
+  public async getFetchKlineData(category : string, symbol: string, interval: string, start?: string, end?: string, limit?: string) {
+    try {
+      const response =await firstValueFrom(
+          this.httpService.get('https://api.bybit.com/v5/market/kline', {
+            params: {
+              category: category,
+              symbol: symbol,
+              interval: interval,
+              start: start,
+              end: end,
+              limit: limit
+            },
+          })
+      );
+      if (response.data.retMsg === 'OK'){
+        return response.data.result.list;
+      }
+    } catch (error) {
+      this.logger.error("bybit api error: ",error);
+      return 'error';
+    }
+  }
 }

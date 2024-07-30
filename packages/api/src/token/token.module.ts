@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import {Logger, Module} from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { TokenController } from "./token.controller";
 import { TokenService } from "./token.service";
@@ -9,11 +9,12 @@ import { TransferModule } from "../transfer/transfer.module";
 import { Transfer } from "../transfer/transfer.entity";
 import { Balance } from "../balance/balance.entity";
 import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
+import { HttpModule } from "@nestjs/axios";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Token, Block, Transaction, Transfer, Balance, FetSqlRecordStatus]), TransferModule],
+  imports: [TypeOrmModule.forFeature([Token, Block, Transaction, Transfer, Balance, FetSqlRecordStatus]), TransferModule, HttpModule],
   controllers: [TokenController],
-  providers: [TokenService],
+  providers: [TokenService, Logger],
   exports: [TokenService],
 })
 export class TokenModule {}
