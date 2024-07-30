@@ -127,7 +127,7 @@ export class TokenController {
   @HttpCode(200)
   public async getDepositTransferHighestTvlRecordPost(@Req() req: any): Promise<any> {
     const { address, twitter, discord, telegram, email } = req.body;
-    
+
     try {
       const checkedAddr = getChecksumAddress(address);
       return {
@@ -271,6 +271,32 @@ export class TokenController {
     const ans =  await this.tokenService.getZkLinkLiquidityAmount();
     cache.set("zkLinkAmount",ans);
     return ans;
+  }
+
+  @Get("/market/kine")
+  public async getMarketKine(
+      @Query("category") category : string,
+      @Query("symbol") symbol: string,
+      @Query("interval") interval: string,
+      @Query("start") start?: string,
+      @Query("end") end?: string,
+      @Query("limit") limit?: string
+  ): Promise<string> {
+    const res = await this.tokenService.getFetchKlineData(category,symbol,interval,start,end,limit);
+    if (res === undefined || (typeof res === "string"&& res === 'error')){
+      return "get kine data error, check network and parameter";
+    }
+    return res.map((individuales) => {
+      return {
+        startTime: new Date(Number(individuales[0])).toISOString(),
+        openPrice: individuales[1],
+        highestPrice: individuales[2],
+        lowestPrice: individuales[3],
+        closePrice: individuales[4],
+        volume: individuales[5],
+        turnover: individuales[6]
+      }
+    });
   }
 
   @Get(":address")
