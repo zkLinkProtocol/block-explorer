@@ -716,7 +716,8 @@
     "transactions": "Transactions",
     "contract": "Contract",
     "events": "Events",
-    "transfers": "Transfers"
+    "transfers": "Transfers",
+    "holders": "Holders"
   },
   "contractInfoTabs": {
     "contract": "Contract",

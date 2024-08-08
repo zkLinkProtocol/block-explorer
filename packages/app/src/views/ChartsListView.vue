@@ -116,7 +116,7 @@ const setChart = (xData: any[],yData: string[],flag: boolean) => {
                 } else if (value < 1000000) {
                     return flag? ((value / 1000).toFixed(0) + 'K'):('$ '+(value / 1000).toFixed(0) + 'K');
                 } else {
-                    return flag? ((value / 1000000).toFixed(0) + 'M'):('$ '+(value / 1000000).toFixed(0) + 'M');
+                    return flag? ((value / 1000000).toFixed(1) + 'M'):('$ '+(value / 1000000).toFixed(1) + 'M');
                 }
             }
         }

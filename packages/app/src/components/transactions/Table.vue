@@ -268,7 +268,6 @@ const props = defineProps({
 const route = useRoute();
 const searchParams = computed(() => props.searchParams ?? {});
 const { data, load, total, pending, pageSize } = useTransactions(searchParams);
-
 const { getTokenInfo, tokenInfo, isRequestPending: isLoadingEthTokenInfo } = useToken();
 getTokenInfo(ETH_TOKEN_L2_ADDRESS);
 

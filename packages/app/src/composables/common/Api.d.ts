@@ -129,7 +129,10 @@ declare namespace Api {
         networkKey:string;
       };
     };
-
+    type Holder ={
+      balance: string;
+      address: string;
+    };
     type TokenAddress = {
       balance: string;
       token: null | Token;
