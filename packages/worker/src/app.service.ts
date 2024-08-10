@@ -15,6 +15,7 @@ import { HistoryService } from "./values/history.service";
 import { GatewayService } from "./values/gateway.service";
 import {DailyTransactionService} from "./values/dailyTransaction.service";
 import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndExcludedTokenUpdate.service";
+import { DailyMonitorZKLAmountService } from "./values/dailyMonitorZKLAmount.service";
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {
@@ -34,6 +35,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     private readonly gatewayService: GatewayService,
     private readonly dailyTransactionService: DailyTransactionService,
     private readonly excludeTokenUpdateService: ExternallyAndExcludeTokenUpdateService,
+    private readonly dailyMonitorZKLAmountService: DailyMonitorZKLAmountService,
   ) {
     this.logger = new Logger(AppService.name);
   }
@@ -85,6 +87,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       tasks.push(this.gatewayService.start());
       tasks.push(this.dailyTransactionService.start());
       tasks.push(this.excludeTokenUpdateService.start());
+      tasks.push(this.dailyMonitorZKLAmountService.start());
     }
     return Promise.all(tasks);
   }
@@ -101,6 +104,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       this.gatewayService.stop(),
       this.dailyTransactionService.stop(),
       this.excludeTokenUpdateService.stop(),
+      this.dailyMonitorZKLAmountService.stop(),
     ]);
   }
 }

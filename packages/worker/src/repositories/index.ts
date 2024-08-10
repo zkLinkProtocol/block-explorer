@@ -14,3 +14,4 @@ export * from "./counterState.repository";
 export * from "./tvlHistory.repository";
 export * from "./dailyTransactionHistory.repository";
 export * from "./fetSqlRecordStatus.repository";
+export * from "./monitAddressHistory.repository";

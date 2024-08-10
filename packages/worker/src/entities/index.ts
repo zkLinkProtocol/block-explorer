@@ -18,3 +18,4 @@ export * from "./dailyTxHistory.entity";
 export * from "./fetSqlRecordStatus.entity";
 export * from "./withdrawalTxAmount.entity";
 export * from "./uawAddress.entity";
+export * from "./monitAddressHistory.entity";

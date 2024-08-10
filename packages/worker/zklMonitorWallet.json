@@ -1,0 +1,218 @@
+[
+  {
+    "Address": "0x8d1f2ebfaccf1136db76fdd1b86f1dede2d23852",
+    "Owner": "Coinlist",
+    "Vested": "Y",
+    "Type": "vested"	,
+    "ZKL Amount":"21,881,543",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0x8d1f2ebfaccf1136db76fdd1b86f1dede2d23852",
+    "Owner": "Coinlist",
+    "Vested": "Y",
+    "Type": "vested",
+    "ZKL Amount": "21,881,543",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0x2dc1a672DC57CC8F115ff04ADE40d2E507E05609",
+    "Owner": "Treasury",
+    "Vested": "Y",
+    "Type": "vested",
+    "ZKL Amount": "41,120,000",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0xC9A3Cf506180757AcfCbE8D78B73E5335926e65B",
+    "Owner": "Treasury",
+    "Vested": "Y",
+    "Type": "vested",
+    "ZKL Amount": "199,000,000",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0x82C1889F00EfcDaB3Cde8Ce2DBAAEa57f8Dd6D0B",
+    "Owner": "Ecosystem Development",
+    "Vested": "Y",
+    "Type": "vested",
+    "ZKL Amount": "180,000,000",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0x223e33eBBD7005D5a7C6ef4BAA35eBd74C691D79",
+    "Owner": "Team/Advisors/Contractors",
+    "Vested": "Y",
+    "Type": "vested",
+    "ZKL Amount": "200,000,000",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0x262cac775BBe38f161275B5d25bD365B20a2Ed00",
+    "Owner": "Private Sale investor",
+    "Vested": "Y",
+    "Type": "vested",
+    "ZKL Amount": "205,000,001",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0x2123f6d10B580BAf5Eb25a16Bf62F2782cc514C6",
+    "Owner": "Liquidity provisioning",
+    "Vested": "Y",
+    "Type": "vested",
+    "ZKL Amount": "20,000,000",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0xFc9A15305cac5f42794deF87E63f19f0Eb6c4cFe",
+    "Owner": "Ecosystem Development",
+    "Vested": "N",
+    "Type": "TBD",
+    "ZKL Amount": "26,253,630",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0x293C68cE1e1E79aAA7880E7d41f5984fE1665Ee8",
+    "Owner": "Treasury(dev incentive & bug bounty , unvested）",
+    "Vested": "N",
+    "Type": "TBD",
+    "ZKL Amount": "12,000,000",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0xd0AF224641A7EA8CfC88Df6Ed2C7133C6bE16939",
+    "Owner": "Liquidity provisioning  (unvested)",
+    "Vested": "N",
+    "Type": "TBD",
+    "ZKL Amount": "8,240,000",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0x4C574Ff0aA0CAcB33142CBD7435ae5132CA1F66A",
+    "Owner": "zkjump (Bridge)",
+    "Vested": "N",
+    "Type": "Liquidity Bridge",
+    "ZKL Amount": "4,944,053",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0xf89d7b9c864f589bbF53a82105107622B35EaA40",
+    "Owner": "Bybit",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "18,150,941",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0xD1669Ac6044269b59Fa12c5822439F609Ca54F41",
+    "Owner": "Coinlist",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "4,655,415",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0x58edF78281334335EfFa23101bBe3371b6a36A51",
+    "Owner": "kucoin",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "1,260,098",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    "Owner": "Gate",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "894,642",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0x1AB4973a48dc892Cd9971ECE8e01DcC7688f8F23",
+    "Owner": "Bitget",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "887,557",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0x75e89d5979E4f6Fba9F97c104c2F0AFB3F1dcB88",
+    "Owner": "MEXC",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "741,412",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0x5569fd6991D1802dbeE9bDD67e763fe7be67C7a9",
+    "Owner": "Hashkey",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "943,617",
+    "Network": "Ethereum"
+  },
+  {
+    "Address": "0xf89d7b9c864f589bbF53a82105107622B35EaA40",
+    "Owner": "Bybit",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "10,952,508",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0x1AB4973a48dc892Cd9971ECE8e01DcC7688f8F23",
+    "Owner": "Bitget",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "1,928,433",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    "Owner": "Gate",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "1,144,435",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0xDFcB5Ead2a58b2873C1AdFdb9E313b14aaF6fb21",
+    "Owner": "Coinone",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "1,767,536",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0x76c7B2f0415a42945C1b2Ef086bbCfCff2F2178C",
+    "Owner": "kucoin",
+    "Vested": "N",
+    "Type": "CEX Wallet",
+    "ZKL Amount": "1,292,629",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0xd264f7001F84f25958041B6E622573460db1e8e2",
+    "Owner": "NovaDrop (S1 Nova Points Rewards)",
+    "Vested": "N",
+    "Type": "unclaimed tokens+Whales Vested",
+    "ZKL Amount": "12,807,363",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0x3c72958D94171Fb9C7F1AbD98EE3fF385a5E2f07",
+    "Owner": "NovaDrop (Loyalty Points Rewards)",
+    "Vested": "N",
+    "Type": "unclaimed tokens",
+    "ZKL Amount": "4,486,898",
+    "Network": "zkLink Nova"
+  },
+  {
+    "Address": "0xBc6c0Dd07E8CadC730b57ad96028D965ad391e45",
+    "Owner": "NovaDrop (Lynks NFT Rewards)",
+    "Vested": "N",
+    "Type": "unclaimed tokens",
+    "ZKL Amount": "1,467,687",
+    "Network": "zkLink Nova"
+  }
+]

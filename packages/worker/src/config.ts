@@ -1,3 +1,5 @@
+import {IMonitorAddress} from "./values/dailyMonitorZKLAmount.service";
+
 export type NetworkKey = string;
 import { config } from "dotenv";
 config();
@@ -10,6 +12,7 @@ const extraCoinsListPath = "../extraCoinsList.json";
 const extraTokenAttributesPath = "../extraTokenAttributes.json";
 const excludeCoinsListPath = "../excludeCoinsList.json";
 const externallyCoinsListPath = "../externallyCoinsList.json";
+const monitorAddressListPath = "../zklMonitorWallet.json";
 import { ChainId } from './types'
 import { ChainInfo, chainsFromEnvironments } from './conf/chains'
 export default async () => {
@@ -143,6 +146,9 @@ export default async () => {
       updateTvlHistoryInterval: parseInt(UPDATE_TVL_HISTORY_INTERVAL, 10) || 3600000,// 1 hour = 3600000
       enableTotalLockedValueUpdater: ENABLE_TOTAL_LOCKED_VALUE_UPDATER === "true",
     },
+    monitor: {
+      monitorAddressList: await getMonitorAddressList(),
+    },
     metrics: {
       collectDbConnectionPoolMetricsInterval: parseInt(COLLECT_DB_CONNECTION_POOL_METRICS_INTERVAL, 10) || 10000,
       collectBlocksToProcessMetricInterval: parseInt(COLLECT_BLOCKS_TO_PROCESS_METRIC_INTERVAL, 10) || 10000,
@@ -239,6 +245,24 @@ async function getExternallyCoinsList(): Promise<IExcludedToken[]> {
   return (res as IExcludedToken[]).map((item) => ({
     ...item,
     address: item.address.toLowerCase(),
+  }));
+}
+async function getMonitorAddressList(): Promise<IMonitorAddress[]> {
+  const readStream = fs.createReadStream(path.join(__dirname, monitorAddressListPath));
+  const jsonStream = JSONStream.parse("*");
+
+  readStream.pipe(jsonStream);
+  const res = [];
+  await new Promise((resolve, reject) => {
+    jsonStream.on("data", (item: any) => {
+      res.push(item);
+    });
+
+    jsonStream.on("end", resolve);
+    jsonStream.on("error", reject);
+  });
+  return (res as IMonitorAddress[]).map((item) => ({
+    ...item,
   }));
 }
 interface ITokenListItemProviderResponse {

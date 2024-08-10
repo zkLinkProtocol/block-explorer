@@ -60,4 +60,21 @@ export class BalanceRepository extends BaseRepository<Balance> {
     const transactionManager = this.unitOfWork.getTransactionManager();
     await transactionManager.query(`SELECT setval('"deleteBalances_fromBlockNumber"', $1, false);`, [fromBlockNumber]);
   }
+
+  public async findOne(address: string, tokenAddress: string){
+    const transactionManager = this.unitOfWork.getTransactionManager();
+    const result = await transactionManager.findOne(this.entityTarget,{
+      where: {
+        address,
+        tokenAddress,
+      },
+      select: {
+        balance: true,
+      },
+      order: {
+        blockNumber: "DESC",
+      },
+    });
+    return result?.balance || "0" ;
+  }
 }

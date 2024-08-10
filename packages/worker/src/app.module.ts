@@ -35,6 +35,7 @@ import {
   TVLHistoryRepository,
   DailyTransactionHistoryRepository,
   FetSqlRecordStatusRepository,
+  MonitAddressHistoryRepository,
 } from "./repositories";
 import {
   Batch,
@@ -65,6 +66,7 @@ import { HistoryService } from "./values/history.service";
 import { GatewayService } from "./values/gateway.service";
 import { DailyTransactionService } from "./values/dailyTransaction.service";
 import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndExcludedTokenUpdate.service";
+import { DailyMonitorZKLAmountService } from "./values/dailyMonitorZKLAmount.service";
 
 @Module({
   imports: [
@@ -142,6 +144,7 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
     BalanceRepository,
     LogRepository,
     FetSqlRecordStatusRepository,
+    MonitAddressHistoryRepository,
     BlocksRevertService,
     BatchService,
     BlockProcessor,
@@ -155,6 +158,7 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
     HistoryService,
     GatewayService,
     DailyTransactionService,
+    DailyMonitorZKLAmountService,
     ExternallyAndExcludeTokenUpdateService,
   ],
 })
