@@ -87,7 +87,6 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       tasks.push(this.gatewayService.start());
       tasks.push(this.dailyTransactionService.start());
       tasks.push(this.excludeTokenUpdateService.start());
-      tasks.push(this.dailyMonitorZKLAmountService.start());
     }
     return Promise.all(tasks);
   }
@@ -104,7 +103,6 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       this.gatewayService.stop(),
       this.dailyTransactionService.stop(),
       this.excludeTokenUpdateService.stop(),
-      this.dailyMonitorZKLAmountService.stop(),
     ]);
   }
 }

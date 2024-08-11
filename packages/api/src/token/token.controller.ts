@@ -16,7 +16,7 @@ import { PagingOptionsDto, PagingOptionsWithMaxItemsLimitDto } from "../common/d
 import { ApiListPageOkResponse } from "../common/decorators/apiListPageOkResponse";
 import { TokenService } from "./token.service";
 import { TransferService } from "../transfer/transfer.service";
-import { TokenBalance, TokenDto } from "./token.dto";
+import { MonitorHistory, TokenBalance, TokenDto } from "./token.dto";
 import { TransferDto } from "../transfer/transfer.dto";
 import { ParseLimitedIntPipe } from "../common/pipes/parseLimitedInt.pipe";
 import { ParseAddressPipe, ADDRESS_REGEX_PATTERN } from "../common/pipes/parseAddress.pipe";
@@ -270,6 +270,29 @@ export class TokenController {
     }
     const ans =  await this.tokenService.getZkLinkLiquidityAmount();
     cache.set("zkLinkAmount",ans);
+    return ans;
+  }
+
+  @ApiOperation({
+    summary: "ZKL token hold monitor",
+  })
+  @ApiBadRequestResponse({ description: "Api error" })
+  @ApiNotFoundResponse({ description: "monitor now does not have data" })
+  @Get("/monitor/list")
+  public async getMonitorList(
+  ) {
+    const cacheResult = cache.get("Monitor") as MonitorHistory[];
+    if (cacheResult) {
+      return cacheResult;
+    }
+    const everyDayMonitorList = await this.tokenService.getMonitorList();
+    const ans = everyDayMonitorList.map((t) =>{
+      return {
+        ...t,
+        address: normalizeAddressTransformer.from(t.address)
+      }
+    });
+    cache.set("Monitor",ans);
     return ans;
   }
 

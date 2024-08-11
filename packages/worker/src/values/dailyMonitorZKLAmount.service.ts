@@ -5,7 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import { BigNumber, ethers } from "ethers";
 import { networkChainIdMap } from "../config";
 import { providerByChainId } from "../utils/providers";
-import waitFor from "../utils/waitFor";
+import { Cron } from "@nestjs/schedule";
 
 export interface IMonitorAddress {
     "Address": string,
@@ -18,7 +18,6 @@ export interface IMonitorAddress {
 @Injectable()
 export class DailyMonitorZKLAmountService extends Worker {
     private readonly logger: Logger;
-    private readonly updateMonitorZKLHistoryInterval: number
     configService: ConfigService;
     private readonly monitorAddressList :IMonitorAddress[];
     public constructor(
@@ -29,9 +28,13 @@ export class DailyMonitorZKLAmountService extends Worker {
         super();
         this.logger = new Logger(DailyMonitorZKLAmountService.name);
         this.monitorAddressList = configService.get<IMonitorAddress[]>("monitor.monitorAddressList");
-        this.updateMonitorZKLHistoryInterval = 6 * 1000 ;//60 * 60 * 1000;
     }
 
+    @Cron('0 40 * * * *', { name: 'daily-monitor-task', timeZone: 'UTC' })
+    async handleDailyTransactionService() {
+        this.logger.log('Daily monitor task executed ');
+        await this.runProcess();
+    }
     protected async runProcess(): Promise<void> {
         try {
             await this.recordDailyZKLAmount();
@@ -41,15 +44,6 @@ export class DailyMonitorZKLAmountService extends Worker {
                 originalError: err,
             });
         }
-
-
-
-        await waitFor(() => !this.currentProcessPromise, this.updateMonitorZKLHistoryInterval);
-        if (!this.currentProcessPromise) {
-            return;
-        }
-
-        return this.runProcess();
     }
 
     private async recordDailyZKLAmount(): Promise<void> {
@@ -58,20 +52,15 @@ export class DailyMonitorZKLAmountService extends Worker {
         let records = [];
         for (let i = 0;i<this.monitorAddressList.length;i++){
             const amount = await this.getTodayZKLAmountByAddress(this.monitorAddressList[i].Address,zklNovaAddress,zklEthAddress,this.monitorAddressList[i].Network);
+            const time = new Date();
+            const timeStr = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate();
+            const preAmount = await this.monitAddressHistoryRepository.findYesterdayLastZKLAmount(this.monitorAddressList[i].Address,this.monitorAddressList[i].Network,timeStr);
+            const nowAmount = BigNumber.from(amount);
+            const changeAmount = BigNumber.from(nowAmount).sub(preAmount);
             records.push({
                 address: this.monitorAddressList[i].Address,
-                zklAmount: BigNumber.from(amount),
-                change: BigNumber.from(0),
-                timestamp: new Date(),
-                owner: this.monitorAddressList[i].Owner,
-                vested: this.monitorAddressList[i].Vested,
-                type: this.monitorAddressList[i].Type,
-                network: this.monitorAddressList[i].Network,
-            });
-            await this.monitAddressHistoryRepository.add({
-                address: this.monitorAddressList[i].Address,
-                zklAmount: BigNumber.from(amount),
-                change: BigNumber.from(0),
+                zklAmount: nowAmount,
+                change: changeAmount,
                 timestamp: new Date(),
                 owner: this.monitorAddressList[i].Owner,
                 vested: this.monitorAddressList[i].Vested,
@@ -79,21 +68,20 @@ export class DailyMonitorZKLAmountService extends Worker {
                 network: this.monitorAddressList[i].Network,
             });
         }
-        console.log(records);
-        try {
-            await this.monitAddressHistoryRepository.addMany(records);
-        }catch (error){
-            console.log("monitor error",error);
-        }
+        await this.monitAddressHistoryRepository.addMany(records);
     }
 
     private async getTodayZKLAmountByAddress(address: string, tokenNovaAddress: string, tokenEthAddress: string ,network: string){
         if (network.toLowerCase() === 'zkLink Nova'.toLowerCase()){
-            // console.log("nova zkl amount",ans," address: ",address);
             return await this.balanceRepository.findOne(address, tokenNovaAddress) ;
         }else if (network.toLowerCase() === 'Ethereum'.toLowerCase()){
-            // console.log("ethereum zkl amount",ans," address: ",address);
-            return await this.getTokenOtherChainZKLAmount(address, tokenEthAddress, network);
+            const preAmount = await this.monitAddressHistoryRepository.findYesterdayLastZKLAmount(address,network);
+            const result =  await this.getTokenOtherChainZKLAmount(address, tokenEthAddress, network);
+            if (result === "networkError"){
+                return preAmount;
+            }else {
+                return result;
+            }
         }
     }
     private async getTokenOtherChainZKLAmount(address: string, tokenAddress: string, network: string): Promise<string> {
@@ -111,7 +99,7 @@ export class DailyMonitorZKLAmountService extends Worker {
                 return "0";
             }
         }catch (error){
-            return "0";
+            return "networkError";
         }
     }
 }

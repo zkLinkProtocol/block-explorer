@@ -53,6 +53,7 @@ import {
   DailyTxHistory,
   FetSqlRecordStatus,
   WithdrawalTxAmount,
+  MonitAddressHistory,
 } from "./entities";
 import { typeOrmModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -100,6 +101,7 @@ import { DailyMonitorZKLAmountService } from "./values/dailyMonitorZKLAmount.ser
       DailyTxHistory,
       FetSqlRecordStatus,
       WithdrawalTxAmount,
+      MonitAddressHistory,
     ]),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),

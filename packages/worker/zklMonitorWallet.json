@@ -3,14 +3,6 @@
     "Address": "0x8d1f2ebfaccf1136db76fdd1b86f1dede2d23852",
     "Owner": "Coinlist",
     "Vested": "Y",
-    "Type": "vested"	,
-    "ZKL Amount":"21,881,543",
-    "Network": "Ethereum"
-  },
-  {
-    "Address": "0x8d1f2ebfaccf1136db76fdd1b86f1dede2d23852",
-    "Owner": "Coinlist",
-    "Vested": "Y",
     "Type": "vested",
     "ZKL Amount": "21,881,543",
     "Network": "Ethereum"
