@@ -30,7 +30,7 @@ export class DailyMonitorZKLAmountService extends Worker {
         this.monitorAddressList = configService.get<IMonitorAddress[]>("monitor.monitorAddressList");
     }
 
-    @Cron('0 40 * * * *', { name: 'daily-monitor-task', timeZone: 'UTC' })
+    @Cron('0 30 * * * *', { name: 'daily-monitor-task', timeZone: 'UTC' })
     async handleDailyTransactionService() {
         this.logger.log('Daily monitor task executed ');
         await this.runProcess();
