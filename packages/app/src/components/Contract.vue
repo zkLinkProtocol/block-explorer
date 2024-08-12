@@ -66,9 +66,12 @@
         <TransfersTable :address="contract.address" />
       </template>
       <template #tab-3-content>
-        <ContractInfoTab :contract="contract" />
+        <HoldersTable  :address="contract.address" />
       </template>
       <template #tab-4-content>
+        <ContractInfoTab :contract="contract" />
+      </template>
+      <template #tab-5-content>
         <ContractEvents :contract="contract" />
       </template>
     </Tabs>
@@ -91,6 +94,7 @@ import TransactionEmptyState from "@/components/contract/TransactionEmptyState.v
 import ContractEvents from "@/components/event/ContractEvents.vue";
 import TransactionsTable from "@/components/transactions/Table.vue";
 import TransfersTable from "@/components/transfers/Table.vue";
+import HoldersTable from "@/components/transfers/holders.vue";
 
 import type { BreadcrumbItem } from "@/components/common/Breadcrumbs.vue";
 import type { Contract } from "@/composables/useAddress";
@@ -118,6 +122,7 @@ const props = defineProps({
 const tabs = computed(() => [
   { title: t("tabs.transactions"), hash: "#transactions" },
   { title: t("tabs.transfers"), hash: "#transfers" },
+  { title: t("tabs.holders"), hash: "#holders" },
   { title: t("tabs.contract"), hash: "#contract" },
   { title: t("tabs.events"), hash: "#events" },
 ]);
