@@ -35,6 +35,7 @@ import {
   TVLHistoryRepository,
   DailyTransactionHistoryRepository,
   FetSqlRecordStatusRepository,
+  MonitAddressHistoryRepository,
 } from "./repositories";
 import {
   Batch,
@@ -52,6 +53,7 @@ import {
   DailyTxHistory,
   FetSqlRecordStatus,
   WithdrawalTxAmount,
+  MonitAddressHistory,
 } from "./entities";
 import { typeOrmModuleOptions } from "./typeorm.config";
 import { JsonRpcProviderModule } from "./rpcProvider/jsonRpcProvider.module";
@@ -65,6 +67,7 @@ import { HistoryService } from "./values/history.service";
 import { GatewayService } from "./values/gateway.service";
 import { DailyTransactionService } from "./values/dailyTransaction.service";
 import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndExcludedTokenUpdate.service";
+import { DailyMonitorZKLAmountService } from "./values/dailyMonitorZKLAmount.service";
 
 @Module({
   imports: [
@@ -98,6 +101,7 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
       DailyTxHistory,
       FetSqlRecordStatus,
       WithdrawalTxAmount,
+      MonitAddressHistory,
     ]),
     EventEmitterModule.forRoot(),
     JsonRpcProviderModule.forRoot(),
@@ -142,6 +146,7 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
     BalanceRepository,
     LogRepository,
     FetSqlRecordStatusRepository,
+    MonitAddressHistoryRepository,
     BlocksRevertService,
     BatchService,
     BlockProcessor,
@@ -155,6 +160,7 @@ import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndEx
     HistoryService,
     GatewayService,
     DailyTransactionService,
+    DailyMonitorZKLAmountService,
     ExternallyAndExcludeTokenUpdateService,
   ],
 })

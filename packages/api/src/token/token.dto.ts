@@ -113,3 +113,58 @@ export class TokenBalance {
   })
   public readonly balance: string;
 }
+
+export class MonitorHistory {
+
+  @ApiProperty({
+    type: String,
+    description: "address",
+    example: "0xd754Ff5e8a6f257E162F72578A4bB0493c0681d8",
+  })
+  public readonly address: string;
+
+  @ApiProperty({
+    type: String,
+    description: "balance",
+    example: "1000000000000000000",
+  })
+  public readonly zklAmount: string;
+
+  @ApiProperty({
+    type: String,
+    description: "change than pre monitor day",
+    example: "1000000000000000000",
+  })
+  public readonly change: string;
+
+  @ApiProperty({
+    type: String,
+    description: "monitor timestamp",
+    example: "",
+  })
+  public readonly timestamp: string;
+
+  @ApiProperty({
+    type: String,
+    description: "address network",
+    example: "zkLink Nova",
+  })
+  public readonly network: string;
+
+  @ApiProperty({
+    type: String,
+    description: "address tage",
+    example: "Gate",
+  })
+  public readonly owner: string;
+
+  @ApiProperty({
+    type: String,
+  })
+  public readonly vested: string;
+
+  @ApiProperty({
+    type: String,
+  })
+  public readonly type: string;
+}

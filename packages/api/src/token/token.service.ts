@@ -13,6 +13,7 @@ import { normalizeAddressTransformer } from "src/common/transformers/normalizeAd
 import { withdrawalTransferAmountSQLName } from "../historyToken/SQLqueries.service";
 import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
 import { timeLineSupplyCirculatingList } from "./timeLineSupplyCirculatingList";
+import { MonitAddressHistory } from "../historyToken/entities/monitAddressHistory.entity";
 import { firstValueFrom } from "rxjs";
 
 // const options: LRU. = { max: 500 };
@@ -56,6 +57,8 @@ export class TokenService {
     private readonly fetSqlRecordStatusRepository: Repository<FetSqlRecordStatus>,
     @InjectRepository(Balance)
     private readonly balanceRepository: Repository<Balance>,
+    @InjectRepository(MonitAddressHistory)
+    private readonly monitAddressHistoryRepository: Repository<MonitAddressHistory>,
     private readonly httpService: HttpService,
     private readonly logger: Logger
   ) {
@@ -271,5 +274,37 @@ select address, "balanceNum" from
       this.logger.error("bybit api error: ",error);
       return 'error';
     }
+  }
+  public async getMonitorList(){
+    return await this.monitAddressHistoryRepository.query(`WITH RankedHistory AS (
+        SELECT
+        address,
+        "zklAmount",
+        change,
+        "timestamp",
+        network,
+        owner,
+        vested,
+        type,
+        ROW_NUMBER() OVER (
+        PARTITION BY DATE_TRUNC('day', "timestamp"), address, owner, network
+    ORDER BY "timestamp" DESC
+  ) AS rn
+    FROM
+  public."monitAddressHistory"
+  )
+    SELECT
+        address,
+        "zklAmount",
+        change,
+        "timestamp",
+        network,
+        owner,
+        vested,
+        type
+    FROM
+    RankedHistory
+    WHERE
+    rn = 1;`);
   }
 }

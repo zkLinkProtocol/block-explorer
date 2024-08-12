@@ -10,9 +10,10 @@ import { Transfer } from "../transfer/transfer.entity";
 import { Balance } from "../balance/balance.entity";
 import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.entity";
 import { HttpModule } from "@nestjs/axios";
+import { MonitAddressHistory } from "../historyToken/entities/monitAddressHistory.entity";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Token, Block, Transaction, Transfer, Balance, FetSqlRecordStatus]), TransferModule, HttpModule],
+  imports: [TypeOrmModule.forFeature([Token, Block, Transaction, Transfer, Balance, FetSqlRecordStatus, MonitAddressHistory]), TransferModule, HttpModule],
   controllers: [TokenController],
   providers: [TokenService, Logger],
   exports: [TokenService],
