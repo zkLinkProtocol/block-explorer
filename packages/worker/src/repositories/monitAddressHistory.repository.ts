@@ -9,12 +9,13 @@ export class MonitAddressHistoryRepository extends BaseRepository<MonitAddressHi
   public constructor(unitOfWork: UnitOfWork) {
     super(MonitAddressHistory, unitOfWork);
   }
-  public async findYesterdayLastZKLAmount(address :string, network :string, time? :string){
+  public async findYesterdayLastZKLAmount(address :string, network :string, owner :string, time? :string){
     const transactionManager = this.unitOfWork.getTransactionManager();
     const result = time? await transactionManager.findOne(this.entityTarget,{
       where:{
         address,
         network,
+        owner,
         timestamp: LessThanOrEqual(new Date(time))
       },
       order:{
@@ -25,6 +26,7 @@ export class MonitAddressHistoryRepository extends BaseRepository<MonitAddressHi
           where:{
             address,
             network,
+            owner
           },
           order:{
             timestamp: "DESC"
