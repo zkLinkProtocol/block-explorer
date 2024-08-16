@@ -148,6 +148,7 @@ export default async () => {
     },
     monitor: {
       monitorAddressList: await getMonitorAddressList(),
+      chainBaseApiKey: process.env['CHAIN_BASE_API_KEY'],
     },
     metrics: {
       collectDbConnectionPoolMetricsInterval: parseInt(COLLECT_DB_CONNECTION_POOL_METRICS_INTERVAL, 10) || 10000,
