@@ -321,9 +321,9 @@ export class TokenController {
   @Get("/monitor/list/download")
   public async getMonitorListDownload(
   ) {
-    const cacheResult = cache.get("Monitor") as MonitorHistory[];
+    const cacheResult = cache.get("Monitor") as any;
     if (cacheResult) {
-      return cacheResult;
+      return new StreamableFile(cacheResult);
     }
     const everyDayMonitorList = await this.tokenService.getMonitorList();
     const ans = everyDayMonitorList.map((t) =>{
@@ -371,6 +371,7 @@ export class TokenController {
     const worksheet = XLSX.utils.json_to_sheet(data);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
     const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+    cache.set("Monitor",buffer);
     return new StreamableFile(buffer);
   }
 
