@@ -44,7 +44,7 @@ import * as XLSX from 'xlsx';
 
 const options = {
   // how long to live in ms
-  ttl: 1000 * 60 * 60,
+  ttl: 1000 * 60 ,
   // return stale items before removing from cache?
   allowStale: false,
   ttlAutopurge: true,
@@ -304,6 +304,12 @@ export class TokenController {
         address: normalizeAddressTransformer.from(t.address)
       }
     });
+    const lastMonitorList = await this.tokenService.getMonitLast();
+    for (const t of lastMonitorList) {
+      ans.push({
+        ...t
+      });
+    }
     cache.set("Monitor",ans);
     return ans;
   }
@@ -332,7 +338,12 @@ export class TokenController {
         address: normalizeAddressTransformer.from(t.address)
       }
     });
-    cache.set("Monitor",ans);
+    const lastMonitorList = await this.tokenService.getMonitLast();
+    for (const t of lastMonitorList) {
+      ans.push({
+        ...t
+      });
+    }
     const data = [];
     const ownerSet = new Set<string>();
     const timeStrSet = new Set<string>();
