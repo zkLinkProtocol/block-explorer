@@ -15,6 +15,7 @@ import { FetSqlRecordStatus } from "../historyToken/entities/fetSqlRecordStatus.
 import { timeLineSupplyCirculatingList } from "./timeLineSupplyCirculatingList";
 import { MonitAddressHistory } from "../historyToken/entities/monitAddressHistory.entity";
 import { firstValueFrom } from "rxjs";
+import { MonitAddressLast } from "../historyToken/entities/monitAddressLast.entity";
 
 // const options: LRU. = { max: 500 };
 const options = {
@@ -59,11 +60,14 @@ export class TokenService {
     private readonly balanceRepository: Repository<Balance>,
     @InjectRepository(MonitAddressHistory)
     private readonly monitAddressHistoryRepository: Repository<MonitAddressHistory>,
+    @InjectRepository(MonitAddressLast)
+    private readonly monitAddressLastRepository: Repository<MonitAddressLast>,
     private readonly httpService: HttpService,
-    private readonly logger: Logger
+    private readonly logger: Logger,
   ) {
     this.logger = new Logger(TokenService.name);
   }
+
 
   public async findOne(address: string, fields?: FindOptionsSelect<Token>): Promise<Token> {
     const token = await this.tokenRepository.findOne({
@@ -306,5 +310,9 @@ select address, "balanceNum" from
     RankedHistory
     WHERE
     rn = 1;`);
+  }
+
+  public async getMonitLast(){
+    return await this.monitAddressLastRepository.find({});
   }
 }

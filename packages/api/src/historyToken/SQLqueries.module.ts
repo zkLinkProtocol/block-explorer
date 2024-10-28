@@ -7,10 +7,11 @@ import { FetSqlRecordStatus } from "./entities/fetSqlRecordStatus.entity";
 import { UawAddress } from "./entities/uawAddress.entity";
 import { AddressTransaction } from "../transaction/entities/addressTransaction.entity";
 import { MonitAddressHistory } from "./entities/monitAddressHistory.entity";
+import { MonitAddressLast } from "./entities/monitAddressLast.entity";
 
 @Module({
   imports: [
-      TypeOrmModule.forFeature([WithdrawalTxAmount, FetSqlRecordStatus, Transfer, UawAddress, AddressTransaction, MonitAddressHistory]),
+      TypeOrmModule.forFeature([WithdrawalTxAmount, FetSqlRecordStatus, Transfer, UawAddress, AddressTransaction, MonitAddressHistory, MonitAddressLast]),
   ],
   providers: [SQLQueriesService],
   exports: [SQLQueriesService],

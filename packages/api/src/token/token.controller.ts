@@ -1,4 +1,15 @@
-import { Controller, Get, Param, NotFoundException, Query, Post, HttpCode, Req } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Param,
+  NotFoundException,
+  Query,
+  Post,
+  HttpCode,
+  Req,
+  StreamableFile,
+  Header
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiParam,
@@ -29,10 +40,11 @@ import { getHistoryTokenList } from "../configureApp";
 import * as fs from "fs";
 import * as path from "path";
 import {DateDto} from "../common/dtos/date.dto";
+import * as XLSX from 'xlsx';
 
 const options = {
   // how long to live in ms
-  ttl: 1000 * 60 * 60,
+  ttl: 1000 * 60 ,
   // return stale items before removing from cache?
   allowStale: false,
   ttlAutopurge: true,
@@ -292,8 +304,86 @@ export class TokenController {
         address: normalizeAddressTransformer.from(t.address)
       }
     });
+    const lastMonitorList = await this.tokenService.getMonitLast();
+    for (const t of lastMonitorList) {
+      ans.push({
+        ...t
+      });
+    }
     cache.set("Monitor",ans);
     return ans;
+  }
+
+  @ApiOperation({
+    summary: "ZKL token hold monitor",
+  })
+  @ApiBadRequestResponse({ description: "Api error" })
+  @ApiNotFoundResponse({ description: "monitor now does not have data" })
+  @Header(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @Header('Content-Disposition', 'attachment; filename="result.xlsx"')
+  @Get("/monitor/list/download")
+  public async getMonitorListDownload(
+  ) {
+    const cacheResult = cache.get("Monitor") as any;
+    if (cacheResult) {
+      return new StreamableFile(cacheResult);
+    }
+    const everyDayMonitorList = await this.tokenService.getMonitorList();
+    const ans = everyDayMonitorList.map((t) =>{
+      return {
+        ...t,
+        address: normalizeAddressTransformer.from(t.address)
+      }
+    });
+    const lastMonitorList = await this.tokenService.getMonitLast();
+    for (const t of lastMonitorList) {
+      ans.push({
+        ...t
+      });
+    }
+    const data = [];
+    const ownerSet = new Set<string>();
+    const timeStrSet = new Set<string>();
+    const ownerMap = new Map<string,Map<string,string>>();
+    for (const t of ans) {
+      const time = new Date(t.timestamp);
+      const timeStr = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate();
+      const name = t.owner + '_' + t.network;
+      if (!ownerMap.has(timeStr)){
+        ownerMap.set(timeStr,new Map());
+      }
+      if (ownerMap.get(timeStr)?.has(name)){
+        const amount = BigNumber.from(ownerMap.get(timeStr)!.get(name)).add(t.zklAmount);
+        ownerMap.get(timeStr)!.set(name,amount.toString());
+      }else {
+        ownerMap.get(timeStr)!.set(name,t.zklAmount);
+      }
+      ownerSet.add(name);
+      timeStrSet.add(timeStr);
+    }
+    const ownerList = [' '];
+    for (const owner of ownerSet) {
+      ownerList.push(owner);
+    }
+    for (const timeStr of timeStrSet) {
+      const amountList = [];
+      amountList.push(timeStr);
+      for (const owner of ownerSet) {
+        const value = ownerMap.get(timeStr)?.get(owner);
+        amountList.push(value);
+      }
+      data.push(amountList);
+    }
+    data.unshift(ownerList);
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+    cache.set("Monitor",buffer);
+    return new StreamableFile(buffer);
   }
 
   @Get("/market/kine")
