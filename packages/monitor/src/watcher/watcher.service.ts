@@ -312,7 +312,9 @@ export class MonitorZKLAmountService implements OnModuleInit {
                 }
             }
 
-            if (BigNumber.from(ethZklTransferElement.value) > BigNumber.from(monitorZKLValue)){
+            const transferAmount = BigNumber.from(ethZklTransferElement.value);
+            const zKLValue = BigNumber.from(monitorZKLValue);
+            if (transferAmount.gte(zKLValue)){
                 let from = ethZklTransferElement.from_address;
                 if (monitAddressConfig){
                     from += '  ' + monitAddressConfig.owner;
@@ -416,7 +418,9 @@ export class MonitorZKLAmountService implements OnModuleInit {
                     await this.monitAddressLastRepository.updataAmount(monitorLastCEXTotalUser.address,monitorLastCEXTotalUser.owner,monitorLastCEXTotalUser.network,monitorLastCEXTotalUser.zklAmount.add(BigNumber.from(zklAmount)),monitorLastCEXTotalUser.change.add(BigNumber.from(zklAmount)));
                 }
             }
-            if (BigNumber.from(novaZklTransferElement.transfers_amount) > BigNumber.from(monitorZKLValue)){
+            const transferAmount = BigNumber.from(novaZklTransferElement.transfers_amount);
+            const zKLValue = BigNumber.from(monitorZKLValue);
+            if (transferAmount.gte(zKLValue)){
                 let from = fromAddress;
                 if (monitAddressConfig){
                     from += '  ' + monitAddressConfig.owner;
