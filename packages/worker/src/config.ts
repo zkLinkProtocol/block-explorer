@@ -1,4 +1,3 @@
-import {IMonitorAddress} from "./values/dailyMonitorZKLAmount.service";
 
 export type NetworkKey = string;
 import { config } from "dotenv";
@@ -147,7 +146,6 @@ export default async () => {
       enableTotalLockedValueUpdater: ENABLE_TOTAL_LOCKED_VALUE_UPDATER === "true",
     },
     monitor: {
-      monitorAddressList: await getMonitorAddressList(),
       chainBaseApiKey: process.env['CHAIN_BASE_API_KEY'],
     },
     metrics: {
@@ -246,24 +244,6 @@ async function getExternallyCoinsList(): Promise<IExcludedToken[]> {
   return (res as IExcludedToken[]).map((item) => ({
     ...item,
     address: item.address.toLowerCase(),
-  }));
-}
-async function getMonitorAddressList(): Promise<IMonitorAddress[]> {
-  const readStream = fs.createReadStream(path.join(__dirname, monitorAddressListPath));
-  const jsonStream = JSONStream.parse("*");
-
-  readStream.pipe(jsonStream);
-  const res = [];
-  await new Promise((resolve, reject) => {
-    jsonStream.on("data", (item: any) => {
-      res.push(item);
-    });
-
-    jsonStream.on("end", resolve);
-    jsonStream.on("error", reject);
-  });
-  return (res as IMonitorAddress[]).map((item) => ({
-    ...item,
   }));
 }
 interface ITokenListItemProviderResponse {
