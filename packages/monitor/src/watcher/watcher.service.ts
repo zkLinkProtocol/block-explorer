@@ -416,7 +416,7 @@ export class MonitorZKLAmountService implements OnModuleInit {
                     await this.monitAddressLastRepository.updataAmount(monitorLastCEXTotalUser.address,monitorLastCEXTotalUser.owner,monitorLastCEXTotalUser.network,monitorLastCEXTotalUser.zklAmount.add(BigNumber.from(zklAmount)),monitorLastCEXTotalUser.change.add(BigNumber.from(zklAmount)));
                 }
             }
-            if (BigNumber.from(novaZklTransferElement.value) > BigNumber.from(monitorZKLValue)){
+            if (BigNumber.from(novaZklTransferElement.transfers_amount) > BigNumber.from(monitorZKLValue)){
                 let from = fromAddress;
                 if (monitAddressConfig){
                     from += '  ' + monitAddressConfig.owner;
