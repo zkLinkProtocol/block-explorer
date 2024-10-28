@@ -67,7 +67,6 @@ import { HistoryService } from "./values/history.service";
 import { GatewayService } from "./values/gateway.service";
 import { DailyTransactionService } from "./values/dailyTransaction.service";
 import { ExternallyAndExcludeTokenUpdateService } from "./values/externallyAndExcludedTokenUpdate.service";
-import { DailyMonitorZKLAmountService } from "./values/dailyMonitorZKLAmount.service";
 
 @Module({
   imports: [
@@ -160,7 +159,6 @@ import { DailyMonitorZKLAmountService } from "./values/dailyMonitorZKLAmount.ser
     HistoryService,
     GatewayService,
     DailyTransactionService,
-    DailyMonitorZKLAmountService,
     ExternallyAndExcludeTokenUpdateService,
   ],
 })
