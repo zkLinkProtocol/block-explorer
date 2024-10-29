@@ -243,7 +243,7 @@ export class MonitorZKLAmountService implements OnModuleInit {
 
         const ethZklTransfer = await this.getOtherChainZKLTransfers(this.zklEthAddress,ethLookBlockNumber.toString(),ethNowBlockNumber.toString(),'Ethereum');
         ethZklTransfer.reverse();
-        this.logger.log("from",ethLookBlockNumber.toString(),"to",ethNowBlockNumber.toString(),"len:",ethZklTransfer.length);
+        this.logger.log(`from,${ethLookBlockNumber.toString()},to ${ethNowBlockNumber.toString()},len: ${ethZklTransfer.length}`);
         for (const ethZklTransferElement of ethZklTransfer) {
             //from
             const monitAddressConfig = await this.monitAddressConfigListRepository.findOneBy({
@@ -314,7 +314,7 @@ export class MonitorZKLAmountService implements OnModuleInit {
 
             const transferAmount = BigNumber.from(ethZklTransferElement.value);
             const zKLValue = BigNumber.from(monitorZKLValue);
-            this.logger.log("amount:",transferAmount.toString(),"look value:",zKLValue.toString());
+            this.logger.log(`amount: ${transferAmount.toString()},look value:,${zKLValue.toString()}`);
             if (transferAmount.gte(zKLValue)){
                 let from = ethZklTransferElement.from_address;
                 if (monitAddressConfig){
@@ -421,7 +421,7 @@ export class MonitorZKLAmountService implements OnModuleInit {
             }
             const transferAmount = BigNumber.from(novaZklTransferElement.transfers_amount);
             const zKLValue = BigNumber.from(monitorZKLValue);
-            this.logger.log("amount:",transferAmount.toString(),"look value:",zKLValue.toString());
+            this.logger.log(`amount: ${transferAmount.toString()},look value:,${zKLValue.toString()}`);
             if (transferAmount.gte(zKLValue)){
                 let from = fromAddress;
                 if (monitAddressConfig){
