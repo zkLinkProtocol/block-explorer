@@ -313,7 +313,6 @@ export class MonitorZKLAmountService implements OnModuleInit {
 
             const transferAmount = BigNumber.from(ethZklTransferElement.value);
             const zKLValue = BigNumber.from(monitorZKLValue);
-            this.logger.log(`eth amount: ${transferAmount.toString()},look value:,${zKLValue.toString()}`);
             if (transferAmount.gte(zKLValue)){
                 let from = ethZklTransferElement.from_address;
                 if (monitAddressConfig){
