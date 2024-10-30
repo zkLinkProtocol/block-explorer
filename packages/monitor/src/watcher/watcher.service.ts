@@ -236,6 +236,7 @@ export class MonitorZKLAmountService implements OnModuleInit {
         if (ethNowBlockNumber === "networkError"){
             ethNowBlockNumber = ethLookBlockNumber;
         }
+        ethNowBlockNumber = Number(ethNowBlockNumber) - 3 ;
         const ethMaxLookBlockNumber = ethLookBlockNumber + 500;
         if (ethNowBlockNumber > ethMaxLookBlockNumber){
             ethNowBlockNumber = ethMaxLookBlockNumber;
