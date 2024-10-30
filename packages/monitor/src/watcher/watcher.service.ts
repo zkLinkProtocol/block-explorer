@@ -76,6 +76,9 @@ export class MonitorZKLAmountService implements OnModuleInit {
     }
     async onModuleInit() {
         this.logger.log('monitor service init');
+        if (this.needInit){
+            await this.monitorInit();
+        }
         this.runProcess();
     }
 
@@ -102,9 +105,6 @@ export class MonitorZKLAmountService implements OnModuleInit {
 
     protected async runProcess(): Promise<void> {
         try {
-            if (this.needInit){
-                await this.monitorInit();
-            }
             await this.monitorZKLTransfer();
         } catch (err) {
             this.logger.error({
