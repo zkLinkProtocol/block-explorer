@@ -94,16 +94,16 @@ export async function findETHMasterListAndAmount() {
                 },
                 {
                     accountType: 'master',
-                    balance: '366589467366031376986935',
+                    balance: '363575038657219905940763',
                     id: '0xd1669ac6044269b59fa12c5822439f609ca54f41'
                 },
                 {
                     accountType: 'master',
-                    balance: '19788166096192670379207654',
+                    balance: '19791771458439282585816912',
                     id: '0xf89d7b9c864f589bbf53a82105107622b35eaa40'
                 }
             ],
-            _meta: { block: { number: 21078311 } }
+            _meta: { block: { number: 21079235 } }
         };
     }
 }

@@ -124,13 +124,14 @@ export class MonitorZKLAmountService implements OnModuleInit {
     }
 
     async monitorInit(){
+        await this.monitorChainRecordRepository.delete({});
+        await this.monitAddressLastRepository.delete({});
+        await this.monitAddressConfigListRepository.delete({});
         const blockNumberList = await this.monitorChainRecordRepository.find({});
         let initETHData : IEThData ;
         let initNovaData : Balance[];
         let initNovaBlock : Block;
-        await this.monitorChainRecordRepository.delete({});
-        await this.monitAddressLastRepository.delete({});
-        await this.monitAddressConfigListRepository.delete({});
+
         if (blockNumberList.length === 0){
             let records = [];
             initETHData = await findETHMasterListAndAmount();
