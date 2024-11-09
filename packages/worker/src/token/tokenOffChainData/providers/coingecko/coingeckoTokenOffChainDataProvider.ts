@@ -98,6 +98,9 @@ export class CoingeckoTokenOffChainDataProvider implements TokenOffChainDataProv
             // tokenMarketData.current_price maybe null
             continue;
           }
+          if (token.id === 'nova-wbtc') {
+            continue;
+          }
           for (const platform of Object.keys(token.platforms)) {
             if (!token.platforms[platform]) {
               continue;
