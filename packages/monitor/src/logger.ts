@@ -1,19 +1,19 @@
-import { utilities, WinstonModule } from "nest-winston";
-import { format, transports, Logform } from "winston";
+import { utilities, WinstonModule } from 'nest-winston';
+import { format, transports, Logform } from 'winston';
 
 const { NODE_ENV, LOG_LEVEL } = process.env;
 
-let defaultLogLevel = "debug";
+let defaultLogLevel = 'debug';
 const loggerFormatters: Logform.Format[] = [
   format.timestamp({
-    format: "DD/MM/YYYY HH:mm:ss.SSS",
+    format: 'DD/MM/YYYY HH:mm:ss.SSS',
   }),
   format.ms(),
-  utilities.format.nestLike("Worker", {}),
+  utilities.format.nestLike('Worker', {}),
 ];
 
-if (NODE_ENV === "production") {
-  defaultLogLevel = "info";
+if (NODE_ENV === 'production') {
+  defaultLogLevel = 'info';
   loggerFormatters.push(format.json());
 }
 
