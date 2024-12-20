@@ -96,7 +96,7 @@ export class Transaction extends BaseEntity {
   public readonly transactionIndex: number;
 
   @Column({ type: "timestamp" })
-  public readonly receivedAt: Date;
+  public receivedAt: Date;
 
   @OneToMany(() => Transfer, (transfer) => transfer.transaction)
   public readonly transfers: Transfer[];

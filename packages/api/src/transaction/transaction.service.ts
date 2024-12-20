@@ -62,9 +62,13 @@ export class TransactionService {
     const queryBuilder = this.transactionDetailsRepository.createQueryBuilder("transaction");
     queryBuilder.leftJoinAndSelect("transaction.batch", "batch");
     queryBuilder.leftJoin("transaction.transactionReceipt", "transactionReceipt");
+    queryBuilder.leftJoinAndSelect("transaction.block", "block");
     queryBuilder.addSelect(["transactionReceipt.gasUsed"]);
     queryBuilder.where({ hash });
-    return await queryBuilder.getOne();
+    const td = await queryBuilder.getOne();
+    const block = td.block;
+    td.receivedAt = block.timestamp;
+    return td;
   }
 
   public async exists(hash: string): Promise<boolean> {
